@@ -12,17 +12,16 @@ class UserLocationSeeder extends AbstractSeeder {
     run() {
         // Generate and insert fake data into the 'user_location' table
         for (let i = 0; i < 10; i += 1) {
-
-
             // Generate fake location data matching the `user_location` table columns
-            const fakeIncident = {
-
-                password_hash: this.faker.string.alphanumeric(60),
-
+            const fakeLocation = {
+                user_id: this.getRef(`user_${i}`).insertId,
+                is_enabled: i % 4 !== 0 ? 1 : 0,
+                latitude: 49.09 + i * 0.001,
+                longitude: 1.48 + i * 0.001,
             };
 
             // Insert the fakeLocation data into the 'user_location' table
-            this.insert(fakeIncident);
+            this.insert(fakeLocation);
         }
     }
 }

@@ -16,14 +16,14 @@ class CommentSeeder extends AbstractSeeder {
 
 
             // Generate fake comment data matching the `comment` table columns
-            const fakeIncident = {
-
-                password_hash: this.faker.string.alphanumeric(60),
-
+            const fakeComment = {
+                user_id: this.getRef(`user_${(i + 2) % 10}`).insertId,
+                incident_id: this.getRef(`incident_${i}`).insertId,
+                content: this.faker.lorem.sentence({ min: 5, max: 12 }),
             };
 
             // Insert the fakeComment data into the 'comment' table
-            this.insert(fakeIncident);
+            this.insert(fakeComment);
         }
     }
 }

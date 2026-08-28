@@ -16,14 +16,14 @@ class ContributionSeeder extends AbstractSeeder {
 
 
             // Generate fake contribution data matching the `contribution` table columns
-            const fakeIncident = {
-
-                password_hash: this.faker.string.alphanumeric(60),
-
+            const fakeContribution = {
+                incident_id: this.getRef(`incident_${i}`).insertId,
+                user_id: this.getRef(`user_${(i + 1) % 10}`).insertId,
+                type: i % 2 === 0 ? "confirm" : "deny",
             };
 
             // Insert the fakeContribution data into the 'contribution' table
-            this.insert(fakeIncident);
+            this.insert(fakeContribution);
         }
     }
 }

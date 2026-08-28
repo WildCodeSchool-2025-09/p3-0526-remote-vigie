@@ -15,14 +15,13 @@ class IncidentIncidentTypeSeeder extends AbstractSeeder {
 
 
             // Generate fake association data matching the `incident_incident_type` table columns
-            const fakeIncident = {
-
-                password_hash: this.faker.string.alphanumeric(60),
-
+            const fakeIncidentType = {
+                incident_id: this.getRef(`incident_${i}`).insertId,
+                incident_type_id: (i % 13) + 1,
             };
 
             // Insert the fake association into the 'incident_incident_type' table
-            this.insert(fakeIncident);
+            this.insert(fakeIncidentType);
         }
     }
 }
