@@ -3,13 +3,13 @@ import AbstractSeeder from "./AbstractSeeder";
 class UserSeeder extends AbstractSeeder {
   constructor() {
     // Call the constructor of the parent class (AbstractSeeder) with appropriate options
-    super({ table: "users", truncate: true });
+    super({ table: "user", truncate: true });
   }
 
-  // The run method - Populate the 'users' table with fake data
+  // The run method - Populate the 'user' table with fake data
 
   run() {
-    // Generate and insert fake data into the 'users' table
+    // Generate and insert fake data into the 'user' table
     for (let i = 0; i < 10; i += 1) {
       const pseudo =
         `${this.faker.word.adjective()}${this.faker.word.noun()}`
@@ -18,7 +18,7 @@ class UserSeeder extends AbstractSeeder {
         `${this.faker.word.adjective()}${this.faker.word.noun()}`.slice(1);
       const email = this.faker.internet.email();
 
-      // Generate fake user data matching the `users` table columns
+      // Generate fake user data matching the `user` table columns
       const fakeUser = {
         pseudo,
         email,
@@ -32,11 +32,10 @@ class UserSeeder extends AbstractSeeder {
         refName: `user_${i}`,
       };
 
-      // Insert the fakeUser data into the 'users' table
+      // Insert the fakeUser data into the 'user' table
       this.insert(fakeUser);
     }
   }
 }
 
-// Export the UserSeeder class
 export default UserSeeder;
