@@ -5,50 +5,49 @@ import { RouterProvider, createBrowserRouter } from "react-router";
 /* ************************************************************************* */
 
 // Import the main app component
-import Home from "./pages/Home/Home";
-import Incident from "./pages/Incident/Incident";
-import Profile from "./pages/Profile/Profile";
-import Numbers from "./pages/Numbers/Numbers";
-import Details from "./pages/Details/Details";
-import Login from "./pages/Login/Login";
-import Register from "./pages/Register/Register";
-import App from "./App";
-
-
+import Home from "@/pages/Home/Home";
+import Incident from "@/pages/Incident/Incident";
+import Profile from "@/pages/Profile/Profile";
+import Numbers from "@/pages/Numbers/Numbers";
+import Details from "@/pages/Details/Details";
+import Login from "@/pages/Login/Login";
+import Register from "@/pages/Register/Register";
+import App from "@/App";
 
 const router = createBrowserRouter([
-    {
-        element: <App />,
-        children: [
-            {
-              path: "/", 
-              element: <Home />, 
-            },
-            { 
-              path: "/numbers", 
-              element: <Numbers />,
-            },
-            {
-              path: "/incident", 
-              element: <Incident />,
-            },
-            {
-              path: "/incident/:id", 
-              element: <Details />,
-            },
-            {
-              path: "/profile", 
-              element: <Profile />,
-            },
-            {
-              path: "/login", 
-              element: <Login />,
-            },
-            {
-              path: "/register", 
-              element: <Register />,
-            }
-      ]}
+  {
+    element: <App />,
+    children: [
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "/numbers",
+        element: <Numbers />,
+      },
+      {
+        path: "/incident",
+        element: <Incident />,
+      },
+      {
+        path: "/incident/:id",
+        element: <Details />,
+      },
+      {
+        path: "/profile",
+        element: <Profile />,
+      },
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/register",
+        element: <Register />,
+      },
+    ],
+  },
 ]);
 
 /* ************************************************************************* */
@@ -60,31 +59,4 @@ if (rootElement == null) {
 }
 
 // Render the app inside the root element
-createRoot(rootElement).render(
-  <RouterProvider router={router} />,
-);
-
-/**
- * Helpful Notes:
- *
- * 1. Adding More Routes:
- *    To add more pages to your app, first create a new component (e.g., About.tsx).
- *    Then, import that component above like this:
- *
- *    import About from "./pages/About";
- *
- *    Add a new route to the router:
- *
- *      {
- *        path: "/about",
- *        element: <About />,  // Renders the About component
- *      }
- *
- * 2. Try Nested Routes:
- *    For more complex applications, you can nest routes. This lets you have sub-pages within a main page.
- *    Documentation: https://reactrouter.com/en/main/start/tutorial#nested-routes
- *
- * 3. Experiment with Dynamic Routes:
- *    You can create routes that take parameters (e.g., /users/:id).
- *    Documentation: https://reactrouter.com/en/main/start/tutorial#url-params-in-loaders
- */
+createRoot(rootElement).render(<RouterProvider router={router} />);
