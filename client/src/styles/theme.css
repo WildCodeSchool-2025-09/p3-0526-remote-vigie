@@ -1,0 +1,129 @@
+:root {
+    --navigation-height: 80px;
+}
+
+/* Palette primitive : source unique de vérité (utilitaires Tailwind + var() CSS) */
+@theme static {
+    --primary: #0b4619; /* primary color (deep green) */
+    --primary-light: color-mix(in srgb, var(--primary) 20%, white);
+    --primary-dark: color-mix(in srgb, var(--primary) 50%, black);
+
+    --secondary: #116530; /* secondary color (green) */
+    --secondary-light: color-mix(in srgb, var(--secondary) 20%, white);
+    --secondary-dark: color-mix(in srgb, var(--secondary) 50%, black);
+
+    --accent: #ffcc1d; /* accent color (gold yellow) */
+    --accent-light: color-mix(in srgb, var(--accent) 20%, white);
+    --accent-dark: color-mix(in srgb, var(--accent) 50%, black);
+
+    --grey: #c9c9c9; /* grey neutral */
+
+    --info: #25a5e0;
+    --success: var(--secondary);
+    --warning: var(--accent);
+    --error: #c1392b;
+
+    --bg-dark: #e8e8cc; /* background in the behind */
+    --bg-default: #f6f5e9; /* background of frames */
+    --bg-light: #fcfbf1; /* background in the front */
+
+    --bg-info: color-mix(in srgb, var(--info) 20%, white);
+    --bg-success: color-mix(in srgb, var(--success) 20%, white);
+    --bg-warning: color-mix(in srgb, var(--warning) 20%, white);
+    --bg-error: color-mix(in srgb, var(--error) 20%, white);
+
+    /* types colors */
+    --fire: #d8323e;
+    --bg-fire: #f4e9df;
+    --insect: #d19a00;
+    --bg-insect: #f4f0db;
+    --flood: #1f8fd0;
+    --bg-flood: #e9efe7;
+    --hail: #6e9ad4;
+    --bg-hail: #eef0e8;
+    --glaze: #2e9aa6;
+    --bg-glaze: #eaf0e5;
+    --snow: #93bede;
+    --bg-snow: #f0f2e8;
+    --storm: #4f6e7c;
+    --bg-storm: #dfe2da;
+    --wild: #6e4a2e;
+    --bg-wild: #e3ddcf;
+    --tornado: #c2661f;
+    --bg-tornado: #efe1cd;
+    --rockfall: #574a5e;
+    --bg-rockfall: #e0ddd6;
+    --animal: #5e4a63;
+    --bg-animal: #e1ddd6;
+    --tree: #2f8a38;
+    --bg-tree: #dae6d0;
+
+    /* danger levels (1 → 5) */
+    --level-1: #3a8f3f; /* faible */
+    --bg-level-1: #e4ecd9;
+    --level-2: #9bbb2f; /* modéré */
+    --bg-level-2: #edefd7;
+    --level-3: #e0a81f; /* important */
+    --bg-level-3: #f4eed6;
+    --level-4: #e8600f; /* élevé */
+    --bg-level-4: #f8e0cd;
+    --level-5: #c1392b; /* critique */
+    --bg-level-5: #f5e2df;
+
+    /* spacings */
+    --spacer-small: 1rem;
+    --spacer-medium: 2rem;
+    --spacer-large: 3rem;
+}
+
+@plugin "daisyui/theme" {
+    name: "mytheme";
+    default: true; /* set as default */
+    prefersdark: false; /* set as default dark mode (prefers-color-scheme:dark) */
+    color-scheme: light; /* color of browser-provided UI */
+
+    --color-primary: var(--primary);
+    --color-primary-content: #cecece;
+
+    --color-secondary: var(--secondary);
+    --color-secondary-content: #cecece;
+
+    --color-accent: var(--accent);
+    --color-accent-content: var(--primary);
+
+    --color-neutral: var(--grey);
+    --color-neutral-content: #cecece;
+
+    --color-info: var(--info);
+    --color-info-content: #333333;
+
+    --color-success: var(--success);
+    --color-success-content: #333333;
+
+    --color-warning: var(--warning);
+    --color-warning-content: #333333;
+
+    --color-error: var(--error);
+    --color-error-content: #333333;
+
+    --color-base-100: var(--bg-dark);
+    --color-base-200: var(--bg-default);
+    --color-base-300: var(--bg-light);
+    --color-base-content: #333333;
+
+    /* border radius */
+    --radius-selector: 1rem; /* For small sized components like checkbox, toggle, badge, etc. */
+    --radius-field: 0.25rem; /* For medium sized components like button, input, select, tab, etc. */
+    --radius-box: 0.5rem; /* For large sized components like card, modal, alert, etc. */
+
+    /* base sizes */
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+
+    /* border size */
+    --border: 2px;
+
+    /* effects */
+    --depth: 1;
+    --noise: 0;
+}

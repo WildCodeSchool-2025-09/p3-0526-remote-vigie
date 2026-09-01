@@ -14,6 +14,9 @@ import Login from "@/pages/Login/Login";
 import Register from "@/pages/Register/Register";
 import App from "@/App";
 
+// DEV ONLY — pas des pages de l'app, voir src/_dev/README.md
+import ColorPalette from "@/_dev/ColorPalette";
+
 const router = createBrowserRouter([
   {
     element: <App />,
@@ -45,6 +48,11 @@ const router = createBrowserRouter([
       {
         path: "/register",
         element: <Register />,
+      },
+      // DEV ONLY
+      {
+        path: "/colors",
+        element: <ColorPalette />,
       },
     ],
   },

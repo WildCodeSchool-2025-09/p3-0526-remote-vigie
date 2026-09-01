@@ -1,6 +1,6 @@
 export default function Details() {
   return (
-    <div>
+    <div className="DETAILS-PAGE">
       <h1>Details</h1>
     </div>
   );
