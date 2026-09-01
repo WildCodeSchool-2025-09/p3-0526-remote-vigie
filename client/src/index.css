@@ -2,4 +2,4 @@
 @plugin "daisyui";
 
 @import "./styles/theme.css";
-@import "./styles/fonts.css";
+@import "./styles/daisyui.css";
