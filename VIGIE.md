@@ -5,7 +5,7 @@
 >
 > - Miro : https://miro.com/app/board/uXjVH26GErs=/
 > - Trello : https://trello.com/b/LK4mUwrE/p3-vigie
-> - Modèle de données (MCD) : https://studio.mcd-creator.com/projets/7508868f-ace5-4445-a245-6423c5d152ee
+<!-- > - Modèle de données (MCD) : en att de modification -->
 > - Wireframes : https://trello.com/c/nx08cpaQ/1-wireframes · Maquettes : https://trello.com/c/qqO1d9re/2-maquettes
 
 ---
