@@ -8,7 +8,7 @@
  * source quand on construit les vrais composants de l'app. Rien n'est importé par l'app.
  */
 
-import type { ComponentType, ReactNode } from "react";
+import { type ComponentType, type ReactNode, useState } from "react";
 import BackButton from "@/_dev/BackButton";
 import Buttons from "@/_dev/components/Buttons";
 
@@ -16,10 +16,12 @@ type Family = {
   id: string;
   title: string;
   description: string;
-  Component: ComponentType;
+  /** Absent = famille pas encore construite (onglet actif → encart « bientôt »). */
+  Component?: ComponentType;
 };
 
-// Ordre d'affichage = ordre du tableau. Ajouter une famille = 1 fichier + 1 entrée ici.
+// Ordre des onglets = ordre du tableau. Construire une famille = créer
+// src/_dev/components/<Famille>.tsx et renseigner `Component` sur son entrée.
 const families: Family[] = [
   {
     id: "buttons",
@@ -27,11 +29,36 @@ const families: Family[] = [
     description: "Boutons : variantes, tailles, états.",
     Component: Buttons,
   },
+  {
+    id: "titles",
+    title: "Titles",
+    description: "Titres et hiérarchie typographique.",
+  },
+  {
+    id: "cards",
+    title: "Cards",
+    description: "Cartes et conteneurs de contenu.",
+  },
+  {
+    id: "layout",
+    title: "Layout",
+    description: "Gabarits de page, grilles, espacements.",
+  },
+  {
+    id: "form",
+    title: "Form",
+    description: "Champs, labels, aides et états de validation.",
+  },
+  {
+    id: "others",
+    title: "Others",
+    description: "Le reste : badges, alertes, séparateurs, etc.",
+  },
 ];
 
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <div className="mt-10 mb-3 flex items-center gap-3">
+    <div className="mt-8 mb-3 flex items-center gap-3">
       <h2 className="text-xs font-bold uppercase tracking-widest text-primary/60">{children}</h2>
       <span className="h-px flex-1 bg-primary/15" />
     </div>
@@ -39,6 +66,10 @@ function SectionTitle({ children }: { children: ReactNode }) {
 }
 
 export default function ComponentGallery() {
+  const [activeId, setActiveId] = useState(families[0].id);
+  const active = families.find((family) => family.id === activeId) ?? families[0];
+  const ActiveComponent = active.Component;
+
   return (
     <div className="min-h-screen bg-base-200 px-6 py-10 text-primary md:px-12">
       <div className="relative mx-auto max-w-5xl">
@@ -53,28 +84,35 @@ export default function ComponentGallery() {
           montre le rendu live et sa source TSX à copier.
         </p>
 
-        {/* Sommaire — inutile tant qu'il n'y a qu'une famille */}
-        {families.length > 1 && (
-          <nav className="mt-6 flex flex-wrap gap-2">
-            {families.map((family) => (
-              <a
-                key={family.id}
-                href={`#${family.id}`}
-                className="rounded-full border border-primary/10 bg-base-200 px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary/50 transition hover:border-primary/30 hover:text-primary"
-              >
-                {family.title}
-              </a>
-            ))}
-          </nav>
-        )}
+        {/* Onglets */}
+        <div role="tablist" className="tabs tabs-box mt-6 flex-wrap">
+          {families.map((family) => (
+            <button
+              key={family.id}
+              type="button"
+              role="tab"
+              aria-selected={family.id === activeId}
+              onClick={() => setActiveId(family.id)}
+              className={`tab ${family.id === activeId ? "tab-active" : ""} ${
+                family.Component ? "" : "text-primary/30"
+              }`}
+            >
+              {family.title}
+            </button>
+          ))}
+        </div>
 
-        {families.map(({ id, title, description, Component }) => (
-          <section key={id} id={id} className="scroll-mt-6">
-            <SectionTitle>{title}</SectionTitle>
-            <p className="mb-4 text-xs text-primary/40">{description}</p>
-            <Component />
-          </section>
-        ))}
+        <section role="tabpanel">
+          <SectionTitle>{active.title}</SectionTitle>
+          <p className="mb-4 text-xs text-primary/40">{active.description}</p>
+          {ActiveComponent ? (
+            <ActiveComponent />
+          ) : (
+            <p className="rounded-xl border border-dashed border-primary/15 bg-base-200 p-5 text-xs font-bold uppercase tracking-widest text-primary/40">
+              Bientôt
+            </p>
+          )}
+        </section>
       </div>
     </div>
   );
