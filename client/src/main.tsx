@@ -1,6 +1,7 @@
 // Import necessary modules from React and React Router
+import { Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
-import { RouterProvider, createBrowserRouter } from "react-router";
+import { Outlet, RouterProvider, createBrowserRouter, type RouteObject } from "react-router";
 
 /* ************************************************************************* */
 
@@ -15,45 +16,92 @@ import Register from "@/pages/Register/Register";
 import App from "@/App";
 
 // DEV ONLY — pas des pages de l'app, voir src/_dev/README.md
-import ColorPalette from "@/_dev/ColorPalette";
+// Le bloc `if (import.meta.env.DEV)` est tree-shaké par Vite dans un build de prod :
+// ni les routes /help/*, ni le code des pages (dont react-markdown + mermaid pour
+// ReadmeViewer) ne finissent dans le bundle déployé.
+// https://vite.dev/guide/env-and-mode.html#production-replacement
+let devRoutes: RouteObject[] = [];
+
+if (import.meta.env.DEV) {
+  const HelpIndex = lazy(() => import("@/_dev/HelpIndex"));
+  const ReadmeViewer = lazy(() => import("@/_dev/ReadmeViewer"));
+  const VigieViewer = lazy(() => import("@/_dev/VigieViewer"));
+  const ColorPalette = lazy(() => import("@/_dev/ColorPalette"));
+  const IconGallery = lazy(() => import("@/_dev/IconGallery"));
+  const ComponentGallery = lazy(() => import("@/_dev/components/ComponentGallery"));
+
+  devRoutes = [
+    {
+      path: "help",
+      // Suspense unique : couvre aussi tous les enfants (readme, vigie, colors, icons).
+      element: (
+        <Suspense fallback={null}>
+          <Outlet />
+        </Suspense>
+      ),
+      children: [
+        {
+          index: true,
+          element: <HelpIndex />,
+        },
+        {
+          path: "readme",
+          element: <ReadmeViewer />,
+        },
+        {
+          path: "vigie",
+          element: <VigieViewer />,
+        },
+        {
+          path: "colors",
+          element: <ColorPalette />,
+        },
+        {
+          path: "icons",
+          element: <IconGallery />,
+        },
+        {
+          path: "components",
+          element: <ComponentGallery />,
+        },
+      ],
+    },
+  ];
+}
 
 const router = createBrowserRouter([
   {
     element: <App />,
     children: [
       {
-        path: "/",
+        index: true,
         element: <Home />,
       },
       {
-        path: "/numbers",
+        path: "numbers",
         element: <Numbers />,
       },
       {
-        path: "/incident",
+        path: "incident",
         element: <Incident />,
       },
       {
-        path: "/incident/:id",
+        path: "incident/:id",
         element: <Details />,
       },
       {
-        path: "/profile",
+        path: "profile",
         element: <Profile />,
       },
       {
-        path: "/login",
+        path: "login",
         element: <Login />,
       },
       {
-        path: "/register",
+        path: "register",
         element: <Register />,
       },
-      // DEV ONLY
-      {
-        path: "/colors",
-        element: <ColorPalette />,
-      },
+      ...devRoutes,
     ],
   },
 ]);
