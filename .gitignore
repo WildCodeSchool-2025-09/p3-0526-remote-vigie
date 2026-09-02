@@ -3,4 +3,5 @@ node_modules
 .DS_Store
 .idea
 .vscode
+laurent.md
 fred.md
