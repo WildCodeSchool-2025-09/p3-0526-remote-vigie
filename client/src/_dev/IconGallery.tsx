@@ -1,11 +1,12 @@
 /**
  * ⚠️ PAGE DE DEV — pas une page de l'app.
- * Route : /design/icons. Sert uniquement à visualiser les icônes déclarées dans src/assets/icons/index.ts.
+ * Route : /help/icons. Sert uniquement à visualiser les icônes déclarées dans src/assets/icons/index.ts.
  * Chaque carte rend le composant SVG importé : elle reflète le fichier .svg en direct.
  */
 
 import type { ReactNode } from "react";
 import { icons, type IconName } from "@/assets/icons";
+import BackButton from "@/_dev/BackButton";
 
 // Catégories = sous-dossiers de src/assets/icons/
 const categories: { title: string; description: string; names: IconName[] }[] = [
@@ -93,10 +94,11 @@ export default function IconGallery() {
 
   return (
     <div className="min-h-screen bg-base-200 px-6 py-10 text-primary md:px-12">
-      <div className="mx-auto max-w-5xl">
+      <div className="relative mx-auto max-w-5xl">
         <p className="inline-block rounded bg-error/15 px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-error">
-          Dev only · /design/icons
+          Dev only · /help/icons
         </p>
+        <BackButton />
         <p className="mt-3 text-sm font-semibold italic text-primary/70">Vigie · design system</p>
         <h1 className="mt-1 text-4xl font-black">Icônes de assets/icons</h1>
         <p className="mt-3 max-w-2xl text-sm text-primary/60">
