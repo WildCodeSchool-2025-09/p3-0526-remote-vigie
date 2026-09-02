@@ -47,6 +47,7 @@ const categories: { title: string; description: string; names: IconName[] }[] = 
       "arrowSmallUp",
       "bullet",
       "camera",
+      "check",
       "checkCircle",
       "commentAltMiddle",
       "crossSmall",

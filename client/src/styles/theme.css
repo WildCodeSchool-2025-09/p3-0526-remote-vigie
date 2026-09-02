@@ -1,15 +1,15 @@
 /* Palette primitive : source unique de vérité (utilitaires Tailwind + var() CSS) */
 @theme static {
     --primary: #0b4619; /* primary color (deep green) */
-    --primary-light: color-mix(in srgb, var(--primary) 20%, white);
+    --primary-light: color-mix(in srgb, var(--primary) 10%, white);
     --primary-dark: color-mix(in srgb, var(--primary) 50%, black);
 
     --secondary: #116530; /* secondary color (green) */
-    --secondary-light: color-mix(in srgb, var(--secondary) 20%, white);
+    --secondary-light: color-mix(in srgb, var(--secondary) 10%, white);
     --secondary-dark: color-mix(in srgb, var(--secondary) 50%, black);
 
     --accent: #ffcc1d; /* accent color (gold yellow) */
-    --accent-light: color-mix(in srgb, var(--accent) 20%, white);
+    --accent-light: color-mix(in srgb, var(--accent) 10%, white);
     --accent-dark: color-mix(in srgb, var(--accent) 50%, black);
 
     --grey: #c9c9c9; /* grey neutral */
@@ -72,6 +72,6 @@
     --spacer-large: 3rem;
 
     /* fonts family */
-    --font-title: "Playfair Display", serif;
-    --font-text: "Inter", sans-serif;
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-title: "Playfair Display", ui-serif, Georgia, serif;
 }
