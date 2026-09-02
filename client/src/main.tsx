@@ -15,44 +15,59 @@ import Register from "@/pages/Register/Register";
 import App from "@/App";
 
 // DEV ONLY — pas des pages de l'app, voir src/_dev/README.md
+import DesignIndex from "@/_dev/DesignIndex";
 import ColorPalette from "@/_dev/ColorPalette";
+import IconGallery from "@/_dev/IconGallery";
 
 const router = createBrowserRouter([
   {
     element: <App />,
     children: [
       {
-        path: "/",
+        index: true,
         element: <Home />,
       },
       {
-        path: "/numbers",
+        path: "numbers",
         element: <Numbers />,
       },
       {
-        path: "/incident",
+        path: "incident",
         element: <Incident />,
       },
       {
-        path: "/incident/:id",
+        path: "incident/:id",
         element: <Details />,
       },
       {
-        path: "/profile",
+        path: "profile",
         element: <Profile />,
       },
       {
-        path: "/login",
+        path: "login",
         element: <Login />,
       },
       {
-        path: "/register",
+        path: "register",
         element: <Register />,
       },
       // DEV ONLY
       {
-        path: "/colors",
-        element: <ColorPalette />,
+        path: "design",
+        children: [
+          {
+            index: true,
+            element: <DesignIndex />,
+          },
+          {
+            path: "colors",
+            element: <ColorPalette />,
+          },
+          {
+            path: "icons",
+            element: <IconGallery />,
+          },
+        ],
       },
     ],
   },

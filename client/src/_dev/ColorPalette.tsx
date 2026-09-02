@@ -1,6 +1,6 @@
 /**
  * ⚠️ PAGE DE DEV — pas une page de l'app.
- * Route : /colors. Sert uniquement à visualiser la palette déclarée dans src/styles/theme.css.
+ * Route : /design/colors. Sert uniquement à visualiser la palette déclarée dans src/styles/theme.css.
  * Les pastilles rendent var(--x) : elles reflètent le thème en direct.
  */
 
@@ -109,7 +109,7 @@ export default function ColorPalette() {
     <div className="min-h-screen bg-base-200 px-6 py-10 text-primary md:px-12">
       <div className="mx-auto max-w-5xl">
         <p className="inline-block rounded bg-error/15 px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-error">
-          Dev only · /colors
+          Dev only · /design/colors
         </p>
         <p className="mt-3 text-sm font-semibold italic text-primary/70">Vigie · design system</p>
         <h1 className="mt-1 text-4xl font-black">Couleurs de theme.css</h1>
