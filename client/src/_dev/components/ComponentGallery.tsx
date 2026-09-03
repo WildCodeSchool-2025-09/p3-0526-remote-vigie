@@ -11,6 +11,7 @@
 import { type ComponentType, type ReactNode, useState } from "react";
 import BackButton from "@/_dev/BackButton";
 import Buttons from "@/_dev/components/Buttons";
+import FormInput from "@/_dev/components/FormInput";
 import SafetyInstructions from "@/_dev/components/SafetyInstructions";
 
 type Family = {
@@ -50,6 +51,7 @@ const families: Family[] = [
     id: "form",
     title: "Form",
     description: "Champs, labels, aides et états de validation.",
+    Component: FormInput,
   },
   {
     id: "others",
