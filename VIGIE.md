@@ -5,7 +5,7 @@
 >
 > - Miro : https://miro.com/app/board/uXjVH26GErs=/
 > - Trello : https://trello.com/b/LK4mUwrE/p3-vigie
-> - Modèle de données (MCD) : https://studio.mcd-creator.com/projets/7508868f-ace5-4445-a245-6423c5d152ee
+<!-- > - Modèle de données (MCD) : en att de modification -->
 > - Wireframes : https://trello.com/c/nx08cpaQ/1-wireframes · Maquettes : https://trello.com/c/qqO1d9re/2-maquettes
 
 ---
@@ -101,31 +101,453 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 
 ## 4. Modèle de données
 
-Schéma de référence : `server/database/schema.sql` (MySQL 8, `utf8mb4_unicode_ci`).
+Reproduit d'après les cadres **MCD**, **MLD** et **MPD** du Miro. Implémentation de
+référence : `server/database/schema.sql` (MySQL 8, `utf8mb4_unicode_ci`).
 
-| Table | Rôle |
-|-------|------|
-| `user` | Compte : `pseudo` + `email` (avec versions `*_normalized` uniques), `password_hash` (bcrypt, CHAR(60)), `email_verified_at`, `cgu_version` + `cgu_accepted_at`. |
-| `address` | Adresses d'un utilisateur (US05, US24) : `label`, `street_line`, `postal_code`, `city`, `insee_code`, `latitude`/`longitude`, `is_approximate` (géocodage par centroïde), `is_primary`. `ON DELETE CASCADE`. |
-| `user_location` | Position live opt-in (US23) : `is_enabled`, dernières `latitude`/`longitude`, une ligne par utilisateur. |
-| `danger_level` | Référentiel des 5 niveaux de gravité : `weight` (1→5), `label`, `color`. |
-| `incident_type` | Référentiel des types : `code`, `label`, `danger_level_id`, `alert_radius_meters`, `lifespan_hours`, `safety_instructions`, `icon`, `color`, `is_selectable`. |
-| `incident` | Signalement : auteur, `danger_level_id`, `title`, `description`, `photo_url`, `latitude`/`longitude`, `city` + `insee_code`, **copies figées** `base_lifespan_hours` / `base_alert_radius_meters`, `status` ENUM(`in_progress`,`resolved`), `expires_at`, `edited_at`. |
-| `incident_incident_type` | Pivot : un incident peut porter plusieurs types (US01). |
-| `contribution` | Confirmer / infirmer (US14) : PK (`incident_id`,`user_id`), `type` ENUM(`confirm`,`deny`), modifiable. |
-| `comment` | Fil de commentaires plat et chronologique (US08), `content` VARCHAR(1000). |
-| `useful_number` | Numéros utiles (US13) : `label`, `phone_number`, `category` (`emergency`/`health`/`safety`/`utility`/`animal`), `scope` (`national`/`departmental`/`municipal`) + `insee_code`. |
-| `useful_place` | Lieux utiles pour la carte (US04) : `category` (`fire_station`/`veterinary`/`hospital`/`pharmacy`/`police`), coordonnées, `phone_number`, `osm_type` + `osm_id` (source OpenStreetMap). |
+Le modèle a été volontairement **borné au périmètre discuté** : `notification`, `badge`,
+`oauth_account`, `push_subscription` et l'auto-citation des commentaires sont écartés pour
+l'instant et seront ajoutés au moment de développer les US concernées (voir §4.4).
 
-### Points encore à modéliser
+### 4.1 MCD — modèle conceptuel
 
-Le backlog référence des objets absents du schéma actuel — à cadrer avec les US concernées :
+Cardinalités Merise notées sur chaque patte. `CONTRIBUTION` est une entité associative
+porteuse de l'attribut `type` (elle matérialise le confirmer/infirmer d'US14).
 
-- **`notification`** (US09, US12, US21) : type, objet, destinataire, `read_at`, purge > 30 j.
-- **Référentiel de badges + badges acquis** (US20) : `code`, `label`, `description`, `icon`,
-  type de compteur, seuil, date d'obtention.
-- **Jetons** : vérification d'e-mail (US05) et réinitialisation de mot de passe (US19).
-- **Abonnements Web Push** par appareil (US21) et **liens comptes tiers** (US22).
+```mermaid
+erDiagram
+    USER ||--|{ ADDRESS : "HAS (1,N)/(1,1)"
+    USER ||--o| USER_LOCATION : "SHARE_POSITION (0,1)/(1,1)"
+    USER ||--o{ INCIDENT : "REPORT (0,N)/(1,1)"
+    USER ||--o{ COMMENT : "WRITE (0,N)/(1,1)"
+    INCIDENT ||--o{ COMMENT : "reçoit (0,N)/(1,1)"
+    DANGER_LEVEL ||--o{ INCIDENT : "RATED_AS (0,N)/(1,1)"
+    DANGER_LEVEL ||--o{ INCIDENT_TYPE : "HAS_DEFAULT_LEVEL (0,N)/(1,1)"
+    INCIDENT }|--o{ INCIDENT_TYPE : "CONCERN (1,N)/(0,N)"
+    USER ||--o{ CONTRIBUTION : "émet (0,N)"
+    INCIDENT ||--o{ CONTRIBUTION : "reçoit (0,N)"
+
+    USER {
+        int id
+        string pseudo
+        string email
+        string pseudo_normalized
+        string email_normalized
+        string password_hash
+        datetime email_verified_at
+        string cgu_version
+        datetime cgu_accepted_at
+    }
+    ADDRESS {
+        int id
+        string label
+        string street_line
+        string city
+        string postal_code
+        string insee_code
+        decimal latitude
+        decimal longitude
+        bool is_approximate
+        bool is_primary
+    }
+    USER_LOCATION {
+        int id
+        bool is_enabled
+        decimal latitude
+        decimal longitude
+    }
+    DANGER_LEVEL {
+        int id
+        int weight
+        string label
+        string color
+    }
+    INCIDENT_TYPE {
+        int id
+        string code
+        string label
+        int alert_radius_meters
+        int lifespan_hours
+        string safety_instructions
+        string icon
+        string color
+        bool is_selectable
+    }
+    INCIDENT {
+        int id
+        string title
+        string description
+        string photo_url
+        decimal latitude
+        decimal longitude
+        int base_lifespan_hours
+        int base_alert_radius_meters
+        string city
+        string insee_code
+        enum status
+        datetime expires_at
+        datetime edited_at
+    }
+    CONTRIBUTION {
+        enum type
+        datetime created_at
+    }
+    COMMENT {
+        int id
+        string content
+        datetime created_at
+    }
+    USEFUL_NUMBER {
+        int id
+        string label
+        string phone_number
+        string email
+        enum category
+        enum scope
+        string insee_code
+    }
+    USEFUL_PLACE {
+        int id
+        string name
+        enum category
+        decimal latitude
+        decimal longitude
+        string street_line
+        string city
+        string insee_code
+        string phone_number
+        enum osm_type
+        bigint osm_id
+    }
+```
+
+`USEFUL_NUMBER` et `USEFUL_PLACE` sont des référentiels autonomes (aucune association) :
+rattachement à un territoire par `insee_code`, jamais par clé étrangère.
+
+### 4.2 MLD — modèle logique
+
+Associations résolues : les `(x,N)/(x,N)` deviennent les tables de jointure
+`INCIDENT_INCIDENT_TYPE` et `CONTRIBUTION` (clé primaire composée `#a + #b`).
+`#` = clé étrangère.
+
+```mermaid
+erDiagram
+    USER ||--o{ ADDRESS : "FK"
+    USER ||--o| USER_LOCATION : "FK"
+    USER ||--o{ INCIDENT : "FK"
+    USER ||--o{ COMMENT : "FK"
+    USER ||--o{ CONTRIBUTION : "FK"
+    INCIDENT ||--o{ COMMENT : "FK"
+    INCIDENT ||--o{ CONTRIBUTION : "FK"
+    INCIDENT ||--o{ INCIDENT_INCIDENT_TYPE : "FK"
+    INCIDENT_TYPE ||--o{ INCIDENT_INCIDENT_TYPE : "FK"
+    DANGER_LEVEL ||--o{ INCIDENT : "FK"
+    DANGER_LEVEL ||--o{ INCIDENT_TYPE : "FK"
+
+    USER {
+        int id PK
+        string pseudo
+        string email
+        string pseudo_normalized UK
+        string email_normalized UK
+        string password_hash
+        datetime email_verified_at
+        string cgu_version
+        datetime cgu_accepted_at
+        datetime created_at
+        datetime updated_at
+    }
+    ADDRESS {
+        int id PK
+        int user_id FK
+        string label
+        string street_line
+        string city
+        string postal_code
+        string insee_code
+        decimal latitude
+        decimal longitude
+        bool is_approximate
+        bool is_primary
+        datetime created_at
+        datetime updated_at
+    }
+    USER_LOCATION {
+        int id PK
+        int user_id FK
+        bool is_enabled
+        decimal latitude
+        decimal longitude
+        datetime updated_at
+        datetime created_at
+    }
+    DANGER_LEVEL {
+        int id PK
+        int weight UK
+        string label
+        string color
+        datetime created_at
+        datetime updated_at
+    }
+    INCIDENT_TYPE {
+        int id PK
+        int danger_level_id FK
+        string code UK
+        string label
+        int alert_radius_meters
+        int lifespan_hours
+        string safety_instructions
+        string icon
+        string color
+        bool is_selectable
+        datetime created_at
+        datetime updated_at
+    }
+    INCIDENT {
+        int id PK
+        int user_id FK
+        int danger_level_id FK
+        string title
+        string description
+        string photo_url
+        decimal latitude
+        decimal longitude
+        int base_lifespan_hours
+        int base_alert_radius_meters
+        string city
+        string insee_code
+        enum status
+        datetime expires_at
+        datetime created_at
+        datetime edited_at
+        datetime updated_at
+    }
+    INCIDENT_INCIDENT_TYPE {
+        int incident_id PK "FK"
+        int incident_type_id PK "FK"
+    }
+    CONTRIBUTION {
+        int user_id PK "FK"
+        int incident_id PK "FK"
+        enum type
+        datetime created_at
+        datetime updated_at
+    }
+    COMMENT {
+        int id PK
+        int user_id FK
+        int incident_id FK
+        string content
+        datetime created_at
+        datetime updated_at
+    }
+    USEFUL_NUMBER {
+        int id PK
+        string label
+        string phone_number
+        string email
+        enum category
+        enum scope
+        string insee_code
+        datetime created_at
+        datetime updated_at
+    }
+    USEFUL_PLACE {
+        int id PK
+        string name
+        enum category
+        decimal latitude
+        decimal longitude
+        string street_line
+        string city
+        string insee_code
+        string phone_number
+        enum osm_type
+        bigint osm_id
+        datetime created_at
+        datetime updated_at
+    }
+```
+
+### 4.3 MPD — modèle physique
+
+Types MySQL relevés sur le cadre MPD (l/L = longueur ; `_` remplace les parenthèses
+pour la lisibilité du diagramme).
+
+```mermaid
+erDiagram
+    USER ||--o{ ADDRESS : "FK"
+    USER ||--o| USER_LOCATION : "FK"
+    USER ||--o{ INCIDENT : "FK"
+    USER ||--o{ COMMENT : "FK"
+    USER ||--o{ CONTRIBUTION : "FK"
+    INCIDENT ||--o{ COMMENT : "FK"
+    INCIDENT ||--o{ CONTRIBUTION : "FK"
+    INCIDENT ||--o{ INCIDENT_INCIDENT_TYPE : "FK"
+    INCIDENT_TYPE ||--o{ INCIDENT_INCIDENT_TYPE : "FK"
+    DANGER_LEVEL ||--o{ INCIDENT : "FK"
+    DANGER_LEVEL ||--o{ INCIDENT_TYPE : "FK"
+
+    USER {
+        INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
+        VARCHAR_30 pseudo "NOT NULL"
+        VARCHAR_255 email "NOT NULL"
+        VARCHAR_30 pseudo_normalized "NOT NULL, UNIQUE"
+        VARCHAR_255 email_normalized "NOT NULL, UNIQUE"
+        CHAR_60 password_hash "NOT NULL"
+        TIMESTAMP email_verified_at "NULL"
+        VARCHAR_10 cgu_version "NOT NULL"
+        TIMESTAMP cgu_accepted_at "NOT NULL"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+    }
+    ADDRESS {
+        INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
+        INT_UNSIGNED user_id FK "NOT NULL"
+        VARCHAR_50 label "NULL"
+        VARCHAR_255 street_line "NOT NULL"
+        VARCHAR_100 city "NOT NULL"
+        CHAR_5 postal_code "NOT NULL"
+        CHAR_5 insee_code "NOT NULL"
+        DECIMAL_10_6 latitude "NOT NULL"
+        DECIMAL_10_6 longitude "NOT NULL"
+        TINYINT_1 is_approximate "NOT NULL, DEFAULT 0"
+        TINYINT_1 is_primary "NOT NULL, DEFAULT 0"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+    }
+    USER_LOCATION {
+        INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
+        INT_UNSIGNED user_id FK "NOT NULL, UNIQUE"
+        TINYINT_1 is_enabled "NOT NULL, DEFAULT 0"
+        DECIMAL_10_6 latitude "NULL"
+        DECIMAL_10_6 longitude "NULL"
+        TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+    }
+    DANGER_LEVEL {
+        INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
+        INT_UNSIGNED weight "NOT NULL, UNIQUE"
+        VARCHAR_50 label "NOT NULL"
+        CHAR_7 color "NOT NULL"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        TIMESTAMP updated_at "NOT NULL, ON UPDATE CURRENT_TIMESTAMP"
+    }
+    INCIDENT_TYPE {
+        INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
+        INT_UNSIGNED danger_level_id FK "NOT NULL"
+        VARCHAR_30 code "NOT NULL, UNIQUE"
+        VARCHAR_60 label "NOT NULL"
+        SMALLINT_UNSIGNED alert_radius_meters "NOT NULL"
+        SMALLINT_UNSIGNED lifespan_hours "NOT NULL"
+        VARCHAR_1000 safety_instructions "NULL"
+        VARCHAR_80 icon "NOT NULL"
+        CHAR_7 color "NOT NULL"
+        TINYINT_1 is_selectable "NOT NULL, DEFAULT 1"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+    }
+    INCIDENT {
+        INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
+        INT_UNSIGNED user_id FK "NOT NULL"
+        INT_UNSIGNED danger_level_id FK "NOT NULL"
+        VARCHAR_150 title "NOT NULL"
+        TEXT description "NULL"
+        VARCHAR_255 photo_url "NULL"
+        DECIMAL_10_6 latitude "NOT NULL"
+        DECIMAL_10_6 longitude "NOT NULL"
+        SMALLINT_UNSIGNED base_lifespan_hours "NOT NULL"
+        SMALLINT_UNSIGNED base_alert_radius_meters "NOT NULL"
+        VARCHAR_150 city "NOT NULL"
+        CHAR_5 insee_code "NOT NULL"
+        ENUM status "in_progress|resolved, NOT NULL, DEFAULT in_progress"
+        TIMESTAMP expires_at "NOT NULL"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        TIMESTAMP edited_at "NULL"
+        TIMESTAMP updated_at "NOT NULL, ON UPDATE CURRENT_TIMESTAMP"
+    }
+    INCIDENT_INCIDENT_TYPE {
+        INT_UNSIGNED incident_id PK "FK, NOT NULL"
+        INT_UNSIGNED incident_type_id PK "FK, NOT NULL"
+    }
+    CONTRIBUTION {
+        INT_UNSIGNED user_id PK "FK, NOT NULL"
+        INT_UNSIGNED incident_id PK "FK, NOT NULL"
+        ENUM type "confirm|deny, NOT NULL"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+    }
+    COMMENT {
+        INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
+        INT_UNSIGNED user_id FK "NOT NULL"
+        INT_UNSIGNED incident_id FK "NOT NULL"
+        VARCHAR_1000 content "NOT NULL"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+    }
+    USEFUL_NUMBER {
+        INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
+        VARCHAR_100 label "NOT NULL"
+        VARCHAR_20 phone_number "NOT NULL"
+        VARCHAR_255 email "NULL"
+        ENUM category "NOT NULL"
+        ENUM scope "national|departmental|municipal, NOT NULL, DEFAULT national"
+        CHAR_5 insee_code "NULL"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+    }
+    USEFUL_PLACE {
+        INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
+        VARCHAR_150 name "NOT NULL"
+        ENUM category "NOT NULL"
+        DECIMAL_10_6 latitude "NOT NULL"
+        DECIMAL_10_6 longitude "NOT NULL"
+        VARCHAR_255 street_line "NULL"
+        VARCHAR_100 city "NULL"
+        CHAR_5 insee_code "NULL"
+        VARCHAR_20 phone_number "NULL"
+        ENUM osm_type "node|way|relation, NULL"
+        BIGINT_UNSIGNED osm_id "NULL"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+    }
+```
+
+**Actions référentielles (cadre MPD)**
+
+| Clé étrangère | Cible | `ON DELETE` |
+|---------------|-------|-------------|
+| `address.user_id` | `user` | `CASCADE` |
+| `user_location.user_id` | `user` | `CASCADE` |
+| `contribution.incident_id` | `incident` | `CASCADE` |
+| `contribution.user_id` | `user` | `CASCADE` |
+| `incident_type.danger_level_id` | `danger_level` | `RESTRICT` |
+
+> `schema.sql` étend ces règles aux autres FK : `incident.user_id`/`comment.*` en
+> `CASCADE`, `incident.danger_level_id` et les pivots `incident_incident_type` en
+> `RESTRICT`. Écart mineur relevé : le cadre MPD note `latitude` en `DECIMAL(10,6)`
+> partout, `schema.sql` utilise `DECIMAL(9,6)` pour la latitude.
+
+### 4.4 Périmètre du modèle & revue
+
+Éléments **volontairement différés** lors de la revue du modèle (à intégrer avec l'US
+correspondante, pas avant) :
+
+- **`notification`** (US09/US12/US21) — piste retenue : remplacer la table par un
+  `last_seen_at` sur `user` ; à la connexion, on recalcule ce qui est « nouveau »
+  (commentaire, incident résolu, badge…). À rediscuter en équipe.
+- **`badge`** + relation `earned_at` (US20) — la relation N-N est aujourd'hui sans
+  attribut ; or `counter_type` / `counter_param` / `threshold` impliquent une
+  progression (« 7 signalements sur 10 ») et une date d'obtention à stocker.
+- **`oauth_account`** (US22) — pour l'instant, `email` + `password_hash` restent sur
+  `user` ; on ajoutera la table au moment de brancher un fournisseur tiers.
+- **`push_subscription`** (US21) — idem, ajoutée avec le Web Push.
+- **Auto-citation des commentaires** (US08) — la relation réflexive sur `comment`
+  n'est posée que si la fonctionnalité de citation est développée.
+
+Questions ouvertes soulevées à la revue : cohérence `id` vs `user_id` sur `user`,
+retrait des attributs d'authentification tant qu'ils ne sont pas cadrés, origine de
+`incident_type.is_selectable`, et confirmation qu'un incident peut porter plusieurs
+types (oui, d'où `incident_incident_type`).
 
 ## 5. Règles métier transverses
 
@@ -310,7 +732,10 @@ POST /api/incidents/emergency      (US17 — SOS)
 |-----------|------|
 | Miro (idéation, pitch, cadres de conception) | https://miro.com/app/board/uXjVH26GErs=/ |
 | Trello (backlog affiné, US détaillées) | https://trello.com/b/LK4mUwrE/p3-vigie |
-| Modèle de données (MCD) | https://studio.mcd-creator.com/projets/7508868f-ace5-4445-a245-6423c5d152ee |
+| Miro — cadre MCD | https://miro.com/app/board/uXjVH26GErs=/?moveToWidget=3458764681600763062 |
+| Miro — cadre MLD | https://miro.com/app/board/uXjVH26GErs=/?moveToWidget=3458764681694627515 |
+| Miro — cadre MPD | https://miro.com/app/board/uXjVH26GErs=/?moveToWidget=3458764681702455729 |
+| MCD Creator (brouillon, non tenu à jour) | https://studio.mcd-creator.com/projets/7508868f-ace5-4445-a245-6423c5d152ee |
 | Wireframes | https://trello.com/c/nx08cpaQ/1-wireframes |
 | Maquettes | https://trello.com/c/qqO1d9re/2-maquettes |
 | Conventions de nommage (carte) | https://trello.com/c/Bc5Mms9V/3-conventions-de-nommage |
