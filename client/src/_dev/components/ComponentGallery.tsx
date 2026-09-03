@@ -14,6 +14,7 @@ import Buttons from "@/_dev/components/Buttons";
 import FormInput from "@/_dev/components/FormInput";
 import SafetyInstructions from "@/_dev/components/SafetyInstructions";
 import Titles from "@/_dev/components/Titles";
+import MessageInfo from "./MessageInfo";
 
 type Family = {
   id: string;
@@ -42,6 +43,7 @@ const families: Family[] = [
     id: "cards",
     title: "Cards",
     description: "Cartes et conteneurs de contenu.",
+    Component: SafetyInstructions,
   },
   {
     id: "layout",
@@ -58,14 +60,16 @@ const families: Family[] = [
     id: "others",
     title: "Others",
     description: "Le reste : badges, alertes, séparateurs, etc.",
-    Component: SafetyInstructions,
+    Component: MessageInfo,
   },
 ];
 
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div className="mt-8 mb-3 flex items-center gap-3">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-primary/60">{children}</h2>
+      <h2 className="text-xs font-bold uppercase tracking-widest text-primary/60">
+        {children}
+      </h2>
       <span className="h-px flex-1 bg-primary/15" />
     </div>
   );
@@ -73,7 +77,8 @@ function SectionTitle({ children }: { children: ReactNode }) {
 
 export default function ComponentGallery() {
   const [activeId, setActiveId] = useState(families[0].id);
-  const active = families.find((family) => family.id === activeId) ?? families[0];
+  const active =
+    families.find((family) => family.id === activeId) ?? families[0];
   const ActiveComponent = active.Component;
 
   return (
@@ -83,11 +88,13 @@ export default function ComponentGallery() {
           Dev only · /help/components
         </p>
         <BackButton />
-        <p className="mt-3 text-sm font-semibold italic text-primary/70">Vigie · design system</p>
+        <p className="mt-3 text-sm font-semibold italic text-primary/70">
+          Vigie · design system
+        </p>
         <h1 className="mt-1 text-4xl font-black">Bibliothèque de composants</h1>
         <p className="mt-3 max-w-2xl text-sm text-primary/60">
-          Composants UI assemblés à partir de Tailwind et daisyUI, stylés pour Vigie. Chaque exemple
-          montre le rendu live et sa source TSX à copier.
+          Composants UI assemblés à partir de Tailwind et daisyUI, stylés pour
+          Vigie. Chaque exemple montre le rendu live et sa source TSX à copier.
         </p>
 
         {/* Onglets */}

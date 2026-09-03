@@ -1,5 +1,5 @@
 /**
- * ⚠️ DEV ONLY — famille "Cards" de la galerie de composants (/help/components).
+ * ⚠️ DEV ONLY — famille "Others" de la galerie de composants (/help/components).
  * Chaque exemple : un rendu live (Tailwind + daisyUI) + sa source TSX (string, à garder synchro).
  * Les couleurs par type (--fire, --storm, …) ne sont pas des tokens daisyUI : pas d'utilitaire
  * Tailwind pour elles, on passe par style={{ color: "var(--x)" }} (voir ColorPalette.tsx).
