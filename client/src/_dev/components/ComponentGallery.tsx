@@ -11,6 +11,7 @@
 import { type ComponentType, type ReactNode, useState } from "react";
 import BackButton from "@/_dev/BackButton";
 import Buttons from "@/_dev/components/Buttons";
+import SafetyInstructions from "@/_dev/components/SafetyInstructions";
 
 type Family = {
   id: string;
@@ -38,6 +39,7 @@ const families: Family[] = [
     id: "cards",
     title: "Cards",
     description: "Cartes et conteneurs de contenu.",
+    Component: SafetyInstructions,
   },
   {
     id: "layout",
