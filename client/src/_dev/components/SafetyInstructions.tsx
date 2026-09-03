@@ -13,15 +13,22 @@ function SafetyInstructionsDemo() {
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="w-full rounded-2xl border border-primary/10 bg-base-200 p-4">
+    <div
+      className="w-full rounded-2xl p-4"
+      style={{ background: "var(--primary-light)" }}
+    >
       <button
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 text-left"
+        className="flex w-full items-center justify-between gap-2 text-left cursor-pointer"
       >
         <span className="flex items-center gap-2 text-sm font-bold text-primary">
-          <Icon name="shield" className="h-4 w-4 fill-success" aria-hidden="true" />
+          <Icon
+            name="shield"
+            className="h-4 w-4 fill-success"
+            aria-hidden="true"
+          />
           Consignes de sécurité (2)
         </span>
         <Icon
@@ -39,8 +46,9 @@ function SafetyInstructionsDemo() {
             </span>
             <span className="text-primary/70">
               {" "}
-              — Éloignez-vous dans la direction opposée au vent pour éviter les fumées.
-              Appelez le 18 ou le 112. Fermez portes et volets si vous restez chez vous.
+              — Éloignez-vous dans la direction opposée au vent pour éviter les
+              fumées. Appelez le 18 ou le 112. Fermez portes et volets si vous
+              restez chez vous.
             </span>
           </p>
           <p>
@@ -49,8 +57,9 @@ function SafetyInstructionsDemo() {
             </span>
             <span className="text-primary/70">
               {" "}
-              — Restez à l'abri et limitez vos déplacements. Rangez ou arrimez les objets
-              pouvant être emportés. Éloignez-vous des arbres et des lignes électriques.
+              — Restez à l'abri et limitez vos déplacements. Rangez ou arrimez
+              les objets pouvant être emportés. Éloignez-vous des arbres et des
+              lignes électriques.
             </span>
           </p>
         </div>
@@ -70,12 +79,12 @@ export default function SafetyInstructions() {
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="rounded-2xl border border-primary/10 bg-base-200 p-4">
+    <div className="rounded-2xl p-4" style={{ background: "var(--primary-light)" }}>
       <button
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 text-left"
+        className="flex w-full items-center justify-between gap-2 text-left cursor-pointer"
       >
         <span className="flex items-center gap-2 text-sm font-bold text-primary">
           <Icon name="shield" className="h-4 w-4 fill-success" aria-hidden="true" />
