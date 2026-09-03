@@ -5,9 +5,9 @@
  * Tailwind pour elles, on passe par style={{ color: "var(--x)" }} (voir ColorPalette.tsx).
  */
 
-import { useState } from "react";
 import Example from "@/_dev/components/Example";
 import Icon from "@/components/Icon/Icon";
+import { useState } from "react";
 
 function SafetyInstructionsDemo() {
   const [open, setOpen] = useState(true);
@@ -44,7 +44,7 @@ function SafetyInstructionsDemo() {
             <span className="font-bold" style={{ color: "var(--fire)" }}>
               Feu
             </span>
-            <span className="text-primary/70">
+            <span className="text-black">
               {" "}
               — Éloignez-vous dans la direction opposée au vent pour éviter les
               fumées. Appelez le 18 ou le 112. Fermez portes et volets si vous
@@ -55,7 +55,7 @@ function SafetyInstructionsDemo() {
             <span className="font-bold" style={{ color: "var(--storm)" }}>
               Tempête
             </span>
-            <span className="text-primary/70">
+            <span className="text-black">
               {" "}
               — Restez à l'abri et limitez vos déplacements. Rangez ou arrimez
               les objets pouvant être emportés. Éloignez-vous des arbres et des
@@ -103,7 +103,7 @@ export default function SafetyInstructions() {
             <span className="font-bold" style={{ color: "var(--fire)" }}>
               Feu
             </span>
-            <span className="text-primary/70">
+            <span className="text-black">
               {" "}
               — Éloignez-vous dans la direction opposée au vent pour éviter les fumées.
               Appelez le 18 ou le 112. Fermez portes et volets si vous restez chez vous.
@@ -113,7 +113,7 @@ export default function SafetyInstructions() {
             <span className="font-bold" style={{ color: "var(--storm)" }}>
               Tempête
             </span>
-            <span className="text-primary/70">
+            <span className="text-black">
               {" "}
               — Restez à l'abri et limitez vos déplacements. Rangez ou arrimez les objets
               pouvant être emportés. Éloignez-vous des arbres et des lignes électriques.
