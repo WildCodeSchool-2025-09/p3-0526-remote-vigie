@@ -55,7 +55,7 @@ export default function Buttons() {
   type="button"
   className="btn btn-accent btn-lg grow rounded-full border-none px-10 text-lg font-bold"
 >
-  <Icon name="check" className="h-5 w-5" aria-hidden="true" />
+  <Icon name="check" className="h-5 w-5 fill-primary" aria-hidden="true" />
   Confirmer
 </button>`}
       >
@@ -117,7 +117,7 @@ export default function Buttons() {
   type="button"
   className="btn btn-lg grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-10 text-lg"
 >
-  <Icon name="arrowSmallLeft" className="h-5 w-5" aria-hidden="true" />
+  <Icon name="arrowSmallLeft" className="h-5 w-5 fill-primary" aria-hidden="true" />
   Retour à l'accueil
 </button>`}
       >
@@ -125,7 +125,7 @@ export default function Buttons() {
           type="button"
           className="btn btn-lg grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-10 text-lg"
         >
-          <Icon name="arrowSmallLeft" className="h-5 w-5" aria-hidden="true" />
+          <Icon name="arrowSmallLeft" className="h-5 w-5 fill-primary" aria-hidden="true" />
           Retour à l'accueil
         </button>
       </Example>
@@ -135,18 +135,18 @@ export default function Buttons() {
         description="Bouton icône seule, forme carrée arrondie, fond transparent, bordure et icône primary."
         code={`<button
   type="button"
-  className="btn btn-square h-14 w-14 rounded-2xl border-2 border-primary/15 bg-transparent shadow-none hover:bg-primary/10"
+  className="btn btn-square btn-lg rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
   aria-label="Partager"
 >
-  <Icon name="share" className="h-6 w-6 fill-primary" aria-hidden="true" />
+  <Icon name="share" className="h-5 w-5 fill-primary" aria-hidden="true" />
 </button>`}
       >
         <button
           type="button"
-          className="btn btn-square h-14 w-14 rounded-2xl border-2 border-primary/15 bg-transparent shadow-none hover:bg-primary/10"
+          className="btn btn-square btn-lg rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
           aria-label="Partager"
         >
-          <Icon name="share" className="h-6 w-6 fill-primary" aria-hidden="true" />
+          <Icon name="share" className="h-5 w-5 fill-primary" aria-hidden="true" />
         </button>
       </Example>
 
@@ -198,10 +198,10 @@ export default function Buttons() {
   </button>
   <button
     type="button"
-    className="btn btn-square h-14 w-14 rounded-2xl border-2 border-primary/15 bg-transparent shadow-none hover:bg-primary/10"
+    className="btn btn-square btn-lg rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
     aria-label="Partager"
   >
-    <Icon name="share" className="h-6 w-6 fill-primary" aria-hidden="true" />
+    <Icon name="share" className="h-5 w-5 fill-primary" aria-hidden="true" />
   </button>
 </div>`}
       >
@@ -214,10 +214,10 @@ export default function Buttons() {
           </button>
           <button
             type="button"
-            className="btn btn-square h-14 w-14 rounded-2xl border-2 border-primary/15 bg-transparent shadow-none hover:bg-primary/10"
+            className="btn btn-square btn-lg rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
             aria-label="Partager"
           >
-            <Icon name="share" className="h-6 w-6 fill-primary" aria-hidden="true" />
+            <Icon name="share" className="h-5 w-5 fill-primary" aria-hidden="true" />
           </button>
         </div>
       </Example>
