@@ -131,6 +131,26 @@ export default function Buttons() {
       </Example>
 
       <Example
+        title="Button square"
+        description="Bouton icône seule, forme carrée arrondie, fond transparent, bordure et icône primary."
+        code={`<button
+  type="button"
+  className="btn btn-square h-14 w-14 rounded-2xl border-2 border-primary/15 bg-transparent shadow-none hover:bg-primary/10"
+  aria-label="Partager"
+>
+  <Icon name="share" className="h-6 w-6 fill-primary" aria-hidden="true" />
+</button>`}
+      >
+        <button
+          type="button"
+          className="btn btn-square h-14 w-14 rounded-2xl border-2 border-primary/15 bg-transparent shadow-none hover:bg-primary/10"
+          aria-label="Partager"
+        >
+          <Icon name="share" className="h-6 w-6 fill-primary" aria-hidden="true" />
+        </button>
+      </Example>
+
+      <Example
         className="sm:col-span-2 lg:col-span-3"
         title="Paire flat + stroke"
         description="Duo d'actions sur une ligne : action principale (flat) en basis-2/3, action secondaire (stroke) en basis-1/3. Le conteneur flex gère le partage."
@@ -161,6 +181,43 @@ export default function Buttons() {
             className="btn btn-lg basis-1/3 rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-6 text-lg"
           >
             Annuler
+          </button>
+        </div>
+      </Example>
+
+      <Example
+        className="sm:col-span-2 lg:col-span-3"
+        title="Paire stroke + square"
+        description="Duo d'actions sur une ligne : action principale (stroke) qui occupe l'espace restant, action secondaire (square) à taille fixe. Icône crayon à ajouter aux assets — texte seul en attendant."
+        code={`<div className="flex w-full items-center gap-3">
+  <button
+    type="button"
+    className="btn btn-lg grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-10 text-lg"
+  >
+    Modifier
+  </button>
+  <button
+    type="button"
+    className="btn btn-square h-14 w-14 rounded-2xl border-2 border-primary/15 bg-transparent shadow-none hover:bg-primary/10"
+    aria-label="Partager"
+  >
+    <Icon name="share" className="h-6 w-6 fill-primary" aria-hidden="true" />
+  </button>
+</div>`}
+      >
+        <div className="flex w-full items-center gap-3">
+          <button
+            type="button"
+            className="btn btn-lg grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-10 text-lg"
+          >
+            Modifier
+          </button>
+          <button
+            type="button"
+            className="btn btn-square h-14 w-14 rounded-2xl border-2 border-primary/15 bg-transparent shadow-none hover:bg-primary/10"
+            aria-label="Partager"
+          >
+            <Icon name="share" className="h-6 w-6 fill-primary" aria-hidden="true" />
           </button>
         </div>
       </Example>
