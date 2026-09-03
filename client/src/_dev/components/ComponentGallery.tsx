@@ -8,13 +8,14 @@
  * source quand on construit les vrais composants de l'app. Rien n'est importé par l'app.
  */
 
-import { type ComponentType, type ReactNode, useState } from "react";
 import BackButton from "@/_dev/BackButton";
 import Buttons from "@/_dev/components/Buttons";
+import Layout from "@/_dev/components/Layout";
 import FormInput from "@/_dev/components/FormInput";
 import SafetyInstructions from "@/_dev/components/SafetyInstructions";
 import Titles from "@/_dev/components/Titles";
 import MessageInfo from "./MessageInfo";
+import { type ComponentType, type ReactNode, useState } from "react";
 
 type Family = {
   id: string;
@@ -49,6 +50,7 @@ const families: Family[] = [
     id: "layout",
     title: "Layout",
     description: "Gabarits de page, grilles, espacements.",
+    Component: Layout,
   },
   {
     id: "form",
