@@ -13,6 +13,7 @@ import BackButton from "@/_dev/BackButton";
 import Buttons from "@/_dev/components/Buttons";
 import FormInput from "@/_dev/components/FormInput";
 import SafetyInstructions from "@/_dev/components/SafetyInstructions";
+import Titles from "@/_dev/components/Titles";
 
 type Family = {
   id: string;
@@ -35,12 +36,12 @@ const families: Family[] = [
     id: "titles",
     title: "Titles",
     description: "Titres et hiérarchie typographique.",
+    Component: Titles,
   },
   {
     id: "cards",
     title: "Cards",
     description: "Cartes et conteneurs de contenu.",
-    Component: SafetyInstructions,
   },
   {
     id: "layout",
@@ -57,6 +58,7 @@ const families: Family[] = [
     id: "others",
     title: "Others",
     description: "Le reste : badges, alertes, séparateurs, etc.",
+    Component: SafetyInstructions,
   },
 ];
 
