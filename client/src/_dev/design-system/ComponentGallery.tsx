@@ -7,6 +7,7 @@ import FormInputExamples from "@/_dev/design-system/FormInputExamples";
 import CardExamples from "@/_dev/design-system/CardExamples";
 import TitlesExamples from "@/_dev/design-system/TitlesExamples";
 import OtherExamples from "./OtherExamples";
+import MapExamples from "@/_dev/design-system/Map";
 import { type ComponentType, type ReactNode, useState } from "react";
 
 type Family = {
@@ -48,11 +49,18 @@ const families: Family[] = [
     Component: FormInputExamples,
   },
   {
+    id: "map",
+    title: "Map",
+    description: "Carte Leaflet et marqueurs d'incidents avec vos icônes SVG.",
+    Component: MapExamples,
+  },
+  {
     id: "others",
     title: "Others",
     description: "Le reste : badges, alertes, séparateurs, etc.",
     Component: OtherExamples,
   },
+  
 ];
 
 function SectionTitle({ children }: { children: ReactNode }) {
