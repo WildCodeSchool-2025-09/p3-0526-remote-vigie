@@ -1,6 +1,7 @@
 // ⚠️ DEV ONLY — famille "Layout" de la galerie de composants (/help/components).
 
 import Example from "@/_dev/design-system/Example";
+import SectionLabel from "@/_dev/design-system/SectionLabel";
 import bgHome from "@/assets/images/backgroud-home.jpg";
 import bgIncidentDetails from "@/assets/images/background-incident-details.jpg";
 import bgIncident from "@/assets/images/background-incident.jpg";
@@ -17,7 +18,7 @@ export default function LayoutExamples() {
           bg-base-300, insérés du bord de{" "}
           <span className="font-mono">px-4</span>, espacés de{" "}
           <span className="font-mono">space-y-4</span>, le premier remonte de{" "}
-          <span className="font-mono">-mt-6</span> sur le header) →{" "}
+          <span className="font-mono">-mt-8</span> sur le header) →{" "}
           <span className="font-semibold text-primary">header</span> (plein
           cadre, porte une couleur de fond ; l'image passe par-dessus en{" "}
           <span className="font-mono">mix-blend-multiply</span> +{" "}
@@ -26,6 +27,8 @@ export default function LayoutExamples() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <SectionLabel>Header</SectionLabel>
+
         <Example
           className="sm:col-span-2 lg:col-span-3"
           title="Header · fond primary + h1 accent"
@@ -131,6 +134,8 @@ export default function LayoutExamples() {
           </div>
         </Example>
 
+        <SectionLabel>Frame</SectionLabel>
+
         <Example
           className="sm:col-span-2 lg:col-span-3"
           title="Frame · inset au bord"
@@ -175,10 +180,12 @@ export default function LayoutExamples() {
           </div>
         </Example>
 
+        <SectionLabel>Assemblage</SectionLabel>
+
         <Example
           className="sm:col-span-2 lg:col-span-3"
           title="Page · header + frames"
-          description="L'assemblage de référence. Header plein cadre, puis la pile d'encarts insérée (px-4) et espacée (space-y-4). Le premier encart remonte de -mt-6 pour chevaucher le header ; le pb-12 du header garde le h1 au-dessus."
+          description="L'assemblage de référence. Header plein cadre, puis la pile d'encarts insérée (px-4) et espacée (space-y-4). Le premier encart remonte de -mt-8 pour chevaucher le header ; le pb-12 du header garde le h1 au-dessus."
           code={`<div className="min-h-screen bg-base-100">
   <header className="relative isolate flex h-44 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
     <img
@@ -191,7 +198,7 @@ export default function LayoutExamples() {
     <p className="mt-1 text-sm text-white/85">Vos voisins concernés seront alertés aussitôt.</p>
   </header>
 
-  <div className="relative -mt-6 space-y-4 px-4 pb-6">
+  <div className="relative -mt-8 space-y-4 px-4 pb-6">
     <section className="rounded-2xl bg-base-300 p-4">
       <h2 className="font-title text-xl font-bold text-primary">
         Que voulez-vous signaler ?
@@ -217,7 +224,7 @@ export default function LayoutExamples() {
                 Vos voisins concernés seront alertés aussitôt.
               </p>
             </header>
-            <div className="relative -mt-6 space-y-4 px-4 pb-6">
+            <div className="relative -mt-8 space-y-4 px-4 pb-6">
               <section className="rounded-2xl bg-base-300 p-4">
                 <h2 className="font-title text-xl font-bold text-primary">
                   Que voulez-vous signaler ?

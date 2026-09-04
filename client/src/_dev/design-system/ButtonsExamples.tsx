@@ -1,11 +1,14 @@
 // ⚠️ DEV ONLY — famille "Buttons" de la galerie de composants (/help/components).
 
 import Example from "@/_dev/design-system/Example";
+import SectionLabel from "@/_dev/design-system/SectionLabel";
 import Icon from "@/components/Icon/Icon";
 
 export default function ButtonsExamples() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <SectionLabel>Flat</SectionLabel>
+
       <Example
         title="Button flat"
         description="CTA principal : fond accent (jaune), texte primary (vert foncé), forme pilule."
@@ -68,6 +71,8 @@ export default function ButtonsExamples() {
         </button>
       </Example>
 
+      <SectionLabel>Stroke</SectionLabel>
+
       <Example
         title="Button stroke"
         description="Variante secondaire : fond transparent, bordure et texte primary. Sans btn-outline — survol en teinte primary légère, pas d'inversion de fond."
@@ -126,6 +131,8 @@ export default function ButtonsExamples() {
         </button>
       </Example>
 
+      <SectionLabel>Square</SectionLabel>
+
       <Example
         title="Button square"
         description="Bouton icône seule, forme carrée arrondie, fond transparent, bordure et icône primary."
@@ -145,6 +152,8 @@ export default function ButtonsExamples() {
           <Icon name="share" className="h-5 w-5 fill-primary" aria-hidden="true" />
         </button>
       </Example>
+
+      <SectionLabel>Paires</SectionLabel>
 
       <Example
         className="sm:col-span-2 lg:col-span-3"

@@ -1,12 +1,15 @@
 // ⚠️ DEV ONLY — famille "Form" de la galerie de composants (/help/components).
 
 import Example from "@/_dev/design-system/Example";
+import SectionLabel from "@/_dev/design-system/SectionLabel";
 import TextAreaExamples from "@/_dev/design-system/TextAreaExamples";
 import Icon from "@/components/Icon/Icon";
 
 export default function FormInputExamples() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <SectionLabel>Champ texte</SectionLabel>
+
       <Example
         title="FormInput"
         description="État neutre. Bordure légère toujours visible ; le badge d'erreur réserve sa place (invisible) mais ne s'affiche pas. Pas de message en dessous : réservé à l'erreur."
@@ -98,6 +101,8 @@ export default function FormInputExamples() {
           </p>
         </div>
       </Example>
+
+      <SectionLabel>Zone de texte</SectionLabel>
 
       <TextAreaExamples />
     </div>

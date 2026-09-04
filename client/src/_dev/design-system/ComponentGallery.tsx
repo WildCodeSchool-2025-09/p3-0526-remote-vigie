@@ -6,7 +6,7 @@ import LayoutExamples from "@/_dev/design-system/LayoutExamples";
 import FormInputExamples from "@/_dev/design-system/FormInputExamples";
 import SafetyInstructionsExamples from "@/_dev/design-system/SafetyInstructionsExamples";
 import TitlesExamples from "@/_dev/design-system/TitlesExamples";
-import MessageInfoExamples from "./MessageInfoExamples";
+import OtherExamples from "./OtherExamples";
 import { type ComponentType, type ReactNode, useState } from "react";
 
 type Family = {
@@ -51,7 +51,7 @@ const families: Family[] = [
     id: "others",
     title: "Others",
     description: "Le reste : badges, alertes, séparateurs, etc.",
-    Component: MessageInfoExamples,
+    Component: OtherExamples,
   },
 ];
 
