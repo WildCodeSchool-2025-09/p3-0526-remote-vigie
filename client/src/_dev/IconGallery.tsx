@@ -72,7 +72,7 @@ const categories: { title: string; description: string; names: IconName[] }[] = 
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div className="mt-10 mb-3 flex items-center gap-3">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-primary/60">{children}</h2>
+      <h2 className="text-lg font-bold uppercase tracking-widest text-primary/60">{children}</h2>
       <span className="h-px flex-1 bg-primary/15" />
     </div>
   );
@@ -101,7 +101,7 @@ export default function IconGallery() {
         </p>
         <BackButton />
         <p className="mt-3 text-sm font-semibold italic text-primary/70">Vigie · design system</p>
-        <h1 className="mt-1 text-4xl font-black">Icônes de assets/icons</h1>
+        <h1 className="mt-1 text-2xl font-black">Icônes de assets/icons</h1>
         <p className="mt-3 max-w-2xl text-sm text-primary/60">
           {total} icônes disponibles via <span className="font-mono">{"<Icon name=\"...\" />"}</span>,
           groupées par sous-dossier de <span className="font-mono">src/assets/icons/</span>.

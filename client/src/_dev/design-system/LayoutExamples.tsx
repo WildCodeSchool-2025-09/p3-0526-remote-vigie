@@ -200,7 +200,7 @@ export default function LayoutExamples() {
 
   <div className="relative -mt-8 space-y-4 px-4 pb-6">
     <section className="rounded-2xl bg-base-300 p-4">
-      <h2 className="font-title text-xl font-bold text-primary">
+      <h2 className="font-title text-lg font-bold text-primary">
         Que voulez-vous signaler ?
       </h2>
       …
@@ -226,7 +226,7 @@ export default function LayoutExamples() {
             </header>
             <div className="relative -mt-8 space-y-4 px-4 pb-6">
               <section className="rounded-2xl bg-base-300 p-4">
-                <h2 className="font-title text-xl font-bold text-primary">
+                <h2 className="font-title text-lg font-bold text-primary">
                   Que voulez-vous signaler ?
                 </h2>
                 <div className="mt-3 h-40 rounded-lg bg-base-100" />

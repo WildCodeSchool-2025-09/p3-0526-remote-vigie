@@ -8,7 +8,7 @@ export default function TitlesExamples() {
       <Example
         className="sm:col-span-2 lg:col-span-3"
         title="Title · h1 de page"
-        description="Titre principal de page (ex. « Créer mon compte »). Taille fixe (text-3xl, calée mobile-first), couleur accent (jaune or) et font-title pour la police Playfair Display. Rendu ici sur fond primary comme sur la page."
+        description="Titre principal de page (ex. « Créer mon compte »). Taille fixe (text-2xl, calée mobile-first), couleur accent (jaune or) et font-title pour la police Playfair Display. Rendu ici sur fond primary comme sur la page."
         code={`<h1 className="font-title text-2xl font-bold text-accent">
   Créer mon compte
 </h1>`}
@@ -23,12 +23,12 @@ export default function TitlesExamples() {
       <Example
         className="sm:col-span-2 lg:col-span-3"
         title="Title · h2 de section"
-        description="Titre de section (ex. « Que voulez-vous signaler ? »). Taille fixe (text-xl, calée mobile-first), couleur primary (vert foncé) et font-title pour la police Playfair Display."
-        code={`<h2 className="font-title text-xl font-bold text-primary">
+        description="Titre de section (ex. « Que voulez-vous signaler ? »). Taille fixe (text-lg, calée mobile-first), couleur primary (vert foncé) et font-title pour la police Playfair Display."
+        code={`<h2 className="font-title text-lg font-bold text-primary">
   Que voulez-vous signaler ?
 </h2>`}
       >
-        <h2 className="font-title text-xl font-bold text-primary">
+        <h2 className="font-title text-lg font-bold text-primary">
           Que voulez-vous signaler ?
         </h2>
       </Example>
