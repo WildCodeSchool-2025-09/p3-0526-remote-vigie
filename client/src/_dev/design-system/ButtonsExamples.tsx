@@ -14,14 +14,14 @@ export default function ButtonsExamples() {
         description="CTA principal : fond accent (jaune), texte primary (vert foncé), forme pilule."
         code={`<button
   type="button"
-  className="btn btn-accent btn-lg grow rounded-full border-none px-10 text-lg font-bold"
+  className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
 >
   Signaler l'incident
 </button>`}
       >
         <button
           type="button"
-          className="btn btn-accent btn-lg grow rounded-full border-none px-10 text-lg font-bold"
+          className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
         >
           Signaler l'incident
         </button>
@@ -33,7 +33,7 @@ export default function ButtonsExamples() {
         code={`<button
   type="button"
   disabled
-  className="btn btn-accent btn-lg grow rounded-full border-none px-10 text-lg font-bold"
+  className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
 >
   Signaler l'incident
 </button>`}
@@ -41,7 +41,7 @@ export default function ButtonsExamples() {
         <button
           type="button"
           disabled
-          className="btn btn-accent btn-lg grow rounded-full border-none px-10 text-lg font-bold"
+          className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
         >
           Signaler l'incident
         </button>
@@ -52,19 +52,19 @@ export default function ButtonsExamples() {
         description="Icône + libellé. btn (daisyUI) aligne et espace déjà les enfants ; l'icône hérite de la couleur du texte via currentColor."
         code={`<button
   type="button"
-  className="btn btn-accent btn-lg grow rounded-full border-none px-10 text-lg font-bold"
+  className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
 >
-  <Icon name="check" className="h-5 w-5 fill-primary" aria-hidden="true" />
+  <Icon name="check" className="h-4 w-4 fill-primary" aria-hidden="true" />
   Confirmer
 </button>`}
       >
         <button
           type="button"
-          className="btn btn-accent btn-lg grow rounded-full border-none px-10 text-lg font-bold"
+          className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
         >
           <Icon
             name="check"
-            className="h-5 w-5 fill-primary"
+            className="h-4 w-4 fill-primary"
             aria-hidden="true"
           />
           Confirmer
@@ -78,14 +78,14 @@ export default function ButtonsExamples() {
         description="Variante secondaire : fond transparent, bordure et texte primary. Sans btn-outline — survol en teinte primary légère, pas d'inversion de fond."
         code={`<button
   type="button"
-  className="btn btn-lg grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-10 text-lg"
+  className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-5"
 >
   Retour à l'accueil
 </button>`}
       >
         <button
           type="button"
-          className="btn btn-lg grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-10 text-lg"
+          className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-5"
         >
           Retour à l'accueil
         </button>
@@ -97,7 +97,7 @@ export default function ButtonsExamples() {
         code={`<button
   type="button"
   disabled
-  className="btn btn-lg grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 disabled:border-primary/20 disabled:text-primary/40 px-10 text-lg"
+  className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 disabled:border-primary/20 disabled:text-primary/40 px-5"
 >
   Retour à l'accueil
 </button>`}
@@ -105,7 +105,7 @@ export default function ButtonsExamples() {
         <button
           type="button"
           disabled
-          className="btn btn-lg grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 disabled:border-primary/20 disabled:text-primary/40 px-10 text-lg"
+          className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 disabled:border-primary/20 disabled:text-primary/40 px-5"
         >
           Retour à l'accueil
         </button>
@@ -116,17 +116,17 @@ export default function ButtonsExamples() {
         description="Icône + libellé. L'icône hérite du primary via currentColor (bordure et texte du bouton)."
         code={`<button
   type="button"
-  className="btn btn-lg grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-10 text-lg"
+  className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-5"
 >
-  <Icon name="arrowSmallLeft" className="h-5 w-5 fill-primary" aria-hidden="true" />
+  <Icon name="arrowSmallLeft" className="h-4 w-4 fill-primary" aria-hidden="true" />
   Retour à l'accueil
 </button>`}
       >
         <button
           type="button"
-          className="btn btn-lg grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-10 text-lg"
+          className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-5"
         >
-          <Icon name="arrowSmallLeft" className="h-5 w-5 fill-primary" aria-hidden="true" />
+          <Icon name="arrowSmallLeft" className="h-4 w-4 fill-primary" aria-hidden="true" />
           Retour à l'accueil
         </button>
       </Example>
@@ -138,18 +138,18 @@ export default function ButtonsExamples() {
         description="Bouton icône seule, forme carrée arrondie, fond transparent, bordure et icône primary."
         code={`<button
   type="button"
-  className="btn btn-square btn-lg rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
+  className="btn btn-square btn-md rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
   aria-label="Partager"
 >
-  <Icon name="share" className="h-5 w-5 fill-primary" aria-hidden="true" />
+  <Icon name="share" className="h-4 w-4 fill-primary" aria-hidden="true" />
 </button>`}
       >
         <button
           type="button"
-          className="btn btn-square btn-lg rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
+          className="btn btn-square btn-md rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
           aria-label="Partager"
         >
-          <Icon name="share" className="h-5 w-5 fill-primary" aria-hidden="true" />
+          <Icon name="share" className="h-4 w-4 fill-primary" aria-hidden="true" />
         </button>
       </Example>
 
@@ -162,13 +162,13 @@ export default function ButtonsExamples() {
         code={`<div className="flex w-full gap-3">
   <button
     type="button"
-    className="btn btn-accent btn-lg basis-2/3 rounded-full border-none px-6 text-lg font-bold"
+    className="btn btn-accent btn-md basis-2/3 rounded-full border-none px-6 font-bold"
   >
     Confirmer
   </button>
   <button
     type="button"
-    className="btn btn-lg basis-1/3 rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-6 text-lg"
+    className="btn btn-md basis-1/3 rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-6"
   >
     Annuler
   </button>
@@ -177,13 +177,13 @@ export default function ButtonsExamples() {
         <div className="flex w-full gap-3">
           <button
             type="button"
-            className="btn btn-accent btn-lg basis-2/3 rounded-full border-none px-6 text-lg font-bold"
+            className="btn btn-accent btn-md basis-2/3 rounded-full border-none px-6 font-bold"
           >
             Confirmer
           </button>
           <button
             type="button"
-            className="btn btn-lg basis-1/3 rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-6 text-lg"
+            className="btn btn-md basis-1/3 rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-6"
           >
             Annuler
           </button>
@@ -197,32 +197,32 @@ export default function ButtonsExamples() {
         code={`<div className="flex w-full items-center gap-3">
   <button
     type="button"
-    className="btn btn-lg grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-10 text-lg"
+    className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-5"
   >
     Modifier
   </button>
   <button
     type="button"
-    className="btn btn-square btn-lg rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
+    className="btn btn-square btn-md rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
     aria-label="Partager"
   >
-    <Icon name="share" className="h-5 w-5 fill-primary" aria-hidden="true" />
+    <Icon name="share" className="h-4 w-4 fill-primary" aria-hidden="true" />
   </button>
 </div>`}
       >
         <div className="flex w-full items-center gap-3">
           <button
             type="button"
-            className="btn btn-lg grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-10 text-lg"
+            className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-5"
           >
             Modifier
           </button>
           <button
             type="button"
-            className="btn btn-square btn-lg rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
+            className="btn btn-square btn-md rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
             aria-label="Partager"
           >
-            <Icon name="share" className="h-5 w-5 fill-primary" aria-hidden="true" />
+            <Icon name="share" className="h-4 w-4 fill-primary" aria-hidden="true" />
           </button>
         </div>
       </Example>
