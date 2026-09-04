@@ -9,6 +9,7 @@ Pages et outils **de développement uniquement**. Rien ici n'est une page de l'a
 | `/help/vigie` | `VigieViewer.tsx` | Rendu du VIGIE.md à la racine du repo (via `MarkdownDoc.tsx`). |
 | `/help/colors` | `ColorPalette.tsx` | Visualiser la palette déclarée dans `src/styles/theme.css`. |
 | `/help/icons` | `IconGallery.tsx` | Visualiser les icônes déclarées dans `src/assets/icons/index.ts`. |
+| `/help/components` | `components/ComponentGallery.tsx` | Bibliothèque de composants UI assemblés (Tailwind + daisyUI). Une famille = un fichier `components/<Famille>.tsx` ; chaque exemple montre le rendu live + sa source TSX copiable (écrite à la main). |
 
 Ces routes sont branchées dans `src/main.tsx` dans un bloc `if (import.meta.env.DEV)`.
 Elles n'existent que lorsque l'app tourne via `vite dev` : dans un `vite build` (donc en prod),

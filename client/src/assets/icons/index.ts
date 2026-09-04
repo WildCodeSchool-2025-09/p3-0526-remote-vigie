@@ -27,6 +27,7 @@ import ArrowSmallRight from "./interface/arrow-small-right.svg?react";
 import ArrowSmallUp from "./interface/arrow-small-up.svg?react";
 import Bullet from "./interface/bullet.svg?react";
 import Camera from "./interface/camera.svg?react";
+import Check from "./interface/check.svg?react";
 import CheckCircle from "./interface/check-circle.svg?react";
 import CommentAltMiddle from "./interface/comment-alt-middle.svg?react";
 import CrossSmall from "./interface/cross-small.svg?react";
@@ -73,6 +74,7 @@ export const icons = {
   arrowSmallUp: ArrowSmallUp,
   bullet: Bullet,
   camera: Camera,
+  check: Check,
   checkCircle: CheckCircle,
   commentAltMiddle: CommentAltMiddle,
   crossSmall: CrossSmall,

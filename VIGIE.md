@@ -612,11 +612,14 @@ gravité par défaut par type · pas de suppression d'incident (archive) ni de c
 
 | Poids | Libellé | Couleur |
 |-------|---------|---------|
-| 1 | Faible | `#116530` |
-| 2 | Modéré | `#6B8E23` |
-| 3 | Important | `#C58A1E` |
-| 4 | Élevé | `#D2691E` |
-| 5 | Critique | `#C1392B` |
+| 1 | Faible | `#3a8f3f` |
+| 2 | Modéré | `#9bbb2f` |
+| 3 | Important | `#e0a81f` |
+| 4 | Élevé | `#e8600f` |
+| 5 | Critique | `#c1392b` |
+
+> Ces valeurs reprennent `--level-1` … `--level-5` de `client/src/styles/theme.css`
+> (source unique) ; elles alimentent la colonne `danger_level.color` au seed.
 
 ### Types d'incident (`incident_type`)
 
@@ -652,6 +655,7 @@ telle qu'enseignée à la Wild Code School.
 
 **Client** — React 19 + Vite + TypeScript · `react-router` · Tailwind CSS + DaisyUI
 (primitives accessibles) · tokens de thème dans `client/src/styles/theme.css` ·
+**SCSS (`sass`)** en complément pour le style particulier (voir §9) ·
 carte **Leaflet + OpenStreetMap** · icônes SVG dans `client/src/assets/icons`
 (`interface/`, `nav/`, `types/`). Mobile-first strict.
 
@@ -703,9 +707,11 @@ Une branche par US (voir §3).
 | Fichier SCSS global | kebab-case | `variables.scss` |
 | Classe CSS | kebab-case | `.card-title` |
 
-> Note : la carte décrit des CSS Modules SCSS ; le projet actuel privilégie les classes
-> utilitaires Tailwind/DaisyUI + les tokens de `theme.css`. À trancher en équipe et à
-> refléter ici.
+> Note : la carte décrit des CSS Modules SCSS. Direction retenue pour le projet : les
+> classes utilitaires Tailwind/DaisyUI + les tokens de `theme.css` par défaut, et du
+> **SCSS (`sass`)** pour le style particulier que les utilitaires ne couvrent pas
+> (fichier global kebab-case type `variables.scss`, ou CSS Module `Xxx.module.scss`
+> attaché à un composant). Les classes restent en kebab-case.
 
 **SQL** — tables au pluriel et en `snake_case` (`users`, `incidents`, `incident_types`) ;
 colonnes `snake_case` explicites (`default_severity`, `alert_radius_meters`,

@@ -45,7 +45,8 @@ const design: Entry[] = [
   },
   {
     title: "Composants",
-    description: "Bibliothèque de composants réutilisables. Bientôt disponible.",
+    description: "Bibliothèque de composants UI assemblés (Tailwind + daisyUI), stylés pour Vigie.",
+    path: "/help/components",
   },
 ];
 
