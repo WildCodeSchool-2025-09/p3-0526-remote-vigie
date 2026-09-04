@@ -66,7 +66,7 @@ const responsiveLinks: ExternalLink[] = [
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div className="mt-10 mb-3 flex items-center gap-3">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-primary/60">{children}</h2>
+      <h2 className="text-lg font-bold uppercase tracking-widest text-primary/60">{children}</h2>
       <span className="h-px flex-1 bg-primary/15" />
     </div>
   );
@@ -125,7 +125,7 @@ export default function HelpIndex() {
           Dev only · /help
         </p>
         <p className="mt-3 text-sm font-semibold italic text-primary/70">Vigie · ressources dev</p>
-        <h1 className="mt-1 text-4xl font-black">Aide</h1>
+        <h1 className="mt-1 text-2xl font-black">Aide</h1>
         <p className="mt-3 max-w-2xl text-sm text-primary/60">
           Point d'entrée vers les ressources de dev du projet.
         </p>

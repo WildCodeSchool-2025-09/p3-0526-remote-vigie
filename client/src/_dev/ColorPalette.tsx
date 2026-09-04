@@ -221,7 +221,7 @@ const levels: DangerLevel[] = [
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div className="mt-10 mb-3 flex items-center gap-3">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-primary/60">
+      <h2 className="text-lg font-bold uppercase tracking-widest text-primary/60">
         {children}
       </h2>
       <span className="h-px flex-1 bg-primary/15" />
@@ -262,7 +262,7 @@ export default function ColorPalette() {
         <p className="mt-3 text-sm font-semibold italic text-primary/70">
           Vigie · design system
         </p>
-        <h1 className="mt-1 text-4xl font-black">Couleurs de theme.css</h1>
+        <h1 className="mt-1 text-2xl font-black">Couleurs de theme.css</h1>
         <p className="mt-3 max-w-2xl text-sm text-primary/60">
           Chaque pastille rend <span className="font-mono">var(--x)</span> :
           elle reflète le thème en direct. Le hex indiqué est la valeur

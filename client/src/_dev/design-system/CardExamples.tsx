@@ -16,13 +16,15 @@ function SafetyInstructionsDemo() {
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between gap-2 text-left cursor-pointer"
       >
-        <span className="flex items-center gap-2 text-sm font-bold text-primary">
+        <span className="flex items-center gap-2">
           <Icon
             name="shield"
             className="h-4 w-4 fill-success"
             aria-hidden="true"
           />
-          Consignes de sécurité (2)
+          <h2 className="font-title text-lg font-bold text-primary">
+            Consignes de sécurité (2)
+          </h2>
         </span>
         <Icon
           name={open ? "angleSmallUp" : "angleSmallDown"}
@@ -81,9 +83,9 @@ export default function CardExamples() {
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between gap-2 text-left cursor-pointer"
       >
-        <span className="flex items-center gap-2 text-sm font-bold text-primary">
+        <span className="flex items-center gap-2">
           <Icon name="shield" className="h-4 w-4 fill-success" aria-hidden="true" />
-          Consignes de sécurité (2)
+          <h2 className="font-title text-lg font-bold text-primary">Consignes de sécurité (2)</h2>
         </span>
         <Icon
           name={open ? "angleSmallUp" : "angleSmallDown"}
@@ -158,7 +160,7 @@ export default function CardExamples() {
         En cours
       </div>
     </div>
-    <h2 className="mt-1.5 font-title text-base font-bold text-primary">
+    <h2 className="mt-1.5 font-title text-lg font-bold text-primary">
       Feu de broussailles au bord de la D904
     </h2>
     <p className="mt-1 text-xs text-primary/50">Alès · il y a 12 min</p>
@@ -206,7 +208,7 @@ export default function CardExamples() {
                 En cours
               </div>
             </div>
-            <h2 className="mt-1.5 font-title text-base font-bold text-primary">
+            <h2 className="mt-1.5 font-title text-lg font-bold text-primary">
               Feu de broussailles au bord de la D904
             </h2>
             <p className="mt-1 text-xs text-primary/50">Alès · il y a 12 min</p>
@@ -253,7 +255,7 @@ export default function CardExamples() {
           En cours
         </div>
       </div>
-      <h2 className="mt-1.5 font-title text-base font-bold text-primary">
+      <h2 className="mt-1.5 font-title text-lg font-bold text-primary">
         Route submergée sous le pont
       </h2>
       <p className="mt-1 text-xs text-primary/50">Saint-Christol · il y a 1 h</p>
@@ -289,7 +291,7 @@ export default function CardExamples() {
           En cours
         </div>
       </div>
-      <h2 className="mt-1.5 font-title text-base font-bold text-primary">
+      <h2 className="mt-1.5 font-title text-lg font-bold text-primary">
         Sanglier sur la départementale
       </h2>
       <p className="mt-1 text-xs text-primary/50">Alès · il y a 3 h</p>
@@ -325,7 +327,7 @@ export default function CardExamples() {
           En cours
         </div>
       </div>
-      <h2 className="mt-1.5 font-title text-base font-bold text-primary">
+      <h2 className="mt-1.5 font-title text-lg font-bold text-primary">
         Nid d'insectes près de l'école
       </h2>
       <p className="mt-1 text-xs text-primary/50">Saint-Privat · il y a 6 h</p>
@@ -373,7 +375,7 @@ export default function CardExamples() {
                   En cours
                 </div>
               </div>
-              <h2 className="mt-1.5 font-title text-base font-bold text-primary">
+              <h2 className="mt-1.5 font-title text-lg font-bold text-primary">
                 Route submergée sous le pont
               </h2>
               <p className="mt-1 text-xs text-primary/50">
@@ -425,7 +427,7 @@ export default function CardExamples() {
                   En cours
                 </div>
               </div>
-              <h2 className="mt-1.5 font-title text-base font-bold text-primary">
+              <h2 className="mt-1.5 font-title text-lg font-bold text-primary">
                 Sanglier sur la départementale
               </h2>
               <p className="mt-1 text-xs text-primary/50">Alès · il y a 3 h</p>
@@ -475,7 +477,7 @@ export default function CardExamples() {
                   En cours
                 </div>
               </div>
-              <h2 className="mt-1.5 font-title text-base font-bold text-primary">
+              <h2 className="mt-1.5 font-title text-lg font-bold text-primary">
                 Nid d'insectes près de l'école
               </h2>
               <p className="mt-1 text-xs text-primary/50">
@@ -497,12 +499,12 @@ export default function CardExamples() {
         className="sm:col-span-2 lg:col-span-3"
         title="Card · centrée"
         description="Carte d'état vide : icône dans un cercle bg-(--bg-success), h2 (font-title) + paragraphe centrés, deux CTA pleine largeur empilés (flat + stroke, repris de la famille Buttons)."
-        code={`<div className="flex flex-col items-center gap-4 rounded-3xl bg-base-300 p-6 text-center">
+        code={`<div className="flex flex-col items-center gap-4 rounded-3xl bg-base-300 p-4 text-center">
   <span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--bg-success)">
     <Icon name="check" className="h-8 w-8 fill-success" aria-hidden="true" />
   </span>
   <div>
-    <h2 className="font-title text-xl font-bold text-primary">
+    <h2 className="font-title text-lg font-bold text-primary">
       Votre compte est vérifié
     </h2>
     <p className="mt-2 text-sm text-black">
@@ -524,7 +526,7 @@ export default function CardExamples() {
   </button>
 </div>`}
       >
-        <div className="flex flex-col items-center gap-4 rounded-3xl bg-base-300 p-6 text-center">
+        <div className="flex flex-col items-center gap-4 rounded-3xl bg-base-300 p-4 text-center">
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--bg-success)">
             <Icon
               name="check"
@@ -533,7 +535,7 @@ export default function CardExamples() {
             />
           </span>
           <div>
-            <h2 className="font-title text-xl font-bold text-primary">
+            <h2 className="font-title text-lg font-bold text-primary">
               Votre compte est vérifié
             </h2>
             <p className="mt-2 text-sm text-black">
@@ -560,13 +562,13 @@ export default function CardExamples() {
         className="sm:col-span-2 lg:col-span-3"
         title="Card · message · info"
         description="Carte d'erreur/statut : même fond (bg-base-300) que Card · centrée, icône réduite à gauche (h-8 w-8, cercle bg-(--primary-light) + icône fill-primary — même logique « teinte claire de la couleur de l'icône » que Card · centrée), titre + description empilés à sa droite, deux CTA côte à côte (flex gap-3, comme la « Paire flat + stroke » de la famille Buttons)."
-        code={`<div className="flex flex-col gap-4 rounded-3xl bg-base-300 p-6">
+        code={`<div className="flex flex-col gap-4 rounded-3xl bg-base-300 p-4">
   <div className="flex items-start gap-3">
     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--primary-light)">
       <Icon name="lock" className="h-3.5 w-3.5 fill-primary" aria-hidden="true" />
     </span>
     <div>
-      <h2 className="font-title text-xl font-bold text-primary">
+      <h2 className="font-title text-lg font-bold text-primary">
         Vérifiez votre e-mail pour signaler
       </h2>
       <p className="mt-1 text-sm text-black">
@@ -591,7 +593,7 @@ export default function CardExamples() {
   </div>
 </div>`}
       >
-        <div className="flex flex-col gap-4 rounded-3xl bg-base-300 p-6">
+        <div className="flex flex-col gap-4 rounded-3xl bg-base-300 p-4">
           <div className="flex items-start gap-3">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--primary-light)">
               <Icon
@@ -601,7 +603,7 @@ export default function CardExamples() {
               />
             </span>
             <div>
-              <h2 className="font-title text-xl font-bold text-primary">
+              <h2 className="font-title text-lg font-bold text-primary">
                 Vérifiez votre e-mail pour signaler
               </h2>
               <p className="mt-1 text-sm text-black">
@@ -631,13 +633,13 @@ export default function CardExamples() {
         className="sm:col-span-2 lg:col-span-3"
         title="Card · message · erreur"
         description="Bloc entièrement teinté error, pas seulement l'icône : fond bg-(--bg-error), cercle plein bg-error + icône blanche, titre text-error, CTA principal plein bg-error, CTA secondaire en stroke error."
-        code={`<div className="flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-6">
+        code={`<div className="flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4">
   <div className="flex items-start gap-3">
     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
       <Icon name="exclamation" className="h-3.5 w-3.5 fill-white" aria-hidden="true" />
     </span>
     <div>
-      <h2 className="font-title text-xl font-bold text-error">
+      <h2 className="font-title text-lg font-bold text-error">
         Impossible de charger les incidents
       </h2>
       <p className="mt-1 text-sm text-black">
@@ -662,7 +664,7 @@ export default function CardExamples() {
   </div>
 </div>`}
       >
-        <div className="flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-6">
+        <div className="flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4">
           <div className="flex items-start gap-3">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
               <Icon
@@ -672,7 +674,7 @@ export default function CardExamples() {
               />
             </span>
             <div>
-              <h2 className="font-title text-xl font-bold text-error">
+              <h2 className="font-title text-lg font-bold text-error">
                 Impossible de charger les incidents
               </h2>
               <p className="mt-1 text-sm text-black">
@@ -702,13 +704,13 @@ export default function CardExamples() {
         className="sm:col-span-2 lg:col-span-3"
         title="Card · message · succès"
         description="Symétrique de la version erreur, en success : fond bg-(--bg-success), cercle plein bg-success + icône blanche, titre text-success, CTA principal plein bg-success, CTA secondaire en stroke success."
-        code={`<div className="flex flex-col gap-4 rounded-3xl bg-(--bg-success) p-6">
+        code={`<div className="flex flex-col gap-4 rounded-3xl bg-(--bg-success) p-4">
   <div className="flex items-start gap-3">
     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-success">
       <Icon name="check" className="h-3.5 w-3.5 fill-white" aria-hidden="true" />
     </span>
     <div>
-      <h2 className="font-title text-xl font-bold text-success">
+      <h2 className="font-title text-lg font-bold text-success">
         Signalement envoyé
       </h2>
       <p className="mt-1 text-sm text-black">
@@ -733,7 +735,7 @@ export default function CardExamples() {
   </div>
 </div>`}
       >
-        <div className="flex flex-col gap-4 rounded-3xl bg-(--bg-success) p-6">
+        <div className="flex flex-col gap-4 rounded-3xl bg-(--bg-success) p-4">
           <div className="flex items-start gap-3">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-success">
               <Icon
@@ -743,7 +745,7 @@ export default function CardExamples() {
               />
             </span>
             <div>
-              <h2 className="font-title text-xl font-bold text-success">
+              <h2 className="font-title text-lg font-bold text-success">
                 Signalement envoyé
               </h2>
               <p className="mt-1 text-sm text-black">
@@ -764,6 +766,71 @@ export default function CardExamples() {
               className="btn btn-md rounded-full border-2 border-success bg-transparent text-success shadow-none hover:bg-success/10 px-5"
             >
               Retour à l'accueil
+            </button>
+          </div>
+        </div>
+      </Example>
+
+      <Example
+        className="sm:col-span-2 lg:col-span-3"
+        title="Card · message · type"
+        description="Variante plein fond couleur du type (ici --fire) : icône dans un cercle bg-white/20 (translucide, fonctionne quel que soit le type), texte blanc, CTA principal plein blanc + texte de la couleur du type, CTA secondaire en stroke blanc."
+        code={`<div className="flex flex-col gap-4 rounded-3xl bg-(--fire) p-4">
+  <div className="flex items-start gap-3">
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--bg-fire)">
+      <Icon name="fire" className="h-4 w-4" aria-hidden="true" />
+    </span>
+    <div>
+      <h2 className="font-title text-lg font-bold text-white">
+        Un feu est déjà signalé près d'ici
+      </h2>
+      <p className="mt-1 text-sm text-white/85">
+        Feu · à 320 m · signalé à 14:12
+      </p>
+    </div>
+  </div>
+  <div className="flex gap-3">
+    <button
+      type="button"
+      className="btn btn-md grow rounded-full border-none bg-white px-5 font-bold text-(--fire)"
+    >
+      Voir ce signalement
+    </button>
+    <button
+      type="button"
+      className="btn btn-md rounded-full border-2 border-white bg-transparent text-white shadow-none hover:bg-white/10 px-5"
+    >
+      Ignorer
+    </button>
+  </div>
+</div>`}
+      >
+        <div className="flex flex-col gap-4 rounded-3xl bg-(--fire) p-4">
+          <div className="flex items-start gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--bg-fire)">
+              <Icon name="fire" className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <div>
+              <h2 className="font-title text-lg font-bold text-white">
+                Un feu est déjà signalé près d'ici
+              </h2>
+              <p className="mt-1 text-sm text-white/85">
+                Feu · à 320 m · signalé à 14:12
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              className="btn btn-md grow rounded-full border-none bg-white px-5 font-bold text-(--fire)"
+            >
+              Voir ce signalement
+            </button>
+            <button
+              type="button"
+              className="btn btn-md rounded-full border-2 border-white bg-transparent text-white shadow-none hover:bg-white/10 px-5"
+            >
+              Ignorer
             </button>
           </div>
         </div>

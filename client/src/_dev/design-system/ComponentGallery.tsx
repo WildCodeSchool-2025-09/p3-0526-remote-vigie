@@ -58,7 +58,7 @@ const families: Family[] = [
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div className="mt-8 mb-3 flex items-center gap-3">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-primary/60">
+      <h2 className="text-lg font-bold uppercase tracking-widest text-primary/60">
         {children}
       </h2>
       <span className="h-px flex-1 bg-primary/15" />
@@ -73,7 +73,7 @@ export default function ComponentGallery() {
   const ActiveComponent = active.Component;
 
   return (
-    <div className="min-h-screen bg-base-200 px-6 py-10 text-primary md:px-12">
+    <div className="min-h-screen bg-base-200 px-4 py-10 text-primary md:px-12">
       <div className="relative mx-auto max-w-5xl">
         <p className="inline-block rounded bg-error/15 px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-error">
           Dev only · /help/components
@@ -82,7 +82,7 @@ export default function ComponentGallery() {
         <p className="mt-3 text-sm font-semibold italic text-primary/70">
           Vigie · design system
         </p>
-        <h1 className="mt-1 text-4xl font-black">Bibliothèque de composants</h1>
+        <h1 className="mt-1 text-2xl font-black">Bibliothèque de composants</h1>
         <p className="mt-3 max-w-2xl text-sm text-primary/60">
           Composants UI assemblés à partir de Tailwind et daisyUI, stylés pour
           Vigie. Chaque exemple montre le rendu live et sa source TSX à copier.
