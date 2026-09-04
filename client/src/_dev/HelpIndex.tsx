@@ -45,7 +45,8 @@ const design: Entry[] = [
   },
   {
     title: "Composants",
-    description: "Bibliothèque de composants UI assemblés (Tailwind + daisyUI), stylés pour Vigie.",
+    description:
+      "Bibliothèque de composants UI assemblés (Tailwind + daisyUI), stylés pour Vigie.",
     path: "/help/components",
   },
 ];
@@ -66,7 +67,9 @@ const responsiveLinks: ExternalLink[] = [
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div className="mt-10 mb-3 flex items-center gap-3">
-      <h2 className="text-lg font-bold uppercase tracking-widest text-primary/60">{children}</h2>
+      <h2 className="text-lg font-bold uppercase tracking-widest text-primary/60">
+        {children}
+      </h2>
       <span className="h-px flex-1 bg-primary/15" />
     </div>
   );
@@ -124,7 +127,9 @@ export default function HelpIndex() {
         <p className="inline-block rounded bg-error/15 px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-error">
           Dev only · /help
         </p>
-        <p className="mt-3 text-sm font-semibold italic text-primary/70">Vigie · ressources dev</p>
+        <p className="mt-3 text-sm font-semibold italic text-primary/70">
+          Vigie · ressources dev
+        </p>
         <h1 className="mt-1 text-2xl font-black">Aide</h1>
         <p className="mt-3 max-w-2xl text-sm text-primary/60">
           Point d'entrée vers les ressources de dev du projet.

@@ -2,8 +2,8 @@
  * Rend un bloc ```mermaid``` en SVG. Utilisé par ReadmeViewer.tsx.
  */
 
-import { useEffect, useId, useRef, useState } from "react";
 import mermaid from "mermaid";
+import { useEffect, useId, useRef, useState } from "react";
 
 mermaid.initialize({ startOnLoad: false, theme: "neutral" });
 
@@ -24,7 +24,11 @@ export default function MermaidBlock({ chart }: { chart: string }) {
       })
       .catch((err: unknown) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Erreur de rendu du diagramme.");
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Erreur de rendu du diagramme.",
+          );
         }
       });
 

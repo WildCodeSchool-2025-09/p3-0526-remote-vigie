@@ -1,19 +1,24 @@
 // Import necessary modules from React and React Router
 import { Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
-import { Outlet, RouterProvider, createBrowserRouter, type RouteObject } from "react-router";
+import {
+  Outlet,
+  type RouteObject,
+  RouterProvider,
+  createBrowserRouter,
+} from "react-router";
 
 /* ************************************************************************* */
 
+import App from "@/App";
+import Details from "@/pages/Details/Details";
 // Import the main app component
 import Home from "@/pages/Home/Home";
 import Incident from "@/pages/Incident/Incident";
-import Profile from "@/pages/Profile/Profile";
-import Numbers from "@/pages/Numbers/Numbers";
-import Details from "@/pages/Details/Details";
 import Login from "@/pages/Login/Login";
+import Numbers from "@/pages/Numbers/Numbers";
+import Profile from "@/pages/Profile/Profile";
 import Register from "@/pages/Register/Register";
-import App from "@/App";
 
 // DEV ONLY — pas des pages de l'app, voir src/_dev/README.md
 // Le bloc `if (import.meta.env.DEV)` est tree-shaké par Vite dans un build de prod :
@@ -28,7 +33,9 @@ if (import.meta.env.DEV) {
   const VigieViewer = lazy(() => import("@/_dev/VigieViewer"));
   const ColorPalette = lazy(() => import("@/_dev/ColorPalette"));
   const IconGallery = lazy(() => import("@/_dev/IconGallery"));
-  const ComponentGallery = lazy(() => import("@/_dev/design-system/ComponentGallery"));
+  const ComponentGallery = lazy(
+    () => import("@/_dev/design-system/ComponentGallery"),
+  );
 
   devRoutes = [
     {

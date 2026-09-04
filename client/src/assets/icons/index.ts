@@ -1,22 +1,5 @@
 // https://www.flaticon.com/icon-fonts-most-downloaded?weight=solid&type=uicon
 
-import Animal from "./types/animal.svg?react";
-import Fire from "./types/fire.svg?react";
-import Flood from "./types/flood.svg?react";
-import Glaze from "./types/glaze.svg?react";
-import Hail from "./types/hail.svg?react";
-import Insect from "./types/insect.svg?react";
-import Rockfall from "./types/rockfall.svg?react";
-import Snow from "./types/snow.svg?react";
-import Storm from "./types/storm.svg?react";
-import Tornado from "./types/tornado.svg?react";
-import Tree from "./types/tree.svg?react";
-import Wild from "./types/wild.svg?react";
-import Alert from "./nav/alert.svg?react";
-import Danger from "./nav/danger.svg?react";
-import Map from "./nav/map.svg?react";
-import Notification from "./nav/notification.svg?react";
-import Profile from "./nav/profile.svg?react";
 import AngleSmallDown from "./interface/angle-small-down.svg?react";
 import AngleSmallLeft from "./interface/angle-small-left.svg?react";
 import AngleSmallRight from "./interface/angle-small-right.svg?react";
@@ -27,8 +10,8 @@ import ArrowSmallRight from "./interface/arrow-small-right.svg?react";
 import ArrowSmallUp from "./interface/arrow-small-up.svg?react";
 import Bullet from "./interface/bullet.svg?react";
 import Camera from "./interface/camera.svg?react";
-import Check from "./interface/check.svg?react";
 import CheckCircle from "./interface/check-circle.svg?react";
+import Check from "./interface/check.svg?react";
 import CommentAltMiddle from "./interface/comment-alt-middle.svg?react";
 import CrossSmall from "./interface/cross-small.svg?react";
 import DiamondExclamation from "./interface/diamond-exclamation.svg?react";
@@ -45,6 +28,23 @@ import QuoteRight from "./interface/quote-right.svg?react";
 import RotateRight from "./interface/rotate-right.svg?react";
 import Share from "./interface/share.svg?react";
 import Shield from "./interface/shield.svg?react";
+import Alert from "./nav/alert.svg?react";
+import Danger from "./nav/danger.svg?react";
+import MapIcon from "./nav/map.svg?react";
+import Notification from "./nav/notification.svg?react";
+import Profile from "./nav/profile.svg?react";
+import Animal from "./types/animal.svg?react";
+import Fire from "./types/fire.svg?react";
+import Flood from "./types/flood.svg?react";
+import Glaze from "./types/glaze.svg?react";
+import Hail from "./types/hail.svg?react";
+import Insect from "./types/insect.svg?react";
+import Rockfall from "./types/rockfall.svg?react";
+import Snow from "./types/snow.svg?react";
+import Storm from "./types/storm.svg?react";
+import Tornado from "./types/tornado.svg?react";
+import Tree from "./types/tree.svg?react";
+import Wild from "./types/wild.svg?react";
 
 export const icons = {
   animal: Animal,
@@ -61,7 +61,7 @@ export const icons = {
   wild: Wild,
   alert: Alert,
   danger: Danger,
-  map: Map,
+  map: MapIcon,
   notification: Notification,
   profile: Profile,
   angleSmallDown: AngleSmallDown,

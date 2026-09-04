@@ -4,8 +4,8 @@
  * Les pastilles rendent var(--x) : elles reflètent le thème en direct.
  */
 
-import type { ReactNode } from "react";
 import BackButton from "@/_dev/BackButton";
+import type { ReactNode } from "react";
 
 type Swatch = { varName: string; hex?: string; label: string };
 

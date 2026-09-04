@@ -2,13 +2,13 @@
 
 import BackButton from "@/_dev/BackButton";
 import ButtonsExamples from "@/_dev/design-system/ButtonsExamples";
-import LayoutExamples from "@/_dev/design-system/LayoutExamples";
-import FormInputExamples from "@/_dev/design-system/FormInputExamples";
 import CardExamples from "@/_dev/design-system/CardExamples";
-import TitlesExamples from "@/_dev/design-system/TitlesExamples";
-import OtherExamples from "./OtherExamples";
+import FormInputExamples from "@/_dev/design-system/FormInputExamples";
+import LayoutExamples from "@/_dev/design-system/LayoutExamples";
 import MapExamples from "@/_dev/design-system/Map";
+import TitlesExamples from "@/_dev/design-system/TitlesExamples";
 import { type ComponentType, type ReactNode, useState } from "react";
+import OtherExamples from "./OtherExamples";
 
 type Family = {
   id: string;
@@ -60,7 +60,6 @@ const families: Family[] = [
     description: "Le reste : badges, alertes, séparateurs, etc.",
     Component: OtherExamples,
   },
-  
 ];
 
 function SectionTitle({ children }: { children: ReactNode }) {

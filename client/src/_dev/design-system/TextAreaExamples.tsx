@@ -21,7 +21,10 @@ export default function TextAreaExamples() {
 </div>`}
     >
       <div className="w-full">
-        <label htmlFor="description" className="mb-1.5 block text-sm font-bold text-primary">
+        <label
+          htmlFor="description"
+          className="mb-1.5 block text-sm font-bold text-primary"
+        >
           Description
         </label>
         <textarea

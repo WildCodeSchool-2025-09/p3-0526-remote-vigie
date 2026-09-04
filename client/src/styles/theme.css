@@ -1,77 +1,77 @@
 /* Palette primitive : source unique de vérité (utilitaires Tailwind + var() CSS) */
 @theme static {
-    --primary: #0b4619; /* primary color (deep green) */
-    --primary-light: color-mix(in srgb, var(--primary) 10%, white);
-    --primary-dark: color-mix(in srgb, var(--primary) 50%, black);
+  --primary: #0b4619; /* primary color (deep green) */
+  --primary-light: color-mix(in srgb, var(--primary) 10%, white);
+  --primary-dark: color-mix(in srgb, var(--primary) 50%, black);
 
-    --secondary: #116530; /* secondary color (green) */
-    --secondary-light: color-mix(in srgb, var(--secondary) 10%, white);
-    --secondary-dark: color-mix(in srgb, var(--secondary) 50%, black);
+  --secondary: #116530; /* secondary color (green) */
+  --secondary-light: color-mix(in srgb, var(--secondary) 10%, white);
+  --secondary-dark: color-mix(in srgb, var(--secondary) 50%, black);
 
-    --accent: #ffcc1d; /* accent color (gold yellow) */
-    --accent-light: color-mix(in srgb, var(--accent) 10%, white);
-    --accent-dark: color-mix(in srgb, var(--accent) 50%, black);
+  --accent: #ffcc1d; /* accent color (gold yellow) */
+  --accent-light: color-mix(in srgb, var(--accent) 10%, white);
+  --accent-dark: color-mix(in srgb, var(--accent) 50%, black);
 
-    --grey: #c9c9c9; /* grey neutral */
+  --grey: #c9c9c9; /* grey neutral */
 
-    --info: #25a5e0;
-    --success: var(--secondary);
-    --warning: var(--accent);
-    --error: #c1392b;
+  --info: #25a5e0;
+  --success: var(--secondary);
+  --warning: var(--accent);
+  --error: #c1392b;
 
-    --bg-dark: #e8e8cc; /* background in the behind */
-    --bg-default: #f6f5e9; /* background of frames */
-    --bg-light: #fcfbf1; /* background in the front */
+  --bg-dark: #e8e8cc; /* background in the behind */
+  --bg-default: #f6f5e9; /* background of frames */
+  --bg-light: #fcfbf1; /* background in the front */
 
-    --bg-info: color-mix(in srgb, var(--info) 20%, white);
-    --bg-success: color-mix(in srgb, var(--success) 20%, white);
-    --bg-warning: color-mix(in srgb, var(--warning) 20%, white);
-    --bg-error: color-mix(in srgb, var(--error) 20%, white);
+  --bg-info: color-mix(in srgb, var(--info) 20%, white);
+  --bg-success: color-mix(in srgb, var(--success) 20%, white);
+  --bg-warning: color-mix(in srgb, var(--warning) 20%, white);
+  --bg-error: color-mix(in srgb, var(--error) 20%, white);
 
-    /* types colors */
-    --fire: #d8323e;
-    --bg-fire: #f4e9df;
-    --insect: #d19a00;
-    --bg-insect: #f4f0db;
-    --flood: #1f8fd0;
-    --bg-flood: #e9efe7;
-    --hail: #6e9ad4;
-    --bg-hail: #eef0e8;
-    --glaze: #2e9aa6;
-    --bg-glaze: #eaf0e5;
-    --snow: #93bede;
-    --bg-snow: #f0f2e8;
-    --storm: #4f6e7c;
-    --bg-storm: #dfe2da;
-    --wild: #6e4a2e;
-    --bg-wild: #e3ddcf;
-    --tornado: #c2661f;
-    --bg-tornado: #efe1cd;
-    --rockfall: #574a5e;
-    --bg-rockfall: #e0ddd6;
-    --animal: #5e4a63;
-    --bg-animal: #e1ddd6;
-    --tree: #2f8a38;
-    --bg-tree: #dae6d0;
+  /* types colors */
+  --fire: #d8323e;
+  --bg-fire: #f4e9df;
+  --insect: #d19a00;
+  --bg-insect: #f4f0db;
+  --flood: #1f8fd0;
+  --bg-flood: #e9efe7;
+  --hail: #6e9ad4;
+  --bg-hail: #eef0e8;
+  --glaze: #2e9aa6;
+  --bg-glaze: #eaf0e5;
+  --snow: #93bede;
+  --bg-snow: #f0f2e8;
+  --storm: #4f6e7c;
+  --bg-storm: #dfe2da;
+  --wild: #6e4a2e;
+  --bg-wild: #e3ddcf;
+  --tornado: #c2661f;
+  --bg-tornado: #efe1cd;
+  --rockfall: #574a5e;
+  --bg-rockfall: #e0ddd6;
+  --animal: #5e4a63;
+  --bg-animal: #e1ddd6;
+  --tree: #2f8a38;
+  --bg-tree: #dae6d0;
 
-    /* danger levels (1 → 5) */
-    --level-1: #3a8f3f; /* faible */
-    --bg-level-1: #f8ffef;
-    --level-2: #9bbb2f; /* modéré */
-    --bg-level-2: #feffed;
-    --level-3: #e0a81f; /* important */
-    --bg-level-3: #fffadd;
-    --level-4: #e8600f; /* élevé */
-    --bg-level-4: #f9f0e9;
-    --level-5: #c1392b; /* critique */
-    --bg-level-5: #fdf1ef;
+  /* danger levels (1 → 5) */
+  --level-1: #3a8f3f; /* faible */
+  --bg-level-1: #f8ffef;
+  --level-2: #9bbb2f; /* modéré */
+  --bg-level-2: #feffed;
+  --level-3: #e0a81f; /* important */
+  --bg-level-3: #fffadd;
+  --level-4: #e8600f; /* élevé */
+  --bg-level-4: #f9f0e9;
+  --level-5: #c1392b; /* critique */
+  --bg-level-5: #fdf1ef;
 
-    /* spacings */
-    --spacer-small: 1rem;
-    --spacer-medium: 2rem;
-    --spacer-large: 3rem;
+  /* spacings */
+  --spacer-small: 1rem;
+  --spacer-medium: 2rem;
+  --spacer-large: 3rem;
 
-    /* fonts family */
-    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-    --font-title: "Playfair Display", ui-serif, Georgia, serif;
+  /* fonts family */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-title: "Playfair Display", ui-serif, Georgia, serif;
 }

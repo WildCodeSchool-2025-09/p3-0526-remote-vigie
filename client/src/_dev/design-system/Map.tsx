@@ -1,18 +1,18 @@
 // ⚠️ DEV ONLY — famille "Map" de la galerie de composants (/help/components).
 
+import L from "leaflet";
 import { useMemo } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 import Example from "@/_dev/design-system/Example";
 import SectionLabel from "@/_dev/design-system/SectionLabel";
-import { icons, type IconName } from "@/assets/icons";
+import { type IconName, icons } from "@/assets/icons";
 
 // --- Fabrique une icône Leaflet (divIcon) à partir d'un composant SVG React ---
 // Reproduit le rond `bg-{type}` + icône vu dans les cards (CardExamples).
-function createIncidentDivIcon(type: IconName, colorType: string ) {
+function createIncidentDivIcon(type: IconName, colorType: string) {
   const SvgIcon = icons[type];
 
   const html = renderToStaticMarkup(
@@ -29,25 +29,60 @@ function createIncidentDivIcon(type: IconName, colorType: string ) {
         boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
       }}
     >
-      <SvgIcon style={{ width: 22, height: 22, fill: `var(${colorType})` }} aria-hidden="true" />
-    </div>
+      <SvgIcon
+        style={{ width: 22, height: 22, fill: `var(${colorType})` }}
+        aria-hidden="true"
+      />
+    </div>,
   );
 
   return L.divIcon({
     html,
     className: "", // évite le style par défaut de Leaflet (fond blanc carré)
     iconSize: [40, 40],
-    iconAnchor: [20, 20],   // centre l'icône sur le point GPS
+    iconAnchor: [20, 20], // centre l'icône sur le point GPS
     popupAnchor: [0, -20],
   });
 }
 
 // --- Faux incidents pour la démo ---
 const fakeIncidents = [
-  { id: 1, type: "fire" as IconName, colorType: "--fire", label: "Feu", place: "Alès", lat: 44.1279, lng: 4.0817 },
-  { id: 2, type: "flood" as IconName, colorType: "--flood", label: "Inondation", place: "Saint-Christol", lat: 44.15, lng: 4.09 },
-  { id: 3, type: "wild" as IconName, colorType: "--wild", label: "Animal sauvage", place: "Alès", lat: 44.12, lng: 4.1 },
-  { id: 4, type: "insect" as IconName, colorType: "--insect", label: "Nid d'insectes", place: "Saint-Privat", lat: 44.135, lng: 4.075 },
+  {
+    id: 1,
+    type: "fire" as IconName,
+    colorType: "--fire",
+    label: "Feu",
+    place: "Alès",
+    lat: 44.1279,
+    lng: 4.0817,
+  },
+  {
+    id: 2,
+    type: "flood" as IconName,
+    colorType: "--flood",
+    label: "Inondation",
+    place: "Saint-Christol",
+    lat: 44.15,
+    lng: 4.09,
+  },
+  {
+    id: 3,
+    type: "wild" as IconName,
+    colorType: "--wild",
+    label: "Animal sauvage",
+    place: "Alès",
+    lat: 44.12,
+    lng: 4.1,
+  },
+  {
+    id: 4,
+    type: "insect" as IconName,
+    colorType: "--insect",
+    label: "Nid d'insectes",
+    place: "Saint-Privat",
+    lat: 44.135,
+    lng: 4.075,
+  },
 ];
 
 function IncidentMapDemo() {
@@ -57,7 +92,7 @@ function IncidentMapDemo() {
         ...incident,
         icon: createIncidentDivIcon(incident.type, incident.colorType),
       })),
-    []
+    [],
   );
 
   return (
@@ -73,7 +108,11 @@ function IncidentMapDemo() {
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {icons_.map((incident) => (
-          <Marker key={incident.id} position={[incident.lat, incident.lng]} icon={incident.icon}>
+          <Marker
+            key={incident.id}
+            position={[incident.lat, incident.lng]}
+            icon={incident.icon}
+          >
             <Popup>
               <span className="font-bold">{incident.label}</span>
               <br />

@@ -10,7 +10,13 @@ type ExampleProps = {
   children: ReactNode;
 };
 
-export default function Example({ title, description, code, className, children }: ExampleProps) {
+export default function Example({
+  title,
+  description,
+  code,
+  className,
+  children,
+}: ExampleProps) {
   const [copied, setCopied] = useState(false);
 
   const copy = () => {
@@ -28,10 +34,14 @@ export default function Example({ title, description, code, className, children 
     >
       <div className="border-b border-primary/10 px-4 py-2.5">
         <p className="text-sm font-bold text-primary">{title}</p>
-        {description && <p className="mt-0.5 text-xs text-primary/50">{description}</p>}
+        {description && (
+          <p className="mt-0.5 text-xs text-primary/50">{description}</p>
+        )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 bg-base-100 p-6">{children}</div>
+      <div className="flex flex-wrap items-center gap-3 bg-base-100 p-6">
+        {children}
+      </div>
 
       <div className="relative border-t border-primary/10">
         <button

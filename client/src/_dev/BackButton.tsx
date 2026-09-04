@@ -2,8 +2,8 @@
  * Bouton retour vers la page précédente, utilisé en tête des sous-pages de dev.
  */
 
-import { useNavigate } from "react-router";
 import Icon from "@/components/Icon/Icon";
+import { useNavigate } from "react-router";
 
 export default function BackButton() {
   const navigate = useNavigate();

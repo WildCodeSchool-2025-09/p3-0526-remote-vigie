@@ -1,5 +1,5 @@
+import { type IconName, icons } from "@/assets/icons";
 import type { SVGProps } from "react";
-import { icons, type IconName } from "@/assets/icons";
 
 type IconProps = SVGProps<SVGSVGElement> & {
   name: IconName;

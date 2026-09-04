@@ -4,9 +4,15 @@
  * diagrammes mermaid), pour un accès visuel sans quitter l'app.
  */
 
-import readmeSource from "../../../README.md?raw";
 import MarkdownDoc from "@/_dev/MarkdownDoc";
+import readmeSource from "../../../README.md?raw";
 
 export default function ReadmeViewer() {
-  return <MarkdownDoc route="/help/readme" label="README.md (racine du repo)" source={readmeSource} />;
+  return (
+    <MarkdownDoc
+      route="/help/readme"
+      label="README.md (racine du repo)"
+      source={readmeSource}
+    />
+  );
 }

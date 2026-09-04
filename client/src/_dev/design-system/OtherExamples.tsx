@@ -24,11 +24,17 @@ export default function OtherExamples() {
       >
         <div className="flex w-full items-start gap-3 rounded-2xl bg-base-300 px-5 py-3">
           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary">
-            <Icon name="marker" className="h-3.5 w-3.5 fill-base-300" aria-hidden="true" />
+            <Icon
+              name="marker"
+              className="h-3.5 w-3.5 fill-base-300"
+              aria-hidden="true"
+            />
           </span>
           <div>
             <p className="text-sm font-bold text-primary">Incident élevé</p>
-            <p className="mt-0.5 text-sm text-primary/60">1 type · rayon 3 km</p>
+            <p className="mt-0.5 text-sm text-primary/60">
+              1 type · rayon 3 km
+            </p>
           </div>
         </div>
       </Example>
@@ -42,7 +48,11 @@ export default function OtherExamples() {
 </div>`}
       >
         <div className="flex w-full items-center gap-3 rounded-2xl bg-error/10 px-5 py-3">
-          <Icon name="exclamation" className="h-6 w-6 shrink-0 fill-error" aria-hidden="true" />
+          <Icon
+            name="exclamation"
+            className="h-6 w-6 shrink-0 fill-error"
+            aria-hidden="true"
+          />
           <p className="text-sm font-bold text-error">3 champs à corriger</p>
         </div>
       </Example>
@@ -58,7 +68,11 @@ export default function OtherExamples() {
 </div>`}
       >
         <div className="flex w-full items-start gap-3 rounded-2xl bg-base-300 px-5 py-3">
-          <Icon name="checkCircle" className="h-6 w-6 shrink-0 fill-success" aria-hidden="true" />
+          <Icon
+            name="checkCircle"
+            className="h-6 w-6 shrink-0 fill-success"
+            aria-hidden="true"
+          />
           <p className="text-sm text-primary">
             Incident résolu le 12 mars à 18:40 — fiche conservée en archive.
           </p>
@@ -80,11 +94,19 @@ export default function OtherExamples() {
       >
         <div className="flex w-full items-start gap-3 rounded-2xl bg-accent px-5 py-3">
           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary">
-            <Icon name="check" className="h-3.5 w-3.5 fill-white" aria-hidden="true" />
+            <Icon
+              name="check"
+              className="h-3.5 w-3.5 fill-white"
+              aria-hidden="true"
+            />
           </span>
           <div>
-            <p className="text-sm font-bold text-primary">Modifications enregistrées</p>
-            <p className="mt-0.5 text-sm text-primary/70">Vos voisins n'ont pas reçu de nouvelle alerte.</p>
+            <p className="text-sm font-bold text-primary">
+              Modifications enregistrées
+            </p>
+            <p className="mt-0.5 text-sm text-primary/70">
+              Vos voisins n'ont pas reçu de nouvelle alerte.
+            </p>
           </div>
         </div>
       </Example>
@@ -116,31 +138,51 @@ export default function OtherExamples() {
         <div className="flex flex-wrap items-center gap-2">
           <div
             className="badge badge-sm border font-bold"
-            style={{ borderColor: "var(--level-1)", backgroundColor: "var(--bg-level-1)", color: "var(--level-1)" }}
+            style={{
+              borderColor: "var(--level-1)",
+              backgroundColor: "var(--bg-level-1)",
+              color: "var(--level-1)",
+            }}
           >
             Incident faible
           </div>
           <div
             className="badge badge-sm border font-bold"
-            style={{ borderColor: "var(--level-2)", backgroundColor: "var(--bg-level-2)", color: "var(--level-2)" }}
+            style={{
+              borderColor: "var(--level-2)",
+              backgroundColor: "var(--bg-level-2)",
+              color: "var(--level-2)",
+            }}
           >
             Incident modéré
           </div>
           <div
             className="badge badge-sm border font-bold"
-            style={{ borderColor: "var(--level-3)", backgroundColor: "var(--bg-level-3)", color: "var(--level-3)" }}
+            style={{
+              borderColor: "var(--level-3)",
+              backgroundColor: "var(--bg-level-3)",
+              color: "var(--level-3)",
+            }}
           >
             Incident important
           </div>
           <div
             className="badge badge-sm border font-bold"
-            style={{ borderColor: "var(--level-4)", backgroundColor: "var(--bg-level-4)", color: "var(--level-4)" }}
+            style={{
+              borderColor: "var(--level-4)",
+              backgroundColor: "var(--bg-level-4)",
+              color: "var(--level-4)",
+            }}
           >
             Incident élevé
           </div>
           <div
             className="badge badge-sm border font-bold"
-            style={{ borderColor: "var(--level-5)", backgroundColor: "var(--bg-level-5)", color: "var(--level-5)" }}
+            style={{
+              borderColor: "var(--level-5)",
+              backgroundColor: "var(--bg-level-5)",
+              color: "var(--level-5)",
+            }}
           >
             Incident critique
           </div>
@@ -156,7 +198,10 @@ export default function OtherExamples() {
 </div>`}
       >
         <div className="badge badge-sm gap-1.5 border-0 font-bold bg-(--bg-success) text-success">
-          <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
+          <span
+            className="h-1.5 w-1.5 rounded-full bg-success"
+            aria-hidden="true"
+          />
           En cours
         </div>
       </Example>
@@ -170,7 +215,10 @@ export default function OtherExamples() {
 </div>`}
       >
         <div className="badge badge-accent badge-sm gap-1.5 border-0 font-bold">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
+          <span
+            className="h-1.5 w-1.5 rounded-full bg-primary"
+            aria-hidden="true"
+          />
           En cours
         </div>
       </Example>
@@ -184,7 +232,11 @@ export default function OtherExamples() {
 </div>`}
       >
         <div className="badge badge-sm gap-1.5 border-0 font-bold bg-(--bg-success) text-success">
-          <Icon name="check" className="h-3 w-3 fill-success" aria-hidden="true" />
+          <Icon
+            name="check"
+            className="h-3 w-3 fill-success"
+            aria-hidden="true"
+          />
           Résolu
         </div>
       </Example>
@@ -205,12 +257,19 @@ export default function OtherExamples() {
         <div className="flex flex-wrap items-center gap-2">
           <div
             className="badge badge-sm border font-bold"
-            style={{ borderColor: "var(--level-4)", backgroundColor: "var(--bg-level-4)", color: "var(--level-4)" }}
+            style={{
+              borderColor: "var(--level-4)",
+              backgroundColor: "var(--bg-level-4)",
+              color: "var(--level-4)",
+            }}
           >
             Incident élevé
           </div>
           <div className="badge badge-sm gap-1.5 border-0 font-bold bg-(--bg-success) text-success">
-            <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
+            <span
+              className="h-1.5 w-1.5 rounded-full bg-success"
+              aria-hidden="true"
+            />
             En cours
           </div>
         </div>
@@ -272,51 +331,108 @@ export default function OtherExamples() {
 </div>`}
       >
         <div className="flex flex-wrap items-center gap-2">
-          <div className="badge badge-sm gap-1.5 border-0 font-bold" style={{ backgroundColor: "var(--bg-fire)", color: "var(--fire)" }}>
+          <div
+            className="badge badge-sm gap-1.5 border-0 font-bold"
+            style={{ backgroundColor: "var(--bg-fire)", color: "var(--fire)" }}
+          >
             <Icon name="fire" className="h-3.5 w-3.5" aria-hidden="true" />
             Feu
           </div>
-          <div className="badge badge-sm gap-1.5 border-0 font-bold" style={{ backgroundColor: "var(--bg-flood)", color: "var(--flood)" }}>
+          <div
+            className="badge badge-sm gap-1.5 border-0 font-bold"
+            style={{
+              backgroundColor: "var(--bg-flood)",
+              color: "var(--flood)",
+            }}
+          >
             <Icon name="flood" className="h-3.5 w-3.5" aria-hidden="true" />
             Inondation
           </div>
-          <div className="badge badge-sm gap-1.5 border-0 font-bold" style={{ backgroundColor: "var(--bg-glaze)", color: "var(--glaze)" }}>
+          <div
+            className="badge badge-sm gap-1.5 border-0 font-bold"
+            style={{
+              backgroundColor: "var(--bg-glaze)",
+              color: "var(--glaze)",
+            }}
+          >
             <Icon name="glaze" className="h-3.5 w-3.5" aria-hidden="true" />
             Verglas
           </div>
-          <div className="badge badge-sm gap-1.5 border-0 font-bold" style={{ backgroundColor: "var(--bg-hail)", color: "var(--hail)" }}>
+          <div
+            className="badge badge-sm gap-1.5 border-0 font-bold"
+            style={{ backgroundColor: "var(--bg-hail)", color: "var(--hail)" }}
+          >
             <Icon name="hail" className="h-3.5 w-3.5" aria-hidden="true" />
             Grêle
           </div>
-          <div className="badge badge-sm gap-1.5 border-0 font-bold" style={{ backgroundColor: "var(--bg-insect)", color: "var(--insect)" }}>
+          <div
+            className="badge badge-sm gap-1.5 border-0 font-bold"
+            style={{
+              backgroundColor: "var(--bg-insect)",
+              color: "var(--insect)",
+            }}
+          >
             <Icon name="insect" className="h-3.5 w-3.5" aria-hidden="true" />
             Nid d'insectes
           </div>
-          <div className="badge badge-sm gap-1.5 border-0 font-bold" style={{ backgroundColor: "var(--bg-rockfall)", color: "var(--rockfall)" }}>
+          <div
+            className="badge badge-sm gap-1.5 border-0 font-bold"
+            style={{
+              backgroundColor: "var(--bg-rockfall)",
+              color: "var(--rockfall)",
+            }}
+          >
             <Icon name="rockfall" className="h-3.5 w-3.5" aria-hidden="true" />
             Éboulement
           </div>
-          <div className="badge badge-sm gap-1.5 border-0 font-bold" style={{ backgroundColor: "var(--bg-snow)", color: "var(--snow)" }}>
+          <div
+            className="badge badge-sm gap-1.5 border-0 font-bold"
+            style={{ backgroundColor: "var(--bg-snow)", color: "var(--snow)" }}
+          >
             <Icon name="snow" className="h-3.5 w-3.5" aria-hidden="true" />
             Neige
           </div>
-          <div className="badge badge-sm gap-1.5 border-0 font-bold" style={{ backgroundColor: "var(--bg-storm)", color: "var(--storm)" }}>
+          <div
+            className="badge badge-sm gap-1.5 border-0 font-bold"
+            style={{
+              backgroundColor: "var(--bg-storm)",
+              color: "var(--storm)",
+            }}
+          >
             <Icon name="storm" className="h-3.5 w-3.5" aria-hidden="true" />
             Tempête
           </div>
-          <div className="badge badge-sm gap-1.5 border-0 font-bold" style={{ backgroundColor: "var(--bg-tornado)", color: "var(--tornado)" }}>
+          <div
+            className="badge badge-sm gap-1.5 border-0 font-bold"
+            style={{
+              backgroundColor: "var(--bg-tornado)",
+              color: "var(--tornado)",
+            }}
+          >
             <Icon name="tornado" className="h-3.5 w-3.5" aria-hidden="true" />
             Tornade
           </div>
-          <div className="badge badge-sm gap-1.5 border-0 font-bold" style={{ backgroundColor: "var(--bg-tree)", color: "var(--tree)" }}>
+          <div
+            className="badge badge-sm gap-1.5 border-0 font-bold"
+            style={{ backgroundColor: "var(--bg-tree)", color: "var(--tree)" }}
+          >
             <Icon name="tree" className="h-3.5 w-3.5" aria-hidden="true" />
             Chute d'arbre
           </div>
-          <div className="badge badge-sm gap-1.5 border-0 font-bold" style={{ backgroundColor: "var(--bg-wild)", color: "var(--wild)" }}>
+          <div
+            className="badge badge-sm gap-1.5 border-0 font-bold"
+            style={{ backgroundColor: "var(--bg-wild)", color: "var(--wild)" }}
+          >
             <Icon name="wild" className="h-3.5 w-3.5" aria-hidden="true" />
             Animal sauvage
           </div>
-          <div className="badge badge-sm gap-1.5 border-0 font-bold" style={{ backgroundColor: "var(--bg-animal)", color: "var(--animal)" }}>
+          <div
+            className="badge badge-sm gap-1.5 border-0 font-bold"
+            style={{
+              backgroundColor: "var(--bg-animal)",
+              color: "var(--animal)",
+            }}
+          >
             <Icon name="animal" className="h-3.5 w-3.5" aria-hidden="true" />
             Animal perdu
           </div>

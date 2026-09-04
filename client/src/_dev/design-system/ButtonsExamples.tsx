@@ -126,7 +126,11 @@ export default function ButtonsExamples() {
           type="button"
           className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-5"
         >
-          <Icon name="arrowSmallLeft" className="h-4 w-4 fill-primary" aria-hidden="true" />
+          <Icon
+            name="arrowSmallLeft"
+            className="h-4 w-4 fill-primary"
+            aria-hidden="true"
+          />
           Retour à l'accueil
         </button>
       </Example>
@@ -149,7 +153,11 @@ export default function ButtonsExamples() {
           className="btn btn-square btn-md rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
           aria-label="Partager"
         >
-          <Icon name="share" className="h-4 w-4 fill-primary" aria-hidden="true" />
+          <Icon
+            name="share"
+            className="h-4 w-4 fill-primary"
+            aria-hidden="true"
+          />
         </button>
       </Example>
 
@@ -222,7 +230,11 @@ export default function ButtonsExamples() {
             className="btn btn-square btn-md rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
             aria-label="Partager"
           >
-            <Icon name="share" className="h-4 w-4 fill-primary" aria-hidden="true" />
+            <Icon
+              name="share"
+              className="h-4 w-4 fill-primary"
+              aria-hidden="true"
+            />
           </button>
         </div>
       </Example>

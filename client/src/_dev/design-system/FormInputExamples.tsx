@@ -33,7 +33,10 @@ export default function FormInputExamples() {
 </div>`}
       >
         <div className="w-full">
-          <label htmlFor="pseudo" className="mb-1.5 block text-sm font-bold text-primary">
+          <label
+            htmlFor="pseudo"
+            className="mb-1.5 block text-sm font-bold text-primary"
+          >
             Pseudo
           </label>
           <div className="relative rounded-xl border-2 border-primary/15 bg-base-100 px-4 py-3">
@@ -79,7 +82,10 @@ export default function FormInputExamples() {
 </div>`}
       >
         <div className="w-full">
-          <label htmlFor="pseudo-error" className="mb-1.5 block text-sm font-bold text-primary">
+          <label
+            htmlFor="pseudo-error"
+            className="mb-1.5 block text-sm font-bold text-primary"
+          >
             Pseudo
           </label>
           <div className="relative rounded-xl border-2 border-error bg-error/10 px-4 py-3">

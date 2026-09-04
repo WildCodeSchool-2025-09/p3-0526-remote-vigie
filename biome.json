@@ -22,6 +22,16 @@
       "recommended": true
     }
   },
+  "overrides": [
+    {
+      "include": ["**/styles/daisyui.css", "**/index.css"],
+      "linter": {
+        "rules": {
+          "correctness": { "noUnknownProperty": "off" }
+        }
+      }
+    }
+  ],
   "javascript": {
     "formatter": {
       "quoteStyle": "double"
