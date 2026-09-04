@@ -2,10 +2,10 @@
 import { Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import {
-  Outlet,
-  type RouteObject,
-  RouterProvider,
-  createBrowserRouter,
+	Outlet,
+	type RouteObject,
+	RouterProvider,
+	createBrowserRouter,
 } from "react-router";
 
 /* ************************************************************************* */
@@ -28,89 +28,89 @@ import Register from "@/pages/Register/Register";
 let devRoutes: RouteObject[] = [];
 
 if (import.meta.env.DEV) {
-  const HelpIndex = lazy(() => import("@/_dev/HelpIndex"));
-  const ReadmeViewer = lazy(() => import("@/_dev/ReadmeViewer"));
-  const VigieViewer = lazy(() => import("@/_dev/VigieViewer"));
-  const ColorPalette = lazy(() => import("@/_dev/ColorPalette"));
-  const IconGallery = lazy(() => import("@/_dev/IconGallery"));
-  const ComponentGallery = lazy(
-    () => import("@/_dev/design-system/ComponentGallery"),
-  );
+	const HelpIndex = lazy(() => import("@/_dev/HelpIndex"));
+	const ReadmeViewer = lazy(() => import("@/_dev/ReadmeViewer"));
+	const VigieViewer = lazy(() => import("@/_dev/VigieViewer"));
+	const ColorPalette = lazy(() => import("@/_dev/ColorPalette"));
+	const IconGallery = lazy(() => import("@/_dev/IconGallery"));
+	const ComponentGallery = lazy(
+		() => import("@/_dev/design-system/ComponentGallery"),
+	);
 
-  devRoutes = [
-    {
-      path: "help",
-      // Suspense unique : couvre aussi tous les enfants (readme, vigie, colors, icons).
-      element: (
-        <Suspense fallback={null}>
-          <Outlet />
-        </Suspense>
-      ),
-      children: [
-        {
-          index: true,
-          element: <HelpIndex />,
-        },
-        {
-          path: "readme",
-          element: <ReadmeViewer />,
-        },
-        {
-          path: "vigie",
-          element: <VigieViewer />,
-        },
-        {
-          path: "colors",
-          element: <ColorPalette />,
-        },
-        {
-          path: "icons",
-          element: <IconGallery />,
-        },
-        {
-          path: "components",
-          element: <ComponentGallery />,
-        },
-      ],
-    },
-  ];
+	devRoutes = [
+		{
+			path: "help",
+			// Suspense unique : couvre aussi tous les enfants (readme, vigie, colors, icons).
+			element: (
+				<Suspense fallback={null}>
+					<Outlet />
+				</Suspense>
+			),
+			children: [
+				{
+					index: true,
+					element: <HelpIndex />,
+				},
+				{
+					path: "readme",
+					element: <ReadmeViewer />,
+				},
+				{
+					path: "vigie",
+					element: <VigieViewer />,
+				},
+				{
+					path: "colors",
+					element: <ColorPalette />,
+				},
+				{
+					path: "icons",
+					element: <IconGallery />,
+				},
+				{
+					path: "components",
+					element: <ComponentGallery />,
+				},
+			],
+		},
+	];
 }
 
 const router = createBrowserRouter([
-  {
-    element: <App />,
-    children: [
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: "numbers",
-        element: <Numbers />,
-      },
-      {
-        path: "incident",
-        element: <Incident />,
-      },
-      {
-        path: "incident/:id",
-        element: <Details />,
-      },
-      {
-        path: "profile",
-        element: <Profile />,
-      },
-      {
-        path: "login",
-        element: <Login />,
-      },
-      {
-        path: "register",
-        element: <Register />,
-      },
-      ...devRoutes,
-    ],
-  },
+	{
+		element: <App />,
+		children: [
+			{
+				index: true,
+				element: <Home />,
+			},
+			{
+				path: "numbers",
+				element: <Numbers />,
+			},
+			{
+				path: "incident",
+				element: <Incident />,
+			},
+			{
+				path: "incident/:id",
+				element: <Details />,
+			},
+			{
+				path: "profile",
+				element: <Profile />,
+			},
+			{
+				path: "login",
+				element: <Login />,
+			},
+			{
+				path: "register",
+				element: <Register />,
+			},
+			...devRoutes,
+		],
+	},
 ]);
 
 /* ************************************************************************* */
@@ -118,7 +118,9 @@ const router = createBrowserRouter([
 // Find the root element in the HTML document
 const rootElement = document.getElementById("root");
 if (rootElement == null) {
-  throw new Error(`Your HTML Document should contain a <div id="root"></div>`);
+	throw new Error(
+		`Your HTML Document should contain a <div id="root"></div>`,
+	);
 }
 
 // Render the app inside the root element

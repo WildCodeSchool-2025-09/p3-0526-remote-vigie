@@ -7,11 +7,11 @@ import MarkdownDoc from "@/_dev/MarkdownDoc";
 import vigieSource from "../../../VIGIE.md?raw";
 
 export default function VigieViewer() {
-  return (
-    <MarkdownDoc
-      route="/help/vigie"
-      label="VIGIE.md (racine du repo)"
-      source={vigieSource}
-    />
-  );
+	return (
+		<MarkdownDoc
+			route="/help/vigie"
+			label="VIGIE.md (racine du repo)"
+			source={vigieSource}
+		/>
+	);
 }

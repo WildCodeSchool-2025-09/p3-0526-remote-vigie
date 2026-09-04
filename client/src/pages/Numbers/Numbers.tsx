@@ -1,7 +1,7 @@
 export default function Numbers() {
-  return (
-    <div className="NUMBERS-PAGE">
-      <h1>Numbers</h1>
-    </div>
-  );
+	return (
+		<div className="NUMBERS-PAGE">
+			<h1>Numbers</h1>
+		</div>
+	);
 }
