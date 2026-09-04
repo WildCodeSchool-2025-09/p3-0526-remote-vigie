@@ -1,17 +1,10 @@
-/**
- * ⚠️ DEV ONLY — famille "Form" de la galerie de composants (/help/components).
- * Chaque exemple : un rendu live (Tailwind + daisyUI) + sa source TSX (string, à garder synchro).
- * Structure fixe : label (au-dessus) → encart (bordure toujours visible + fond, contient le champ
- * ET l'icône "exclamation", alignée à droite — c'est déjà un ! sur fond rond, pas besoin de le
- * recomposer) → message (aide ou erreur, en dessous).
- * États figés (pas de useState) : la validation réelle sera branchée au moment de l'US.
- */
+// ⚠️ DEV ONLY — famille "Form" de la galerie de composants (/help/components).
 
-import Example from "@/_dev/components/Example";
-import TextArea from "@/_dev/components/TextArea";
+import Example from "@/_dev/design-system/Example";
+import TextAreaExamples from "@/_dev/design-system/TextAreaExamples";
 import Icon from "@/components/Icon/Icon";
 
-export default function FormInput() {
+export default function FormInputExamples() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <Example
@@ -106,7 +99,7 @@ export default function FormInput() {
         </div>
       </Example>
 
-      <TextArea />
+      <TextAreaExamples />
     </div>
   );
 }

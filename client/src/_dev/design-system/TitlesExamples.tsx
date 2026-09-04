@@ -1,12 +1,8 @@
-/**
- * ⚠️ DEV ONLY — famille "Titles" de la galerie de composants (/help/components).
- * Chaque exemple : un rendu live (Tailwind + daisyUI) + sa source TSX (string, à garder synchro).
- * `font-title` = police Playfair Display (var --font-title de theme.css). `text-accent` = jaune or.
- */
+// ⚠️ DEV ONLY — famille "Titles" de la galerie de composants (/help/components).
 
-import Example from "@/_dev/components/Example";
+import Example from "@/_dev/design-system/Example";
 
-export default function Titles() {
+export default function TitlesExamples() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <Example

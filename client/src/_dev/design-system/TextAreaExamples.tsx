@@ -1,13 +1,8 @@
-/**
- * ⚠️ DEV ONLY — famille "Form" de la galerie de composants (/help/components), rendu par
- * FormInput.tsx aux côtés des champs simples. Chaque exemple : un rendu live (Tailwind +
- * daisyUI) + sa source TSX (string, à garder synchro).
- * Mêmes tokens que FormInput : bordure légère toujours visible, fond base-100, texte noir.
- */
+// ⚠️ DEV ONLY — famille "Form" de la galerie de composants (/help/components).
 
-import Example from "@/_dev/components/Example";
+import Example from "@/_dev/design-system/Example";
 
-export default function TextArea() {
+export default function TextAreaExamples() {
   return (
     <Example
       className="sm:col-span-2 lg:col-span-3"

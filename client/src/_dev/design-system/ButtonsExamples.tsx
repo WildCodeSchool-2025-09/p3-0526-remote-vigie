@@ -1,13 +1,9 @@
-/**
- * ⚠️ DEV ONLY — famille "Buttons" de la galerie de composants (/help/components).
- * Chaque exemple : un rendu live (Tailwind + daisyUI) + sa source TSX (string, à garder synchro).
- * On copie la source telle quelle quand on construit un vrai bouton dans l'app.
- */
+// ⚠️ DEV ONLY — famille "Buttons" de la galerie de composants (/help/components).
 
-import Example from "@/_dev/components/Example";
+import Example from "@/_dev/design-system/Example";
 import Icon from "@/components/Icon/Icon";
 
-export default function Buttons() {
+export default function ButtonsExamples() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <Example

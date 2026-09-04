@@ -28,7 +28,7 @@ if (import.meta.env.DEV) {
   const VigieViewer = lazy(() => import("@/_dev/VigieViewer"));
   const ColorPalette = lazy(() => import("@/_dev/ColorPalette"));
   const IconGallery = lazy(() => import("@/_dev/IconGallery"));
-  const ComponentGallery = lazy(() => import("@/_dev/components/ComponentGallery"));
+  const ComponentGallery = lazy(() => import("@/_dev/design-system/ComponentGallery"));
 
   devRoutes = [
     {

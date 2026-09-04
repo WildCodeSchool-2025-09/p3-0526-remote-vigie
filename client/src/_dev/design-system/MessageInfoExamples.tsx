@@ -1,15 +1,9 @@
-/**
- * ⚠️ DEV ONLY — famille "Others" de la galerie de composants (/help/components), rendu par
- * SafetyInstructions.tsx aux côtés de la carte consignes. Chaque exemple : un rendu live
- * (Tailwind + daisyUI) + sa source TSX (string, à garder synchro).
- * Pastille d'info : icône ronde + texte, sur fond bg-light (= base-300, cf. daisyui.css).
- * Version 3/3.
- */
+// ⚠️ DEV ONLY — famille "Others" de la galerie de composants (/help/components).
 
-import Example from "@/_dev/components/Example";
+import Example from "@/_dev/design-system/Example";
 import Icon from "@/components/Icon/Icon";
 
-export default function MessageInfo() {
+export default function MessageInfoExamples() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <Example

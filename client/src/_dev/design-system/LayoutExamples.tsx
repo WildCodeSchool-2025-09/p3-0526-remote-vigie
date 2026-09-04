@@ -1,29 +1,11 @@
-/**
- * ⚠️ DEV ONLY — famille "Layout" de la galerie de composants (/help/components).
- * Structure de page commune à tous les écrans : un `header` (bandeau plein cadre, porte
- * le h1) + des `frames` (encarts de contenu, insérés du bord, espacés, le premier
- * chevauche le header). Chaque exemple : rendu live (contraint à max-w-sm pour lire l'inset
- * et le chevauchement à l'échelle mobile) + source TSX à copier (string, à garder synchro).
- *
- * Les blocs à copier sont volontairement bêtes : du JSX brut, pas de variable ni de
- * composant. La mécanique (props, images importées…) sera montée dans l'US dédiée,
- * pas dans la PR d'init. Les imports d'images ci-dessous ne servent qu'au rendu live.
- *
- * Tokens partagés (identiques sur toutes les pages) :
- *   - inset au bord d'écran : px-4
- *   - écart entre encarts   : space-y-4
- *   - chevauchement          : -mt-6 sur le conteneur des encarts, + relative pour qu'il
- *                              passe au-dessus du header (stacking context via isolate)
- *   - hauteur du header      : h-44 (fixe ; un h1 de ~150 caractères tient sur 2 lignes)
- *   - image du header        : opacity-70 + mix-blend-multiply par-dessus la couleur de fond
- */
+// ⚠️ DEV ONLY — famille "Layout" de la galerie de composants (/help/components).
 
-import Example from "@/_dev/components/Example";
+import Example from "@/_dev/design-system/Example";
 import bgHome from "@/assets/images/backgroud-home.jpg";
 import bgIncidentDetails from "@/assets/images/background-incident-details.jpg";
 import bgIncident from "@/assets/images/background-incident.jpg";
 
-export default function Layout() {
+export default function LayoutExamples() {
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-dashed border-primary/15 bg-base-200 p-4 text-sm leading-relaxed text-primary/70">
@@ -153,8 +135,7 @@ export default function Layout() {
           className="sm:col-span-2 lg:col-span-3"
           title="Frame · inset au bord"
           description="Un encart seul, posé sur le fond de page. Le retrait au bord d'écran est toujours px-4 (identique sur toutes les pages). Radius rounded-2xl, fond bg-base-300, padding interne p-4."
-          code={`{/* inset au bord d'écran : px-4 — jamais un autre écart */}
-<div className="px-4">
+          code={`<div className="px-4">
   <section className="rounded-2xl bg-base-300 p-4">
     …contenu de l'encart…
   </section>
@@ -210,8 +191,6 @@ export default function Layout() {
     <p className="mt-1 text-sm text-white/85">Vos voisins concernés seront alertés aussitôt.</p>
   </header>
 
-  {/* relative : passe au-dessus du header (qui crée un stacking context via isolate) */}
-  {/* -mt-6 : le premier encart chevauche le header */}
   <div className="relative -mt-6 space-y-4 px-4 pb-6">
     <section className="rounded-2xl bg-base-300 p-4">
       <h2 className="font-title text-xl font-bold text-primary">

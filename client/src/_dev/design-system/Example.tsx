@@ -1,17 +1,11 @@
-/**
- * ⚠️ DEV ONLY — brique de la galerie de composants (/help/components).
- * Affiche un exemple : le rendu live au-dessus, la source TSX en dessous avec un bouton copier.
- * La source est une string écrite à la main : à garder synchro avec le rendu manuellement.
- */
+// ⚠️ DEV ONLY — brique de rendu d'un exemple (/help/components) : rendu live + source TSX copiable.
 
 import { type ReactNode, useState } from "react";
 
 type ExampleProps = {
   title: string;
   description?: string;
-  /** Source TSX affichée et copiée. À maintenir alignée sur `children` à la main. */
   code: string;
-  /** Classes ajoutées à la carte (ex. col-span pour un exemple sur toute la ligne). */
   className?: string;
   children: ReactNode;
 };
@@ -37,10 +31,8 @@ export default function Example({ title, description, code, className, children 
         {description && <p className="mt-0.5 text-xs text-primary/50">{description}</p>}
       </div>
 
-      {/* Rendu live */}
       <div className="flex flex-wrap items-center gap-3 bg-base-100 p-6">{children}</div>
 
-      {/* Source TSX (écrite à la main) */}
       <div className="relative border-t border-primary/10">
         <button
           type="button"

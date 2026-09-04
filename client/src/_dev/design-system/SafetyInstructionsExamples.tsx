@@ -1,11 +1,6 @@
-/**
- * ⚠️ DEV ONLY — famille "Others" de la galerie de composants (/help/components).
- * Chaque exemple : un rendu live (Tailwind + daisyUI) + sa source TSX (string, à garder synchro).
- * Les couleurs par type (--fire, --storm, …) ne sont pas des tokens daisyUI : pas d'utilitaire
- * Tailwind pour elles, on passe par style={{ color: "var(--x)" }} (voir ColorPalette.tsx).
- */
+// ⚠️ DEV ONLY — famille "Others" de la galerie de composants (/help/components).
 
-import Example from "@/_dev/components/Example";
+import Example from "@/_dev/design-system/Example";
 import Icon from "@/components/Icon/Icon";
 import { useState } from "react";
 
@@ -68,7 +63,7 @@ function SafetyInstructionsDemo() {
   );
 }
 
-export default function SafetyInstructions() {
+export default function SafetyInstructionsExamples() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <Example

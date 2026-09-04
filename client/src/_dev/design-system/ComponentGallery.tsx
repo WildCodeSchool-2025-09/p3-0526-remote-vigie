@@ -1,68 +1,57 @@
-/**
- * ⚠️ PAGE DE DEV — pas une page de l'app.
- * Route : /help/components. Bibliothèque de composants UI assemblés (Tailwind + daisyUI),
- * stylés pour Vigie.
- *
- * Chaque famille vit dans src/_dev/components/<Famille>.tsx et expose des exemples :
- * rendu live + source TSX copiable (écrite à la main). On "pioche" ici en copiant la
- * source quand on construit les vrais composants de l'app. Rien n'est importé par l'app.
- */
+// ⚠️ PAGE DE DEV — bibliothèque de composants UI (/help/components), pas une page de l'app.
 
 import BackButton from "@/_dev/BackButton";
-import Buttons from "@/_dev/components/Buttons";
-import Layout from "@/_dev/components/Layout";
-import FormInput from "@/_dev/components/FormInput";
-import SafetyInstructions from "@/_dev/components/SafetyInstructions";
-import Titles from "@/_dev/components/Titles";
-import MessageInfo from "./MessageInfo";
+import ButtonsExamples from "@/_dev/design-system/ButtonsExamples";
+import LayoutExamples from "@/_dev/design-system/LayoutExamples";
+import FormInputExamples from "@/_dev/design-system/FormInputExamples";
+import SafetyInstructionsExamples from "@/_dev/design-system/SafetyInstructionsExamples";
+import TitlesExamples from "@/_dev/design-system/TitlesExamples";
+import MessageInfoExamples from "./MessageInfoExamples";
 import { type ComponentType, type ReactNode, useState } from "react";
 
 type Family = {
   id: string;
   title: string;
   description: string;
-  /** Absent = famille pas encore construite (onglet actif → encart « bientôt »). */
   Component?: ComponentType;
 };
 
-// Ordre des onglets = ordre du tableau. Construire une famille = créer
-// src/_dev/components/<Famille>.tsx et renseigner `Component` sur son entrée.
 const families: Family[] = [
   {
     id: "buttons",
     title: "Buttons",
     description: "Boutons : variantes, tailles, états.",
-    Component: Buttons,
+    Component: ButtonsExamples,
   },
   {
     id: "titles",
     title: "Titles",
     description: "Titres et hiérarchie typographique.",
-    Component: Titles,
+    Component: TitlesExamples,
   },
   {
     id: "cards",
     title: "Cards",
     description: "Cartes et conteneurs de contenu.",
-    Component: SafetyInstructions,
+    Component: SafetyInstructionsExamples,
   },
   {
     id: "layout",
     title: "Layout",
     description: "Gabarits de page, grilles, espacements.",
-    Component: Layout,
+    Component: LayoutExamples,
   },
   {
     id: "form",
     title: "Form",
     description: "Champs, labels, aides et états de validation.",
-    Component: FormInput,
+    Component: FormInputExamples,
   },
   {
     id: "others",
     title: "Others",
     description: "Le reste : badges, alertes, séparateurs, etc.",
-    Component: MessageInfo,
+    Component: MessageInfoExamples,
   },
 ];
 
@@ -99,7 +88,6 @@ export default function ComponentGallery() {
           Vigie. Chaque exemple montre le rendu live et sa source TSX à copier.
         </p>
 
-        {/* Onglets */}
         <div role="tablist" className="tabs tabs-box mt-6 flex-wrap">
           {families.map((family) => (
             <button
