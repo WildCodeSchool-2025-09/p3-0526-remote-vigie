@@ -4,7 +4,7 @@ import BackButton from "@/_dev/BackButton";
 import ButtonsExamples from "@/_dev/design-system/ButtonsExamples";
 import LayoutExamples from "@/_dev/design-system/LayoutExamples";
 import FormInputExamples from "@/_dev/design-system/FormInputExamples";
-import SafetyInstructionsExamples from "@/_dev/design-system/SafetyInstructionsExamples";
+import CardExamples from "@/_dev/design-system/CardExamples";
 import TitlesExamples from "@/_dev/design-system/TitlesExamples";
 import OtherExamples from "./OtherExamples";
 import { type ComponentType, type ReactNode, useState } from "react";
@@ -33,7 +33,7 @@ const families: Family[] = [
     id: "cards",
     title: "Cards",
     description: "Cartes et conteneurs de contenu.",
-    Component: SafetyInstructionsExamples,
+    Component: CardExamples,
   },
   {
     id: "layout",

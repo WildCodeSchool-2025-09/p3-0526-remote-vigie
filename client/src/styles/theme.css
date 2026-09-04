@@ -56,15 +56,15 @@
 
     /* danger levels (1 → 5) */
     --level-1: #3a8f3f; /* faible */
-    --bg-level-1: #e4ecd9;
+    --bg-level-1: #f8ffef;
     --level-2: #9bbb2f; /* modéré */
-    --bg-level-2: #edefd7;
+    --bg-level-2: #feffed;
     --level-3: #e0a81f; /* important */
-    --bg-level-3: #f4eed6;
+    --bg-level-3: #fffadd;
     --level-4: #e8600f; /* élevé */
-    --bg-level-4: #f8e0cd;
+    --bg-level-4: #f9f0e9;
     --level-5: #c1392b; /* critique */
-    --bg-level-5: #f5e2df;
+    --bg-level-5: #fdf1ef;
 
     /* spacings */
     --spacer-small: 1rem;
