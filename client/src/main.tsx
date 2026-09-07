@@ -14,7 +14,7 @@ import App from "@/App";
 import Details from "@/pages/Details/Details";
 // Import the main app component
 import Home from "@/pages/Home/Home";
-import Incident from "@/pages/Incident/Incident";
+import IncidentForm from "@/pages/IncidentForm/IncidentForm";
 import Login from "@/pages/Login/Login";
 import Numbers from "@/pages/Numbers/Numbers";
 import Profile from "@/pages/Profile/Profile";
@@ -90,7 +90,7 @@ const router = createBrowserRouter([
 			},
 			{
 				path: "incident",
-				element: <Incident />,
+				element: <IncidentForm />,
 			},
 			{
 				path: "incident/:id",
