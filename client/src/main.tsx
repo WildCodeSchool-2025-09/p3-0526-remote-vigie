@@ -1,29 +1,116 @@
 // Import necessary modules from React and React Router
-import { StrictMode } from "react";
+import { Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
-import { RouterProvider, createBrowserRouter } from "react-router";
+import {
+	Outlet,
+	type RouteObject,
+	RouterProvider,
+	createBrowserRouter,
+} from "react-router";
 
 /* ************************************************************************* */
 
+import App from "@/App";
+import Details from "@/pages/Details/Details";
 // Import the main app component
-import App from "./App";
+import Home from "@/pages/Home/Home";
+import Incident from "@/pages/Incident/Incident";
+import Login from "@/pages/Login/Login";
+import Numbers from "@/pages/Numbers/Numbers";
+import Profile from "@/pages/Profile/Profile";
+import Register from "@/pages/Register/Register";
 
-// Import additional components for new routes
-// Try creating these components in the "pages" folder
+// DEV ONLY — pas des pages de l'app, voir src/_dev/README.md
+// Le bloc `if (import.meta.env.DEV)` est tree-shaké par Vite dans un build de prod :
+// ni les routes /help/*, ni le code des pages (dont react-markdown + mermaid pour
+// ReadmeViewer) ne finissent dans le bundle déployé.
+// https://vite.dev/guide/env-and-mode.html#production-replacement
+let devRoutes: RouteObject[] = [];
 
-// import About from "./pages/About";
-// import Contact from "./pages/Contact";
+if (import.meta.env.DEV) {
+	const HelpIndex = lazy(() => import("@/_dev/HelpIndex"));
+	const ReadmeViewer = lazy(() => import("@/_dev/ReadmeViewer"));
+	const VigieViewer = lazy(() => import("@/_dev/VigieViewer"));
+	const ColorPalette = lazy(() => import("@/_dev/ColorPalette"));
+	const IconGallery = lazy(() => import("@/_dev/IconGallery"));
+	const ComponentGallery = lazy(
+		() => import("@/_dev/design-system/ComponentGallery"),
+	);
 
-/* ************************************************************************* */
+	devRoutes = [
+		{
+			path: "help",
+			// Suspense unique : couvre aussi tous les enfants (readme, vigie, colors, icons).
+			element: (
+				<Suspense fallback={null}>
+					<Outlet />
+				</Suspense>
+			),
+			children: [
+				{
+					index: true,
+					element: <HelpIndex />,
+				},
+				{
+					path: "readme",
+					element: <ReadmeViewer />,
+				},
+				{
+					path: "vigie",
+					element: <VigieViewer />,
+				},
+				{
+					path: "colors",
+					element: <ColorPalette />,
+				},
+				{
+					path: "icons",
+					element: <IconGallery />,
+				},
+				{
+					path: "components",
+					element: <ComponentGallery />,
+				},
+			],
+		},
+	];
+}
 
-// Create router configuration with routes
-// You can add more routes as you build out your app!
 const router = createBrowserRouter([
-  {
-    path: "/", // The root path
-    element: <App />, // Renders the App component for the home page
-  },
-  // Try adding a new route! For example, "/about" with an About component
+	{
+		element: <App />,
+		children: [
+			{
+				index: true,
+				element: <Home />,
+			},
+			{
+				path: "numbers",
+				element: <Numbers />,
+			},
+			{
+				path: "incident",
+				element: <Incident />,
+			},
+			{
+				path: "incident/:id",
+				element: <Details />,
+			},
+			{
+				path: "profile",
+				element: <Profile />,
+			},
+			{
+				path: "login",
+				element: <Login />,
+			},
+			{
+				path: "register",
+				element: <Register />,
+			},
+			...devRoutes,
+		],
+	},
 ]);
 
 /* ************************************************************************* */
@@ -31,37 +118,10 @@ const router = createBrowserRouter([
 // Find the root element in the HTML document
 const rootElement = document.getElementById("root");
 if (rootElement == null) {
-  throw new Error(`Your HTML Document should contain a <div id="root"></div>`);
+	throw new Error(
+		`Your HTML Document should contain a <div id="root"></div>`,
+	);
 }
 
 // Render the app inside the root element
-createRoot(rootElement).render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>,
-);
-
-/**
- * Helpful Notes:
- *
- * 1. Adding More Routes:
- *    To add more pages to your app, first create a new component (e.g., About.tsx).
- *    Then, import that component above like this:
- *
- *    import About from "./pages/About";
- *
- *    Add a new route to the router:
- *
- *      {
- *        path: "/about",
- *        element: <About />,  // Renders the About component
- *      }
- *
- * 2. Try Nested Routes:
- *    For more complex applications, you can nest routes. This lets you have sub-pages within a main page.
- *    Documentation: https://reactrouter.com/en/main/start/tutorial#nested-routes
- *
- * 3. Experiment with Dynamic Routes:
- *    You can create routes that take parameters (e.g., /users/:id).
- *    Documentation: https://reactrouter.com/en/main/start/tutorial#url-params-in-loaders
- */
+createRoot(rootElement).render(<RouterProvider router={router} />);
