@@ -23,7 +23,6 @@ export default function IncidentForm() {
 				setLoadingTypes(false);
 			})
 			.catch((error) => {
-				// Nettoyage de l'effet : composant démonté, on ne touche plus au state.
 				if (error.name === "AbortError") return;
 				setTypesError(
 					"Impossible de charger les types de signalement.",

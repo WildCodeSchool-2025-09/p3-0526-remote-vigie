@@ -1,4 +1,5 @@
 import type { RequestHandler } from "express";
+import { StatusCodes } from "http-status-codes";
 
 import databaseClient from "../../database/client";
 import type { Rows } from "../../database/client";
@@ -15,7 +16,7 @@ import type { Rows } from "../../database/client";
 const requireVerifiedEmail: RequestHandler = async (req, res, next) => {
 	if (req.user == null) {
 		// Filet si le middleware est monté sans verifyToken devant.
-		res.sendStatus(401);
+		res.sendStatus(StatusCodes.UNAUTHORIZED);
 		return;
 	}
 
@@ -27,12 +28,12 @@ const requireVerifiedEmail: RequestHandler = async (req, res, next) => {
 
 		if (rows.length === 0) {
 			// Le token désigne un compte qui n'existe plus.
-			res.sendStatus(401);
+			res.sendStatus(StatusCodes.UNAUTHORIZED);
 			return;
 		}
 
 		if (rows[0].email_verified_at == null) {
-			res.status(403).json({
+			res.status(StatusCodes.FORBIDDEN).json({
 				error: "email_not_verified",
 				message:
 					"Vérifiez votre adresse e-mail pour pouvoir publier un signalement.",
