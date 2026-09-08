@@ -1,7 +1,7 @@
 import express from "express";
+import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 import requireVerifiedEmail from "./services/requireVerifiedEmail";
 import verifyToken from "./services/verifyToken";
-import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 
 const router = express.Router();
 

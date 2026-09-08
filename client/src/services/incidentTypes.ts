@@ -1,0 +1,28 @@
+export type IncidentType = {
+	id: number;
+	code: string;
+	label: string;
+	alert_radius_meters: number;
+	lifespan_hours: number;
+	safety_instructions: string | null;
+	icon: string;
+	color: string;
+	is_selectable: 0 | 1;
+	danger_level_id: number;
+	danger_level_weight: number;
+	danger_level_label: string;
+	danger_level_color: string;
+};
+
+export async function getIncidentTypes(
+	signal?: AbortSignal,
+): Promise<IncidentType[]> {
+	const response = await fetch(
+		`${import.meta.env.VITE_API_URL}/api/incident-types`,
+		{ signal },
+	);
+	if (!response.ok) {
+		throw new Error(`GET /api/incident-types → ${response.status}`);
+	}
+	return response.json();
+}

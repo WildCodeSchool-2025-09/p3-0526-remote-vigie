@@ -22,7 +22,7 @@ const STUB_USER: AuthUser | null = {
 	id: 1,
 	pseudo: "test",
 	email: "test@example.com",
-	emailVerified: false,
+	emailVerified: true,
 };
 
 // TODO US06 : remplacer ce fichier par un vrai AuthProvider (appelle GET /api/auth/me
