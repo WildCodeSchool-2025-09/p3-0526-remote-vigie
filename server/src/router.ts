@@ -1,6 +1,7 @@
 import express from "express";
 import requireVerifiedEmail from "./services/requireVerifiedEmail";
 import verifyToken from "./services/verifyToken";
+import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 
 const router = express.Router();
 
@@ -9,5 +10,7 @@ const router = express.Router();
 router.post("/api/incidents", verifyToken, requireVerifiedEmail, (req, res) => {
 	res.status(501).json({ message: "Not implemented", userId: req.user?.id });
 });
+
+router.get("/api/incident-types", incidentTypeActions.browse);
 
 export default router;
