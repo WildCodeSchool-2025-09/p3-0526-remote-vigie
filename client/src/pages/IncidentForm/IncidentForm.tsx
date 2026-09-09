@@ -1,6 +1,8 @@
 import EmailVerificationNotice from "@/components/EmailVerificationNotice/EmailVerificationNotice";
+import IncidentTypePicker from "@/components/IncidentTypePicker/IncidentTypePicker";
 import { useAuth } from "@/contexts/AuthContext";
-import { type IncidentType, getIncidentTypes } from "@/services/incidentTypes";
+import { getIncidentTypes } from "@/services/incidentTypeService";
+import type { IncidentType } from "@/types/incidentForm";
 import { useEffect, useState } from "react";
 
 export default function IncidentForm() {
@@ -33,14 +35,6 @@ export default function IncidentForm() {
 		return () => controller.abort();
 	}, []);
 
-	function toggleType(id: number) {
-		setSelectedTypes((current) =>
-			current.includes(id)
-				? current.filter((typeId) => typeId !== id)
-				: [...current, id],
-		);
-	}
-
 	// PrivateRoute a déjà filtré les non-connectés : ici `user` existe.
 	// S'il n'a pas vérifié son e-mail, on bloque le signalement.
 	if (!user?.emailVerified) {
@@ -51,25 +45,16 @@ export default function IncidentForm() {
 		<section>
 			<h1>Signaler un incident</h1>
 
-			<fieldset>
-				<legend>Type d'incident</legend>
+			{loadingTypes && <p>Chargement des types…</p>}
+			{typesError && <p role="alert">{typesError}</p>}
 
-				{loadingTypes && <p>Chargement des types…</p>}
-				{typesError && <p role="alert">{typesError}</p>}
-
-				{!loadingTypes &&
-					!typesError &&
-					incidentTypes.map((type) => (
-						<label key={type.id}>
-							<input
-								type="checkbox"
-								checked={selectedTypes.includes(type.id)}
-								onChange={() => toggleType(type.id)}
-							/>
-							{type.label}
-						</label>
-					))}
-			</fieldset>
+			{!loadingTypes && !typesError && (
+				<IncidentTypePicker
+					incidentTypes={incidentTypes}
+					value={selectedTypes}
+					onChange={setSelectedTypes}
+				/>
+			)}
 		</section>
 	);
 }
