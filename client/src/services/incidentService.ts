@@ -1,4 +1,4 @@
-import type { Incident } from "@/types/incident";
+import type { Incident } from "@/types/incidentDetails";
 
 type GetIncidentResult =
 	| { status: "ok"; incident: Incident }
