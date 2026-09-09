@@ -1,4 +1,5 @@
 import type { IncidentType } from "@/types/incidentForm";
+import { useId } from "react";
 
 type IncidentTypePickerProps = {
 	incidentTypes: IncidentType[];
@@ -13,6 +14,8 @@ export default function IncidentTypePicker({
 	onChange,
 	error,
 }: IncidentTypePickerProps) {
+	const errorId = useId();
+
 	function toggleType(id: number) {
 		const next = value.includes(id)
 			? value.filter((typeId) => typeId !== id)
@@ -22,7 +25,7 @@ export default function IncidentTypePicker({
 	}
 
 	return (
-		<fieldset>
+		<fieldset aria-describedby={error ? errorId : undefined}>
 			<legend>Type d'incident</legend>
 
 			{incidentTypes.map((type) => (
@@ -36,7 +39,11 @@ export default function IncidentTypePicker({
 				</label>
 			))}
 
-			{error && <p role="alert">{error}</p>}
+			{error && (
+				<p id={errorId} role="alert">
+					{error}
+				</p>
+			)}
 		</fieldset>
 	);
 }

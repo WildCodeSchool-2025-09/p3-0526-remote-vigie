@@ -11,7 +11,7 @@ import {
 /* ************************************************************************* */
 
 import App from "@/App";
-import PrivateRoute from "@/components/PrivateRoute/PrivateRoute";
+import PrivateRoute from "@/components/Routing/PrivateRoute/PrivateRoute";
 import Details from "@/pages/Details/Details";
 import Home from "@/pages/Home/Home";
 import IncidentForm from "@/pages/IncidentForm/IncidentForm";

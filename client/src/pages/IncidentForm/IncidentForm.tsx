@@ -1,5 +1,6 @@
-import EmailVerificationNotice from "@/components/EmailVerificationNotice/EmailVerificationNotice";
-import IncidentTypePicker from "@/components/IncidentTypePicker/IncidentTypePicker";
+import EmailVerificationNotice from "@/components/Form/EmailVerificationNotice/EmailVerificationNotice";
+import IncidentTypePicker from "@/components/Form/IncidentTypePicker/IncidentTypePicker";
+import SafetyInstructions from "@/components/SafetyInstructions/SafetyInstructions";
 import { useAuth } from "@/contexts/AuthContext";
 import { getIncidentTypes } from "@/services/incidentTypeService";
 import type { IncidentType } from "@/types/incidentForm";
@@ -49,11 +50,17 @@ export default function IncidentForm() {
 			{typesError && <p role="alert">{typesError}</p>}
 
 			{!loadingTypes && !typesError && (
-				<IncidentTypePicker
-					incidentTypes={incidentTypes}
-					value={selectedTypes}
-					onChange={setSelectedTypes}
-				/>
+				<>
+					<IncidentTypePicker
+						incidentTypes={incidentTypes}
+						value={selectedTypes}
+						onChange={setSelectedTypes}
+					/>
+					<SafetyInstructions
+						incidentTypes={incidentTypes}
+						value={selectedTypes}
+					/>
+				</>
 			)}
 		</section>
 	);
