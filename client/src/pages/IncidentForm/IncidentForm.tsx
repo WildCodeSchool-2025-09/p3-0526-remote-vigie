@@ -4,7 +4,7 @@ import SafetyInstructions from "@/components/SafetyInstructions/SafetyInstructio
 import { useAuth } from "@/contexts/AuthContext";
 import { getIncidentTypes } from "@/services/incidentTypeService";
 import type { IncidentType } from "@/types/incidentForm";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function IncidentForm() {
 	const { user } = useAuth();
@@ -14,15 +14,15 @@ export default function IncidentForm() {
 	const [loadingTypes, setLoadingTypes] = useState(true);
 	const [typesError, setTypesError] = useState<string | null>(null);
 
-	useEffect(() => {
-		const controller = new AbortController();
+	const loadIncidentTypes = useCallback((signal?: AbortSignal) => {
+		setLoadingTypes(true);
+		setTypesError(null);
 
-		getIncidentTypes(controller.signal)
+		getIncidentTypes(signal)
 			.then((types) => {
 				setIncidentTypes(
 					types.filter((type) => type.is_selectable === 1),
 				);
-				setTypesError(null);
 				setLoadingTypes(false);
 			})
 			.catch((error) => {
@@ -32,9 +32,13 @@ export default function IncidentForm() {
 				);
 				setLoadingTypes(false);
 			});
-
-		return () => controller.abort();
 	}, []);
+
+	useEffect(() => {
+		const controller = new AbortController();
+		loadIncidentTypes(controller.signal);
+		return () => controller.abort();
+	}, [loadIncidentTypes]);
 
 	// PrivateRoute a déjà filtré les non-connectés : ici `user` existe.
 	// S'il n'a pas vérifié son e-mail, on bloque le signalement.
@@ -47,7 +51,15 @@ export default function IncidentForm() {
 			<h1>Signaler un incident</h1>
 
 			{loadingTypes && <p>Chargement des types…</p>}
-			{typesError && <p role="alert">{typesError}</p>}
+
+			{typesError && (
+				<div>
+					<p role="alert">{typesError}</p>
+					<button type="button" onClick={() => loadIncidentTypes()}>
+						Réessayer
+					</button>
+				</div>
+			)}
 
 			{!loadingTypes && !typesError && (
 				<>
