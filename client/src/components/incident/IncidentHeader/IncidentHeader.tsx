@@ -50,7 +50,7 @@ export default function IncidentHeader({
 		<header className="flex flex-col gap-3">
 			<div className="flex items-start justify-between gap-2">
 				{/* Gravité : libellé + couleur issus de la base */}
-				<h2 className="font-title text-xl font-bold text-primary">
+				<h2 className="font-title text-xl font-bold text-primary leading-none">
 					Incident <span>{dangerLevel.label.toLowerCase()}</span>
 				</h2>
 
@@ -66,7 +66,7 @@ export default function IncidentHeader({
 						Résolu
 					</div>
 				) : (
-					<div className="badge badge-accent badge-sm shrink-0 gap-1.5 border-0 font-bold">
+					<div className="badge badge-accent badge-md shrink-0 gap-1.5 border-0 font-bold leading-none">
 						<span
 							className="h-1.5 w-1.5 rounded-full bg-primary"
 							aria-hidden="true"
@@ -86,10 +86,9 @@ export default function IncidentHeader({
 					return (
 						<li
 							key={type.code}
-							className="badge badge-xl gap-1.5 rounded-(--radius-box) border-0 font-bold"
+							className="badge badge-lg gap-1.5 rounded-(--radius-box) border-0 font-bold text-primary"
 							style={{
 								backgroundColor: `var(--bg-${type.code})`,
-								color: `var(--${type.code})`,
 							}}
 						>
 							{iconName && (

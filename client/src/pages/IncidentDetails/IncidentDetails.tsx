@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import bgIncidentDetails from "@/assets/images/background-incident-details.jpg";
 import IncidentHeader from "@/components/incident/IncidentHeader/IncidentHeader";
+import IncidentLocation from "@/components/incident/IncidentLocation/IncidentLocation";
 import { getIncidentById } from "@/services/incidentService";
 import type { Incident } from "@/types/incidentDetails";
 import Icon from "@/components/Icon/Icon";
@@ -45,6 +46,7 @@ export default function IncidentDetails() {
 	if (state.status === "error") return <p>Erreur</p>;
 
 	const { incident } = state;
+	console.log(incident);
 
 	return (
 		<div className="INCIDENT-DETAILS-PAGE bg-base-100">
@@ -85,6 +87,16 @@ export default function IncidentDetails() {
 						types={incident.types}
 						createdAt={incident.createdAt}
 						author={incident.author}
+					/>
+				</section>
+
+				<section>
+					<IncidentLocation
+						city={incident.city}
+						inseeCode={incident.inseeCode}
+						latitude={incident.latitude}
+						longitude={incident.longitude}
+						types={incident.types}
 					/>
 				</section>
 			</div>
