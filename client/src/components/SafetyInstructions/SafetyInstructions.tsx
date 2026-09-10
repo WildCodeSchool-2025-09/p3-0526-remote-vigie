@@ -22,29 +22,52 @@ export default function SafetyInstructions({
 	}
 
 	return (
-		<section>
+		<div className="rounded-2xl bg-(--primary-light) mt-4 p-4">
 			<button
 				type="button"
 				onClick={() => setIsOpen((open) => !open)}
 				aria-expanded={isOpen}
 				aria-controls={panelId}
+				className="flex w-full items-center justify-between gap-2 text-left cursor-pointer"
 			>
-				<Icon name="shield" />
-				<span>Consignes de sécurité ({instructions.length})</span>
-				<Icon name={isOpen ? "angleSmallUp" : "angleSmallDown"} />
+				<span className="flex items-center gap-2">
+					<Icon
+						name="shield"
+						className="h-4 w-4 fill-success"
+						aria-hidden="true"
+					/>
+					<h2 className="font-title text-lg font-bold text-primary">
+						Consignes de sécurité ({instructions.length})
+					</h2>
+				</span>
+				<Icon
+					name={isOpen ? "angleSmallUp" : "angleSmallDown"}
+					className="h-4 w-4 fill-primary/60"
+					aria-hidden="true"
+				/>
 			</button>
+
 			{isOpen && (
-				<div id={panelId}>
+				<div
+					id={panelId}
+					className="mt-3 space-y-3 border-t border-primary/10 pt-3 text-sm leading-relaxed"
+				>
 					{instructions.map((type) => (
 						<p key={type.id}>
-							<strong style={{ color: type.color }}>
-								{type.label} —{" "}
-							</strong>
-							{type.safety_instructions}
+							<span
+								className="font-bold"
+								style={{ color: type.color }}
+							>
+								{type.label}
+							</span>
+							<span className="text-black">
+								{" "}
+								— {type.safety_instructions}
+							</span>
 						</p>
 					))}
 				</div>
 			)}
-		</section>
+		</div>
 	);
 }
