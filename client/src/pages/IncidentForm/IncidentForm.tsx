@@ -1,10 +1,28 @@
 import EmailVerificationNotice from "@/components/Form/EmailVerificationNotice/EmailVerificationNotice";
 import IncidentTypePicker from "@/components/Form/IncidentTypePicker/IncidentTypePicker";
+import SeverityPicker, {
+	type DangerLevel,
+} from "@/components/Form/SeverityPicker/SeverityPicker";
 import SafetyInstructions from "@/components/SafetyInstructions/SafetyInstructions";
 import { useAuth } from "@/contexts/AuthContext";
 import { getIncidentTypes } from "@/services/incidentTypeService";
 import type { IncidentType } from "@/types/incidentForm";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+function computeHighestSeverity(
+	incidentTypes: IncidentType[],
+	selectedTypes: number[],
+): number | null {
+	const selected = incidentTypes.filter((type) =>
+		selectedTypes.includes(type.id),
+	);
+
+	if (selected.length === 0) return null;
+
+	return selected.reduce((highest, type) =>
+		type.danger_level_weight > highest.danger_level_weight ? type : highest,
+	).danger_level_id;
+}
 
 export default function IncidentForm() {
 	const { user } = useAuth();
@@ -13,6 +31,8 @@ export default function IncidentForm() {
 	const [selectedTypes, setSelectedTypes] = useState<number[]>([]);
 	const [loadingTypes, setLoadingTypes] = useState(true);
 	const [typesError, setTypesError] = useState<string | null>(null);
+	const [severity, setSeverity] = useState<number | null>(null);
+	const [severityTouched, setSeverityTouched] = useState(false);
 
 	const loadIncidentTypes = useCallback((signal?: AbortSignal) => {
 		setLoadingTypes(true);
@@ -39,6 +59,35 @@ export default function IncidentForm() {
 		loadIncidentTypes(controller.signal);
 		return () => controller.abort();
 	}, [loadIncidentTypes, user?.emailVerified]);
+
+	useEffect(() => {
+		if (selectedTypes.length === 0) {
+			setSeverity(null);
+			setSeverityTouched(false);
+			return;
+		}
+
+		if (severityTouched) return;
+
+		setSeverity(computeHighestSeverity(incidentTypes, selectedTypes));
+	}, [selectedTypes, incidentTypes, severityTouched]);
+
+	const dangerLevels = useMemo(() => {
+		const map = new Map<number, DangerLevel>();
+
+		for (const type of incidentTypes) {
+			if (!map.has(type.danger_level_id)) {
+				map.set(type.danger_level_id, {
+					id: type.danger_level_id,
+					weight: type.danger_level_weight,
+					label: type.danger_level_label,
+					color: type.danger_level_color,
+				});
+			}
+		}
+
+		return [...map.values()].sort((a, b) => a.weight - b.weight);
+	}, [incidentTypes]);
 
 	// PrivateRoute a déjà filtré les non-connectés : ici `user` existe.
 	// S'il n'a pas vérifié son e-mail, on bloque le signalement.
@@ -101,7 +150,27 @@ export default function IncidentForm() {
 						</>
 					)}
 				</section>
-				<section className="rounded-2xl bg-base-200 p-4">…</section>
+				<section className="rounded-2xl bg-base-200 p-4">
+					<div className="flex justify-between">
+						<div className="flex items-center gap-2 pb-8">
+							<span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-content">
+								2
+							</span>
+							<h2 className="font-title text-lg font-bold text-primary">
+								Détails
+							</h2>
+						</div>
+						<p className="text-neutral ">Facultatif</p>
+					</div>
+					<SeverityPicker
+						dangerLevels={dangerLevels}
+						value={severity}
+						onChange={(id) => {
+							setSeverity(id);
+							setSeverityTouched(true);
+						}}
+					/>
+				</section>
 				<section className="rounded-2xl bg-base-200 p-4">…</section>
 			</div>
 		</div>
