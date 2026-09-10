@@ -30,6 +30,7 @@ class UserSeeder extends AbstractSeeder {
         cgu_version: "1.0",
         cgu_accepted_at: this.faker.date.past(),
         refName: `user_${i}`,
+        last_seen_at: null,
       };
 
       // Insert the fakeUser data into the 'user' table
