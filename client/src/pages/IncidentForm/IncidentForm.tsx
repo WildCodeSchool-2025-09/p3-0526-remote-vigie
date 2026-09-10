@@ -20,9 +20,7 @@ export default function IncidentForm() {
 
 		getIncidentTypes(signal)
 			.then((types) => {
-				setIncidentTypes(
-					types.filter((type) => type.is_selectable === 1),
-				);
+				setIncidentTypes(types);
 				setLoadingTypes(false);
 			})
 			.catch((error) => {

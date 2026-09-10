@@ -7,7 +7,6 @@ export type IncidentType = {
 	safety_instructions: string | null;
 	icon: string;
 	color: string;
-	is_selectable: 0 | 1;
 	danger_level_id: number;
 	danger_level_weight: number;
 	danger_level_label: string;
