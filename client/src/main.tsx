@@ -1,7 +1,12 @@
 // Import necessary modules from React and React Router
 import { Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
-import { Outlet, RouterProvider, createBrowserRouter, type RouteObject } from "react-router";
+import {
+  Outlet,
+  RouterProvider,
+  createBrowserRouter,
+  type RouteObject,
+} from "react-router";
 
 /* ************************************************************************* */
 
@@ -14,6 +19,9 @@ import Details from "@/pages/Details/Details";
 import Login from "@/pages/Login/Login";
 import Register from "@/pages/Register/Register";
 import App from "@/App";
+import NotificationCenter from "@/pages/Notification/NotificationCenter";
+import PrivateRoute from "@/components/Routing/PrivateRoute/PrivateRoute";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 // DEV ONLY — pas des pages de l'app, voir src/_dev/README.md
 // Le bloc `if (import.meta.env.DEV)` est tree-shaké par Vite dans un build de prod :
@@ -28,7 +36,9 @@ if (import.meta.env.DEV) {
   const VigieViewer = lazy(() => import("@/_dev/VigieViewer"));
   const ColorPalette = lazy(() => import("@/_dev/ColorPalette"));
   const IconGallery = lazy(() => import("@/_dev/IconGallery"));
-  const ComponentGallery = lazy(() => import("@/_dev/design-system/ComponentGallery"));
+  const ComponentGallery = lazy(
+    () => import("@/_dev/design-system/ComponentGallery"),
+  );
 
   devRoutes = [
     {
@@ -101,6 +111,11 @@ const router = createBrowserRouter([
         path: "register",
         element: <Register />,
       },
+      {
+        path: "notifications",
+        element: <PrivateRoute />,
+        children: [{ index: true, element: <NotificationCenter /> }],
+      },
       ...devRoutes,
     ],
   },
@@ -115,4 +130,8 @@ if (rootElement == null) {
 }
 
 // Render the app inside the root element
-createRoot(rootElement).render(<RouterProvider router={router} />);
+createRoot(rootElement).render(
+  <AuthProvider>
+    <RouterProvider router={router} />
+  </AuthProvider>,
+);
