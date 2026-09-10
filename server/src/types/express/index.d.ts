@@ -8,6 +8,7 @@ declare global {
       // Add your custom properties here, for example:
       //
       // user?: { ... }
+      payload?: { sub: number };
       /* ************************************************************************* */
     }
   }
