@@ -93,7 +93,7 @@ const router = createBrowserRouter([
 				element: <PrivateRoute />,
 				children: [
 					{
-						path: "incident/add",
+						path: "incident/form",
 						element: <IncidentForm />,
 					},
 				],
