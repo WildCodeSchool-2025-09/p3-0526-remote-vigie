@@ -35,6 +35,7 @@ export type Incident = {
 	status: IncidentStatus;
 	createdAt: string;
 	editedAt: string | null;
+	expiresAt: string;
 	dangerLevel: IncidentDangerLevel;
 	author: IncidentAuthor;
 	types: IncidentType[];

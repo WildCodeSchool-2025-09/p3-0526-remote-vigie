@@ -6,6 +6,7 @@ import type {
 	IncidentStatus,
 	IncidentType,
 } from "@/types/incidentDetails";
+import { formatDateTime } from "@/utils/formatDate";
 
 type Props = {
 	types: IncidentType[];
@@ -33,10 +34,7 @@ function formatReportedAt(iso: string) {
 	if (date.toDateString() === yesterday.toDateString()) {
 		return `hier à ${time}`;
 	}
-	return `le ${date.toLocaleDateString("fr-FR", {
-		day: "numeric",
-		month: "long",
-	})} à ${time}`;
+	return `le ${formatDateTime(iso)}`;
 }
 
 export default function IncidentHeader({

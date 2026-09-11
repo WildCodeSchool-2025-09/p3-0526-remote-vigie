@@ -18,6 +18,7 @@ type IncidentDetails = {
 	status: "in_progress" | "resolved";
 	createdAt: Date;
 	editedAt: Date | null;
+	expiresAt: Date;
 	dangerLevel: { label: string; color: string; weight: number };
 	author: { pseudo: string };
 	types: {
@@ -37,7 +38,7 @@ class IncidentRepository {
 			`SELECT
 				i.id, i.title, i.description, i.photo_url,
 				i.latitude, i.longitude, i.city, i.insee_code,
-				i.status, i.created_at, i.edited_at,
+				i.status, i.created_at, i.edited_at, i.expires_at,
 				d.label AS danger_level_label,
 				d.color AS danger_level_color,
 				d.weight AS danger_level_weight,
@@ -91,6 +92,7 @@ class IncidentRepository {
 			status: row.status,
 			createdAt: row.created_at,
 			editedAt: row.edited_at,
+			expiresAt: row.expires_at,
 			dangerLevel: {
 				label: row.danger_level_label,
 				color: row.danger_level_color,

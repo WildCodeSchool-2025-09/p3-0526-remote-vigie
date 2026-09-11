@@ -7,7 +7,7 @@ type Props = {
 export default function IncidentContributions({ counts }: Props) {
 	return (
 		<div className="grid grid-cols-2 gap-3">
-			<div className="rounded-xl bg-base-300 p-3">
+			<div className="rounded-xl bg-base-300 px-4 py-2">
 				<p className="text-xs font-bold uppercase tracking-widest text-primary/50">
 					Confirmé
 				</p>
@@ -16,7 +16,7 @@ export default function IncidentContributions({ counts }: Props) {
 				</p>
 			</div>
 
-			<div className="rounded-xl bg-base-300 p-3">
+			<div className="rounded-xl bg-base-300 px-4 py-2">
 				<p className="text-xs font-bold uppercase tracking-widest text-primary/50">
 					Infirmé
 				</p>
