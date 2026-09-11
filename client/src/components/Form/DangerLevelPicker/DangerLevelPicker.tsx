@@ -7,19 +7,21 @@ export type DangerLevel = {
 	color: string;
 };
 
-type SeverityPickerProps = {
+type DangerLevelPickerProps = {
+	label: string;
 	dangerLevels: DangerLevel[];
 	value: number | null;
 	onChange: (dangerLevelId: number) => void;
 	error?: string | null;
 };
 
-export default function SeverityPicker({
+export default function DangerLevelPicker({
+	label,
 	dangerLevels,
 	value,
 	onChange,
 	error,
-}: SeverityPickerProps) {
+}: DangerLevelPickerProps) {
 	const errorId = useId();
 
 	function selectLevel(id: number) {
@@ -31,6 +33,7 @@ export default function SeverityPicker({
 			aria-describedby={error ? errorId : undefined}
 			className="min-w-0"
 		>
+			<legend className="font-bold text-primary pb-2">{label}</legend>
 			<div className="flex min-w-0 gap-2">
 				{dangerLevels.map((level) => {
 					const isSelected = value === level.id;

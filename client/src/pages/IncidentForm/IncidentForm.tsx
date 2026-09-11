@@ -1,15 +1,15 @@
 import EmailVerificationNotice from "@/components/Form/EmailVerificationNotice/EmailVerificationNotice";
 import IncidentTypePicker from "@/components/Form/IncidentTypePicker/IncidentTypePicker";
-import SeverityPicker, {
+import DangerLevelPicker, {
 	type DangerLevel,
-} from "@/components/Form/SeverityPicker/SeverityPicker";
+} from "@/components/Form/DangerLevelPicker/DangerLevelPicker";
 import SafetyInstructions from "@/components/SafetyInstructions/SafetyInstructions";
 import { useAuth } from "@/contexts/AuthContext";
 import { getIncidentTypes } from "@/services/incidentTypeService";
 import type { IncidentType } from "@/types/incidentForm";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-function computeHighestSeverity(
+function computeHighestDangerLevel(
 	incidentTypes: IncidentType[],
 	selectedTypes: number[],
 ): number | null {
@@ -31,8 +31,8 @@ export default function IncidentForm() {
 	const [selectedTypes, setSelectedTypes] = useState<number[]>([]);
 	const [loadingTypes, setLoadingTypes] = useState(true);
 	const [typesError, setTypesError] = useState<string | null>(null);
-	const [severity, setSeverity] = useState<number | null>(null);
-	const [severityTouched, setSeverityTouched] = useState(false);
+	const [dangerLevel, setDangerLevel] = useState<number | null>(null);
+	const [dangerLevelTouched, setDangerLevelTouched] = useState(false);
 
 	const loadIncidentTypes = useCallback((signal?: AbortSignal) => {
 		setLoadingTypes(true);
@@ -62,15 +62,15 @@ export default function IncidentForm() {
 
 	useEffect(() => {
 		if (selectedTypes.length === 0) {
-			setSeverity(null);
-			setSeverityTouched(false);
+			setDangerLevel(null);
+			setDangerLevelTouched(false);
 			return;
 		}
 
-		if (severityTouched) return;
+		if (dangerLevelTouched) return;
 
-		setSeverity(computeHighestSeverity(incidentTypes, selectedTypes));
-	}, [selectedTypes, incidentTypes, severityTouched]);
+		setDangerLevel(computeHighestDangerLevel(incidentTypes, selectedTypes));
+	}, [selectedTypes, incidentTypes, dangerLevelTouched]);
 
 	const dangerLevels = useMemo(() => {
 		const map = new Map<number, DangerLevel>();
@@ -163,7 +163,7 @@ export default function IncidentForm() {
 				</section>
 				<section className="rounded-2xl bg-base-200 p-4">
 					<div className="flex justify-between">
-						<div className="flex items-center gap-2 pb-8">
+						<div className="flex items-center gap-2 pb-4">
 							<span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-content">
 								2
 							</span>
@@ -173,12 +173,14 @@ export default function IncidentForm() {
 						</div>
 						<p className="text-neutral ">Facultatif</p>
 					</div>
-					<SeverityPicker
+
+					<DangerLevelPicker
+						label="Quelle est la gravité de la situation ?"
 						dangerLevels={dangerLevels}
-						value={severity}
+						value={dangerLevel}
 						onChange={(id) => {
-							setSeverity(id);
-							setSeverityTouched(true);
+							setDangerLevel(id);
+							setDangerLevelTouched(true);
 						}}
 					/>
 				</section>
