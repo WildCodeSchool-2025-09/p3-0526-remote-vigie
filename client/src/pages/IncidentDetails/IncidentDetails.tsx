@@ -6,6 +6,7 @@ import IncidentContent from "@/components/incident/IncidentContent/IncidentConte
 import IncidentContributions from "@/components/incident/IncidentContributions/IncidentContributions";
 import IncidentHeader from "@/components/incident/IncidentHeader/IncidentHeader";
 import IncidentLocation from "@/components/incident/IncidentLocation/IncidentLocation";
+import IncidentDetailsSkeleton from "@/pages/IncidentDetails/IncidentDetailsSkeleton";
 import { getIncidentById } from "@/services/incidentService";
 import type { Incident } from "@/types/incidentDetails";
 import Icon from "@/components/Icon/Icon";
@@ -49,11 +50,7 @@ export default function IncidentDetails() {
 	}, [id, reloadCount]);
 
 	if (state.status === "loading") {
-		return (
-			<p className="p-6 text-center text-sm text-primary/60">
-				Chargement…
-			</p>
-		);
+		return <IncidentDetailsSkeleton />;
 	}
 
 	// Card · centrée (DS) : icône en rond + titre + description + un CTA.
