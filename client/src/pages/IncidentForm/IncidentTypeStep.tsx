@@ -55,7 +55,9 @@ export default function IncidentTypeStep({
 						value={selectedTypes}
 						onChange={onSelectedTypesChange}
 					/>
-					<SafetyInstructions incidentTypes={selectedTypesInstructions} />
+					<SafetyInstructions
+						incidentTypes={selectedTypesInstructions}
+					/>
 				</>
 			)}
 		</section>
