@@ -1,20 +1,26 @@
-import Icon from "@/components/Icon/Icon";
-import type { IncidentType } from "@/types/incidentForm";
 import { useId, useState } from "react";
+import Icon from "@/components/Icon/Icon";
 
-type SafetyInstructionsProps = {
-	incidentTypes: IncidentType[];
-	value: number[];
+// Contrat volontairement minimal : ce composant est partagé (US01 le formulaire
+// de signalement, US02 la fiche détail). Il affiche les types qu'on lui donne —
+// filtrer parmi "tous les types" (formulaire) ou "les types de cet incident"
+// (fiche) est la responsabilité de l'appelant, pas la sienne.
+export type SafetyInstructionsItem = {
+	label: string;
+	color: string;
+	safetyInstructions: string | null;
 };
 
-export default function SafetyInstructions({
-	incidentTypes,
-	value,
-}: SafetyInstructionsProps) {
+type Props = {
+	incidentTypes: SafetyInstructionsItem[];
+};
+
+export default function SafetyInstructions({ incidentTypes }: Props) {
 	const [isOpen, setIsOpen] = useState(true);
 	const panelId = useId();
+
 	const instructions = incidentTypes.filter(
-		(type) => value.includes(type.id) && type.safety_instructions !== null,
+		(type) => type.safetyInstructions != null,
 	);
 
 	if (instructions.length === 0) {
@@ -53,7 +59,7 @@ export default function SafetyInstructions({
 					className="mt-3 space-y-3 border-t border-primary/10 pt-3 text-sm leading-relaxed"
 				>
 					{instructions.map((type) => (
-						<p key={type.id}>
+						<p key={type.label}>
 							<span
 								className="font-bold"
 								style={{ color: type.color }}
@@ -62,7 +68,7 @@ export default function SafetyInstructions({
 							</span>
 							<span className="text-black">
 								{" "}
-								— {type.safety_instructions}
+								— {type.safetyInstructions}
 							</span>
 						</p>
 					))}

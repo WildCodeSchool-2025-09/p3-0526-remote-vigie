@@ -89,6 +89,18 @@ export default function IncidentForm() {
 		return [...map.values()].sort((a, b) => a.weight - b.weight);
 	}, [incidentTypes]);
 
+	const selectedTypesInstructions = useMemo(
+		() =>
+			incidentTypes
+				.filter((type) => selectedTypes.includes(type.id))
+				.map((type) => ({
+					label: type.label,
+					color: type.color,
+					safetyInstructions: type.safety_instructions,
+				})),
+		[incidentTypes, selectedTypes],
+	);
+
 	// PrivateRoute a déjà filtré les non-connectés : ici `user` existe.
 	// S'il n'a pas vérifié son e-mail, on bloque le signalement.
 	if (!user?.emailVerified) {
@@ -144,8 +156,7 @@ export default function IncidentForm() {
 								onChange={setSelectedTypes}
 							/>
 							<SafetyInstructions
-								incidentTypes={incidentTypes}
-								value={selectedTypes}
+								incidentTypes={selectedTypesInstructions}
 							/>
 						</>
 					)}
