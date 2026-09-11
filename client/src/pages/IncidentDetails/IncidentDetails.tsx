@@ -8,6 +8,7 @@ import IncidentLocation from "@/components/incident/IncidentLocation/IncidentLoc
 import { getIncidentById } from "@/services/incidentService";
 import type { Incident } from "@/types/incidentDetails";
 import Icon from "@/components/Icon/Icon";
+import SafetyInstructions from "@/components/SafetyInstructions/SafetyInstructions";
 
 type ViewState =
 	| { status: "loading" }
@@ -108,6 +109,8 @@ export default function IncidentDetails() {
 					description={incident.description}
 					photoUrl={incident.photoUrl}
 				/>
+
+				<SafetyInstructions incidentTypes={incident.types} />
 			</div>
 		</div>
 	);
