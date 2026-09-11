@@ -1,13 +1,11 @@
+import type { DangerLevel } from "@/components/Form/DangerLevelPicker/DangerLevelPicker";
 import EmailVerificationNotice from "@/components/Form/EmailVerificationNotice/EmailVerificationNotice";
-import IncidentTypePicker from "@/components/Form/IncidentTypePicker/IncidentTypePicker";
-import DangerLevelPicker, {
-	type DangerLevel,
-} from "@/components/Form/DangerLevelPicker/DangerLevelPicker";
-import SafetyInstructions from "@/components/SafetyInstructions/SafetyInstructions";
 import { useAuth } from "@/contexts/AuthContext";
 import { getIncidentTypes } from "@/services/incidentTypeService";
 import type { IncidentType } from "@/types/incidentForm";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import DetailsStep from "./DetailsStep";
+import IncidentTypeStep from "./IncidentTypeStep";
 
 function computeHighestDangerLevel(
 	incidentTypes: IncidentType[],
@@ -124,66 +122,23 @@ export default function IncidentForm() {
 				</p>
 			</header>
 			<div className="relative -mt-8 space-y-4 px-4 pb-6">
-				<section className="rounded-2xl bg-base-200 p-4">
-					<div className="flex items-center gap-2 pb-8">
-						<span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-content">
-							1
-						</span>
-						<h2 className="font-title text-lg font-bold text-primary">
-							Que voulez-vous signaler ?
-						</h2>
-					</div>
-					{loadingTypes && <p>Chargement des types…</p>}
-					{typesError && (
-						<div className="text-center">
-							<p role="alert" className="m-2 ">
-								{typesError}
-							</p>
-							<button
-								type="button"
-								className="btn btn-accent btn-md w-full grow rounded-full border-none px-5 font-bold"
-								onClick={() => loadIncidentTypes()}
-							>
-								Réessayer
-							</button>
-						</div>
-					)}
-					{!loadingTypes && !typesError && (
-						<>
-							<IncidentTypePicker
-								incidentTypes={incidentTypes}
-								value={selectedTypes}
-								onChange={setSelectedTypes}
-							/>
-							<SafetyInstructions
-								incidentTypes={selectedTypesInstructions}
-							/>
-						</>
-					)}
-				</section>
-				<section className="rounded-2xl bg-base-200 p-4">
-					<div className="flex justify-between">
-						<div className="flex items-center gap-2 pb-4">
-							<span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-content">
-								2
-							</span>
-							<h2 className="font-title text-lg font-bold text-primary">
-								Détails
-							</h2>
-						</div>
-						<p className="text-neutral ">Facultatif</p>
-					</div>
-
-					<DangerLevelPicker
-						label="Quelle est la gravité de la situation ?"
-						dangerLevels={dangerLevels}
-						value={dangerLevel}
-						onChange={(id) => {
-							setDangerLevel(id);
-							setDangerLevelTouched(true);
-						}}
-					/>
-				</section>
+				<IncidentTypeStep
+					incidentTypes={incidentTypes}
+					selectedTypes={selectedTypes}
+					onSelectedTypesChange={setSelectedTypes}
+					loadingTypes={loadingTypes}
+					typesError={typesError}
+					onRetry={() => loadIncidentTypes()}
+					selectedTypesInstructions={selectedTypesInstructions}
+				/>
+				<DetailsStep
+					dangerLevels={dangerLevels}
+					dangerLevel={dangerLevel}
+					onDangerLevelChange={(id) => {
+						setDangerLevel(id);
+						setDangerLevelTouched(true);
+					}}
+				/>
 				<section className="rounded-2xl bg-base-200 p-4">…</section>
 			</div>
 		</div>
