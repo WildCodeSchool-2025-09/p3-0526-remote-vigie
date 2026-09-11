@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import bgIncidentDetails from "@/assets/images/background-incident-details.jpg";
+import IncidentContent from "@/components/incident/IncidentContent/IncidentContent";
 import IncidentContributions from "@/components/incident/IncidentContributions/IncidentContributions";
 import IncidentHeader from "@/components/incident/IncidentHeader/IncidentHeader";
 import IncidentLocation from "@/components/incident/IncidentLocation/IncidentLocation";
@@ -102,6 +103,11 @@ export default function IncidentDetails() {
 				</section>
 
 				<IncidentContributions counts={incident.counts} />
+
+				<IncidentContent
+					description={incident.description}
+					photoUrl={incident.photoUrl}
+				/>
 			</div>
 		</div>
 	);

@@ -4,8 +4,6 @@ type Props = {
 	counts: IncidentCounts;
 };
 
-// TODO — US02 · tâche 2.5 : affichage des décomptes confirmations/infirmations.
-// Les boutons Confirmer/Infirmer (leur logique) sont IncidentContributionActions, US14.
 export default function IncidentContributions({ counts }: Props) {
 	return (
 		<div className="grid grid-cols-2 gap-3">
