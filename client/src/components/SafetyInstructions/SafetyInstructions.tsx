@@ -2,6 +2,7 @@ import Icon from "@/components/Icon/Icon";
 import { useId, useState } from "react";
 
 export type SafetyInstructionsItem = {
+	code: string;
 	label: string;
 	color: string;
 	safetyInstructions: string | null;
@@ -63,7 +64,7 @@ export default function SafetyInstructions({ incidentTypes }: Props) {
 						className="mt-3 space-y-3 border-t border-primary/10 pt-3 text-sm leading-relaxed"
 					>
 						{instructions.map((type) => (
-							<p key={type.label}>
+							<p key={type.code}>
 								<span
 									className="font-bold"
 									style={{ color: type.color }}

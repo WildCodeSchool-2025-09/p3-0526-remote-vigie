@@ -10,7 +10,7 @@ const read: RequestHandler = async (req, res, next) => {
 		const id = Number(req.params.id);
 
 		if (!Number.isInteger(id) || id <= 0) {
-			res.sendStatus(StatusCodes.NOT_FOUND);
+			res.sendStatus(StatusCodes.BAD_REQUEST);
 			return;
 		}
 

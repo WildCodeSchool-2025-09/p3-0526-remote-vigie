@@ -9,7 +9,7 @@ import IncidentLocation from "@/components/incident/IncidentLocation/IncidentLoc
 import IncidentDetailsSkeleton from "@/pages/IncidentDetails/IncidentDetailsSkeleton";
 import { getIncidentById } from "@/services/incidentService";
 import type { Incident } from "@/types/incidentDetails";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 type ViewState =
@@ -22,32 +22,33 @@ export default function IncidentDetails() {
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const [state, setState] = useState<ViewState>({ status: "loading" });
-	const [reloadCount, setReloadCount] = useState(0);
-	const reload = () => setReloadCount((n) => n + 1);
+	// Compteur de requête : si une nouvelle requête part (id changé, ou clic sur
+	// "Réessayer") avant que la précédente ait répondu, on ignore la réponse
+	// périmée au lieu d'écraser un état plus récent.
+	const requestIdRef = useRef(0);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: reloadCount n'est pas lu, il sert juste à redéclencher le fetch (bouton "Réessayer").
-	useEffect(() => {
+	const fetchIncident = useCallback(() => {
 		if (id == null) {
 			setState({ status: "notFound" });
 			return;
 		}
 
-		let ignore = false;
+		const requestId = ++requestIdRef.current;
 		setState({ status: "loading" });
 
 		getIncidentById(id).then((result) => {
-			if (ignore) return;
+			if (requestId !== requestIdRef.current) return;
 			setState(
 				result.status === "ok"
 					? { status: "ok", incident: result.incident }
 					: result,
 			);
 		});
+	}, [id]);
 
-		return () => {
-			ignore = true;
-		};
-	}, [id, reloadCount]);
+	useEffect(() => {
+		fetchIncident();
+	}, [fetchIncident]);
 
 	if (state.status === "loading") {
 		return <IncidentDetailsSkeleton />;
@@ -110,7 +111,7 @@ export default function IncidentDetails() {
 					<div className="flex gap-3">
 						<button
 							type="button"
-							onClick={reload}
+							onClick={fetchIncident}
 							className="btn btn-md grow rounded-full border-none bg-error px-5 font-bold text-white"
 						>
 							Réessayer
