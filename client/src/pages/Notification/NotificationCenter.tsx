@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router";
 import Icon from "../../components/Icon/Icon";
 import NotificationItem from "../../components/NotificationItem";
 import { useNotificationCenter } from "../../contexts/Notification/useNotificationCenter";
@@ -35,6 +36,7 @@ function groupByDate(notifications: Notification[]) {
 }
 
 function NotificationCenter() {
+  const navigate = useNavigate();
   const {
     notifications,
     page,
@@ -134,6 +136,7 @@ function NotificationCenter() {
         </div>
             <button
               type="button"
+              onClick={() => navigate("/")}
               className="btn btn-accent btn-md w-full rounded-full border-none px-5 font-bold mt-3">
               Aller à l'accueil
             </button>

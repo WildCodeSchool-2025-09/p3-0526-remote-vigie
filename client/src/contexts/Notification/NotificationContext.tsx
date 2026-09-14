@@ -8,14 +8,12 @@ import {
 import notificationService from "../../services/notificationService";
 import type { NotificationContextValue } from "../../types/notification";
 
-const dismissedNotificationsKey = "vigie:dismissed-notifications";
+const readNotificationsKey = "vigie:read-notifications";
 
-function getDismissedNotifications() {
+function getReadNotifications() {
   try {
     return new Set(
-      JSON.parse(
-        sessionStorage.getItem(dismissedNotificationsKey) ?? "[]",
-      ) as string[],
+      JSON.parse(sessionStorage.getItem(readNotificationsKey) ?? "[]") as string[],
     );
   } catch {
     return new Set<string>();
@@ -42,11 +40,11 @@ export function NotificationProvider({
         notificationService.getNotifications(),
       ]);
 
-      const dismissedNotifications = getDismissedNotifications();
+      const readNotifications = getReadNotifications();
 
       const visibleUnreadCount = notifications.filter(
         (notification) =>
-          !dismissedNotifications.has(
+          !readNotifications.has(
             `${notification.type}:${notification.source_id}`,
           ),
       ).length;

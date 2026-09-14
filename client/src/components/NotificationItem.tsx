@@ -187,16 +187,20 @@ function NotificationItem({
       </div>
       <div className="min-w-0 grow">
         <div className="flex items-center gap-2 text-sm text-secondary/55">
-          {isUnread && (
+          {isUnread ? (
             <span className="rounded-full bg-(--error)/15 px-2 py-0.5 text-xs font-bold text-(--error)">
               Non lue
+            </span>
+          ) : (
+            <span className="rounded-full bg-secondary/10 px-2 py-0.5 text-xs font-bold text-secondary/60">
+              Lue
             </span>
           )}
           <time dateTime={notification.created_at}>
             {formatDate(notification.created_at)}
           </time>
         </div>
-        <h2 className="mt-1 font-title text-lg leading-tight sm:text-xl">
+        <h2 className="mt-1 line-clamp-2 font-title text-lg leading-tight sm:text-xl">
           {notification.type === "incident"
             ? (notification.incident_title ?? title)
             : title}

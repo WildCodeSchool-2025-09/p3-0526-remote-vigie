@@ -9,14 +9,12 @@ const notificationCache = {
   page: 1,
   hasMore: false,
 };
-const dismissedNotificationsKey = "vigie:dismissed-notifications";
+const readNotificationsKey = "vigie:read-notifications";
 
-function getDismissedNotifications() {
+function getReadNotifications() {
   try {
     return new Set(
-      JSON.parse(
-        sessionStorage.getItem(dismissedNotificationsKey) ?? "[]",
-      ) as string[],
+      JSON.parse(sessionStorage.getItem(readNotificationsKey) ?? "[]") as string[],
     );
   } catch {
     return new Set<string>();
@@ -48,24 +46,17 @@ export function useNotificationCenter() {
       setIsLoading(true);
       setError(null);
       const loaded = await notificationService.getNotifications(nextPage);
-      const dismissedNotifications = getDismissedNotifications();
-      const visibleNotifications = loaded.filter(
-        (notification) =>
-          !dismissedNotifications.has(getNotificationKey(notification)),
-      );
+      const readNotifications = getReadNotifications();
+      const withReadState = loaded.map((notification) => ({
+        ...notification,
+        is_read:
+          notification.is_read ??
+          readNotifications.has(getNotificationKey(notification)),
+      }));
       const nextNotifications =
         nextPage === 1
-          ? visibleNotifications.map((notification) => ({
-              ...notification,
-              is_read: notification.is_read ?? false,
-            }))
-          : [
-              ...notificationCache.notifications,
-              ...visibleNotifications.map((notification) => ({
-                ...notification,
-                is_read: notification.is_read ?? false,
-              })),
-            ];
+          ? withReadState
+          : [...notificationCache.notifications, ...withReadState];
       const nextHasMore = loaded.length === 20;
 
       notificationCache.hasValue = true;
@@ -94,24 +85,29 @@ export function useNotificationCenter() {
     await refreshUnreadCount();
   };
 
-  const markOneAsRead = (notificationToDismiss: Notification) => {
+  const markOneAsRead = (notificationToRead: Notification) => {
     const notification = notificationCache.notifications.find(
       (item) =>
-        getNotificationKey(item) === getNotificationKey(notificationToDismiss),
+        getNotificationKey(item) === getNotificationKey(notificationToRead),
     );
     if (!notification) return;
 
-    const dismissedNotifications = getDismissedNotifications();
-    dismissedNotifications.add(getNotificationKey(notification));
+    const readNotifications = getReadNotifications();
+    readNotifications.add(getNotificationKey(notification));
     sessionStorage.setItem(
-      dismissedNotificationsKey,
-      JSON.stringify([...dismissedNotifications]),
+      readNotificationsKey,
+      JSON.stringify([...readNotifications]),
     );
-    notificationCache.notifications = notificationCache.notifications.filter(
-      (item) => getNotificationKey(item) !== getNotificationKey(notification),
+
+    const wasUnread = notification.is_read === false;
+    notificationCache.notifications = notificationCache.notifications.map(
+      (item) =>
+        getNotificationKey(item) === getNotificationKey(notification)
+          ? { ...item, is_read: true }
+          : item,
     );
     setNotifications(notificationCache.notifications);
-    if (notification.is_read === false) markNotificationAsRead();
+    if (wasUnread) markNotificationAsRead();
   };
 
   useEffect(() => {
