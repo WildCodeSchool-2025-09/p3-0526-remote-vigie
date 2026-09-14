@@ -12,3 +12,8 @@ export type IncidentType = {
 	danger_level_label: string;
 	danger_level_color: string;
 };
+
+export type Position = {
+	lat: number;
+	lng: number;
+};

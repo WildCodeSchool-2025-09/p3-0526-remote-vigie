@@ -1,8 +1,8 @@
 import type { DangerLevel } from "@/components/Form/DangerLevelPicker/DangerLevelPicker";
 import EmailVerificationNotice from "@/components/Form/EmailVerificationNotice/EmailVerificationNotice";
-import { useAuth } from "@/contexts/AuthContext";
+import { type Address, useAuth } from "@/contexts/AuthContext";
 import { getIncidentTypes } from "@/services/incidentTypeService";
-import type { IncidentType } from "@/types/incidentForm";
+import type { IncidentType, Position } from "@/types/incidentForm";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import DetailsStep from "./DetailsStep";
 import IncidentTypeStep from "./IncidentTypeStep";
@@ -25,6 +25,11 @@ function computeHighestDangerLevel(
 export default function IncidentForm() {
 	const { user } = useAuth();
 
+	const [addressOptions, setAddressOptions] = useState<Address[]>([]);
+	const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
+		null,
+	);
+	const [position, setPosition] = useState<Position | null>(null);
 	const [incidentTypes, setIncidentTypes] = useState<IncidentType[]>([]);
 	const [selectedTypes, setSelectedTypes] = useState<number[]>([]);
 	const [loadingTypes, setLoadingTypes] = useState(true);
@@ -87,6 +92,36 @@ export default function IncidentForm() {
 		return [...map.values()].sort((a, b) => a.weight - b.weight);
 	}, [incidentTypes]);
 
+	useEffect(() => {
+		function fallbackToPrimaryAddress() {
+			if (!user) return;
+
+			setAddressOptions(user.addresses);
+			const primaryAddress = user.addresses.find(
+				(address) => address.is_primary,
+			);
+			setSelectedAddressId(primaryAddress?.id ?? null);
+		}
+		navigator.geolocation.getCurrentPosition((geoPosition) => {
+			setPosition({
+				lat: geoPosition.coords.latitude,
+				lng: geoPosition.coords.longitude,
+			});
+		}, fallbackToPrimaryAddress);
+	}, [user]);
+
+	useEffect(() => {
+		const selectedAddress = addressOptions.find(
+			(address) => address.id === selectedAddressId,
+		);
+		if (!selectedAddress) return;
+
+		setPosition({
+			lat: selectedAddress.latitude,
+			lng: selectedAddress.longitude,
+		});
+	}, [addressOptions, selectedAddressId]);
+
 	const selectedTypesInstructions = useMemo(
 		() =>
 			incidentTypes
@@ -138,7 +173,13 @@ export default function IncidentForm() {
 						setDangerLevel(id);
 						setDangerLevelTouched(true);
 					}}
+					addressOptions={addressOptions}
+					selectedAddressId={selectedAddressId}
+					onSelectedAddressIdChange={setSelectedAddressId}
+					position={position}
+					onPositionChange={setPosition}
 				/>
+
 				<section className="rounded-2xl bg-base-200 p-4">…</section>
 			</div>
 		</div>

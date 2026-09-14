@@ -1,23 +1,37 @@
+import AddressPicker from "@/components/Form/AddressPicker/AddressPicker";
 import DangerLevelPicker, {
 	type DangerLevel,
 } from "@/components/Form/DangerLevelPicker/DangerLevelPicker";
+import MapLocationPicker from "@/components/Form/MapLocationPicker/MapLocationPicker";
 import Icon from "@/components/Icon/Icon";
+import type { Address } from "@/contexts/AuthContext";
+import type { Position } from "@/types/incidentForm";
 import { useId, useState } from "react";
 
 type DetailsStepProps = {
 	dangerLevels: DangerLevel[];
 	dangerLevel: number | null;
 	onDangerLevelChange: (id: number) => void;
+	addressOptions: Address[];
+	selectedAddressId: number | null;
+	onSelectedAddressIdChange: (id: number) => void;
+	position: Position | null;
+	onPositionChange: (position: Position) => void;
 };
 
 export default function DetailsStep({
 	dangerLevels,
 	dangerLevel,
 	onDangerLevelChange,
+	addressOptions,
+	selectedAddressId,
+	onSelectedAddressIdChange,
+	position,
+	onPositionChange,
 }: DetailsStepProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const panelId = useId();
-
+	const [isChoosingPosition, setIsChoosingPosition] = useState(false);
 	return (
 		<section className="rounded-2xl bg-base-200 p-4">
 			<button
@@ -53,6 +67,65 @@ export default function DetailsStep({
 						value={dangerLevel}
 						onChange={onDangerLevelChange}
 					/>
+					{addressOptions.length > 0 && (
+						<AddressPicker
+							label="Impossible de vous localiser, veuillez choisir une adresse"
+							addresses={addressOptions}
+							value={selectedAddressId}
+							onChange={onSelectedAddressIdChange}
+						/>
+					)}
+
+					{position &&
+						(isChoosingPosition ? (
+							<div className="mt-6">
+								<MapLocationPicker
+									key="picker"
+									value={position}
+									onChange={onPositionChange}
+								/>
+								<button
+									type="button"
+									className="btn btn-accent btn-md grow w-full rounded-full border-none px-5 font-bold"
+									onClick={() => setIsChoosingPosition(false)}
+								>
+									<Icon
+										name="check"
+										className="h-4 w-4 fill-primary"
+										aria-hidden="true"
+									/>
+									Valider la position
+								</button>
+							</div>
+						) : (
+							<div className="mt-6 flex items-start gap-2 text-left">
+								<MapLocationPicker
+									key="summary"
+									value={position}
+									onChange={onPositionChange}
+									draggable={false}
+									className="w-20 shrink-0"
+								/>
+								<div className="text-left">
+									<p className="font-bold text-primary">
+										Position détectée
+									</p>
+									<p className="text-sm text-primary">
+										{position.lat.toFixed(5)},{" "}
+										{position.lng.toFixed(5)}
+									</p>
+									<button
+										type="button"
+										className="text-left text-sm font-bold text-primary underline"
+										onClick={() =>
+											setIsChoosingPosition(true)
+										}
+									>
+										Choisir un autre point
+									</button>
+								</div>
+							</div>
+						))}
 				</div>
 			)}
 		</section>
