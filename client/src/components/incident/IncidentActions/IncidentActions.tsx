@@ -71,7 +71,7 @@ export default function IncidentActions({ status, expiresAt }: Props) {
 					>
 						<Icon
 							name="check"
-							className="h-4 w-4 fill-primary"
+							className="h-4 w-4 fill-primary/20"
 							aria-hidden="true"
 						/>
 						Confirmer
@@ -83,7 +83,7 @@ export default function IncidentActions({ status, expiresAt }: Props) {
 					>
 						<Icon
 							name="crossSmall"
-							className="h-5 w-5 fill-primary"
+							className="h-5 w-5 fill-primary/20"
 							aria-hidden="true"
 						/>
 						Infirmer
