@@ -33,7 +33,6 @@ type IncidentDetails = {
 
 class IncidentRepository {
 	async read(id: number): Promise<IncidentDetails | null> {
-		// 1. The incident itself + its 1-to-1 relations (danger level, author).
 		const [rows] = await databaseClient.query<Rows>(
 			`SELECT
 				i.id, i.title, i.description, i.photo_url,
@@ -56,7 +55,6 @@ class IncidentRepository {
 			return null;
 		}
 
-		// 2. The incident's types (1-to-many, via the junction table).
 		const [typeRows] = await databaseClient.query<Rows>(
 			`SELECT t.code, t.label, t.icon, t.color, t.safety_instructions
 			FROM incident_incident_type AS iit
@@ -65,7 +63,6 @@ class IncidentRepository {
 			[id],
 		);
 
-		// 3. The confirm / deny counts (aggregation).
 		const [countRows] = await databaseClient.query<Rows>(
 			`SELECT type, COUNT(*) AS total
 			FROM contribution

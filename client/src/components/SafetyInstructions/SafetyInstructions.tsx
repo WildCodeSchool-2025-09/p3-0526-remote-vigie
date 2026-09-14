@@ -1,10 +1,6 @@
 import Icon from "@/components/Icon/Icon";
 import { useId, useState } from "react";
 
-// Contrat volontairement minimal : ce composant est partagé (US01 le formulaire
-// de signalement, US02 la fiche détail). Il affiche les types qu'on lui donne —
-// filtrer parmi "tous les types" (formulaire) ou "les types de cet incident"
-// (fiche) est la responsabilité de l'appelant, pas la sienne.
 export type SafetyInstructionsItem = {
 	label: string;
 	color: string;

@@ -9,12 +9,7 @@ type Props = {
 	expiresAt: string;
 };
 
-// Emplacement des actions sur l'incident : Confirmer/Infirmer (US14), et à
-// terme le partage (US15) — d'où un nom générique plutôt que centré sur les
-// seules contributions. Le clic des boutons de vote est hors périmètre ici ;
-// ce composant ne gère que : qui peut voir quoi (visiteur vs membre), le
-// retour sur la fiche après connexion, et le remplacement des actions par un
-// rappel de clôture une fois l'incident résolu.
+// Emplacement des actions sur l'incident : Confirmer/Infirmer (US14), et à terme le partage (US15)
 export default function IncidentActions({ status, expiresAt }: Props) {
 	const { user, loading } = useAuth();
 	const location = useLocation();
@@ -24,12 +19,7 @@ export default function IncidentActions({ status, expiresAt }: Props) {
 		return null;
 	}
 
-	// Un incident résolu ne se confirme/infirme plus (US02 · AC "Statuts") :
-	// on remplace les actions par la date de clôture + un retour à l'accueil.
-	// `expires_at` est la seule source fiable ici : dans ce modèle, le seul
-	// chemin vers "resolved" est la tâche planifiée d'US12 qui bascule le
-	// statut quand `expires_at` est dépassé — la valeur porte donc déjà le
-	// moment de résolution (à la fréquence du cron près).
+	// `expires_at` sert de date de résolution : c'est le seul chemin vers "resolved" (cron US12), donc la valeur la porte déjà.
 	if (status === "resolved") {
 		return (
 			<div className="flex flex-col gap-3 border-t border-primary/10 pt-4">

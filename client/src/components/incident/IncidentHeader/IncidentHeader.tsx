@@ -47,13 +47,10 @@ export default function IncidentHeader({
 	return (
 		<header className="flex flex-col gap-3">
 			<div className="flex items-start justify-between gap-2">
-				{/* Gravité : libellé + couleur issus de la base */}
 				<h2 className="font-title text-xl font-bold text-primary leading-none">
 					Incident <span>{dangerLevel.label.toLowerCase()}</span>
 				</h2>
 
-				{/* Statut — chips du design system (voir /help/components, famille Autres).
-				    Toujours un texte, dot/icône en renfort (jamais la couleur seule). */}
 				{status === "resolved" ? (
 					<div className="badge badge-md shrink-0 gap-1.5 border-0 bg-(--bg-success) font-bold text-success">
 						<Icon
@@ -77,8 +74,6 @@ export default function IncidentHeader({
 				)}
 			</div>
 
-			{/* Types — chip « Chip · type » du design system : badge + fond bg-{code}
-			    + texte {code}, icône dédiée (couleurs déjà dans le SVG). */}
 			<ul className="flex flex-wrap items-center gap-2">
 				{types.map((type) => {
 					const iconName =

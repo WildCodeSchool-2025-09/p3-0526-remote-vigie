@@ -1,6 +1,3 @@
-// Écran squelette affiché pendant le chargement de la fiche. Les blocs
-// reprennent la forme des vraies sections (bandeau, en-tête, carte, actions)
-// pour éviter tout saut de mise en page quand le contenu réel arrive.
 export default function IncidentDetailsSkeleton() {
 	return (
 		<div

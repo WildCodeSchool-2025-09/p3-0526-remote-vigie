@@ -53,7 +53,6 @@ export default function IncidentDetails() {
 		return <IncidentDetailsSkeleton />;
 	}
 
-	// Card · centrée (DS) : icône en rond + titre + description + un CTA.
 	if (state.status === "notFound") {
 		return (
 			<div className="flex min-h-dvh flex-col items-center justify-center bg-base-100 p-4">
@@ -86,7 +85,6 @@ export default function IncidentDetails() {
 		);
 	}
 
-	// Card · message · erreur (DS) : fond teinté error, icône pleine, 2 CTA.
 	if (state.status === "error") {
 		return (
 			<div className="flex min-h-dvh flex-col items-center justify-center bg-base-100 p-4">

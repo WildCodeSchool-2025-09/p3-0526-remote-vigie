@@ -14,8 +14,6 @@ type Props = {
 	types: IncidentType[];
 };
 
-// Repris de _dev/design-system/Map.tsx : rond blanc + icône SVG du type,
-// transformé en icône Leaflet. `color` est le hex renvoyé par la base.
 function createIncidentDivIcon(iconName: IconName, color: string) {
 	const SvgIcon = icons[iconName];
 
@@ -42,7 +40,7 @@ function createIncidentDivIcon(iconName: IconName, color: string) {
 
 	return L.divIcon({
 		html,
-		className: "", // évite le fond blanc carré par défaut de Leaflet
+		className: "", // évite le fond blanc
 		iconSize: [40, 40],
 		iconAnchor: [20, 20], // centre l'icône sur le point GPS
 	});
@@ -59,7 +57,6 @@ export default function IncidentLocation({
 	const lng = Number(longitude);
 	const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
 
-	// Le 1er type porte la couleur / l'icône de la pastille.
 	const primaryType = types[0];
 	const iconName: IconName =
 		primaryType && primaryType.icon in icons
