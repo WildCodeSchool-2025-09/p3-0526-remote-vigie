@@ -22,9 +22,6 @@ export default function IncidentDetails() {
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const [state, setState] = useState<ViewState>({ status: "loading" });
-	// Compteur de requête : si une nouvelle requête part (id changé, ou clic sur
-	// "Réessayer") avant que la précédente ait répondu, on ignore la réponse
-	// périmée au lieu d'écraser un état plus récent.
 	const requestIdRef = useRef(0);
 
 	const fetchIncident = useCallback(() => {
