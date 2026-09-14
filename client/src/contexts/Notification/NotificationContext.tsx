@@ -42,14 +42,14 @@ export function NotificationProvider({
 
       const readNotifications = getReadNotifications();
 
-      const visibleUnreadCount = notifications.filter(
-        (notification) =>
-          !readNotifications.has(
-            `${notification.type}:${notification.source_id}`,
-          ),
-      ).length;
+      const stillUnreadCount = notifications.filter((notification) => {
+        const isRead =
+          notification.is_read ??
+          readNotifications.has(`${notification.type}:${notification.source_id}`);
+        return !isRead;
+      }).length;
 
-      setUnreadCount(Math.min(serverCount, visibleUnreadCount));
+      setUnreadCount(Math.min(serverCount, stillUnreadCount));
     } catch {
       setUnreadCount(0);
     }

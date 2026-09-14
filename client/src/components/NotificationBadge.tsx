@@ -5,9 +5,16 @@ function NotificationBadge() {
   if (unreadCount === 0) return null;
 
   return (
-    <span className="badge badge-error badge-sm absolute -top-2 -right-2">
-      {unreadCount > 9 ? "9+" : unreadCount}
-    </span>
+    <>
+      <span
+        className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-(--accent)"
+        aria-hidden="true"
+      />
+      <span className="sr-only">
+        {unreadCount} notification{unreadCount > 1 ? "s" : ""} non lue
+        {unreadCount > 1 ? "s" : ""}
+      </span>
+    </>
   );
 }
 
