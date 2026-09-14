@@ -48,7 +48,7 @@ export default function IncidentActions({ status, expiresAt }: Props) {
 				<button
 					type="button"
 					onClick={() => navigate("/")}
-					className="btn btn-lg w-full rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10"
+					className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
 				>
 					Retour à l'accueil
 				</button>
@@ -67,11 +67,11 @@ export default function IncidentActions({ status, expiresAt }: Props) {
 					<button
 						type="button"
 						disabled
-						className="btn btn-lg grow gap-2 rounded-full border-2 border-primary bg-white/30 text-primary shadow-none disabled:opacity-40"
+						className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
 					>
 						<Icon
 							name="check"
-							className="h-5 w-5 fill-primary"
+							className="h-4 w-4 fill-primary"
 							aria-hidden="true"
 						/>
 						Confirmer
@@ -79,7 +79,7 @@ export default function IncidentActions({ status, expiresAt }: Props) {
 					<button
 						type="button"
 						disabled
-						className="btn btn-lg grow gap-2 rounded-full border-2 border-primary bg-white/30 text-primary shadow-none disabled:opacity-40"
+						className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
 					>
 						<Icon
 							name="crossSmall"
@@ -93,7 +93,7 @@ export default function IncidentActions({ status, expiresAt }: Props) {
 				<Link
 					to="/login"
 					state={{ from: location.pathname }}
-					className="btn btn-accent btn-lg rounded-full border-none px-5 font-bold"
+					className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
 				>
 					Se connecter
 				</Link>
@@ -103,21 +103,21 @@ export default function IncidentActions({ status, expiresAt }: Props) {
 
 	// Membre connecté : emplacement réservé, comportement du clic = US14.
 	return (
-		<div className="flex gap-3 border-t border-primary/10 pt-4">
+		<div className="flex gap-3 border-t border-primary/10 pt-5">
 			<button
 				type="button"
-				className="btn btn-lg grow gap-2 rounded-full border-2 border-primary bg-white/30 text-primary shadow-none hover:bg-primary/10"
+				className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
 			>
 				<Icon
 					name="check"
-					className="h-5 w-5 fill-primary"
+					className="h-4 w-4 fill-primary stroke-1 stroke-primary"
 					aria-hidden="true"
 				/>
 				Confirmer
 			</button>
 			<button
 				type="button"
-				className="btn btn-lg grow gap-2 rounded-full border-2 border-primary bg-white/30 text-primary shadow-none hover:bg-primary/10"
+				className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
 			>
 				<Icon
 					name="crossSmall"

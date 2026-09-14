@@ -55,10 +55,10 @@ export default function IncidentHeader({
 				{/* Statut — chips du design system (voir /help/components, famille Autres).
 				    Toujours un texte, dot/icône en renfort (jamais la couleur seule). */}
 				{status === "resolved" ? (
-					<div className="badge badge-sm shrink-0 gap-1.5 border-0 bg-(--bg-success) font-bold text-success">
+					<div className="badge badge-md shrink-0 gap-1.5 border-0 bg-(--bg-success) font-bold text-success">
 						<Icon
 							name="check"
-							className="h-3 w-3 fill-success"
+							className="h-3 w-3 fill-success stroke-1 stroke-success"
 							aria-hidden="true"
 						/>
 						Résolu
@@ -66,9 +66,12 @@ export default function IncidentHeader({
 				) : (
 					<div className="badge badge-accent badge-md shrink-0 gap-1.5 border-0 font-bold leading-none">
 						<span
-							className="h-1.5 w-1.5 rounded-full bg-primary"
+							className="relative flex size-2"
 							aria-hidden="true"
-						/>
+						>
+							<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+							<span className="size-2 rounded-full bg-primary" />
+						</span>
 						En cours
 					</div>
 				)}
