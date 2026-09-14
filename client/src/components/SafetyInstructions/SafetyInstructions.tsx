@@ -1,10 +1,6 @@
-import { useId, useState } from "react";
 import Icon from "@/components/Icon/Icon";
+import { useId, useState } from "react";
 
-// Contrat volontairement minimal : ce composant est partagé (US01 le formulaire
-// de signalement, US02 la fiche détail). Il affiche les types qu'on lui donne —
-// filtrer parmi "tous les types" (formulaire) ou "les types de cet incident"
-// (fiche) est la responsabilité de l'appelant, pas la sienne.
 export type SafetyInstructionsItem = {
 	label: string;
 	color: string;
@@ -47,33 +43,42 @@ export default function SafetyInstructions({ incidentTypes }: Props) {
 					</h2>
 				</span>
 				<Icon
-					name={isOpen ? "angleSmallUp" : "angleSmallDown"}
-					className="h-4 w-4 fill-primary/60"
+					name="angleSmallDown"
+					className={`h-4 w-4 fill-primary/60 transition-transform duration-300 ${
+						isOpen ? "rotate-180" : ""
+					}`}
 					aria-hidden="true"
 				/>
 			</button>
 
-			{isOpen && (
-				<div
-					id={panelId}
-					className="mt-3 space-y-3 border-t border-primary/10 pt-3 text-sm leading-relaxed"
-				>
-					{instructions.map((type) => (
-						<p key={type.label}>
-							<span
-								className="font-bold"
-								style={{ color: type.color }}
-							>
-								{type.label}
-							</span>
-							<span className="text-black">
-								{" "}
-								— {type.safetyInstructions}
-							</span>
-						</p>
-					))}
+			<div
+				className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+					isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+				}`}
+			>
+				<div className="overflow-hidden">
+					<div
+						id={panelId}
+						aria-hidden={!isOpen}
+						className="mt-3 space-y-3 border-t border-primary/10 pt-3 text-sm leading-relaxed"
+					>
+						{instructions.map((type) => (
+							<p key={type.label}>
+								<span
+									className="font-bold"
+									style={{ color: type.color }}
+								>
+									{type.label}
+								</span>
+								<span className="text-black">
+									{" "}
+									— {type.safetyInstructions}
+								</span>
+							</p>
+						))}
+					</div>
 				</div>
-			)}
+			</div>
 		</div>
 	);
 }
