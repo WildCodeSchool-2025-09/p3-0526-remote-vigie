@@ -70,6 +70,8 @@ const incidentBorderByType = {
 } as const;
 
 const commentBorder = "border-l-[var(--primary-dark)]";
+const badgeBorder = "border-l-[var(--insect)]";
+const readBorder = "border-l-[var(--grey)]";
 
 const incidentLabelByType = {
   fire: "Feu",
@@ -135,6 +137,16 @@ function NotificationItem({
   const label = notification.type === "badge" ? "Badge" : incidentLabel;
   const title = titleByType[notification.type];
   const isUnread = notification.is_read === false;
+  const typeBorder =
+    notification.type === "incident" ||
+    notification.type === "incident_resolved"
+      ? incidentBorder
+      : notification.type === "comment"
+        ? commentBorder
+        : notification.type === "badge"
+          ? badgeBorder
+          : "";
+  const borderColor = isUnread ? typeBorder : readBorder;
   const meta = [
     notification.city,
     notification.danger_level ? `gravité ${notification.danger_level}` : null,
@@ -160,14 +172,7 @@ function NotificationItem({
     <button
       type="button"
       onClick={handleClick}
-      className={`flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 ${
-        notification.type === "incident" ||
-        notification.type === "incident_resolved"
-          ? incidentBorder
-          : notification.type === "comment"
-            ? commentBorder
-            : ""
-      }`}
+      className={`flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 ${borderColor}`}
     >
       <div className="flex shrink-0 flex-col items-center gap-1">
         <div
