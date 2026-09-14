@@ -13,11 +13,11 @@ import {
 import App from "@/App";
 import Home from "@/pages/Home/Home";
 import Incident from "@/pages/Incident/Incident";
+import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
 import Login from "@/pages/Login/Login";
 import Numbers from "@/pages/Numbers/Numbers";
 import Profile from "@/pages/Profile/Profile";
 import Register from "@/pages/Register/Register";
-import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
 
 // DEV ONLY — pas des pages de l'app, voir src/_dev/README.md
 // Le bloc `if (import.meta.env.DEV)` est tree-shaké par Vite dans un build de prod :

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
 import bgIncidentDetails from "@/assets/images/background-incident-details.jpg";
+import Icon from "@/components/Icon/Icon";
+import SafetyInstructions from "@/components/SafetyInstructions/SafetyInstructions";
 import IncidentActions from "@/components/incident/IncidentActions/IncidentActions";
 import IncidentContent from "@/components/incident/IncidentContent/IncidentContent";
 import IncidentContributions from "@/components/incident/IncidentContributions/IncidentContributions";
@@ -9,8 +9,8 @@ import IncidentLocation from "@/components/incident/IncidentLocation/IncidentLoc
 import IncidentDetailsSkeleton from "@/pages/IncidentDetails/IncidentDetailsSkeleton";
 import { getIncidentById } from "@/services/incidentService";
 import type { Incident } from "@/types/incidentDetails";
-import Icon from "@/components/Icon/Icon";
-import SafetyInstructions from "@/components/SafetyInstructions/SafetyInstructions";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
 
 type ViewState =
 	| { status: "loading" }

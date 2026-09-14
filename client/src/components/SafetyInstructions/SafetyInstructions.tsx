@@ -1,5 +1,5 @@
-import { useId, useState } from "react";
 import Icon from "@/components/Icon/Icon";
+import { useId, useState } from "react";
 
 // Contrat volontairement minimal : ce composant est partagé (US01 le formulaire
 // de signalement, US02 la fiche détail). Il affiche les types qu'on lui donne —

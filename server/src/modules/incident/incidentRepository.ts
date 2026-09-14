@@ -74,7 +74,10 @@ class IncidentRepository {
 			[id],
 		);
 
-		const rawCounts = countRows as { type: "confirm" | "deny"; total: number }[];
+		const rawCounts = countRows as {
+			type: "confirm" | "deny";
+			total: number;
+		}[];
 		const counts = { confirm: 0, deny: 0 };
 		for (const line of rawCounts) {
 			counts[line.type] = Number(line.total);

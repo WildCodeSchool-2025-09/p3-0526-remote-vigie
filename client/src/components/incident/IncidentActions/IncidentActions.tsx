@@ -1,8 +1,8 @@
-import { Link, useLocation, useNavigate } from "react-router";
 import Icon from "@/components/Icon/Icon";
 import { useAuth } from "@/contexts/AuthContext";
 import type { IncidentStatus } from "@/types/incidentDetails";
 import { formatDateTime } from "@/utils/formatDate";
+import { Link, useLocation, useNavigate } from "react-router";
 
 type Props = {
 	status: IncidentStatus;
