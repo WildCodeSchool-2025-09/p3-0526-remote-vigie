@@ -7,8 +7,6 @@ export default function IncidentDetailsSkeleton() {
 		>
 			<span className="sr-only">Chargement du signalement…</span>
 
-			{/* Bandeau */}
-
 			<div className="relative mt-4 space-y-4 px-4 pb-6">
 				{/* IncidentHeader */}
 				<div className="flex flex-col gap-3 rounded-2xl bg-base-300 p-4">

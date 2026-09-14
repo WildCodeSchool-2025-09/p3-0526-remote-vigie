@@ -16,7 +16,6 @@ type Props = {
 	author: IncidentAuthor;
 };
 
-// "Signalé aujourd'hui à 14:12" / "hier à …" / "le 3 septembre à …"
 function formatReportedAt(iso: string) {
 	const date = new Date(iso);
 	const time = date.toLocaleTimeString("fr-FR", {
