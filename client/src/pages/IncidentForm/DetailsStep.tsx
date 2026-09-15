@@ -112,11 +112,19 @@ export default function DetailsStep({
 									className="w-20 shrink-0"
 								/>
 								<div className="text-left">
-									{addressOptions.length === 0 && (
-										<p className="font-bold text-primary">
-											Position détectée
-										</p>
-									)}
+									{addressOptions.length === 0 &&
+										(geolocationError ? (
+											<p className="font-bold text-primary">
+												Localisation impossible,
+												veuillez choisir une position
+												sur la carte :
+											</p>
+										) : (
+											<p className="font-bold text-primary">
+												Position détectée
+											</p>
+										))}
+
 									<p className="text-sm text-primary">
 										{position.lat.toFixed(5)},{" "}
 										{position.lng.toFixed(5)}

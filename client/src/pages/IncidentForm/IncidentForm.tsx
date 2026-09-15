@@ -122,6 +122,10 @@ export default function IncidentForm() {
 				(address) => address.is_primary,
 			);
 			setSelectedAddressId(primaryAddress?.id ?? null);
+
+			if (!primaryAddress) {
+				setPosition({ lat: 46.6034, lng: 1.8883 });
+			}
 		}
 		navigator.geolocation.getCurrentPosition((geoPosition) => {
 			setPosition({
