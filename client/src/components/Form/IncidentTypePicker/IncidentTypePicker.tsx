@@ -28,7 +28,7 @@ export default function IncidentTypePicker({
 
 	return (
 		<fieldset aria-describedby={error ? errorId : undefined}>
-			<div className="flex flex-wrap gap-x-3 gap-y-6">
+			<div className="grid grid-cols-3 gap-x-3 gap-y-6">
 				{incidentTypes.map((type) => {
 					const isSelected = value.includes(type.id);
 
@@ -38,7 +38,6 @@ export default function IncidentTypePicker({
 							type="button"
 							aria-pressed={isSelected}
 							onClick={() => toggleType(type.id)}
-							className="min-w-0 basis-[calc((100%-1.5rem)/3)]"
 						>
 							<div
 								className="relative flex aspect-square flex-col items-center justify-center gap-1 rounded-2xl border bg-base-300 p-3"
