@@ -172,7 +172,7 @@ function NotificationItem({
     <button
       type="button"
       onClick={handleClick}
-      className={`flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 ${borderColor}`}
+      className={`flex items-center gap-3 h-26 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 ${borderColor}`}
     >
       <div className="flex shrink-0 flex-col items-center gap-1">
         <div

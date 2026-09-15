@@ -9,6 +9,9 @@ const notificationCache = {
   page: 1,
   hasMore: false,
 };
+// Durée minimale d'affichage du skeleton, pour que l'effet reste perceptible
+// même quand la requête (succès ou échec) répond quasi instantanément.
+const MIN_LOADING_DURATION_MS = 1200;
 const readNotificationsKey = "vigie:read-notifications";
 
 function getReadNotifications() {
@@ -42,9 +45,10 @@ export function useNotificationCenter() {
       return;
     }
 
+    const startedAt = Date.now();
+    setIsLoading(true);
+    setError(null);
     try {
-      setIsLoading(true);
-      setError(null);
       const loaded = await notificationService.getNotifications(nextPage);
       const readNotifications = getReadNotifications();
       const withReadState = loaded.map((notification) => ({
@@ -70,6 +74,12 @@ export function useNotificationCenter() {
     } catch {
       setError("Impossible de charger les notifications.");
     } finally {
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < MIN_LOADING_DURATION_MS) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, MIN_LOADING_DURATION_MS - elapsed),
+        );
+      }
       setIsLoading(false);
     }
   }, []);

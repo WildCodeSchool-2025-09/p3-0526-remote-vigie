@@ -3,6 +3,7 @@ import Icon from "../../components/Icon/Icon";
 import NotificationItem from "../../components/NotificationItem";
 import { useNotificationCenter } from "../../contexts/Notification/useNotificationCenter";
 import type { Notification } from "../../types/notification";
+import NotificationsSkeleton from "./NotificationsSkeleton";
 
 function getDateGroupLabel(date: string) {
   const value = new Date(date);
@@ -89,12 +90,7 @@ function NotificationCenter() {
             </button>
           </div>
         )}
-        {isLoading && (
-          <div className="notification-state py-16 text-center">
-            <span className="loading loading-spinner loading-lg" />
-            <p className="mt-4 font-bold">Chargement de vos notifications...</p>
-          </div>
-        )}
+        {isLoading && <NotificationsSkeleton />}
         {error && (
           <div
             className="notification-state rounded-2xl border-2 border-error bg-base-100 p-8 text-center"
