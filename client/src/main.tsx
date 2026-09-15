@@ -11,10 +11,9 @@ import {
 /* ************************************************************************* */
 
 import App from "@/App";
-import Details from "@/pages/Details/Details";
-// Import the main app component
 import Home from "@/pages/Home/Home";
 import Incident from "@/pages/Incident/Incident";
+import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
 import Login from "@/pages/Login/Login";
 import Numbers from "@/pages/Numbers/Numbers";
 import Profile from "@/pages/Profile/Profile";
@@ -94,7 +93,7 @@ const router = createBrowserRouter([
 			},
 			{
 				path: "incident/:id",
-				element: <Details />,
+				element: <IncidentDetails />,
 			},
 			{
 				path: "profile",
