@@ -36,6 +36,9 @@ export default function IncidentForm() {
 	const [typesError, setTypesError] = useState<string | null>(null);
 	const [dangerLevel, setDangerLevel] = useState<number | null>(null);
 	const [dangerLevelTouched, setDangerLevelTouched] = useState(false);
+	const [geolocationError, setGeolocationError] = useState<string | null>(
+		null,
+	);
 
 	const loadIncidentTypes = useCallback((signal?: AbortSignal) => {
 		setLoadingTypes(true);
@@ -93,8 +96,26 @@ export default function IncidentForm() {
 	}, [incidentTypes]);
 
 	useEffect(() => {
-		function fallbackToPrimaryAddress() {
+		function fallbackToPrimaryAddress(error: GeolocationPositionError) {
 			if (!user) return;
+
+			switch (error.code) {
+				case error.PERMISSION_DENIED:
+					setGeolocationError(
+						"Vous avez refusé l'accès à votre position, veuillez choisir une adresse :",
+					);
+					break;
+				case error.POSITION_UNAVAILABLE:
+					setGeolocationError(
+						"Votre position n'a pas pu être déterminée, veuillez choisir une adresse : ",
+					);
+					break;
+				case error.TIMEOUT:
+					setGeolocationError(
+						"La détection de votre position a pris trop de temps, veuillez choisir une adresse :",
+					);
+					break;
+			}
 
 			setAddressOptions(user.addresses);
 			const primaryAddress = user.addresses.find(
@@ -178,6 +199,7 @@ export default function IncidentForm() {
 					onSelectedAddressIdChange={setSelectedAddressId}
 					position={position}
 					onPositionChange={setPosition}
+					geolocationError={geolocationError}
 				/>
 
 				<section className="rounded-2xl bg-base-200 p-4">…</section>

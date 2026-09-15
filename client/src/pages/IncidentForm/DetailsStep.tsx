@@ -17,6 +17,7 @@ type DetailsStepProps = {
 	onSelectedAddressIdChange: (id: number) => void;
 	position: Position | null;
 	onPositionChange: (position: Position) => void;
+	geolocationError: string | null;
 };
 
 export default function DetailsStep({
@@ -28,6 +29,7 @@ export default function DetailsStep({
 	onSelectedAddressIdChange,
 	position,
 	onPositionChange,
+	geolocationError,
 }: DetailsStepProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const panelId = useId();
@@ -69,7 +71,10 @@ export default function DetailsStep({
 					/>
 					{addressOptions.length > 0 && (
 						<AddressPicker
-							label="Impossible de vous localiser, veuillez choisir une adresse"
+							label={
+								geolocationError ??
+								"Impossible de vous localiser, veuillez choisir une adresse"
+							}
 							addresses={addressOptions}
 							value={selectedAddressId}
 							onChange={onSelectedAddressIdChange}
