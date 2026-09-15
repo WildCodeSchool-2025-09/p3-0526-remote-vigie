@@ -52,19 +52,28 @@ export default function DangerLevelPicker({
 									isSelected ? "scale-110" : ""
 								}`}
 								style={{
-									color: isSelected
-										? "var(--accent-light)"
-										: levelColor,
-									borderColor: levelColor,
+									borderColor: isSelected
+										? levelColor
+										: "var(--grey)",
 									backgroundColor: isSelected
-										? `var(--level-${level.weight})`
+										? `var(--bg-level-${level.weight})`
 										: "transparent",
 								}}
 							>
-								<span className="text-base font-bold">
+								<span
+									className="text-base font-bold"
+									style={{ color: levelColor }}
+								>
 									{level.weight}
 								</span>
-								<span className="text-[10px] leading-tight">
+								<span
+									className="text-[10px] leading-tight"
+									style={{
+										color: isSelected
+											? levelColor
+											: "var(--primary-dark)",
+									}}
+								>
 									{level.label}
 								</span>
 							</div>
