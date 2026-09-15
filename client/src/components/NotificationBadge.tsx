@@ -7,7 +7,7 @@ function NotificationBadge() {
   return (
     <>
       <span
-        className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-(--accent)"
+        className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-(--accent) border-2 border-primary"
         aria-hidden="true"
       />
       <span className="sr-only">

@@ -205,7 +205,7 @@ function NotificationItem({
             {formatDate(notification.created_at)}
           </time>
         </div>
-        <h2 className="mt-1 line-clamp-2 font-title text-lg leading-tight sm:text-xl">
+        <h2 className="font-title text-lg font-bold text-primary line-clamp-1">
           {notification.type === "incident"
             ? (notification.incident_title ?? title)
             : title}

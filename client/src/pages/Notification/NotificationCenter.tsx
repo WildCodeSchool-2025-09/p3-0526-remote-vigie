@@ -82,7 +82,7 @@ function NotificationCenter() {
               </span>
             </div>
             <button
-              className="shrink-0 text-sm font-bold text-secondary underline underline-offset-2"
+              className="shrink-0 text-xs font-bold text-secondary underline underline-offset-2"
               type="button"
               onClick={() => void markAllAsRead()}
             >
@@ -120,25 +120,30 @@ function NotificationCenter() {
           </div>
         )}
         {!isLoading && !error && notifications.length === 0 && (
-        <div className="flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4 relative -mt-8 space-y-4 px-4">
-          <div className="flex items-start gap-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
-              <Icon name="exclamation" className="h-3.5 w-3.5 fill-white" aria-hidden="true" />
-            </span>
-            <div>
-            <h2 className="font-title text-lg font-bold text-error">
-              Aucune notification
-            </h2>
-            <p className="mt-1 text-sm text-black">
-              Vous retrouverez ici les incidents signalés près de vos adresses,
-              les réponses à vos signalements et vos badges.
-            </p>
-          </div>
-        </div>
+          <div className="flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4 relative -mt-8 space-y-4 px-4">
+            <div className="flex items-start gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
+                <Icon
+                  name="exclamation"
+                  className="h-3.5 w-3.5 fill-white"
+                  aria-hidden="true"
+                />
+              </span>
+              <div>
+                <h2 className="font-title text-lg font-bold text-error">
+                  Aucune notification
+                </h2>
+                <p className="mt-1 text-sm text-black">
+                  Vous retrouverez ici les incidents signalés près de vos
+                  adresses, les réponses à vos signalements et vos badges.
+                </p>
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="btn btn-accent btn-md w-full rounded-full border-none px-5 font-bold mt-3">
+              className="btn btn-accent btn-md w-full rounded-full border-none px-5 font-bold mt-3"
+            >
               Aller à l'accueil
             </button>
           </div>
