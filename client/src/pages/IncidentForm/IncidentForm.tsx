@@ -152,6 +152,7 @@ export default function IncidentForm() {
 			incidentTypes
 				.filter((type) => selectedTypes.includes(type.id))
 				.map((type) => ({
+					code: type.code,
 					label: type.label,
 					color: type.color,
 					safetyInstructions: type.safety_instructions,

@@ -12,8 +12,8 @@ import {
 
 import App from "@/App";
 import PrivateRoute from "@/components/Routing/PrivateRoute/PrivateRoute";
-import Details from "@/pages/Details/Details";
 import Home from "@/pages/Home/Home";
+import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
 import IncidentForm from "@/pages/IncidentForm/IncidentForm";
 import Login from "@/pages/Login/Login";
 import Numbers from "@/pages/Numbers/Numbers";
@@ -100,7 +100,7 @@ const router = createBrowserRouter([
 			},
 			{
 				path: "incident/:id",
-				element: <Details />,
+				element: <IncidentDetails />,
 			},
 			{
 				path: "profile",

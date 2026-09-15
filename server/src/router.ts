@@ -16,4 +16,8 @@ router.post("/api/incidents", verifyToken, requireVerifiedEmail, (req, res) => {
 
 router.get("/api/incident-types", incidentTypeActions.browse);
 
+import incidentActions from "./modules/incident/incidentActions";
+
+router.get("/api/incidents/:id", incidentActions.read);
+
 export default router;
