@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import backgroundIncident from "../../assets/images/background-incident.jpg";
 import Icon from "../../components/Icon/Icon";
 import NotificationItem from "../../components/NotificationItem";
 import { useNotificationCenter } from "../../contexts/Notification/useNotificationCenter";
@@ -53,12 +54,11 @@ function NotificationCenter() {
     <main className="min-h-full bg-base-100">
       <header className="relative isolate flex h-36 flex-col justify-center overflow-hidden bg-primary px-4 pb-10">
         <img
-          src="/src/assets/images/background-incident.jpg"
+          src={backgroundIncident}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-70 mix-blend-multiply"
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-60 mix-blend-multiply"
         />
-        <div className="absolute inset-0 -z-10 bg-primary/80" />
         <h1 className="font-title text-2xl font-bold text-accent">
           Notifications
         </h1>
@@ -92,26 +92,31 @@ function NotificationCenter() {
         )}
         {isLoading && <NotificationsSkeleton />}
         {error && (
-          <div
-            className="notification-state rounded-2xl border-2 border-error bg-base-100 p-8 text-center"
-            role="alert"
-          >
-            <div className="mx-auto mb-6 grid size-32 place-items-center rounded-full border-2 border-primary text-5xl text-primary">
-              !
+          <div className="relative -mt-8 flex flex-col gap-4 rounded-3xl bg-base-300 p-4">
+            <div className="flex items-start gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
+                <Icon
+                  name="exclamation"
+                  className="h-3.5 w-3.5 fill-white"
+                  aria-hidden="true"
+                />
+              </span>
+              <div>
+                <h2 className="font-title text-lg font-bold text-error">
+                  Impossible d'afficher vos notifications
+                </h2>
+                <p className="mx-auto mt-3 max-w-lg text-secondary/70">
+                  La connexion au serveur a échoué. Réessayez dans un instant.
+                </p>
+                <button
+                  className="btn btn-accent btn-md basis-2/3 rounded-full border-none px-6 font-bold m-3"
+                  type="button"
+                  onClick={() => void loadNotifications()}
+                >
+                  Réessayer
+                </button>
+              </div>
             </div>
-            <h2 className="font-title text-3xl">
-              Impossible d'afficher vos notifications
-            </h2>
-            <p className="mx-auto mt-3 max-w-lg text-secondary/70">
-              La connexion au serveur a échoué. Réessayez dans un instant.
-            </p>
-            <button
-              className="btn btn-primary mt-6"
-              type="button"
-              onClick={() => void loadNotifications()}
-            >
-              Réessayer
-            </button>
           </div>
         )}
         {!isLoading && !error && notifications.length === 0 && (
