@@ -4,6 +4,7 @@ import SafetyInstructions from "@/components/SafetyInstructions/SafetyInstructio
 import IncidentActions from "@/components/incident/IncidentActions/IncidentActions";
 import IncidentContent from "@/components/incident/IncidentContent/IncidentContent";
 import IncidentContributions from "@/components/incident/IncidentContributions/IncidentContributions";
+import IncidentEditModal from "@/components/incident/IncidentEditModal/IncidentEditModal";
 import IncidentHeader from "@/components/incident/IncidentHeader/IncidentHeader";
 import IncidentLocation from "@/components/incident/IncidentLocation/IncidentLocation";
 import IncidentDetailsSkeleton from "@/pages/IncidentDetails/IncidentDetailsSkeleton";
@@ -23,6 +24,7 @@ export default function IncidentDetails() {
 	const { id } = useParams();
 	const [state, setState] = useState<ViewState>({ status: "loading" });
 	const requestIdRef = useRef(0);
+	const editModalRef = useRef<HTMLDialogElement>(null);
 
 	const fetchIncident = useCallback(() => {
 		if (id == null) {
@@ -157,7 +159,23 @@ export default function IncidentDetails() {
 				<h1 className="font-title text-2xl font-bold text-white">
 					{incident.title}
 				</h1>
+				{incident.status === "in_progress" && (
+					<button
+						type="button"
+						className="btn btn-square btn-md rounded-2xl border-none bg-transparent shadow-none hover:bg-white/50"
+						aria-label="Éditer l'incident"
+						onClick={() => editModalRef.current?.showModal()}
+					>
+						<Icon
+							name="pencil"
+							className="h-4 w-4 fill-white"
+							aria-hidden="true"
+						/>
+					</button>
+				)}
 			</header>
+
+			<IncidentEditModal dialogRef={editModalRef} />
 
 			<div className="relative -mt-8 space-y-4 px-4 pb-6">
 				<section className="rounded-2xl bg-base-300 p-4">

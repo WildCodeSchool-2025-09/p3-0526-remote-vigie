@@ -22,6 +22,7 @@ import LandLocation from "./interface/land-location.svg?react";
 import Lock from "./interface/lock.svg?react";
 import Marker from "./interface/marker.svg?react";
 import MenuDotsVertical from "./interface/menu-dots-vertical.svg?react";
+import Pencil from "./interface/pencil.svg?react";
 import PhoneFlip from "./interface/phone-flip.svg?react";
 import PlusSmall from "./interface/plus-small.svg?react";
 import QuoteRight from "./interface/quote-right.svg?react";
@@ -86,6 +87,7 @@ export const icons = {
 	lock: Lock,
 	marker: Marker,
 	menuDotsVertical: MenuDotsVertical,
+	pencil: Pencil,
 	phoneFlip: PhoneFlip,
 	plusSmall: PlusSmall,
 	quoteRight: QuoteRight,
