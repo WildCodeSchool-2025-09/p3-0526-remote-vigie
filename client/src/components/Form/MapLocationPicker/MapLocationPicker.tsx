@@ -2,7 +2,7 @@ import { icons } from "@/assets/icons";
 import type { Position } from "@/types/incidentForm";
 import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 type MapLocationPickerProps = {
@@ -21,6 +21,17 @@ const markerIcon = L.divIcon({
 	iconAnchor: [16, 32],
 });
 
+function ClickToPlace({
+	onChange,
+}: { onChange: (position: Position) => void }) {
+	useMapEvents({
+		click(event) {
+			onChange({ lat: event.latlng.lat, lng: event.latlng.lng });
+		},
+	});
+	return null;
+}
+
 export default function MapLocationPicker({
 	value,
 	onChange,
@@ -38,9 +49,12 @@ export default function MapLocationPicker({
 					className="h-full w-full"
 					dragging={draggable}
 					zoomControl={draggable}
-					attributionControl={false}
+					attributionControl={draggable}
 				>
-					<TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
+					<TileLayer
+						attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+						url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+					/>
 					<Marker
 						position={[value.lat, value.lng]}
 						icon={markerIcon}
@@ -53,15 +67,18 @@ export default function MapLocationPicker({
 							},
 						}}
 					/>
+					{draggable && <ClickToPlace onChange={onChange} />}
 				</MapContainer>
 			</div>
-			<p className="text-[10px] text-neutral">
-				©{" "}
-				<a href="https://www.openstreetmap.org/copyright">
-					OpenStreetMap
-				</a>{" "}
-				contributors
-			</p>
+			{!draggable && (
+				<p className="text-[10px] text-neutral">
+					©{" "}
+					<a href="https://www.openstreetmap.org/copyright">
+						OpenStreetMap
+					</a>{" "}
+					contributors
+				</p>
+			)}
 		</div>
 	);
 }

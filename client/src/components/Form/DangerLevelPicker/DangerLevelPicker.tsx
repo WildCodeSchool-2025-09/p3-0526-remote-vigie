@@ -48,26 +48,23 @@ export default function DangerLevelPicker({
 							className="min-w-0 flex-1"
 						>
 							<div
-								className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-2xl border-2 p-1 transition-transform ${
+								className={`flex aspect-square flex-col items-center justify-center rounded-2xl border-2 p-1 transition-transform ${
 									isSelected ? "scale-110" : ""
 								}`}
 								style={{
+									color: isSelected
+										? "var(--accent-light)"
+										: levelColor,
 									borderColor: levelColor,
 									backgroundColor: isSelected
-										? `var(--bg-level-${level.weight})`
+										? `var(--level-${level.weight})`
 										: "transparent",
 								}}
 							>
-								<span
-									className="text-base font-bold"
-									style={{ color: levelColor }}
-								>
+								<span className="text-base font-bold">
 									{level.weight}
 								</span>
-								<span
-									className="text-[10px] leading-tight"
-									style={{ color: levelColor }}
-								>
+								<span className="text-[10px] leading-tight">
 									{level.label}
 								</span>
 							</div>

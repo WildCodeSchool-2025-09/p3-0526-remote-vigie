@@ -86,7 +86,7 @@ export default function DetailsStep({
 								/>
 								<button
 									type="button"
-									className="btn btn-accent btn-md grow w-full rounded-full border-none px-5 font-bold"
+									className="btn btn-accent btn-md mt-4 w-full rounded-full border-none px-5 font-bold"
 									onClick={() => setIsChoosingPosition(false)}
 								>
 									<Icon
@@ -107,9 +107,11 @@ export default function DetailsStep({
 									className="w-20 shrink-0"
 								/>
 								<div className="text-left">
-									<p className="font-bold text-primary">
-										Position détectée
-									</p>
+									{addressOptions.length === 0 && (
+										<p className="font-bold text-primary">
+											Position détectée
+										</p>
+									)}
 									<p className="text-sm text-primary">
 										{position.lat.toFixed(5)},{" "}
 										{position.lng.toFixed(5)}
@@ -121,7 +123,9 @@ export default function DetailsStep({
 											setIsChoosingPosition(true)
 										}
 									>
-										Choisir un autre point
+										{addressOptions.length > 0
+											? "Ajuster la localisation"
+											: "Choisir un autre point"}
 									</button>
 								</div>
 							</div>
