@@ -73,7 +73,7 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 						{STATUS_LABEL[status]}
 					</span>
 				</div>
-				<h2 className="mt-1.5 font-title text-lg font-bold text-primary">
+				<h2 className="mt-1.5 line-clamp-2 font-title text-lg font-bold text-primary">
 					{incident.title}
 				</h2>
 				<p className="mt-1 text-xs text-primary/50">
