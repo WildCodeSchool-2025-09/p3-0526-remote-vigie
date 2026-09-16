@@ -1,11 +1,13 @@
 import { NavLink, Outlet, useLocation } from "react-router";
 import "./index.css";
+import { useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/Notification/NotificationContext";
 import Icon from "./components/Icon/Icon";
 import NotificationBadge from "./components/NotificationBadge";
 
 function App() {
   const { pathname } = useLocation();
+  const { user } = useAuth();
   const isDevHelpRoute = pathname === "/help" || pathname.startsWith("/help/");
 
   return (
@@ -49,18 +51,20 @@ function App() {
               <Icon name="danger" className="size-10" />
               <span>Danger</span>
             </NavLink>
-            <NavLink
-              to="/notifications"
-              className={({ isActive }) =>
-                `relative flex flex-col items-center justify-center gap-0.5 text-xs font-bold no-underline ${isActive ? "text-(--accent)" : "text-(--bg-light)/75"}`
-              }
-            >
-              <span className="relative">
-                <Icon name="notification" className="size-7" />
-                <NotificationBadge />
-              </span>
-              <span>Notifs</span>
-            </NavLink>
+            {user != null && (
+              <NavLink
+                to="/notifications"
+                className={({ isActive }) =>
+                  `relative flex flex-col items-center justify-center gap-0.5 text-xs font-bold no-underline ${isActive ? "text-(--accent)" : "text-(--bg-light)/75"}`
+                }
+              >
+                <span className="relative">
+                  <Icon name="notification" className="size-7" />
+                  <NotificationBadge />
+                </span>
+                <span>Notifs</span>
+              </NavLink>
+            )}
             <NavLink
               to="/profile"
               className={({ isActive }) =>
