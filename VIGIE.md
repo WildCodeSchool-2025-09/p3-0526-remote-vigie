@@ -68,6 +68,14 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 | US14 | Confirmer / infirmer un incident (pilote la durée de vie) | 3 | Frédéric Briand | `feat/US14-incident-contributions` |
 | US15 | Partager un incident (menu natif / copie de lien) | 3 | Frédéric Briand | `feat/US15-incident-share` |
 | US16 | Barre de navigation fixe + gabarit commun des pages | 3 | Frédéric Briand | `feat/US16-navigation` |
+| US27 | Ajouter une photo à son signalement depuis son téléphone (vrai upload) | 3 | À affecter | `feat/US27-photo-upload` |
+
+> **US27 est transverse** : elle remplace, pour US01 (création) et US07 (édition), le repli actuel
+> — un simple champ URL — par un vrai import de fichier (redimensionnement, EXIF, stockage,
+> validation MIME/taille). US01 et US07 restent finissables et livrables sans elle (photo
+> optionnelle / repli URL déjà couverts par leurs propres critères d'acceptation) ; US27 vient
+> ensuite compléter les deux. Composant partagé déjà livré par US07 :
+> `client/src/components/Form/PhotoField/PhotoField.tsx`.
 
 ### V2
 
@@ -590,6 +598,10 @@ Type, position et gravité sont **verrouillés** dès l'envoi de l'alerte : ce s
 déterminé qui a été alerté, dans quel rayon et pour combien de temps. Seuls titre, description
 et photo restent modifiables, et seulement tant que l'incident est `in_progress`. Une
 modification ne renvoie **aucune** alerte ; la fiche indique « modifié le … ».
+
+Le vrai import de fichier photo (redimensionnement, EXIF, stockage) est traité par l'US
+transverse US27, commune à US01 et US07 (§3). En attendant, le champ photo reste une simple
+saisie d'URL côté US07.
 
 ### Authentification (US05, US06)
 
