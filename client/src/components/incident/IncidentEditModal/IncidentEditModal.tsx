@@ -17,6 +17,7 @@ export default function IncidentEditModal({
 }: Props) {
 	const [titleValue, setTitleValue] = useState(title);
 	const [descriptionValue, setDescriptionValue] = useState(description ?? "");
+	const [photoUrlValue, setPhotoUrlValue] = useState(photoUrl);
 
 	return (
 		<dialog ref={dialogRef} className="modal modal-bottom sm:modal-middle">
@@ -54,19 +55,24 @@ export default function IncidentEditModal({
 
 				<form method="dialog">
 					<div className="mt-5 flex flex-col gap-1.5">
-						<label
-							htmlFor="incident-edit-title"
-							className="mb-1.5 block text-sm font-bold text-primary"
-						>
-							Titre
-						</label>
+						<div className="flex items-center justify-between gap-2">
+							<label
+								htmlFor="incident-edit-title"
+								className="mb-1.5 block text-sm font-bold text-primary"
+							>
+								Titre
+							</label>
+							<span className="text-xs text-primary/40">
+								{titleValue.length} / 150 caractères
+							</span>
+						</div>
 						<input
 							id="incident-edit-title"
 							type="text"
 							value={titleValue}
 							placeholder="Ajouter un titre (facultatif)"
 							onChange={(e) => setTitleValue(e.target.value)}
-							maxLength={100}
+							maxLength={150}
 							className="w-full rounded-xl border-2 border-primary/15 bg-base-300 px-4 py-3 pr-8 text-black placeholder:text-black/40 focus:outline-none"
 						/>
 					</div>
@@ -92,24 +98,60 @@ export default function IncidentEditModal({
 								setDescriptionValue(e.target.value)
 							}
 							maxLength={1000}
-							className="w-full resize-none rounded-3xl border-2 border-primary/15 bg-base-300 px-5 py-4 text-black placeholder:text-black/40 focus:outline-none"
+							className="w-full resize-none rounded-xl border-2 border-primary/15 bg-base-300 px-5 py-4 text-black placeholder:text-black/40 focus:outline-none"
 						/>
 					</div>
 
 					<div className="mt-4 flex flex-col gap-1.5 mb-5">
-						<label
-							htmlFor="incident-edit-photo"
-							className="mb-1.5 block text-sm font-bold text-primary"
-						>
+						<p className="mb-1.5 block text-sm font-bold text-primary">
 							Photo
-						</label>
-						<input
-							id="incident-edit-photo"
-							type="text"
-							defaultValue={photoUrl ?? ""}
-							placeholder="URL de la photo"
-							className="w-full rounded-xl border-2 border-primary/15 bg-base-300 px-4 py-3 pr-8 text-black placeholder:text-black/40 focus:outline-none"
-						/>
+						</p>
+						{photoUrlValue ? (
+							<div className="relative overflow-hidden rounded-xl">
+								<img
+									src={photoUrlValue}
+									alt="Aperçu actuel du signalement"
+									className="w-full object-cover"
+								/>
+								<div className="absolute top-2 right-2 flex gap-2">
+									<button
+										type="button"
+										className="btn btn-square btn-sm rounded-xl border-none bg-black/40 shadow-none hover:bg-black/60"
+										aria-label="Remplacer la photo"
+									>
+										<Icon
+											name="pencil"
+											className="h-3 w-3 fill-white"
+											aria-hidden="true"
+										/>
+									</button>
+									<button
+										type="button"
+										onClick={() => setPhotoUrlValue(null)}
+										className="btn btn-square btn-sm rounded-xl border-none bg-black/40 shadow-none hover:bg-black/60"
+										aria-label="Supprimer la photo"
+									>
+										<Icon
+											name="crossSmall"
+											className="h-5 w-5 fill-white"
+											aria-hidden="true"
+										/>
+									</button>
+								</div>
+							</div>
+						) : (
+							<button
+								type="button"
+								className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-primary/20 bg-transparent py-6 text-sm font-bold text-primary/60 hover:bg-primary/5"
+							>
+								<Icon
+									name="camera"
+									className="h-5 w-5 fill-primary/40"
+									aria-hidden="true"
+								/>
+								Ajouter une photo
+							</button>
+						)}
 					</div>
 					<div className="flex gap-3 w-full border-t border-primary/10 pt-5">
 						<button
