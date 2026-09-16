@@ -30,7 +30,7 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 			className="flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3"
 			style={{ borderLeftColor: typeColorVar }}
 		>
-			<div className="flex shrink-0 flex-col items-center gap-1">
+			<div className="flex w-14 shrink-0 flex-col items-center gap-1">
 				<div
 					className="flex h-14 w-14 items-center justify-center rounded-xl"
 					style={{ backgroundColor: typeBgVar }}
@@ -45,7 +45,7 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 				</div>
 				{type && (
 					<span
-						className="text-xs font-bold"
+						className="line-clamp-2 text-center text-xs font-bold"
 						style={{ color: typeColorVar }}
 					>
 						{type.label}
@@ -54,9 +54,9 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 			</div>
 
 			<div className="min-w-0 flex-1">
-				<div className="flex flex-wrap items-center gap-1.5">
+				<div className="flex flex-col items-start gap-1.5 min-[370px]:flex-row min-[370px]:items-center">
 					<span
-						className="badge badge-sm border font-bold"
+						className="badge badge-sm whitespace-nowrap border font-bold"
 						style={{
 							borderColor: `var(--level-${dangerLevel.weight})`,
 							backgroundColor: `var(--bg-level-${dangerLevel.weight})`,
@@ -65,7 +65,7 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 					>
 						Incident {dangerLevel.label.toLowerCase()}
 					</span>
-					<span className="badge badge-sm gap-1.5 border-0 font-bold bg-(--primary-light) text-success">
+					<span className="badge badge-sm gap-1.5 whitespace-nowrap border-0 font-bold bg-(--primary-light) text-success">
 						<span
 							className="h-1.5 w-1.5 rounded-full bg-success"
 							aria-hidden="true"
