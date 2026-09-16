@@ -1,4 +1,5 @@
 import Icon from "@/components/Icon/Icon";
+import PhotoField from "@/components/Form/PhotoField/PhotoField";
 import { useState } from "react";
 import type { RefObject } from "react";
 
@@ -102,57 +103,10 @@ export default function IncidentEditModal({
 						/>
 					</div>
 
-					<div className="mt-4 flex flex-col gap-1.5 mb-5">
-						<p className="mb-1.5 block text-sm font-bold text-primary">
-							Photo
-						</p>
-						{photoUrlValue ? (
-							<div className="relative overflow-hidden rounded-xl">
-								<img
-									src={photoUrlValue}
-									alt="Aperçu actuel du signalement"
-									className="w-full object-cover"
-								/>
-								<div className="absolute top-2 right-2 flex gap-2">
-									<button
-										type="button"
-										className="btn btn-square btn-sm rounded-xl border-none bg-black/40 shadow-none hover:bg-black/60"
-										aria-label="Remplacer la photo"
-									>
-										<Icon
-											name="pencil"
-											className="h-3 w-3 fill-white"
-											aria-hidden="true"
-										/>
-									</button>
-									<button
-										type="button"
-										onClick={() => setPhotoUrlValue(null)}
-										className="btn btn-square btn-sm rounded-xl border-none bg-black/40 shadow-none hover:bg-black/60"
-										aria-label="Supprimer la photo"
-									>
-										<Icon
-											name="crossSmall"
-											className="h-5 w-5 fill-white"
-											aria-hidden="true"
-										/>
-									</button>
-								</div>
-							</div>
-						) : (
-							<button
-								type="button"
-								className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-primary/20 bg-transparent py-6 text-sm font-bold text-primary/60 hover:bg-primary/5"
-							>
-								<Icon
-									name="camera"
-									className="h-5 w-5 fill-primary/40"
-									aria-hidden="true"
-								/>
-								Ajouter une photo
-							</button>
-						)}
-					</div>
+					<PhotoField
+						value={photoUrlValue}
+						onChange={setPhotoUrlValue}
+					/>
 					<div className="flex gap-3 w-full border-t border-primary/10 pt-5">
 						<button
 							type="submit"
