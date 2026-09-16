@@ -48,9 +48,8 @@ export default function IncidentEditModal({
 						aria-hidden="true"
 					/>
 					<p className="text-sm text-primary">
-						Le type, la gravité et la position ne peuvent pas être
-						modifiés : ils définissent qui a été alerté, dans quel
-						rayon et pour combien de temps.
+						Les types, le niveau de gravité et le lieu ne peuvent
+						pas être modifiés.
 					</p>
 				</div>
 

@@ -9,5 +9,6 @@ const router = express.Router();
 import incidentActions from "./modules/incident/incidentActions";
 
 router.get("/api/incidents/:id", incidentActions.read);
+router.put("/api/incidents/:id", incidentActions.edit);
 
 export default router;

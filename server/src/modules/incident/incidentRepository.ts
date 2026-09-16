@@ -109,6 +109,22 @@ class IncidentRepository {
 			counts,
 		};
 	}
+
+	async update(
+		id: number,
+		data: {
+			title: string;
+			description: string | null;
+			photoUrl: string | null;
+		},
+	): Promise<void> {
+		await databaseClient.query(
+			`UPDATE incident
+			SET title = ?, description = ?, photo_url = ?, edited_at = NOW()
+			WHERE id = ?`,
+			[data.title, data.description, data.photoUrl, id],
+		);
+	}
 }
 
 export default new IncidentRepository();
