@@ -14,12 +14,12 @@ function IncidentCardSkeleton() {
 	return (
 		<div
 			aria-hidden="true"
-			className="flex animate-pulse items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3"
+			className="flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3"
 		>
-			<div className="h-14 w-14 shrink-0 rounded-xl bg-primary/10" />
+			<div className="skeleton h-14 w-14 shrink-0 rounded-xl" />
 			<div className="flex min-w-0 flex-1 flex-col gap-2">
-				<div className="h-4 w-2/3 rounded-full bg-primary/10" />
-				<div className="h-3 w-1/3 rounded-full bg-primary/10" />
+				<div className="skeleton h-4 w-2/3 rounded-full" />
+				<div className="skeleton h-3 w-1/3 rounded-full" />
 			</div>
 		</div>
 	);
@@ -46,61 +46,66 @@ export default function IncidentList({
 
 	if (hasError) {
 		return (
-			<div
-				role="alert"
-				aria-live="assertive"
-				className="flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4"
-			>
-				<div className="flex items-start gap-3">
-					<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
-						<Icon
-							name="exclamation"
-							className="h-3.5 w-3.5 fill-white"
-							aria-hidden="true"
-						/>
-					</span>
-					<div>
-						<h2 className="font-title text-lg font-bold text-error">
-							Impossible de charger les incidents
-						</h2>
-						<p className="mt-1 text-sm text-black">
-							La connexion au serveur a échoué. Vos alertes ne
-							sont pas affectées : elles arriveront normalement.
-						</p>
-					</div>
-				</div>
-				<button
-					type="button"
-					onClick={onRetry}
-					className="btn btn-md rounded-full border-none bg-error px-5 font-bold text-white"
+			<div className="flex flex-1 flex-col items-center justify-center">
+				<div
+					role="alert"
+					aria-live="assertive"
+					className="flex w-full max-w-sm flex-col gap-4 rounded-3xl bg-(--bg-error) p-4"
 				>
-					Réessayer
-				</button>
+					<div className="flex items-start gap-3">
+						<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
+							<Icon
+								name="exclamation"
+								className="h-3.5 w-3.5 fill-white"
+								aria-hidden="true"
+							/>
+						</span>
+						<div>
+							<h2 className="font-title text-lg font-bold text-error">
+								Impossible de charger les incidents
+							</h2>
+							<p className="mt-1 text-sm text-black">
+								La connexion au serveur a échoué. Vos alertes ne
+								sont pas affectées : elles arriveront
+								normalement.
+							</p>
+						</div>
+					</div>
+					<button
+						type="button"
+						onClick={onRetry}
+						className="btn btn-md rounded-full border-none bg-error px-5 font-bold text-white"
+					>
+						Réessayer
+					</button>
+				</div>
 			</div>
 		);
 	}
 
 	if (incidents.length === 0) {
 		return (
-			<output className="flex flex-col items-center gap-4 rounded-3xl bg-base-300 p-4 text-center">
-				<span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--bg-success)">
-					<Icon
-						name="check"
-						className="h-8 w-8 fill-success"
-						aria-hidden="true"
-					/>
-				</span>
-				<div>
-					<h2 className="font-title text-lg font-bold text-primary">
-						Rien à signaler autour de vous
-					</h2>
-					<p className="mt-2 text-sm text-black">
-						Aucun incident en cours dans votre zone. Vous serez
-						alerté dès qu'un voisin signale quelque chose près d'une
-						de vos adresses.
-					</p>
-				</div>
-			</output>
+			<div className="flex flex-1 flex-col items-center justify-center">
+				<output className="flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl bg-base-300 p-4 text-center">
+					<span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--bg-success)">
+						<Icon
+							name="check"
+							className="h-8 w-8 fill-success"
+							aria-hidden="true"
+						/>
+					</span>
+					<div>
+						<h2 className="font-title text-lg font-bold text-primary">
+							Rien à signaler autour de vous
+						</h2>
+						<p className="mt-2 text-sm text-black">
+							Aucun incident en cours dans votre zone. Vous serez
+							alerté dès qu'un voisin signale quelque chose près
+							d'une de vos adresses.
+						</p>
+					</div>
+				</output>
+			</div>
 		);
 	}
 
