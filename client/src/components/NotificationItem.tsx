@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import type { IconName } from "../assets/icons";
 import type { Notification } from "../types/notification";
 import Icon from "./Icon/Icon";
 
@@ -125,17 +126,21 @@ function NotificationItem({
       ? (incidentIconByType[
           notification.incident_type as keyof typeof incidentIconByType
         ] ?? "fire")
-      : iconByType[notification.type];
+      : ((iconByType as Record<string, IconName>)[notification.type] ??
+        "notification");
   const iconStyle =
     notification.type === "incident" ||
     notification.type === "incident_resolved"
       ? (incidentStyleByType[incidentType] ?? incidentStyleByType.fire)
-      : iconStyleByType[notification.type];
+      : ((iconStyleByType as Record<string, string>)[notification.type] ??
+        iconStyleByType.mention);
   const incidentBorder =
     incidentBorderByType[incidentType] ?? incidentBorderByType.fire;
   const incidentLabel = incidentLabelByType[incidentType];
   const label = notification.type === "badge" ? "Badge" : incidentLabel;
-  const title = titleByType[notification.type];
+  const title =
+    (titleByType as Record<string, string>)[notification.type] ??
+    "Nouvelle notification";
   const isUnread = notification.is_read === false;
   const typeBorder =
     notification.type === "incident" ||
