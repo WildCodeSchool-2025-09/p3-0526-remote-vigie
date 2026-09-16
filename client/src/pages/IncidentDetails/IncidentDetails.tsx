@@ -146,7 +146,7 @@ export default function IncidentDetails() {
 				/>
 				<button
 					type="button"
-					className="btn btn-square btn-md rounded-2xl border-2 border-white bg-white/20 shadow-none hover:bg-white/50"
+					className="btn btn-square btn-md rounded-xl border-2 border-white bg-white/20 shadow-none hover:bg-white/50"
 					aria-label="Retour à la carte"
 					onClick={() => navigate("/")}
 				>
@@ -162,7 +162,7 @@ export default function IncidentDetails() {
 				{incident.status === "in_progress" && (
 					<button
 						type="button"
-						className="btn btn-square btn-md rounded-2xl border-none bg-transparent shadow-none hover:bg-white/50"
+						className="btn btn-square btn-md rounded-xl border-none bg-transparent shadow-none hover:bg-white/50"
 						aria-label="Éditer l'incident"
 						onClick={() => editModalRef.current?.showModal()}
 					>
@@ -175,7 +175,12 @@ export default function IncidentDetails() {
 				)}
 			</header>
 
-			<IncidentEditModal dialogRef={editModalRef} />
+			<IncidentEditModal
+				dialogRef={editModalRef}
+				title={incident.title}
+				description={incident.description}
+				photoUrl={incident.photoUrl}
+			/>
 
 			<div className="relative -mt-8 space-y-4 px-4 pb-6">
 				<section className="rounded-2xl bg-base-300 p-4">

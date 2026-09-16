@@ -1,11 +1,23 @@
 import Icon from "@/components/Icon/Icon";
+import { useState } from "react";
 import type { RefObject } from "react";
 
 type Props = {
 	dialogRef: RefObject<HTMLDialogElement | null>;
+	title: string;
+	description: string | null;
+	photoUrl: string | null;
 };
 
-export default function IncidentEditModal({ dialogRef }: Props) {
+export default function IncidentEditModal({
+	dialogRef,
+	title,
+	description,
+	photoUrl,
+}: Props) {
+	const [titleValue, setTitleValue] = useState(title);
+	const [descriptionValue, setDescriptionValue] = useState(description ?? "");
+
 	return (
 		<dialog ref={dialogRef} className="modal modal-bottom sm:modal-middle">
 			<div className="modal-box rounded-t-3xl bg-base-200 sm:rounded-3xl">
@@ -16,7 +28,7 @@ export default function IncidentEditModal({ dialogRef }: Props) {
 					<form method="dialog">
 						<button
 							type="submit"
-							className="btn btn-square btn-sm rounded-full border-none bg-base-300 shadow-none"
+							className="btn btn-square btn-md rounded-xl border-2 border-primary/15 bg-transparent shadow-none hover:bg-primary/10"
 							aria-label="Fermer"
 						>
 							<Icon
@@ -27,7 +39,7 @@ export default function IncidentEditModal({ dialogRef }: Props) {
 						</button>
 					</form>
 				</div>
-				<div className="flex w-full items-start gap-3 rounded-2xl bg-base-100 px-5 py-3 mt-5">
+				<div className="flex w-full items-start gap-3 rounded-2xl bg-(--primary-light) px-5 py-3 mt-5">
 					<Icon
 						name="info"
 						className="h-6 w-6 shrink-0 fill-success"
@@ -39,7 +51,66 @@ export default function IncidentEditModal({ dialogRef }: Props) {
 						rayon et pour combien de temps.
 					</p>
 				</div>
+
 				<form method="dialog">
+					<div className="mt-5 flex flex-col gap-1.5">
+						<label
+							htmlFor="incident-edit-title"
+							className="mb-1.5 block text-sm font-bold text-primary"
+						>
+							Titre
+						</label>
+						<input
+							id="incident-edit-title"
+							type="text"
+							value={titleValue}
+							placeholder="Ajouter un titre (facultatif)"
+							onChange={(e) => setTitleValue(e.target.value)}
+							maxLength={100}
+							className="w-full rounded-xl border-2 border-primary/15 bg-base-300 px-4 py-3 pr-8 text-black placeholder:text-black/40 focus:outline-none"
+						/>
+					</div>
+
+					<div className="mt-4 flex flex-col gap-1.5">
+						<div className="flex items-center justify-between gap-2">
+							<label
+								htmlFor="incident-edit-description"
+								className="mb-1.5 block text-sm font-bold text-primary"
+							>
+								Description
+							</label>
+							<span className="text-xs text-primary/40">
+								{descriptionValue.length} / 1000 caractères
+							</span>
+						</div>
+						<textarea
+							id="incident-edit-description"
+							rows={4}
+							value={descriptionValue}
+							placeholder="Ajouter une description (facultatif)"
+							onChange={(e) =>
+								setDescriptionValue(e.target.value)
+							}
+							maxLength={1000}
+							className="w-full resize-none rounded-3xl border-2 border-primary/15 bg-base-300 px-5 py-4 text-black placeholder:text-black/40 focus:outline-none"
+						/>
+					</div>
+
+					<div className="mt-4 flex flex-col gap-1.5 mb-5">
+						<label
+							htmlFor="incident-edit-photo"
+							className="mb-1.5 block text-sm font-bold text-primary"
+						>
+							Photo
+						</label>
+						<input
+							id="incident-edit-photo"
+							type="text"
+							defaultValue={photoUrl ?? ""}
+							placeholder="URL de la photo"
+							className="w-full rounded-xl border-2 border-primary/15 bg-base-300 px-4 py-3 pr-8 text-black placeholder:text-black/40 focus:outline-none"
+						/>
+					</div>
 					<div className="flex gap-3 w-full border-t border-primary/10 pt-5">
 						<button
 							type="submit"
@@ -50,7 +121,7 @@ export default function IncidentEditModal({ dialogRef }: Props) {
 						</button>
 						<button
 							type="submit"
-							className="btn btn-md grow basis-1/3 rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-5"
+							className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-5"
 							aria-label="Annuler"
 						>
 							Annuler
