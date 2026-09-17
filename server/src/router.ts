@@ -1,12 +1,15 @@
 import express from "express";
 import notificationsActions from "./modules/notifications/notificationsActions";
 import requireAuthentication from "./middlewares/requireAuthentication";
+import incidentActions from "./modules/incident/incidentActions";
 
 const router = express.Router();
 
 /* ************************************************************************* */
 // Define Your API Routes Here
 /* ************************************************************************* */
+
+router.get("/api/incidents/:id", incidentActions.read);
 
 router.get(
   "/api/notifications",

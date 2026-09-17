@@ -1,11 +1,11 @@
+import { type IconName, icons } from "@/assets/icons";
 import type { SVGProps } from "react";
-import { icons, type IconName } from "@/assets/icons";
 
 type IconProps = SVGProps<SVGSVGElement> & {
-  name: IconName;
+	name: IconName;
 };
 
 export default function Icon({ name, ...props }: IconProps) {
-  const Component = icons[name];
-  return <Component {...props} />;
+	const Component = icons[name];
+	return <Component {...props} />;
 }

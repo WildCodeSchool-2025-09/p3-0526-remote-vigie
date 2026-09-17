@@ -19,14 +19,12 @@ type AuthContextValue = {
 //   emailVerified: true  → le formulaire s'affiche
 //   emailVerified: false → écran « vérifie ton e-mail »
 //   STUB_USER = null      → redirection vers /login
-const STUB_USER: AuthUser | null = 
-		// null;
-		{
-			id: 1,
-			pseudo: "test",
-			email: "test@example.com",
-			emailVerified: true,
-		};
+const STUB_USER: AuthUser | null = {
+	id: 1,
+	pseudo: "test",
+	email: "test@example.com",
+	emailVerified: true,
+};
 
 // TODO US06 : remplacer ce fichier par un vrai AuthProvider (appelle GET /api/auth/me
 // au montage, expose login()/logout(), englobe <App/> dans main.tsx).
