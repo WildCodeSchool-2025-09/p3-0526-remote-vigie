@@ -4,7 +4,7 @@ import type { QuoteTarget } from "@/components/incident/CommentList/CommentList"
 import { createComment } from "@/services/commentService";
 import type { Comment } from "@/types/comment";
 import type { IncidentStatus } from "@/types/incidentDetails";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import type { ChangeEvent, FormEvent } from "react";
 
@@ -29,6 +29,7 @@ export default function CommentForm({
 	const [content, setContent] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const errorId = useId();
 
 	if (incidentStatus === "resolved") {
 		return null;
@@ -99,7 +100,7 @@ export default function CommentForm({
 	};
 
 	return (
-		<div className="mt-4">
+		<div id="comment-form" className="mt-4">
 			{!isConnected && (
 				<div className="mb-3 flex items-center gap-3 rounded-2xl bg-base-300 p-3">
 					<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--primary-light)">
@@ -117,6 +118,7 @@ export default function CommentForm({
 
 			{error != null && (
 				<div
+					id={errorId}
 					role="alert"
 					className="mb-3 flex w-full items-start gap-3 rounded-2xl bg-(--bg-error) px-5 py-3"
 				>
@@ -135,7 +137,7 @@ export default function CommentForm({
 				<div className="flex items-end gap-3">
 					<div className="max-h-40 w-full flex-1 overflow-y-auto rounded-xl border-2 border-primary/15 bg-base-200 px-5 py-3">
 						{quotedComment != null && (
-							<div className="mb-2 flex items-start justify-between gap-2 border-b border-black/10 pb-2">
+							<div className="mb-2 flex items-start justify-between gap-2 border-b border-black/10 pb-2 animate-slide">
 								<Icon
 									name="quoteRight"
 									className="mt-0.5 h-3 w-3 shrink-0 fill-black/40"
@@ -172,6 +174,9 @@ export default function CommentForm({
 							rows={1}
 							disabled={!isConnected}
 							aria-label="Écrire un commentaire"
+							aria-describedby={
+								error != null ? errorId : undefined
+							}
 							className="min-h-1 field-sizing-content w-full resize-none border-none bg-transparent p-0 text-black text-sm placeholder:text-black/40 focus:outline-none disabled:opacity-50"
 						/>
 					</div>

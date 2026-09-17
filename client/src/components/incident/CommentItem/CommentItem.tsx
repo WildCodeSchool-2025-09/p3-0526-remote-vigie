@@ -46,6 +46,7 @@ export default function CommentItem({
 				<button
 					type="button"
 					onClick={() => setIsQuoteExpanded((expanded) => !expanded)}
+					aria-expanded={isQuoteExpanded}
 					className="mt-2 block w-full rounded-xl border-l-4 border-base-100 bg-base-200 p-2 text-left cursor-pointer"
 				>
 					<span className="block text-sm font-bold text-black/50">

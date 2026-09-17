@@ -23,6 +23,7 @@ export default function CommentList({ incidentId, incidentStatus }: Props) {
 	const [quotedComment, setQuotedComment] = useState<QuoteTarget | null>(
 		null,
 	);
+	const [announcement, setAnnouncement] = useState("");
 
 	useEffect(() => {
 		getComments(incidentId).then((result) => {
@@ -71,13 +72,19 @@ export default function CommentList({ incidentId, incidentStatus }: Props) {
 							comment={comment}
 							incidentStatus={incidentStatus}
 							isNewComment={newCommentIds.has(comment.id)}
-							onQuote={() =>
+							onQuote={() => {
 								setQuotedComment({
 									id: comment.id,
 									author: comment.author.pseudo,
 									content: comment.content,
-								})
-							}
+								});
+								document
+									.getElementById("comment-form")
+									?.scrollIntoView({
+										behavior: "smooth",
+										block: "center",
+									});
+							}}
 						/>
 					))}
 				</div>
@@ -94,8 +101,15 @@ export default function CommentList({ incidentId, incidentStatus }: Props) {
 						(current) => new Set(current).add(comment.id),
 					);
 					setQuotedComment(null);
+					setAnnouncement(
+						`Commentaire de ${comment.author.pseudo} ajouté au fil.`,
+					);
 				}}
 			/>
+
+			<div aria-live="polite" className="sr-only">
+				{announcement}
+			</div>
 		</div>
 	);
 }
