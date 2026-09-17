@@ -51,9 +51,11 @@ export default function CommentList({ incidentId }: Props) {
 					</div>
 				</div>
 			) : (
-				comments.map((comment) => (
-					<CommentItem key={comment.id} comment={comment} />
-				))
+				<div className="flex flex-col gap-3">
+					{comments.map((comment) => (
+						<CommentItem key={comment.id} comment={comment} />
+					))}
+				</div>
 			)}
 		</div>
 	);
