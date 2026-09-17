@@ -33,6 +33,7 @@ type IncidentDetails = {
 
 type NearbyIncident = {
 	id: number;
+	typeIds: number[];
 	latitude: string;
 	longitude: string;
 	baseAlertRadiusMeters: number;
@@ -132,8 +133,25 @@ class IncidentRepository {
 			[typeIds],
 		);
 
+		if (rows.length === 0) return [];
+
+		const [typeRows] = await databaseClient.query<Rows>(
+			`SELECT incident_id, incident_type_id
+			FROM incident_incident_type
+			WHERE incident_id IN (?)`,
+			[rows.map((row) => row.id)],
+		);
+
+		const typesByIncident = new Map<number, number[]>();
+		for (const row of typeRows) {
+			const ids = typesByIncident.get(row.incident_id) ?? [];
+			ids.push(row.incident_type_id);
+			typesByIncident.set(row.incident_id, ids);
+		}
+
 		return rows.map((r) => ({
 			id: r.id,
+			typeIds: typesByIncident.get(r.id) ?? [],
 			latitude: r.latitude,
 			longitude: r.longitude,
 			baseAlertRadiusMeters: r.base_alert_radius_meters,

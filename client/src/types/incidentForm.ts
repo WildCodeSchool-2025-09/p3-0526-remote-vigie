@@ -17,3 +17,12 @@ export type Position = {
 	lat: number;
 	lng: number;
 };
+
+export type NearbyIncident = {
+	id: number;
+	latitude: string;
+	longitude: string;
+	baseAlertRadiusMeters: number;
+	city: string;
+	createdAt: string;
+};

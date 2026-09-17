@@ -1,8 +1,15 @@
 import type { DangerLevel } from "@/components/Form/DangerLevelPicker/DangerLevelPicker";
+import DuplicateWarning from "@/components/Form/DuplicateWarning/DuplicateWarning";
 import EmailVerificationNotice from "@/components/Form/EmailVerificationNotice/EmailVerificationNotice";
 import { type Address, useAuth } from "@/contexts/AuthContext";
+import { getNearbyIncident } from "@/services/incidentService";
 import { getIncidentTypes } from "@/services/incidentTypeService";
-import type { IncidentType, Position } from "@/types/incidentForm";
+import type {
+	IncidentType,
+	NearbyIncident,
+	Position,
+} from "@/types/incidentForm";
+import { distanceInMeters } from "@/utils/distance";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import DetailsStep from "./DetailsStep";
 import IncidentTypeStep from "./IncidentTypeStep";
@@ -39,6 +46,19 @@ export default function IncidentForm() {
 	const [geolocationError, setGeolocationError] = useState<string | null>(
 		null,
 	);
+	const [duplicateCandidate, setDuplicateCandidate] =
+		useState<NearbyIncident | null>(null);
+	const duplicateType =
+		incidentTypes.find((type) => selectedTypes.includes(type.id)) ?? null;
+	const duplicateDistance =
+		position && duplicateCandidate
+			? distanceInMeters(
+					position.lat,
+					position.lng,
+					Number(duplicateCandidate.latitude),
+					Number(duplicateCandidate.longitude),
+				)
+			: 0;
 
 	const loadIncidentTypes = useCallback((signal?: AbortSignal) => {
 		setLoadingTypes(true);
@@ -160,6 +180,33 @@ export default function IncidentForm() {
 		[incidentTypes, selectedTypes],
 	);
 
+	useEffect(() => {
+		setDuplicateCandidate(null);
+
+		if (selectedTypes.length === 0 || !position) return;
+
+		let active = true;
+
+		const timeoutId = setTimeout(async () => {
+			const result = await getNearbyIncident(
+				position.lat,
+				position.lng,
+				selectedTypes,
+			);
+
+			if (!active) return;
+
+			if (result.status === "ok") {
+				setDuplicateCandidate(result.nearbyIncident);
+			}
+		}, 300);
+
+		return () => {
+			active = false;
+			clearTimeout(timeoutId);
+		};
+	}, [selectedTypes, position]);
+
 	// PrivateRoute a déjà filtré les non-connectés : ici `user` existe.
 	// S'il n'a pas vérifié son e-mail, on bloque le signalement.
 	if (!user?.emailVerified) {
@@ -183,6 +230,15 @@ export default function IncidentForm() {
 				</p>
 			</header>
 			<div className="relative -mt-8 space-y-4 px-4 pb-6">
+				{duplicateCandidate && (
+					<DuplicateWarning
+						candidate={duplicateCandidate}
+						type={duplicateType}
+						distanceMeters={duplicateDistance}
+						onJoin={() => {}}
+						onIgnore={() => setDuplicateCandidate(null)}
+					/>
+				)}
 				<IncidentTypeStep
 					incidentTypes={incidentTypes}
 					selectedTypes={selectedTypes}
