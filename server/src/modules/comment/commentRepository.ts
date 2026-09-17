@@ -46,14 +46,25 @@ class CommentRepository {
 		userId: number;
 		incidentId: number;
 		content: string;
+		quotedCommentId: number | null;
 	}): Promise<number> {
 		const [result] = await databaseClient.query<Result>(
-			`INSERT INTO comment (user_id, incident_id, content)
-			VALUES (?, ?, ?)`,
-			[data.userId, data.incidentId, data.content],
+			`INSERT INTO comment (user_id, incident_id, content, quoted_comment_id)
+			VALUES (?, ?, ?, ?)`,
+			[data.userId, data.incidentId, data.content, data.quotedCommentId],
 		);
 
 		return result.insertId;
+	}
+
+	async findIncidentId(id: number): Promise<number | null> {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT incident_id FROM comment WHERE id = ?",
+			[id],
+		);
+
+		const row = rows[0];
+		return row == null ? null : row.incident_id;
 	}
 }
 

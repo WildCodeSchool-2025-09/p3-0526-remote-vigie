@@ -19,6 +19,7 @@ export async function getComments(incidentId: number): Promise<GetComments> {
 
 type CreateCommentPayload = {
 	content: string;
+	quotedCommentId?: number;
 };
 
 type CreateComment =

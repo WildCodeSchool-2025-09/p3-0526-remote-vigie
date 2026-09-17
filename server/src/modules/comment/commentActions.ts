@@ -32,7 +32,7 @@ const add: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		const body = req.body as { content?: unknown };
+		const body = req.body as { content?: unknown; quotedCommentId?: unknown };
 
 		if (
 			typeof body.content !== "string" ||
@@ -41,6 +41,25 @@ const add: RequestHandler = async (req, res, next) => {
 		) {
 			res.sendStatus(StatusCodes.BAD_REQUEST);
 			return;
+		}
+
+		let quotedCommentId: number | null = null;
+
+		if (body.quotedCommentId != null) {
+			quotedCommentId = Number(body.quotedCommentId);
+
+			if (!Number.isInteger(quotedCommentId) || quotedCommentId <= 0) {
+				res.sendStatus(StatusCodes.BAD_REQUEST);
+				return;
+			}
+
+			const quotedIncidentId =
+				await commentRepository.findIncidentId(quotedCommentId);
+
+			if (quotedIncidentId == null || quotedIncidentId !== incidentId) {
+				res.sendStatus(StatusCodes.BAD_REQUEST);
+				return;
+			}
 		}
 
 		const incident = await incidentRepository.findOwnerAndStatus(incidentId);
@@ -67,6 +86,7 @@ const add: RequestHandler = async (req, res, next) => {
 			userId: Number(req.auth.sub),
 			incidentId,
 			content: body.content.trim(),
+			quotedCommentId,
 		});
 
 		res.status(StatusCodes.CREATED).json({ id });

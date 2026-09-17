@@ -9,12 +9,14 @@ type Props = {
 	comment: Comment;
 	incidentStatus: IncidentStatus;
 	isNewComment?: boolean;
+	onQuote: () => void;
 };
 
 export default function CommentItem({
 	comment,
 	incidentStatus,
 	isNewComment = false,
+	onQuote,
 }: Props) {
 	const [isQuoteExpanded, setIsQuoteExpanded] = useState(false);
 	const { user } = useAuth();
@@ -61,6 +63,7 @@ export default function CommentItem({
 			{user != null && incidentStatus === "in_progress" && (
 				<button
 					type="button"
+					onClick={onQuote}
 					className="btn btn-xs mt-3 rounded-full border-2 border-primary/15 bg-transparent text-primary shadow-none hover:bg-primary/10 px-3 gap-1"
 				>
 					<Icon

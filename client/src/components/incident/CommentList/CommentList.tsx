@@ -11,9 +11,18 @@ type Props = {
 	incidentStatus: IncidentStatus;
 };
 
+export type QuoteTarget = {
+	id: number;
+	author: string;
+	content: string;
+};
+
 export default function CommentList({ incidentId, incidentStatus }: Props) {
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [newCommentIds, setNewCommentIds] = useState<Set<number>>(new Set());
+	const [quotedComment, setQuotedComment] = useState<QuoteTarget | null>(
+		null,
+	);
 
 	useEffect(() => {
 		getComments(incidentId).then((result) => {
@@ -62,6 +71,13 @@ export default function CommentList({ incidentId, incidentStatus }: Props) {
 							comment={comment}
 							incidentStatus={incidentStatus}
 							isNewComment={newCommentIds.has(comment.id)}
+							onQuote={() =>
+								setQuotedComment({
+									id: comment.id,
+									author: comment.author.pseudo,
+									content: comment.content,
+								})
+							}
 						/>
 					))}
 				</div>
@@ -70,11 +86,14 @@ export default function CommentList({ incidentId, incidentStatus }: Props) {
 			<CommentForm
 				incidentId={incidentId}
 				incidentStatus={incidentStatus}
+				quotedComment={quotedComment}
+				onRemoveQuote={() => setQuotedComment(null)}
 				onCommentAdded={(comment) => {
 					setComments((current) => [...current, comment]);
 					setNewCommentIds(
 						(current) => new Set(current).add(comment.id),
 					);
+					setQuotedComment(null);
 				}}
 			/>
 		</div>
