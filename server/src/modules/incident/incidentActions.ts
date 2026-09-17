@@ -39,7 +39,7 @@ const edit: RequestHandler = async (req, res, next) => {
 		if (
 			typeof body.title !== "string" ||
 			body.title.trim().length === 0 ||
-			body.title.length > 150
+			body.title.length > 80
 		) {
 			res.sendStatus(StatusCodes.BAD_REQUEST);
 			return;
@@ -48,7 +48,7 @@ const edit: RequestHandler = async (req, res, next) => {
 		if (
 			body.description != null &&
 			(typeof body.description !== "string" ||
-				body.description.length > 1000)
+				body.description.length > 500)
 		) {
 			res.sendStatus(StatusCodes.BAD_REQUEST);
 			return;

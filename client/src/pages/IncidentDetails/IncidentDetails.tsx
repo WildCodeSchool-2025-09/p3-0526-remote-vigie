@@ -175,7 +175,10 @@ export default function IncidentDetails() {
 							type="button"
 							className="btn btn-square btn-md rounded-xl border-none bg-transparent shadow-none hover:bg-white/50"
 							aria-label="Éditer l'incident"
-							onClick={() => editModalRef.current?.showModal()}
+							onClick={() => {
+								setJustSaved(false);
+								editModalRef.current?.showModal();
+							}}
 						>
 							<Icon
 								name="pencil"

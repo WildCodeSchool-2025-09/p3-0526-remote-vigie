@@ -108,7 +108,7 @@ CREATE TABLE `incident` (
     `user_id` INT UNSIGNED NOT NULL,
     `danger_level_id` INT UNSIGNED NOT NULL,
     `title` VARCHAR(80) NOT NULL,
-    `description` VARCHAR(300) NULL,
+    `description` VARCHAR(500) NULL,
     `photo_url` VARCHAR(255) NULL DEFAULT NULL,
     `latitude` DECIMAL(9, 6) NOT NULL,
     `longitude` DECIMAL(10, 6) NOT NULL,
