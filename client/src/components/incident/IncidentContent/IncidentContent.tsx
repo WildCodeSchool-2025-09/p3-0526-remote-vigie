@@ -6,10 +6,8 @@ type Props = {
 export default function IncidentContent({ description, photoUrl }: Props) {
 	return (
 		<div className="flex flex-col gap-3">
-			{description != null && (
-				<p className="text-sm mb-1">{description}</p>
-			)}
-			{photoUrl != null && (
+			{description && <p className="text-sm mb-1">{description}</p>}
+			{photoUrl && (
 				<img
 					src={photoUrl}
 					alt="photographie de l'incident"

@@ -21,7 +21,7 @@ class CommentSeeder extends AbstractSeeder {
 				refName: `comment_${i}`,
 				user_id: this.getRef(`user_${(i + 2) % 10}`).insertId,
 				incident_id: this.getRef(`incident_${incidentIndex}`).insertId,
-				content: this.faker.lorem.sentence({ min: 5, max: 12 }),
+				content: this.faker.lorem.sentence({ min: 1, max: 4 }),
 				...(i === 10 && {
 					quoted_comment_id: this.getRef("comment_0").insertId,
 				}),

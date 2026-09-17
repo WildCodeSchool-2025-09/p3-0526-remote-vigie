@@ -5,8 +5,10 @@ import CommentList from "@/components/incident/CommentList/CommentList";
 import IncidentActions from "@/components/incident/IncidentActions/IncidentActions";
 import IncidentContent from "@/components/incident/IncidentContent/IncidentContent";
 import IncidentContributions from "@/components/incident/IncidentContributions/IncidentContributions";
+import IncidentEditModal from "@/components/incident/IncidentEditModal/IncidentEditModal";
 import IncidentHeader from "@/components/incident/IncidentHeader/IncidentHeader";
 import IncidentLocation from "@/components/incident/IncidentLocation/IncidentLocation";
+import { useAuth } from "@/contexts/AuthContext";
 import IncidentDetailsSkeleton from "@/pages/IncidentDetails/IncidentDetailsSkeleton";
 import { getIncidentById } from "@/services/incidentService";
 import type { Incident } from "@/types/incidentDetails";
@@ -21,9 +23,18 @@ type ViewState =
 
 export default function IncidentDetails() {
 	const navigate = useNavigate();
+	const { user } = useAuth();
 	const { id } = useParams();
 	const [state, setState] = useState<ViewState>({ status: "loading" });
+	const [justSaved, setJustSaved] = useState(false);
 	const requestIdRef = useRef(0);
+	const editModalRef = useRef<HTMLDialogElement>(null);
+
+	function handleIncidentSaved(updated: Incident) {
+		setState({ status: "ok", incident: updated });
+		editModalRef.current?.close();
+		setJustSaved(true);
+	}
 
 	const fetchIncident = useCallback(() => {
 		if (id == null) {
@@ -145,7 +156,7 @@ export default function IncidentDetails() {
 				/>
 				<button
 					type="button"
-					className="btn btn-square btn-md rounded-2xl border-2 border-white bg-white/20 shadow-none hover:bg-white/50"
+					className="btn btn-square btn-md rounded-xl border-2 border-white bg-white/20 shadow-none hover:bg-white/50"
 					aria-label="Retour à la carte"
 					onClick={() => navigate("/")}
 				>
@@ -158,15 +169,62 @@ export default function IncidentDetails() {
 				<h1 className="font-title text-2xl font-bold text-white">
 					{incident.title}
 				</h1>
+				{incident.status === "in_progress" &&
+					user != null &&
+					user.id === incident.author.id && (
+						<button
+							type="button"
+							className="btn btn-square btn-md rounded-xl border-none bg-transparent shadow-none hover:bg-white/50"
+							aria-label="Éditer l'incident"
+							onClick={() => {
+								setJustSaved(false);
+								editModalRef.current?.showModal();
+							}}
+						>
+							<Icon
+								name="pencil"
+								className="h-4 w-4 fill-white"
+								aria-hidden="true"
+							/>
+						</button>
+					)}
 			</header>
 
+			<IncidentEditModal
+				dialogRef={editModalRef}
+				id={incident.id}
+				title={incident.title}
+				description={incident.description}
+				photoUrl={incident.photoUrl}
+				onSaved={handleIncidentSaved}
+			/>
+
 			<div className="relative -mt-8 space-y-4 px-4 pb-6">
+				{justSaved && (
+					<div className="flex w-full items-start gap-3 rounded-2xl bg-accent px-5 py-3 animate-pop">
+						<Icon
+							name="checkCircle"
+							className="h-6 w-6 shrink-0 fill-success"
+							aria-hidden="true"
+						/>
+						<div>
+							<p className="text-sm font-bold text-primary">
+								Modifications enregistrées
+							</p>
+							<p className="mt-0.5 text-sm text-primary/70">
+								Vos voisins n'ont pas reçu de nouvelle alerte.
+							</p>
+						</div>
+					</div>
+				)}
+
 				<section className="rounded-2xl bg-base-300 p-4">
 					<IncidentHeader
 						dangerLevel={incident.dangerLevel}
 						status={incident.status}
 						types={incident.types}
 						createdAt={incident.createdAt}
+						editedAt={incident.editedAt}
 						author={incident.author}
 					/>
 				</section>
