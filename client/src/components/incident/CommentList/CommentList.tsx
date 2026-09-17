@@ -1,4 +1,5 @@
 import Icon from "@/components/Icon/Icon";
+import CommentForm from "@/components/incident/CommentForm/CommentForm";
 import CommentItem from "@/components/incident/CommentItem/CommentItem";
 import { getComments } from "@/services/commentService";
 import type { Comment } from "@/types/comment";
@@ -63,6 +64,8 @@ export default function CommentList({ incidentId, incidentStatus }: Props) {
 					))}
 				</div>
 			)}
+
+			<CommentForm incidentStatus={incidentStatus} />
 		</div>
 	);
 }
