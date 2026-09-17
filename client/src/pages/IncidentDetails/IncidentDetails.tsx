@@ -216,6 +216,7 @@ export default function IncidentDetails() {
 						status={incident.status}
 						types={incident.types}
 						createdAt={incident.createdAt}
+						editedAt={incident.editedAt}
 						author={incident.author}
 					/>
 				</section>
