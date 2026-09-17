@@ -2,14 +2,14 @@ import databaseClient from "../../../database/client";
 import type { Rows } from "../../../database/client";
 
 class NotificationsRepository {
-  async browseSinceLastSeen(
-    userId: number,
-    lastSeenAt: Date | null,
-    limit = 20,
-    offset = 0,
-  ) {
-    const [rows] = await databaseClient.query<Rows>(
-      `(
+	async browseSinceLastSeen(
+		userId: number,
+		lastSeenAt: Date | null,
+		limit = 20,
+		offset = 0,
+	) {
+		const [rows] = await databaseClient.query<Rows>(
+			`(
          SELECT
            'incident' AS type,
            incident.id AS source_id,
@@ -73,29 +73,29 @@ class NotificationsRepository {
        )
        ORDER BY created_at DESC
        LIMIT ? OFFSET ?`,
-      [
-        userId,
-        lastSeenAt,
-        lastSeenAt,
-        userId,
-        userId,
-        userId,
-        lastSeenAt,
-        lastSeenAt,
-        userId,
-        lastSeenAt,
-        lastSeenAt,
-        limit,
-        offset,
-      ],
-    );
+			[
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				userId,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				limit,
+				offset,
+			],
+		);
 
-    return rows;
-  }
+		return rows;
+	}
 
-  async countSinceLastSeen(userId: number, lastSeenAt: Date | null) {
-    const [rows] = await databaseClient.query<Rows>(
-      `SELECT COUNT(*) AS count FROM (
+	async countSinceLastSeen(userId: number, lastSeenAt: Date | null) {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT COUNT(*) AS count FROM (
          SELECT incident.id
          FROM incident
          WHERE incident.user_id != ?
@@ -121,23 +121,23 @@ class NotificationsRepository {
          WHERE incident.user_id = ? AND incident.status = 'resolved'
            AND (? IS NULL OR incident.updated_at > ?)
        ) AS events`,
-      [
-        userId,
-        lastSeenAt,
-        lastSeenAt,
-        userId,
-        userId,
-        userId,
-        lastSeenAt,
-        lastSeenAt,
-        userId,
-        lastSeenAt,
-        lastSeenAt,
-      ],
-    );
+			[
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				userId,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+			],
+		);
 
-    return (rows as { count: number }[])[0].count;
-  }
+		return (rows as { count: number }[])[0].count;
+	}
 }
 
 export default new NotificationsRepository();
