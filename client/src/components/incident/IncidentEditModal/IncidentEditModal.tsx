@@ -1,5 +1,5 @@
-import Icon from "@/components/Icon/Icon";
 import PhotoField from "@/components/Form/PhotoField/PhotoField";
+import Icon from "@/components/Icon/Icon";
 import { updateIncident } from "@/services/incidentService";
 import type { Incident } from "@/types/incidentDetails";
 import { type FormEvent, type RefObject, useState } from "react";

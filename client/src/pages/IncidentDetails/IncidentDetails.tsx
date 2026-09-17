@@ -171,19 +171,19 @@ export default function IncidentDetails() {
 				{incident.status === "in_progress" &&
 					user != null &&
 					user.id === incident.author.id && (
-					<button
-						type="button"
-						className="btn btn-square btn-md rounded-xl border-none bg-transparent shadow-none hover:bg-white/50"
-						aria-label="Éditer l'incident"
-						onClick={() => editModalRef.current?.showModal()}
-					>
-						<Icon
-							name="pencil"
-							className="h-4 w-4 fill-white"
-							aria-hidden="true"
-						/>
-					</button>
-				)}
+						<button
+							type="button"
+							className="btn btn-square btn-md rounded-xl border-none bg-transparent shadow-none hover:bg-white/50"
+							aria-label="Éditer l'incident"
+							onClick={() => editModalRef.current?.showModal()}
+						>
+							<Icon
+								name="pencil"
+								className="h-4 w-4 fill-white"
+								aria-hidden="true"
+							/>
+						</button>
+					)}
 			</header>
 
 			<IncidentEditModal
