@@ -23,8 +23,15 @@ export default function IncidentDetails() {
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const [state, setState] = useState<ViewState>({ status: "loading" });
+	const [justSaved, setJustSaved] = useState(false);
 	const requestIdRef = useRef(0);
 	const editModalRef = useRef<HTMLDialogElement>(null);
+
+	function handleIncidentSaved(updated: Incident) {
+		setState({ status: "ok", incident: updated });
+		editModalRef.current?.close();
+		setJustSaved(true);
+	}
 
 	const fetchIncident = useCallback(() => {
 		if (id == null) {
@@ -177,12 +184,32 @@ export default function IncidentDetails() {
 
 			<IncidentEditModal
 				dialogRef={editModalRef}
+				id={incident.id}
 				title={incident.title}
 				description={incident.description}
 				photoUrl={incident.photoUrl}
+				onSaved={handleIncidentSaved}
 			/>
 
 			<div className="relative -mt-8 space-y-4 px-4 pb-6">
+				{justSaved && (
+					<div className="flex w-full items-start gap-3 rounded-2xl bg-accent px-5 py-3 animate-pop">
+						<Icon
+							name="checkCircle"
+							className="h-6 w-6 shrink-0 fill-success"
+							aria-hidden="true"
+						/>
+						<div>
+							<p className="text-sm font-bold text-primary">
+								Modifications enregistrées
+							</p>
+							<p className="mt-0.5 text-sm text-primary/70">
+								Vos voisins n'ont pas reçu de nouvelle alerte.
+							</p>
+						</div>
+					</div>
+				)}
+
 				<section className="rounded-2xl bg-base-300 p-4">
 					<IncidentHeader
 						dangerLevel={incident.dangerLevel}
