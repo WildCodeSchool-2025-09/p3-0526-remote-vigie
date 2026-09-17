@@ -12,6 +12,8 @@ type Props = {
 	onQuote: () => void;
 };
 
+const QUOTE_TRUNCATE_LENGTH = 50;
+
 export default function CommentItem({
 	comment,
 	incidentStatus,
@@ -20,6 +22,10 @@ export default function CommentItem({
 }: Props) {
 	const [isQuoteExpanded, setIsQuoteExpanded] = useState(false);
 	const { user } = useAuth();
+
+	const isQuoteLong =
+		comment.quotedComment != null &&
+		comment.quotedComment.content.length > QUOTE_TRUNCATE_LENGTH;
 
 	return (
 		<div
@@ -36,7 +42,7 @@ export default function CommentItem({
 				</span>
 			</div>
 
-			{comment.quotedComment && (
+			{comment.quotedComment && isQuoteLong && (
 				<button
 					type="button"
 					onClick={() => setIsQuoteExpanded((expanded) => !expanded)}
@@ -46,8 +52,8 @@ export default function CommentItem({
 						{comment.quotedComment.author.pseudo}
 					</span>
 					<span
-						className={`block text-sm text-black/50 ${
-							isQuoteExpanded ? "" : "truncate"
+						className={`text-sm text-black/50 ${
+							isQuoteExpanded ? "block" : "line-clamp-2"
 						}`}
 					>
 						{comment.quotedComment.content}
@@ -56,6 +62,17 @@ export default function CommentItem({
 						{isQuoteExpanded ? "Replier" : "Déplier"}
 					</span>
 				</button>
+			)}
+
+			{comment.quotedComment && !isQuoteLong && (
+				<div className="mt-2 block w-full rounded-xl border-l-4 border-base-100 bg-base-200 p-2 text-left">
+					<span className="block text-sm font-bold text-black/50">
+						{comment.quotedComment.author.pseudo}
+					</span>
+					<span className="block text-sm text-black/50">
+						{comment.quotedComment.content}
+					</span>
+				</div>
 			)}
 
 			<p className="mt-2 text-sm text-black">{comment.content}</p>
