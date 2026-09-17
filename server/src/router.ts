@@ -7,6 +7,7 @@ const router = express.Router();
 /* ************************************************************************* */
 
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
+import contributionActions from "./modules/contribution/contributionActions";
 import incidentActions from "./modules/incident/incidentActions";
 import verifyToken from "./services/verifyToken";
 
@@ -16,6 +17,11 @@ router.put(
 	verifyToken,
 	requireIncidentAuthor,
 	incidentActions.edit,
+);
+router.post(
+	"/api/incidents/:id/contributions",
+	verifyToken,
+	contributionActions.add,
 );
 
 export default router;

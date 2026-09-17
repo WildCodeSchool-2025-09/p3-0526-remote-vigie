@@ -1,4 +1,5 @@
 import databaseClient from "../../../database/client";
+import contributionRepository from "../contribution/contributionRepository";
 
 import type { Rows } from "../../../database/client";
 
@@ -61,22 +62,7 @@ class IncidentRepository {
 			[id],
 		);
 
-		const [countRows] = await databaseClient.query<Rows>(
-			`SELECT type, COUNT(*) AS total
-			FROM contribution
-			WHERE incident_id = ?
-			GROUP BY type`,
-			[id],
-		);
-
-		const rawCounts = countRows as {
-			type: "confirm" | "deny";
-			total: number;
-		}[];
-		const counts = { confirm: 0, deny: 0 };
-		for (const line of rawCounts) {
-			counts[line.type] = Number(line.total);
-		}
+		const counts = await contributionRepository.countByIncident(id);
 
 		return {
 			id: row.id,
