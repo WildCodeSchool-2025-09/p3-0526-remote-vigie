@@ -15,9 +15,15 @@ class NotificationsRepository {
            incident.id AS source_id,
            incident.created_at,
            incident.id AS incident_id,
+           incident.title AS incident_title,
            incident.city,
-           incident.status
+           incident.status,
+           incident_type.code AS incident_type
          FROM incident
+         LEFT JOIN incident_incident_type
+           ON incident_incident_type.incident_id = incident.id
+         LEFT JOIN incident_type
+           ON incident_type.id = incident_incident_type.incident_type_id
          WHERE incident.user_id != ?
            AND incident.status = 'in_progress'
            AND incident.expires_at > NOW()
@@ -39,8 +45,10 @@ class NotificationsRepository {
            comment.id AS source_id,
            comment.created_at,
            incident.id AS incident_id,
+           incident.title AS incident_title,
            incident.city,
-           incident.status
+           incident.status,
+           NULL AS incident_type
          FROM comment
          JOIN incident ON incident.id = comment.incident_id
          WHERE incident.user_id = ?
@@ -54,8 +62,10 @@ class NotificationsRepository {
            incident.id AS source_id,
            incident.updated_at AS created_at,
            incident.id AS incident_id,
+           incident.title AS incident_title,
            incident.city,
-           incident.status
+           incident.status,
+           NULL AS incident_type
          FROM incident
          WHERE incident.user_id = ?
            AND incident.status = 'resolved'

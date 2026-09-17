@@ -69,13 +69,8 @@ function NotificationCenter() {
         aria-live="polite"
       >
         {!isLoading && !error && notifications.length > 0 && (
-          <div className="-mt-8 relative mb-6 flex items-center justify-between gap-3 rounded-2xl bg-base-300 p-4 shadow-sm">
+          <div className="-mt-8 relative mb-6 flex items-center justify-between gap-3 rounded-2xl bg-warning p-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <Icon
-                name="notification"
-                className="size-5 text-primary"
-                aria-hidden="true"
-              />
               <span className="font-title text-lg font-bold text-primary">
                 {notifications.filter((item) => item.is_read === false).length}{" "}
                 non lues sur {notifications.length}
@@ -92,7 +87,7 @@ function NotificationCenter() {
         )}
         {isLoading && <NotificationsSkeleton />}
         {error && (
-          <div className="relative -mt-8 flex flex-col gap-4 rounded-3xl bg-base-300 p-4">
+          <div className="relative -mt-8 flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4">
             <div className="flex items-start gap-3">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
                 <Icon
@@ -109,7 +104,7 @@ function NotificationCenter() {
                   La connexion au serveur a échoué. Réessayez dans un instant.
                 </p>
                 <button
-                  className="btn btn-accent btn-md basis-2/3 rounded-full border-none px-6 font-bold m-3"
+                  className="btn btn-md grow rounded-full mt-3 w-60 border-none bg-error px-5 font-bold text-white"
                   type="button"
                   onClick={() => void loadNotifications()}
                 >
@@ -120,17 +115,12 @@ function NotificationCenter() {
           </div>
         )}
         {!isLoading && !error && notifications.length === 0 && (
-          <div className="flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4 relative -mt-8 space-y-4 px-4">
-            <div className="flex items-start gap-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
-                <Icon
-                  name="exclamation"
-                  className="h-3.5 w-3.5 fill-white"
-                  aria-hidden="true"
-                />
+          <div className="relative -mt-8 flex flex-col items-center gap-4 rounded-3xl bg-base-300 p-4 text-center">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--bg-success)">
+                <Icon name="notification" className="h-8 w-8 fill-success" aria-hidden="true" />
               </span>
-              <div>
-                <h2 className="font-title text-lg font-bold text-error">
+            <div>
+              <h2 className="font-title text-lg font-bold text-primary">
                   Aucune notification
                 </h2>
                 <p className="mt-1 text-sm text-black">
@@ -138,7 +128,6 @@ function NotificationCenter() {
                   adresses, les réponses à vos signalements et vos badges.
                 </p>
               </div>
-            </div>
             <button
               type="button"
               onClick={() => navigate("/")}

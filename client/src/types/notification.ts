@@ -10,6 +10,7 @@ export type Notification = {
   source_id: number;
   created_at: string;
   incident_id: number;
+  incident_title?: string;
   city: string;
   status: string;
   incident_type?: string;

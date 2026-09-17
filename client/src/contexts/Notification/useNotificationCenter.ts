@@ -10,14 +10,45 @@ const notificationCache = {
   hasMore: false,
   fetchedAt: 0,
 };
-// Durée minimale d'affichage du skeleton, pour que l'effet reste perceptible
-// même quand la requête (succès ou échec) répond quasi instantanément.
+
 const MIN_LOADING_DURATION_MS = 1200;
-// Au-delà de ce délai, les données en cache sont considérées périmées : on les
-// affiche quand même immédiatement (pas de skeleton), mais on relance un
-// rafraîchissement silencieux en tâche de fond (stale-while-revalidate).
+
 const STALE_TIME_MS = 60_000;
 const readNotificationsKey = "vigie:read-notifications";
+
+type PreviewState = Partial<{
+  isLoading: boolean;
+  error: string | null;
+  notifications: Notification[];
+}>;
+
+// Dev only - "incident", "comment" et "incident_resolved" viennent déjà du
+// seed (server/database/fixtures) pour le premier utilisateur : pas besoin de
+// les mocker ici. "badge" et "mention" n'existent pas encore côté backend
+// (hors périmètre, voir CLAUDE.md), donc on les garde en dur pour l'aperçu.
+const previewNotifications: Notification[] = [
+  {
+    type: "badge",
+    source_id: 4,
+    created_at: new Date().toISOString(),
+    incident_id: 0,
+    city: "",
+    status: "",
+    is_read: false,
+  },
+  {
+    type: "mention",
+    source_id: 5,
+    created_at: new Date().toISOString(),
+    incident_id: 1,
+    incident_title: "Départ de feu",
+    city: "Vernon",
+    status: "in_progress",
+    is_read: true,
+  },
+];
+
+void previewNotifications;
 
 function isCacheStale() {
   return Date.now() - notificationCache.fetchedAt > STALE_TIME_MS;
@@ -51,15 +82,12 @@ export function useNotificationCenter() {
         notificationCache.hasValue && nextPage <= notificationCache.page;
 
       if (usingCache) {
-        // Cache disponible : affichage immédiat, sans skeleton.
         setNotifications(notificationCache.notifications);
         setPage(notificationCache.page);
         setHasMore(notificationCache.hasMore);
         setIsLoading(false);
 
-        if (!options.force && !isCacheStale()) return; // encore frais, rien à refaire
-        // Périmé (ou revalidation forcée, ex. reconnexion réseau) : on
-        // rafraîchit en tâche de fond sans perturber l'affichage existant.
+        if (!options.force && !isCacheStale()) return; 
       } else {
         setIsLoading(true);
       }
@@ -91,9 +119,7 @@ export function useNotificationCenter() {
         setPage(nextPage);
         setHasMore(nextHasMore);
       } catch {
-        // Une revalidation silencieuse qui échoue ne doit pas remplacer des
-        // données déjà affichées par un message d'erreur — seul un premier
-        // chargement sans cache doit bloquer sur l'état d'erreur.
+
         if (!usingCache) setError("Impossible de charger les notifications.");
       } finally {
         if (!usingCache) {
@@ -150,10 +176,6 @@ export function useNotificationCenter() {
     void loadNotifications();
   }, [loadNotifications]);
 
-  // Revalidation façon "stale-while-revalidate", comme React Query/SWR par
-  // défaut : on rafraîchit silencieusement quand la connexion revient (même
-  // si le cache est encore "frais" — une coupure réseau est un signal fort),
-  // et quand l'onglet redevient visible si le cache est périmé.
   useEffect(() => {
     const revalidateOnReconnect = () => {
       void loadNotifications(1, { force: true });
@@ -170,6 +192,15 @@ export function useNotificationCenter() {
     };
   }, [loadNotifications]);
 
+  // Dev only - ce sont des mokes - pour prévisualiser un état UI sans dépendre du réseau,
+  // commente la ligne active ci-dessous et décommente celle de l'état voulu
+  // (une seule ligne "const preview" doit rester active à la fois).
+  const preview: PreviewState | undefined = undefined; // état normal
+  // const preview: PreviewState | undefined = { isLoading: false, error: "Impossible de charger les notifications." }; // état erreur
+  // const preview: PreviewState | undefined = { isLoading: false, error: null, notifications: [] }; // état "aucune notification"
+  // const preview: PreviewState | undefined = { isLoading: true }; // état skeleton
+  // const preview: PreviewState | undefined = { isLoading: false, error: null, notifications: [...notifications, ...previewNotifications] }; // + badge/mention (non seedables), en plus des vraies notifications
+
   return {
     notifications,
     page,
@@ -179,5 +210,6 @@ export function useNotificationCenter() {
     loadNotifications,
     markAllAsRead,
     markOneAsRead,
+    ...(preview ?? {}),
   };
 }

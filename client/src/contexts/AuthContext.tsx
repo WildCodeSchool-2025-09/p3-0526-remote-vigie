@@ -14,7 +14,7 @@ type AuthContextValue = {
 	loading: boolean;
 };
 
-// 🔧 Bouchon de dev — tient lieu de réponse de GET /api/auth/me en attendant l'US06.
+// Bouchon de dev — tient lieu de réponse de GET /api/auth/me en attendant l'US06.
 // Modifier ces valeurs pour tester les cas d'US01 :
 //   emailVerified: true  → le formulaire s'affiche
 //   emailVerified: false → écran « vérifie ton e-mail »
