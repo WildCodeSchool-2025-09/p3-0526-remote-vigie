@@ -8,14 +8,23 @@ import { useState } from "react";
 type Props = {
 	comment: Comment;
 	incidentStatus: IncidentStatus;
+	isNewComment?: boolean;
 };
 
-export default function CommentItem({ comment, incidentStatus }: Props) {
+export default function CommentItem({
+	comment,
+	incidentStatus,
+	isNewComment = false,
+}: Props) {
 	const [isQuoteExpanded, setIsQuoteExpanded] = useState(false);
 	const { user } = useAuth();
 
 	return (
-		<div className="rounded-2xl border-l-4 border-secondary bg-base-300 py-2 px-4">
+		<div
+			className={`rounded-2xl border-l-4 border-secondary bg-base-300 py-2 px-4 ${
+				isNewComment ? "animate-pop" : ""
+			}`}
+		>
 			<div className="flex items-baseline justify-between gap-2">
 				<span className="font-bold text-sm text-primary">
 					{comment.author.pseudo}

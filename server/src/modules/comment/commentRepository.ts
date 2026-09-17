@@ -1,6 +1,6 @@
 import databaseClient from "../../../database/client";
 
-import type { Rows } from "../../../database/client";
+import type { Result, Rows } from "../../../database/client";
 
 // Only CRUD here (Create, Read, Update, Delete)
 
@@ -40,6 +40,20 @@ class CommentRepository {
 							content: row.quoted_content,
 						},
 		}));
+	}
+
+	async create(data: {
+		userId: number;
+		incidentId: number;
+		content: string;
+	}): Promise<number> {
+		const [result] = await databaseClient.query<Result>(
+			`INSERT INTO comment (user_id, incident_id, content)
+			VALUES (?, ?, ?)`,
+			[data.userId, data.incidentId, data.content],
+		);
+
+		return result.insertId;
 	}
 }
 

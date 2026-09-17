@@ -13,6 +13,7 @@ type Props = {
 
 export default function CommentList({ incidentId, incidentStatus }: Props) {
 	const [comments, setComments] = useState<Comment[]>([]);
+	const [newCommentIds, setNewCommentIds] = useState<Set<number>>(new Set());
 
 	useEffect(() => {
 		getComments(incidentId).then((result) => {
@@ -60,12 +61,22 @@ export default function CommentList({ incidentId, incidentStatus }: Props) {
 							key={comment.id}
 							comment={comment}
 							incidentStatus={incidentStatus}
+							isNewComment={newCommentIds.has(comment.id)}
 						/>
 					))}
 				</div>
 			)}
 
-			<CommentForm incidentStatus={incidentStatus} />
+			<CommentForm
+				incidentId={incidentId}
+				incidentStatus={incidentStatus}
+				onCommentAdded={(comment) => {
+					setComments((current) => [...current, comment]);
+					setNewCommentIds(
+						(current) => new Set(current).add(comment.id),
+					);
+				}}
+			/>
 		</div>
 	);
 }

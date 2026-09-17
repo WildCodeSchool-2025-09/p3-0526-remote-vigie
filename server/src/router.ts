@@ -20,6 +20,6 @@ router.put(
 );
 
 router.get("/api/incidents/:id/comments", commentActions.browse);
-router.post("/api/incidents/:id/comments", commentActions.add);
+router.post("/api/incidents/:id/comments", verifyToken, commentActions.add);
 
 export default router;

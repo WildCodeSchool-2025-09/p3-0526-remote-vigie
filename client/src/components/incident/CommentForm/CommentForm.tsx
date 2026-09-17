@@ -1,5 +1,7 @@
 import Icon from "@/components/Icon/Icon";
 import { useAuth } from "@/contexts/AuthContext";
+import { createComment } from "@/services/commentService";
+import type { Comment } from "@/types/comment";
 import type { IncidentStatus } from "@/types/incidentDetails";
 import { useState } from "react";
 
@@ -8,13 +10,20 @@ import type { ChangeEvent, FormEvent } from "react";
 const MAX_LENGTH = 500;
 
 type Props = {
+	incidentId: number;
 	incidentStatus: IncidentStatus;
+	onCommentAdded: (comment: Comment) => void;
 };
 
-export default function CommentForm({ incidentStatus }: Props) {
+export default function CommentForm({
+	incidentId,
+	incidentStatus,
+	onCommentAdded,
+}: Props) {
 	const { user } = useAuth();
 	const [content, setContent] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
 	if (incidentStatus === "resolved") {
 		return null;
@@ -26,13 +35,54 @@ export default function CommentForm({ incidentStatus }: Props) {
 		setContent(event.target.value);
 	};
 
-	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		// TODO : brancher commentService.createComment (prochaine tâche de la checklist)
-	};
-
 	const isDisabled =
 		!isConnected || isSubmitting || content.trim().length === 0;
+
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+
+		if (isDisabled || user == null) return;
+
+		setIsSubmitting(true);
+		setError(null);
+
+		const result = await createComment(incidentId, {
+			content: content.trim(),
+		});
+
+		setIsSubmitting(false);
+
+		if (result.status === "ok") {
+			onCommentAdded({
+				id: result.id,
+				author: { pseudo: user.pseudo },
+				content: content.trim(),
+				createdAt: new Date().toISOString(),
+				quotedComment: null,
+			});
+			setContent("");
+			return;
+		}
+
+		switch (result.status) {
+			case "invalid":
+				setError("Votre commentaire est vide ou dépasse 500 caractères.");
+				break;
+			case "unauthorized":
+				setError("Vous devez être connecté pour commenter.");
+				break;
+			case "notFound":
+				setError("Cet incident n'existe plus.");
+				break;
+			case "resolved":
+				setError(
+					"Cet incident est résolu, vous ne pouvez plus commenter.",
+				);
+				break;
+			default:
+				setError("Une erreur est survenue, réessayez.");
+		}
+	};
 
 	return (
 		<div className="mt-4">
@@ -48,6 +98,22 @@ export default function CommentForm({ incidentStatus }: Props) {
 					<p className="text-sm text-black">
 						Connectez-vous pour commenter ce signalement.
 					</p>
+				</div>
+			)}
+
+			{error != null && (
+				<div
+					role="alert"
+					className="mb-3 flex w-full items-start gap-3 rounded-2xl bg-(--bg-error) px-5 py-3"
+				>
+					<span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-error">
+						<Icon
+							name="exclamation"
+							className="h-3.5 w-3.5 fill-white"
+							aria-hidden="true"
+						/>
+					</span>
+					<p className="text-sm text-error">{error}</p>
 				</div>
 			)}
 
