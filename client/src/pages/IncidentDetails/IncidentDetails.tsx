@@ -1,6 +1,7 @@
 import bgIncidentDetails from "@/assets/images/background-incident-details.jpg";
 import Icon from "@/components/Icon/Icon";
 import SafetyInstructions from "@/components/SafetyInstructions/SafetyInstructions";
+import CommentList from "@/components/incident/CommentList/CommentList";
 import IncidentActions from "@/components/incident/IncidentActions/IncidentActions";
 import IncidentContent from "@/components/incident/IncidentContent/IncidentContent";
 import IncidentContributions from "@/components/incident/IncidentContributions/IncidentContributions";
@@ -188,6 +189,8 @@ export default function IncidentDetails() {
 				/>
 
 				<SafetyInstructions incidentTypes={incident.types} />
+
+				<CommentList incidentId={incident.id} />
 
 				<IncidentActions
 					status={incident.status}
