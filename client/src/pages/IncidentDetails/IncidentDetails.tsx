@@ -248,7 +248,10 @@ export default function IncidentDetails() {
 
 				<SafetyInstructions incidentTypes={incident.types} />
 
-				<CommentList incidentId={incident.id} />
+				<CommentList
+					incidentId={incident.id}
+					incidentStatus={incident.status}
+				/>
 
 				<IncidentActions
 					status={incident.status}

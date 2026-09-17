@@ -2,13 +2,15 @@ import Icon from "@/components/Icon/Icon";
 import CommentItem from "@/components/incident/CommentItem/CommentItem";
 import { getComments } from "@/services/commentService";
 import type { Comment } from "@/types/comment";
+import type { IncidentStatus } from "@/types/incidentDetails";
 import { useEffect, useState } from "react";
 
 type Props = {
 	incidentId: number;
+	incidentStatus: IncidentStatus;
 };
 
-export default function CommentList({ incidentId }: Props) {
+export default function CommentList({ incidentId, incidentStatus }: Props) {
 	const [comments, setComments] = useState<Comment[]>([]);
 
 	useEffect(() => {
@@ -53,7 +55,11 @@ export default function CommentList({ incidentId }: Props) {
 			) : (
 				<div className="flex flex-col gap-3">
 					{comments.map((comment) => (
-						<CommentItem key={comment.id} comment={comment} />
+						<CommentItem
+							key={comment.id}
+							comment={comment}
+							incidentStatus={incidentStatus}
+						/>
 					))}
 				</div>
 			)}
