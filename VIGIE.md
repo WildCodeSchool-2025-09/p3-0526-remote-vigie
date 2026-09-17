@@ -598,6 +598,9 @@ l'incident soit `in_progress`. Un commentaire publié n'est ni modifiable ni sup
 **Pas de pagination** : un incident a une durée de vie limitée (`expires_at`), donc un fil reste
 court en pratique — tous les commentaires s'affichent directement (décision prise à l'ouverture
 d'US08, le comportement par lots initialement prévu sur la carte Trello a été retiré).
+**Une seule limite de publication** : la longueur du contenu (500 caractères, `comment.content`).
+Pas de limite de fréquence — la checklist Trello en prévoyait une (`checkCommentRateLimit`),
+retirée à l'ouverture d'US08 pour la même raison que la pagination.
 
 ### Authentification (US05, US06)
 

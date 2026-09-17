@@ -14,7 +14,7 @@ const browse: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		const comments = await commentRepository.browse(incidentId);
+		const comments = await commentRepository.browseByIncident(incidentId);
 
 		res.json(comments);
 	} catch (err) {
