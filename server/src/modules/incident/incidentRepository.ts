@@ -31,6 +31,15 @@ type IncidentDetails = {
 	counts: { confirm: number; deny: number };
 };
 
+type NearbyIncident = {
+	id: number;
+	latitude: string;
+	longitude: string;
+	baseAlertRadiusMeters: number;
+	city: string;
+	createdAt: Date;
+};
+
 class IncidentRepository {
 	async read(id: number): Promise<IncidentDetails | null> {
 		const [rows] = await databaseClient.query<Rows>(
@@ -108,6 +117,29 @@ class IncidentRepository {
 			})),
 			counts,
 		};
+	}
+	async readNearbyOngoingByTypes(
+		typeIds: number[],
+	): Promise<NearbyIncident[]> {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT DISTINCT
+			i.id, i.latitude, i.longitude, i.base_alert_radius_meters,
+			i.city, i.created_at
+			FROM incident AS i
+			INNER JOIN incident_incident_type AS iit ON iit.incident_id = i.id
+			WHERE i.status = 'in_progress'
+			AND iit.incident_type_id IN (?)`,
+			[typeIds],
+		);
+
+		return rows.map((r) => ({
+			id: r.id,
+			latitude: r.latitude,
+			longitude: r.longitude,
+			baseAlertRadiusMeters: r.base_alert_radius_meters,
+			city: r.city,
+			createdAt: r.created_at,
+		}));
 	}
 }
 

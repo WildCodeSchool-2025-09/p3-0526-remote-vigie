@@ -18,6 +18,7 @@ router.get("/api/incident-types", incidentTypeActions.browse);
 
 import incidentActions from "./modules/incident/incidentActions";
 
+router.get("/api/incidents/nearby", incidentActions.browseNearby);
 router.get("/api/incidents/:id", incidentActions.read);
 
 export default router;
