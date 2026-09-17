@@ -35,14 +35,21 @@ const edit: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		const currentStatus = await incidentRepository.findStatus(id);
+		const current = await incidentRepository.findOwnerAndStatus(id);
 
-		if (currentStatus == null) {
+		if (current == null) {
 			res.sendStatus(StatusCodes.NOT_FOUND);
 			return;
 		}
 
-		if (currentStatus === "resolved") {
+		if (req.auth == null || Number(req.auth.sub) !== current.userId) {
+			res.status(StatusCodes.FORBIDDEN).json({
+				message: "Vous n'êtes pas l'auteur de ce signalement.",
+			});
+			return;
+		}
+
+		if (current.status === "resolved") {
 			res.status(StatusCodes.CONFLICT).json({
 				message: "Cet incident est résolu, il n'est plus modifiable.",
 			});

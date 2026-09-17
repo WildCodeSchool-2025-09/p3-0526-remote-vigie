@@ -52,8 +52,20 @@ export default function IncidentEditModal({
 			return;
 		}
 
+		if (result.status === "forbidden") {
+			setServerError("Vous n'êtes pas l'auteur de ce signalement.");
+			return;
+		}
+
 		if (result.status === "notFound") {
 			setServerError("Ce signalement n'existe plus.");
+			return;
+		}
+
+		if (result.status === "resolved") {
+			setServerError(
+				"Cet incident est résolu, il n'est plus modifiable.",
+			);
 			return;
 		}
 

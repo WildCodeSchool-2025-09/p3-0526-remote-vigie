@@ -57,7 +57,7 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 | US03 | Accéder à la liste de tous les incidents | 2 | Guillaume Galinanes | `feat/US03-incident-list` |
 | US04 | Carte interactive (incidents + lieux utiles) | 2 | Guillaume Galinanes | `feat/US04-interactive-map` |
 | US05 | S'inscrire (avec adresse géolocalisée + vérification e-mail) | 2 | Laurent Koehler | `feat/US05-register` |
-| US06 | Se connecter (JWT en cookie httpOnly) | 2 | Laurent Koehler | `feat/US06-login` |
+| US06 | Se connecter (JWT en en-tête `Authorization: Bearer`) | 2 | Laurent Koehler | `feat/US06-login` |
 | US07 | Corriger le contenu descriptif de son incident | 2 | Frédéric Briand | `feat/US07-incident-edit` |
 | US08 | Consulter et commenter un incident (fil plat, citations) | 2 | Frédéric Briand | `feat/US08-incident-comments` |
 | US09 | Centre de notifications in-app (pastille non lues) | 2 | Frédéric Briand | `feat/US09-notification-center` |
@@ -609,7 +609,12 @@ saisie d'URL côté US07.
   composition imposée) + adresse (auto-complétion via l'API Vigie) + acceptation CGU.
   Compte créé non vérifié, e-mail de vérification envoyé.
 - Connexion possible même sans e-mail vérifié ; certaines actions (US01) restent bloquées.
-- Session : **JWT dans un cookie `httpOnly`**, durée fixe, sans renouvellement automatique.
+- Session : **JWT transporté en en-tête `Authorization: Bearer <token>`**, durée fixe (1h),
+  sans renouvellement automatique. *(Révisé le 2026-09-17 : décrit précédemment comme un cookie
+  `httpOnly` ; l'équipe s'est finalement alignée sur le modèle du repo pédagogique
+  [`workshop-js-auth`](https://github.com/WildCodeSchool/workshop-js-auth/tree/jwt), qui utilise
+  un en-tête plutôt qu'un cookie. Conséquence concrète : c'est le **front** qui doit attacher le
+  token à chaque requête protégée, il n'est plus envoyé automatiquement par le navigateur.)*
 - Comparaisons pseudo / e-mail sur formes **normalisées** ; messages d'erreur neutres
   (anti-énumération de comptes).
 
