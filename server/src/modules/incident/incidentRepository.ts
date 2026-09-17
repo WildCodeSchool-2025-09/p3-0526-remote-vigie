@@ -110,6 +110,19 @@ class IncidentRepository {
 		};
 	}
 
+	// Lecture minimale utilisée avant modification : pas besoin des 3 requêtes de
+	// read() (jointures, types, décomptes) juste pour connaître le statut courant.
+	async findStatus(
+		id: number,
+	): Promise<"in_progress" | "resolved" | null> {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT status FROM incident WHERE id = ?",
+			[id],
+		);
+
+		return rows[0]?.status ?? null;
+	}
+
 	async update(
 		id: number,
 		data: {

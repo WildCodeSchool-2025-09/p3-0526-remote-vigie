@@ -150,7 +150,10 @@ export default function IncidentEditModal({
 					/>
 
 					{serverError != null && (
-						<div className="mb-3 flex w-full items-start gap-3 rounded-2xl bg-(--bg-error) px-5 py-3">
+						<div
+							role="alert"
+							className="mb-3 flex w-full items-start gap-3 rounded-2xl bg-(--bg-error) px-5 py-3"
+						>
 							<span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-error">
 								<Icon
 									name="exclamation"

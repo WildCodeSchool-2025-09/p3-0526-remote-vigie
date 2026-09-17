@@ -35,6 +35,20 @@ const edit: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
+		const currentStatus = await incidentRepository.findStatus(id);
+
+		if (currentStatus == null) {
+			res.sendStatus(StatusCodes.NOT_FOUND);
+			return;
+		}
+
+		if (currentStatus === "resolved") {
+			res.status(StatusCodes.CONFLICT).json({
+				message: "Cet incident est résolu, il n'est plus modifiable.",
+			});
+			return;
+		}
+
 		const body = req.body as {
 			title?: unknown;
 			description?: unknown;
