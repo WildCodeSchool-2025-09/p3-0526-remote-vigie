@@ -7,6 +7,7 @@ import IncidentContributions from "@/components/incident/IncidentContributions/I
 import IncidentEditModal from "@/components/incident/IncidentEditModal/IncidentEditModal";
 import IncidentHeader from "@/components/incident/IncidentHeader/IncidentHeader";
 import IncidentLocation from "@/components/incident/IncidentLocation/IncidentLocation";
+import { useAuth } from "@/contexts/AuthContext";
 import IncidentDetailsSkeleton from "@/pages/IncidentDetails/IncidentDetailsSkeleton";
 import { getIncidentById } from "@/services/incidentService";
 import type { Incident } from "@/types/incidentDetails";
@@ -21,6 +22,7 @@ type ViewState =
 
 export default function IncidentDetails() {
 	const navigate = useNavigate();
+	const { user } = useAuth();
 	const { id } = useParams();
 	const [state, setState] = useState<ViewState>({ status: "loading" });
 	const [justSaved, setJustSaved] = useState(false);
@@ -166,7 +168,9 @@ export default function IncidentDetails() {
 				<h1 className="font-title text-2xl font-bold text-white">
 					{incident.title}
 				</h1>
-				{incident.status === "in_progress" && (
+				{incident.status === "in_progress" &&
+					user != null &&
+					user.id === incident.author.id && (
 					<button
 						type="button"
 						className="btn btn-square btn-md rounded-xl border-none bg-transparent shadow-none hover:bg-white/50"

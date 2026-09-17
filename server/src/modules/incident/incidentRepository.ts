@@ -18,7 +18,7 @@ type IncidentDetails = {
 	editedAt: Date | null;
 	expiresAt: Date;
 	dangerLevel: { label: string; color: string; weight: number };
-	author: { pseudo: string };
+	author: { id: number; pseudo: string };
 	types: {
 		code: string;
 		label: string;
@@ -33,7 +33,7 @@ class IncidentRepository {
 	async read(id: number): Promise<IncidentDetails | null> {
 		const [rows] = await databaseClient.query<Rows>(
 			`SELECT
-				i.id, i.title, i.description, i.photo_url,
+				i.id, i.user_id, i.title, i.description, i.photo_url,
 				i.latitude, i.longitude, i.city, i.insee_code,
 				i.status, i.created_at, i.edited_at, i.expires_at,
 				d.label AS danger_level_label,
@@ -96,7 +96,7 @@ class IncidentRepository {
 				color: row.danger_level_color,
 				weight: row.danger_level_weight,
 			},
-			author: { pseudo: row.author_pseudo },
+			author: { id: row.user_id, pseudo: row.author_pseudo },
 			types: typeRows.map((t) => ({
 				code: t.code,
 				label: t.label,
