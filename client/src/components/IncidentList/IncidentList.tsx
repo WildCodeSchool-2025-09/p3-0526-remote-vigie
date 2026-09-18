@@ -46,7 +46,7 @@ export default function IncidentList({
 
 	if (hasError) {
 		return (
-			<div className="flex flex-1 flex-col items-center justify-center">
+			<div className="flex flex-1 flex-col items-center justify-start">
 				<div
 					role="alert"
 					aria-live="assertive"
@@ -85,7 +85,7 @@ export default function IncidentList({
 
 	if (incidents.length === 0) {
 		return (
-			<div className="flex flex-1 flex-col items-center justify-center">
+			<div className="flex flex-1 flex-col items-center justify-start">
 				<output className="flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl bg-base-300 p-4 text-center">
 					<span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--bg-success)">
 						<Icon
@@ -99,7 +99,7 @@ export default function IncidentList({
 							Rien à signaler autour de vous
 						</h2>
 						<p className="mt-2 text-sm text-black">
-							Aucun incident en cours dans votre zone. Vous serez
+							Aucun incident dans votre zone. Vous serez
 							alerté dès qu'un voisin signale quelque chose près
 							d'une de vos adresses.
 						</p>
@@ -112,7 +112,7 @@ export default function IncidentList({
 	return (
 		<div className="flex flex-col gap-3">
 			<p className="text-sm text-black">
-				Incidents en cours · {incidents.length}
+				Incidents · {incidents.length}
 			</p>
 
 			<ul className="flex flex-col gap-3">
