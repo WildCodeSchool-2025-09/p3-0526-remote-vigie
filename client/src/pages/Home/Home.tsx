@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import bgHome from "@/assets/images/backgroud-home.jpg";
+import VigieLogo from "@/assets/images/vigie-ligne.svg?react";
 import IncidentList from "@/components/IncidentList/IncidentList";
 import { getAllIncidents } from "@/services/incidentService";
 import type { IncidentListItem } from "@/types/incidentList";
@@ -38,36 +39,46 @@ export default function Home() {
 		return loadIncidents();
 	}, [loadIncidents]);
 
+	// Chevauchement avec le header réservé aux états "placeholder" (chargement,
+	// erreur, vide) : la vraie liste de cartes n'en a pas besoin. À revoir avec
+	// l'US04 : la carte, une fois codée, deviendra l'élément qui chevauche le
+	// header, indépendamment de l'état de la liste en dessous.
+	const showsPlaceholder = isLoading || hasError || incidents.length === 0;
+
 	return (
-		<div className="flex h-full flex-col bg-base-100">
-			{/* Commune en dur en attendant la géolocalisation. */}
+		<div className="fixed inset-x-0 top-0 flex h-[calc(100dvh-var(--navigation-height))] flex-col bg-base-100">
 			<header className="relative isolate flex h-44 shrink-0 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
 				<img
 					src={bgHome}
 					alt=""
 					aria-hidden="true"
 					className="absolute inset-0 -z-10 h-full w-full object-cover opacity-70 mix-blend-multiply"
-				/>
-				<h1 className="font-title text-2xl font-bold text-accent">
-					Vigie
+					/>
+				<h1>
+					<VigieLogo
+						role="img"
+						aria-label="Vigie"
+						className="h-8 w-auto"
+					/>
 				</h1>
-				<p className="mt-1 text-sm text-white/85">Alès (30100)</p>
+				{/* <p className="mt-1 text-sm text-white/85">Affichage commune en attente de la géolocalisation.</p> */}
+					
 			</header>
 
-			<div className="relative -mt-8 flex min-h-0 flex-1 flex-col space-y-4 px-4 pb-6">
+			<div
+				className={`relative flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto px-4 pb-6 ${showsPlaceholder ? "-mt-8" : ""}`}
+			>
 				{/* <section className="rounded-2xl bg-base-300 p-4"> */}
 					{/* US04 : <IncidentMap incidents={incidents} isLoading={isLoading} hasError={hasError} /> viendra ici, même donnée. Encart séparé de celui de la liste, taille/scroll à définir avec l'US04. */}
 				{/* </section> */}
 
-				<section className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-2xl bg-base-300 p-4">
-					<IncidentList
-						incidents={incidents}
-						isLoading={isLoading}
-						hasError={hasError}
-						onRetry={loadIncidents}
-						limit={INCIDENTS_LIST_LIMIT}
-					/>
-				</section>
+				<IncidentList
+					incidents={incidents}
+					isLoading={isLoading}
+					hasError={hasError}
+					onRetry={loadIncidents}
+					limit={INCIDENTS_LIST_LIMIT}
+				/>
 			</div>
 		</div>
 	);
