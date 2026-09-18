@@ -155,7 +155,7 @@ export default function IncidentDetails() {
 				/>
 				<button
 					type="button"
-					className="btn btn-square btn-md rounded-2xl border-2 border-white bg-white/20 shadow-none hover:bg-white/50"
+					className="btn btn-square btn-md rounded-xl border-2 border-white bg-white/20 shadow-none hover:bg-white/50"
 					aria-label="Retour à la carte"
 					onClick={() => navigate("/")}
 				>

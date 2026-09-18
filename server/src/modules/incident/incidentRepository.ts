@@ -4,8 +4,6 @@ import type { Rows } from "../../../database/client";
 
 // Only CRUD here (Create, Read, Update, Delete)
 
-// Shape returned by read(): the incident plus its resolved relations
-// (danger level, author, types) and the contribution counts.
 type IncidentDetails = {
 	id: number;
 	title: string;

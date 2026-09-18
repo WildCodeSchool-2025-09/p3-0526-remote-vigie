@@ -16,7 +16,7 @@ export default function TextAreaExamples() {
     id="description"
     rows={2}
     placeholder="Écrire un commentaire..."
-    className="w-full resize-none rounded-3xl border-2 border-primary/15 bg-base-100 px-5 py-4 text-black placeholder:text-black/40 focus:outline-none"
+    className="w-full resize-none rounded-xl border-2 border-primary/15 bg-base-100 px-5 py-4 text-black placeholder:text-black/40 focus:outline-none"
   />
 </div>`}
 		>
@@ -31,7 +31,7 @@ export default function TextAreaExamples() {
 					id="description"
 					rows={2}
 					placeholder="Écrire un commentaire..."
-					className="w-full resize-none rounded-3xl border-2 border-primary/15 bg-base-100 px-5 py-4 text-black placeholder:text-black/40 focus:outline-none"
+					className="w-full resize-none rounded-xl border-2 border-primary/15 bg-base-100 px-5 py-4 text-black placeholder:text-black/40 focus:outline-none"
 				/>
 			</div>
 		</Example>

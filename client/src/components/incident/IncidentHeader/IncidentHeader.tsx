@@ -105,12 +105,12 @@ export default function IncidentHeader({
 				})}
 			</ul>
 
-			<div className="border-t border-primary/10 pt-3 text-sm text-primary/60">
+			<div className="border-t border-primary/10 pt-3 text-xs text-primary/60">
 				<p>
 					Signalé {formatReportedAt(createdAt)}
 					{editedAt != null && ` · modifié à ${formatTime(editedAt)}`}
 				</p>
-				<p>
+				<p className="mt-1">
 					Par{" "}
 					<strong className="text-primary">{author.pseudo}</strong>
 				</p>
