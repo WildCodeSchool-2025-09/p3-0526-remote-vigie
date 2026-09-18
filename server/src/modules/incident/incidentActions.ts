@@ -28,7 +28,6 @@ const read: RequestHandler = async (req, res, next) => {
 	}
 };
 
-<<<<<<< HEAD
 const browseNearby: RequestHandler = async (req, res, next) => {
 	try {
 		const lat = Number(req.query.lat);
@@ -69,7 +68,11 @@ const browseNearby: RequestHandler = async (req, res, next) => {
 		);
 
 		res.json(touching[0] ?? null);
-=======
+	} catch (err) {
+		next(err);
+	}
+};
+
 const edit: RequestHandler = async (req, res, next) => {
 	try {
 		const id = Number(req.params.id);
@@ -125,7 +128,6 @@ const edit: RequestHandler = async (req, res, next) => {
 		}
 
 		res.json(incident);
->>>>>>> origin/dev
 	} catch (err) {
 		next(err);
 	}
@@ -133,9 +135,6 @@ const edit: RequestHandler = async (req, res, next) => {
 
 export default {
 	read,
-<<<<<<< HEAD
 	browseNearby,
-=======
 	edit,
->>>>>>> origin/dev
 };

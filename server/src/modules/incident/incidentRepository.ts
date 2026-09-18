@@ -117,7 +117,7 @@ class IncidentRepository {
 			counts,
 		};
 	}
-<<<<<<< HEAD
+
 	async readNearbyOngoingByTypes(
 		typeIds: number[],
 	): Promise<NearbyIncident[]> {
@@ -157,7 +157,7 @@ class IncidentRepository {
 			city: r.city,
 			createdAt: r.created_at,
 		}));
-=======
+	}
 
 	async findOwnerAndStatus(
 		id: number,
@@ -185,7 +185,6 @@ class IncidentRepository {
 			WHERE id = ?`,
 			[data.title, data.description, data.photoUrl, id],
 		);
->>>>>>> origin/dev
 	}
 }
 

@@ -49,17 +49,11 @@ export default function DuplicateWarning({
 
 	return (
 		<section
-			className="space-y-4 rounded-2xl border-2 p-4 shadow-lg"
-			style={{
-				backgroundColor,
-				borderColor: type?.color ?? "var(--warning)",
-			}}
+			className="space-y-4 rounded-2xl p-4 animate-pop"
+			style={{ backgroundColor }}
 		>
 			<div className="flex items-start gap-3">
-				<span
-					className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border bg-(--accent-light)"
-					style={{ borderColor: type?.color ?? "var(--warning)" }}
-				>
+				<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--accent-light)">
 					<Icon
 						name={iconName}
 						className="h-4 w-4"
@@ -80,8 +74,11 @@ export default function DuplicateWarning({
 				<button
 					type="button"
 					onClick={onJoin}
-					className="btn rounded-full border-none text-white"
-					style={{ backgroundColor: type?.color ?? "var(--warning)" }}
+					className="btn rounded-full border-none"
+					style={{
+						backgroundColor: type?.color ?? "var(--warning)",
+						color: backgroundColor,
+					}}
 				>
 					Rejoindre
 				</button>

@@ -25,7 +25,6 @@ export async function getIncidentById(id: string): Promise<GetIncidentResult> {
 	}
 }
 
-<<<<<<< HEAD
 export async function getNearbyIncident(
 	lat: number,
 	lng: number,
@@ -39,9 +38,7 @@ export async function getNearbyIncident(
 			params.append("types", String(id));
 		}
 
-		const res = await fetch(
-			`${import.meta.env.VITE_API_URL}/api/incidents/nearby?${params.toString()}`,
-		);
+		const res = await apiFetch(`/api/incidents/nearby?${params.toString()}`);
 		if (res.status === 400) return { status: "badRequest" };
 		if (!res.ok) return { status: "error" };
 
@@ -49,7 +46,11 @@ export async function getNearbyIncident(
 			status: "ok",
 			nearbyIncident: await res.json(),
 		};
-=======
+	} catch {
+		return { status: "error" };
+	}
+}
+
 type UpdateIncidentPayload = {
 	title: string;
 	description: string | null;
@@ -82,7 +83,6 @@ export async function updateIncident(
 		if (!res.ok) return { status: "error" };
 
 		return { status: "ok", incident: (await res.json()) as Incident };
->>>>>>> origin/dev
 	} catch {
 		return { status: "error" };
 	}

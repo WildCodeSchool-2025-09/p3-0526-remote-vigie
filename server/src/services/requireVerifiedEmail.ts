@@ -6,15 +6,15 @@ import type { Rows } from "../../database/client";
 
 /**
  * Refuse l'accès (403) si l'e-mail de l'utilisateur connecté n'est pas vérifié.
- * À monter APRÈS verifyToken, qui pose req.user.
+ * À monter APRÈS verifyToken, qui pose req.auth.
  *
  * 🔧 Contexte US06 : verifyToken est encore un bouchon (utilisateur n°1 forcé).
  * Ce middleware-ci fait une vraie requête sur user.email_verified_at à partir de
- * req.user.id — il n'a donc rien de bouché et ne changera pas en US06.
+ * req.auth.sub — il n'a donc rien de bouché et ne changera pas en US06.
  * TODO US06 : juste revérifier l'enchaînement quand le vrai verifyToken arrive.
  */
 const requireVerifiedEmail: RequestHandler = async (req, res, next) => {
-	if (req.user == null) {
+	if (req.auth == null) {
 		// Filet si le middleware est monté sans verifyToken devant.
 		res.sendStatus(StatusCodes.UNAUTHORIZED);
 		return;
@@ -23,7 +23,7 @@ const requireVerifiedEmail: RequestHandler = async (req, res, next) => {
 	try {
 		const [rows] = await databaseClient.query<Rows>(
 			"SELECT email_verified_at FROM user WHERE id = ?",
-			[req.user.id],
+			[Number(req.auth.sub)],
 		);
 
 		if (rows.length === 0) {

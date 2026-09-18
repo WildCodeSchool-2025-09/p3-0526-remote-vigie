@@ -13,6 +13,7 @@ import { distanceInMeters } from "@/utils/distance";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import DetailsStep from "./DetailsStep";
+import IncidentFormSkeleton from "./IncidentFormSkeleton";
 import IncidentTypeStep from "./IncidentTypeStep";
 
 function computeHighestDangerLevel(
@@ -231,42 +232,48 @@ export default function IncidentForm() {
 					Vos voisins concernés seront alertés aussitôt.
 				</p>
 			</header>
-			<div className="relative -mt-8 space-y-4 px-4 pb-6">
-				{duplicateCandidate && (
-					<DuplicateWarning
-						candidate={duplicateCandidate}
-						type={duplicateType}
-						distanceMeters={duplicateDistance}
-						onJoin={() => navigate(`/incident/${duplicateCandidate.id}`)}
-						onIgnore={() => setDuplicateCandidate(null)}
+			{loadingTypes || position == null ? (
+				<IncidentFormSkeleton />
+			) : (
+				<div className="relative -mt-8 space-y-4 px-4 pb-6">
+					{duplicateCandidate && (
+						<DuplicateWarning
+							candidate={duplicateCandidate}
+							type={duplicateType}
+							distanceMeters={duplicateDistance}
+							onJoin={() =>
+								navigate(`/incident/${duplicateCandidate.id}`)
+							}
+							onIgnore={() => setDuplicateCandidate(null)}
+						/>
+					)}
+					<IncidentTypeStep
+						incidentTypes={incidentTypes}
+						selectedTypes={selectedTypes}
+						onSelectedTypesChange={setSelectedTypes}
+						loadingTypes={loadingTypes}
+						typesError={typesError}
+						onRetry={() => loadIncidentTypes()}
+						selectedTypesInstructions={selectedTypesInstructions}
 					/>
-				)}
-				<IncidentTypeStep
-					incidentTypes={incidentTypes}
-					selectedTypes={selectedTypes}
-					onSelectedTypesChange={setSelectedTypes}
-					loadingTypes={loadingTypes}
-					typesError={typesError}
-					onRetry={() => loadIncidentTypes()}
-					selectedTypesInstructions={selectedTypesInstructions}
-				/>
-				<DetailsStep
-					dangerLevels={dangerLevels}
-					dangerLevel={dangerLevel}
-					onDangerLevelChange={(id) => {
-						setDangerLevel(id);
-						setDangerLevelTouched(true);
-					}}
-					addressOptions={addressOptions}
-					selectedAddressId={selectedAddressId}
-					onSelectedAddressIdChange={setSelectedAddressId}
-					position={position}
-					onPositionChange={setPosition}
-					geolocationError={geolocationError}
-				/>
+					<DetailsStep
+						dangerLevels={dangerLevels}
+						dangerLevel={dangerLevel}
+						onDangerLevelChange={(id) => {
+							setDangerLevel(id);
+							setDangerLevelTouched(true);
+						}}
+						addressOptions={addressOptions}
+						selectedAddressId={selectedAddressId}
+						onSelectedAddressIdChange={setSelectedAddressId}
+						position={position}
+						onPositionChange={setPosition}
+						geolocationError={geolocationError}
+					/>
 
-				<section className="rounded-2xl bg-base-200 p-4">…</section>
-			</div>
+					<section className="rounded-2xl bg-base-200 p-4">…</section>
+				</div>
+			)}
 		</div>
 	);
 }

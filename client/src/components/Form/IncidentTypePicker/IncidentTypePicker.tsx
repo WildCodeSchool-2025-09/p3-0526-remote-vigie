@@ -57,7 +57,7 @@ export default function IncidentTypePicker({
 									name={type.icon as IconName}
 									className={`-mt-8 ${isSelected ? "h-16 w-16" : "h-14 w-14"}`}
 								/>
-								<span className="pt-1 text-xs">
+								<span className="pt-1 text-sm">
 									{type.label}
 								</span>
 							</div>

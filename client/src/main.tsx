@@ -12,10 +12,7 @@ import {
 
 import App from "@/App";
 import PrivateRoute from "@/components/Routing/PrivateRoute/PrivateRoute";
-<<<<<<< HEAD
-=======
 import { AuthProvider } from "@/contexts/AuthContext";
->>>>>>> origin/dev
 import Home from "@/pages/Home/Home";
 import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
 import IncidentForm from "@/pages/IncidentForm/IncidentForm";
@@ -98,7 +95,7 @@ const router = createBrowserRouter([
 				element: <PrivateRoute />,
 				children: [
 					{
-						path: "incident/form",
+						path: "incident/create",
 						element: <IncidentForm />,
 					},
 				],
