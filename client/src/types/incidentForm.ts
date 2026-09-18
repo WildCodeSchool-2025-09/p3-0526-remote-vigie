@@ -26,3 +26,10 @@ export type NearbyIncident = {
 	city: string;
 	createdAt: string;
 };
+
+export type LocationAddress = {
+	streetLine: string | null;
+	city: string | null;
+	postalCode: string | null;
+	inseeCode: string | null;
+};

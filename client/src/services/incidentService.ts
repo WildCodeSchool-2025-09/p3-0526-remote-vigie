@@ -21,7 +21,7 @@ export async function getIncidentById(id: string): Promise<GetIncidentResult> {
 
 		return { status: "ok", incident: (await res.json()) as Incident };
 	} catch {
-		return { status: "error" }; // réseau, CORS, JSON illisible
+		return { status: "error" };
 	}
 }
 
@@ -38,7 +38,9 @@ export async function getNearbyIncident(
 			params.append("types", String(id));
 		}
 
-		const res = await apiFetch(`/api/incidents/nearby?${params.toString()}`);
+		const res = await apiFetch(
+			`/api/incidents/nearby?${params.toString()}`,
+		);
 		if (res.status === 400) return { status: "badRequest" };
 		if (!res.ok) return { status: "error" };
 
