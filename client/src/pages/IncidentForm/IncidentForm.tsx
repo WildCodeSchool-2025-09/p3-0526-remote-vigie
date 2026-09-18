@@ -11,6 +11,7 @@ import type {
 } from "@/types/incidentForm";
 import { distanceInMeters } from "@/utils/distance";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 import DetailsStep from "./DetailsStep";
 import IncidentTypeStep from "./IncidentTypeStep";
 
@@ -31,6 +32,7 @@ function computeHighestDangerLevel(
 
 export default function IncidentForm() {
 	const { user } = useAuth();
+	const navigate = useNavigate();
 
 	const [addressOptions, setAddressOptions] = useState<Address[]>([]);
 	const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
@@ -235,7 +237,7 @@ export default function IncidentForm() {
 						candidate={duplicateCandidate}
 						type={duplicateType}
 						distanceMeters={duplicateDistance}
-						onJoin={() => {}}
+						onJoin={() => navigate(`/incident/${duplicateCandidate.id}`)}
 						onIgnore={() => setDuplicateCandidate(null)}
 					/>
 				)}
