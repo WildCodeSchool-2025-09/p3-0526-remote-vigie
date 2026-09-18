@@ -15,7 +15,7 @@ type MapLocationPickerProps = {
 
 const markerIcon = L.divIcon({
 	html: renderToStaticMarkup(
-		<icons.marker className="h-8 w-8 fill-primary" />,
+		<icons.marker className="h-8 w-8 fill-primary stroke-white stroke-1" />,
 	),
 	className: "",
 	iconSize: [32, 32],
@@ -80,15 +80,7 @@ export default function MapLocationPicker({
 					{draggable && <ClickToPlace onChange={onChange} />}
 				</MapContainer>
 			</div>
-			{!draggable && (
-				<p className="text-[10px] text-neutral">
-					©{" "}
-					<a href="https://www.openstreetmap.org/copyright">
-						OpenStreetMap
-					</a>{" "}
-					contributors
-				</p>
-			)}
+
 			{hasTileError && (
 				<div className="w-full">
 					<p className="text-primary ">Erreur sur la carte</p>

@@ -2,7 +2,7 @@ import { type IconName, icons } from "@/assets/icons";
 import Icon from "@/components/Icon/Icon";
 import type { IncidentType, NearbyIncident } from "@/types/incidentForm";
 import { formatDistance } from "@/utils/distance";
-import { formatDateTime } from "@/utils/formatDate";
+import { formatRelativeTime } from "@/utils/formatRelativeTime";
 
 type DuplicateWarningProps = {
 	candidate: NearbyIncident;
@@ -71,8 +71,8 @@ export default function DuplicateWarning({
 						{title}
 					</h2>
 					<p className="text-sm text-primary/50">
-						{candidate.city} · {formatDistance(distanceMeters)} · le{" "}
-						{formatDateTime(candidate.createdAt)}
+						{candidate.city} · {formatDistance(distanceMeters)} ·{" "}
+						{formatRelativeTime(candidate.createdAt)}
 					</p>
 				</div>
 			</div>
