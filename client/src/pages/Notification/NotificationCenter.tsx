@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import backgroundIncident from "../../assets/images/background-incident.jpg";
 import Icon from "../../components/Icon/Icon";
-import NotificationItem from "../../components/NotificationItem";
+import NotificationItem from "../../components/Notification/NotificationItem/NotificationItem";
 import { useNotificationCenter } from "../../contexts/Notification/useNotificationCenter";
 import type { Notification } from "../../types/notification";
 import NotificationsSkeleton from "./NotificationsSkeleton";
@@ -39,6 +39,23 @@ function groupByDate(notifications: Notification[]) {
 	return [...groups.entries()];
 }
 
+type ViewState =
+	| { status: "loading" }
+	| { status: "error" }
+	| { status: "empty" }
+	| { status: "list"; notifications: Notification[] };
+
+function getViewState(
+	isLoading: boolean,
+	error: string | null,
+	notifications: Notification[],
+): ViewState {
+	if (isLoading) return { status: "loading" };
+	if (error) return { status: "error" };
+	if (notifications.length === 0) return { status: "empty" };
+	return { status: "list", notifications };
+}
+
 function NotificationCenter() {
 	const navigate = useNavigate();
 	const {
@@ -51,6 +68,7 @@ function NotificationCenter() {
 		markAllAsRead,
 		markOneAsRead,
 	} = useNotificationCenter();
+	const state = getViewState(isLoading, error, notifications);
 
 	return (
 		<main className="min-h-full bg-base-100">
@@ -70,29 +88,9 @@ function NotificationCenter() {
 				className="mx-auto w-full max-w-4xl px-4 pb-24 sm:px-8 sm:pb-28"
 				aria-live="polite"
 			>
-				{!isLoading && !error && notifications.length > 0 && (
-					<div className="-mt-8 relative mb-6 flex items-center justify-between gap-3 rounded-2xl bg-warning p-4 shadow-sm">
-						<div className="flex items-center gap-2">
-							<span className="font-title text-lg font-bold text-primary">
-								{
-									notifications.filter(
-										(item) => item.is_read === false,
-									).length
-								}{" "}
-								non lues sur {notifications.length}
-							</span>
-						</div>
-						<button
-							className="shrink-0 text-xs font-bold text-secondary underline underline-offset-2"
-							type="button"
-							onClick={() => void markAllAsRead()}
-						>
-							Tout marquer comme lu
-						</button>
-					</div>
-				)}
-				{isLoading && <NotificationsSkeleton />}
-				{error && (
+				{state.status === "loading" && <NotificationsSkeleton />}
+
+				{state.status === "error" && (
 					<div className="relative -mt-8 flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4">
 						<div className="flex items-start gap-3">
 							<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
@@ -121,7 +119,8 @@ function NotificationCenter() {
 						</div>
 					</div>
 				)}
-				{!isLoading && !error && notifications.length === 0 && (
+
+				{state.status === "empty" && (
 					<div className="relative -mt-8 flex flex-col items-center gap-4 rounded-3xl bg-base-300 p-4 text-center">
 						<span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--bg-success)">
 							<Icon
@@ -149,33 +148,58 @@ function NotificationCenter() {
 						</button>
 					</div>
 				)}
-				{!isLoading &&
-					!error &&
-					notifications.length > 0 &&
-					groupByDate(notifications).map(([dateLabel, items]) => (
-						<div key={dateLabel} className="mb-5">
-							<h2 className="mb-2 text-xs font-bold tracking-wide text-secondary/50 uppercase">
-								{dateLabel}
-							</h2>
-							<div className="grid content-start gap-3">
-								{items.map((notification) => (
-									<NotificationItem
-										key={`${notification.type}-${notification.source_id}`}
-										notification={notification}
-										onRead={markOneAsRead}
-									/>
-								))}
+
+				{state.status === "list" && (
+					<>
+						<div className="-mt-8 relative mb-6 flex items-center justify-between gap-3 rounded-2xl bg-warning p-4 shadow-sm">
+							<div className="flex items-center gap-2">
+								<span className="font-title text-lg font-bold text-primary">
+									{
+										state.notifications.filter(
+											(item) => item.is_read === false,
+										).length
+									}{" "}
+									non lues sur {state.notifications.length}
+								</span>
 							</div>
+							<button
+								className="shrink-0 text-xs font-bold text-secondary underline underline-offset-2"
+								type="button"
+								onClick={() => void markAllAsRead()}
+							>
+								Tout marquer comme lu
+							</button>
 						</div>
-					))}
-				{hasMore && !isLoading && (
-					<button
-						className="btn btn-outline mt-5 w-full"
-						type="button"
-						onClick={() => void loadNotifications(page + 1)}
-					>
-						Charger plus
-					</button>
+
+						{groupByDate(state.notifications).map(
+							([dateLabel, items]) => (
+								<div key={dateLabel} className="mb-5">
+									<h2 className="mb-2 text-xs font-bold tracking-wide text-secondary/50 uppercase">
+										{dateLabel}
+									</h2>
+									<div className="grid content-start gap-3">
+										{items.map((notification) => (
+											<NotificationItem
+												key={`${notification.type}-${notification.source_id}`}
+												notification={notification}
+												onRead={markOneAsRead}
+											/>
+										))}
+									</div>
+								</div>
+							),
+						)}
+
+						{hasMore && (
+							<button
+								className="btn btn-outline mt-5 w-full"
+								type="button"
+								onClick={() => void loadNotifications(page + 1)}
+							>
+								Charger plus
+							</button>
+						)}
+					</>
 				)}
 			</section>
 		</main>

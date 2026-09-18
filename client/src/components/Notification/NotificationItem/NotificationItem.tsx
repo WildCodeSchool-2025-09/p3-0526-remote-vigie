@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
-import type { IconName } from "../assets/icons";
-import type { Notification } from "../types/notification";
-import Icon from "./Icon/Icon";
+import type { IconName } from "../../../assets/icons";
+import type { Notification } from "../../../types/notification";
+import Icon from "../../Icon/Icon";
 
 const iconByType = {
 	comment: "commentAltMiddle",

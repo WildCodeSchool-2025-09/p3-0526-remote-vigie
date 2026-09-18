@@ -18,12 +18,17 @@ class NotificationsRepository {
            incident.title AS incident_title,
            incident.city,
            incident.status,
-           incident_type.code AS incident_type
+           (
+            SELECT incident_type.code
+            FROM incident_incident_type
+            JOIN incident_type ON incident_type.id = incident_incident_type.incident_type_id
+            JOIN danger_level ON danger_level.id = incident_type.danger_level_id
+            WHERE incident_incident_type.incident_id = incident.id
+            ORDER BY danger_level.weight DESC, incident_type.code ASC
+            LIMIT 1
+           ) AS incident_type
+
          FROM incident
-         LEFT JOIN incident_incident_type
-           ON incident_incident_type.incident_id = incident.id
-         LEFT JOIN incident_type
-           ON incident_type.id = incident_incident_type.incident_type_id
          WHERE incident.user_id != ?
            AND incident.status = 'in_progress'
            AND incident.expires_at > NOW()

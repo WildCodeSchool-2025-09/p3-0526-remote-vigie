@@ -2,72 +2,19 @@ import { useCallback, useEffect, useState } from "react";
 import notificationService from "../../services/notificationService";
 import type { Notification } from "../../types/notification";
 import { useNotifications } from "./NotificationContext";
-
-const notificationCache = {
-	hasValue: false,
-	notifications: [] as Notification[],
-	page: 1,
-	hasMore: false,
-	fetchedAt: 0,
-};
+import {
+	getNotificationKey,
+	getReadNotifications,
+	notificationCache,
+	readNotificationsKey,
+} from "./readNotifications";
 
 const MIN_LOADING_DURATION_MS = 1200;
 
 const STALE_TIME_MS = 60_000;
-const readNotificationsKey = "vigie:read-notifications";
-
-type PreviewState = Partial<{
-	isLoading: boolean;
-	error: string | null;
-	notifications: Notification[];
-}>;
-
-// Dev only - "incident", "comment" et "incident_resolved" viennent déjà du
-// seed (server/database/fixtures) pour le premier utilisateur : pas besoin de
-// les mocker ici. "badge" et "mention" n'existent pas encore côté backend
-// (hors périmètre, voir CLAUDE.md), donc on les garde en dur pour l'aperçu.
-const previewNotifications: Notification[] = [
-	{
-		type: "badge",
-		source_id: 4,
-		created_at: new Date().toISOString(),
-		incident_id: 0,
-		city: "",
-		status: "",
-		is_read: false,
-	},
-	{
-		type: "mention",
-		source_id: 5,
-		created_at: new Date().toISOString(),
-		incident_id: 1,
-		incident_title: "Départ de feu",
-		city: "Vernon",
-		status: "in_progress",
-		is_read: true,
-	},
-];
-
-void previewNotifications;
 
 function isCacheStale() {
 	return Date.now() - notificationCache.fetchedAt > STALE_TIME_MS;
-}
-
-function getReadNotifications() {
-	try {
-		return new Set(
-			JSON.parse(
-				sessionStorage.getItem(readNotificationsKey) ?? "[]",
-			) as string[],
-		);
-	} catch {
-		return new Set<string>();
-	}
-}
-
-function getNotificationKey(notification: Notification) {
-	return `${notification.type}:${notification.source_id}`;
 }
 
 export function useNotificationCenter() {
@@ -207,15 +154,6 @@ export function useNotificationCenter() {
 		};
 	}, [loadNotifications]);
 
-	// Dev only - ce sont des mokes - pour prévisualiser un état UI sans dépendre du réseau,
-	// commente la ligne active ci-dessous et décommente celle de l'état voulu
-	// (une seule ligne "const preview" doit rester active à la fois).
-	const preview: PreviewState | undefined = undefined; // état normal
-	// const preview: PreviewState | undefined = { isLoading: false, error: "Impossible de charger les notifications." }; // état erreur
-	// const preview: PreviewState | undefined = { isLoading: false, error: null, notifications: [] }; // état "aucune notification"
-	// const preview: PreviewState | undefined = { isLoading: true }; // état skeleton
-	// const preview: PreviewState | undefined = { isLoading: false, error: null, notifications: [...notifications, ...previewNotifications] }; // + badge/mention (non seedables), en plus des vraies notifications
-
 	return {
 		notifications,
 		page,
@@ -225,6 +163,5 @@ export function useNotificationCenter() {
 		loadNotifications,
 		markAllAsRead,
 		markOneAsRead,
-		...(preview ?? {}),
 	};
 }

@@ -3,9 +3,9 @@ import usersRepository from "../users/usersRepository";
 import notificationsRepository from "./notificationsRepository";
 
 function getAuthenticatedUserId(req: Request) {
-	const userId = req.payload?.sub;
-	if (userId == null) throw new Error("Missing authenticated user");
-	return userId;
+	const sub = req.auth?.sub;
+	if (sub == null) throw new Error("Missing authenticated user");
+	return Number(sub);
 }
 
 const browse: RequestHandler = async (req, res, next) => {

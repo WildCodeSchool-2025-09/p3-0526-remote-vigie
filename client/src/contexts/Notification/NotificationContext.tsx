@@ -7,20 +7,12 @@ import {
 } from "react";
 import notificationService from "../../services/notificationService";
 import type { NotificationContextValue } from "../../types/notification";
-
-const readNotificationsKey = "vigie:read-notifications";
-
-function getReadNotifications() {
-	try {
-		return new Set(
-			JSON.parse(
-				sessionStorage.getItem(readNotificationsKey) ?? "[]",
-			) as string[],
-		);
-	} catch {
-		return new Set<string>();
-	}
-}
+import { useAuth } from "../AuthContext";
+import {
+	getNotificationKey,
+	getReadNotifications,
+	resetNotificationCache,
+} from "./readNotifications";
 
 const NotificationContext = createContext<NotificationContextValue | null>(
 	null,
@@ -30,6 +22,7 @@ export function NotificationProvider({
 	children,
 }: { children: React.ReactNode }) {
 	const [unreadCount, setUnreadCount] = useState(0);
+	const { user } = useAuth();
 
 	const markNotificationAsRead = () => {
 		setUnreadCount((current) => Math.max(0, current - 1));
@@ -47,9 +40,7 @@ export function NotificationProvider({
 			const stillUnreadCount = notifications.filter((notification) => {
 				const isRead =
 					notification.is_read ??
-					readNotifications.has(
-						`${notification.type}:${notification.source_id}`,
-					);
+					readNotifications.has(getNotificationKey(notification));
 				return !isRead;
 			}).length;
 
@@ -59,9 +50,11 @@ export function NotificationProvider({
 		}
 	}, []);
 
+	
 	useEffect(() => {
-		refreshUnreadCount();
-	}, [refreshUnreadCount]);
+		resetNotificationCache();
+		void refreshUnreadCount();
+	}, [user?.id, refreshUnreadCount]);
 
 	return (
 		<NotificationContext.Provider

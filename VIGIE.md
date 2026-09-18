@@ -560,6 +560,15 @@ types (oui, d'où `incident_incident_type`).
 - La pastille est affichée lorsqu'au moins un événement est non lu.
 - L'ouverture du centre marque les événements affichés comme lus en mettant à jour
     `user.last_seen_at`.
+- `user.last_seen_at` reste la seule frontière de lecture côté serveur, mais elle
+    n'avance que globalement (bouton "Tout marquer comme lu"). Le front ajoute donc un
+    état de lecture par notification, stocké en `sessionStorage` (clé
+    `vigie:read-notifications`, propre à l'onglet/appareil) : sans lui, cliquer sur une
+    seule notification n'avancerait pas `last_seen_at` (sinon on marquerait aussi lues
+    des notifications jamais vues) et elle redeviendrait "non lue" au prochain
+    chargement. Limite assumée : cet état de lecture individuel est perdu sur un autre
+    appareil ou si le `sessionStorage` est vidé — `last_seen_at` reste alors la seule
+    source de vérité qui persiste.
 - Les notifications sont consultables dans l'application ; l'envoi navigateur lorsque
     l'application est fermée relève de l'US21.
 
