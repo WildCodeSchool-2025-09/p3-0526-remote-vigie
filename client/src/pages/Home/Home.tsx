@@ -53,7 +53,7 @@ export default function Home() {
 					alt=""
 					aria-hidden="true"
 					className="absolute inset-0 -z-10 h-full w-full object-cover opacity-70 mix-blend-multiply"
-					/>
+				/>
 				<h1>
 					<VigieLogo
 						role="img"
@@ -61,17 +61,11 @@ export default function Home() {
 						className="h-8 w-auto"
 					/>
 				</h1>
-				{/* <p className="mt-1 text-sm text-white/85">Affichage commune en attente de la géolocalisation.</p> */}
-					
 			</header>
 
 			<div
 				className={`relative flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto px-4 pb-6 ${showsPlaceholder ? "-mt-8" : ""}`}
 			>
-				{/* <section className="rounded-2xl bg-base-300 p-4"> */}
-					{/* US04 : <IncidentMap incidents={incidents} isLoading={isLoading} hasError={hasError} /> viendra ici, même donnée. Encart séparé de celui de la liste, taille/scroll à définir avec l'US04. */}
-				{/* </section> */}
-
 				<IncidentList
 					incidents={incidents}
 					isLoading={isLoading}
