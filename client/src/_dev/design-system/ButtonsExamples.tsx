@@ -142,7 +142,7 @@ export default function ButtonsExamples() {
 				description="Bouton icône seule, forme carrée arrondie, fond transparent, bordure et icône primary."
 				code={`<button
   type="button"
-  className="btn btn-square btn-md rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
+  className="btn btn-square btn-md rounded-xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
   aria-label="Partager"
 >
   <Icon name="share" className="h-4 w-4 fill-primary" aria-hidden="true" />
@@ -150,7 +150,7 @@ export default function ButtonsExamples() {
 			>
 				<button
 					type="button"
-					className="btn btn-square btn-md rounded-2xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
+					className="btn btn-square btn-md rounded-xl border-2 border-primary bg-transparent shadow-none hover:bg-primary/10"
 					aria-label="Partager"
 				>
 					<Icon
@@ -170,13 +170,13 @@ export default function ButtonsExamples() {
 				code={`<div className="flex w-full gap-3">
   <button
     type="button"
-    className="btn btn-accent btn-md basis-2/3 rounded-full border-none px-6 font-bold"
+    className="btn btn-accent btn-md grow basis-2/3 rounded-full border-none px-6 font-bold"
   >
     Confirmer
   </button>
   <button
     type="button"
-    className="btn btn-md basis-1/3 rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-6"
+    className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-6"
   >
     Annuler
   </button>
@@ -185,13 +185,13 @@ export default function ButtonsExamples() {
 				<div className="flex w-full gap-3">
 					<button
 						type="button"
-						className="btn btn-accent btn-md basis-2/3 rounded-full border-none px-6 font-bold"
+						className="btn btn-accent btn-md grow basis-2/3 rounded-full border-none px-6 font-bold"
 					>
 						Confirmer
 					</button>
 					<button
 						type="button"
-						className="btn btn-md basis-1/3 rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-6"
+						className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10 px-6"
 					>
 						Annuler
 					</button>

@@ -90,8 +90,8 @@ class IncidentSeeder extends AbstractSeeder {
 			const fakeIncident = {
 				user_id: this.getRef(`user_${i}`).insertId,
 				danger_level_id: this.faker.number.int({ min: 1, max: 5 }),
-				title: this.faker.lorem.sentence({ min: 5, max: 10 }),
-				description: this.faker.lorem.paragraph(),
+				title: this.faker.lorem.sentence({ min: 3, max: 7 }),
+				description: this.faker.lorem.sentences({ min: 1, max: 4 }),
 				photo_url: this.faker.image.urlPicsumPhotos(),
 				latitude: location.latitude,
 				longitude: location.longitude,

@@ -61,6 +61,7 @@ const categories: { title: string; description: string; names: IconName[] }[] =
 				"lock",
 				"marker",
 				"menuDotsVertical",
+				"pencil",
 				"phoneFlip",
 				"plusSmall",
 				"quoteRight",
