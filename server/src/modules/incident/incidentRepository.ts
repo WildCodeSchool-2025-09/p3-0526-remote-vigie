@@ -1,7 +1,7 @@
 import databaseClient from "../../../database/client";
 import contributionRepository from "../contribution/contributionRepository";
 
-import type { Rows } from "../../../database/client";
+import type { Executor, Rows } from "../../../database/client";
 
 // Only CRUD here (Create, Read, Update, Delete)
 
@@ -119,6 +119,36 @@ class IncidentRepository {
 			SET title = ?, description = ?, photo_url = ?, edited_at = NOW()
 			WHERE id = ?`,
 			[data.title, data.description, data.photoUrl, id],
+		);
+	}
+
+	// Verrouille la ligne pour la durée de la transaction appelante : à utiliser
+	// uniquement sur une connexion en transaction (FOR UPDATE hors transaction
+	// ne verrouille rien), jamais sur le pool directement.
+	async lockBaseLifespan(
+		id: number,
+		executor: Executor,
+	): Promise<{ baseLifespanHours: number; createdAt: Date }> {
+		const [rows] = await executor.query<Rows>(
+			"SELECT base_lifespan_hours, created_at FROM incident WHERE id = ? FOR UPDATE",
+			[id],
+		);
+
+		const row = rows[0];
+		return {
+			baseLifespanHours: row.base_lifespan_hours,
+			createdAt: row.created_at,
+		};
+	}
+
+	async updateExpiry(
+		id: number,
+		expiresAt: Date,
+		executor: Executor = databaseClient,
+	): Promise<void> {
+		await executor.query(
+			"UPDATE incident SET expires_at = ? WHERE id = ?",
+			[expiresAt, id],
 		);
 	}
 }

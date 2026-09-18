@@ -1,6 +1,6 @@
 import databaseClient from "../../../database/client";
 
-import type { Result, Rows } from "../../../database/client";
+import type { Executor, Result, Rows } from "../../../database/client";
 
 // Only CRUD here (Create, Read, Update, Delete)
 
@@ -9,8 +9,9 @@ class ContributionRepository {
 		incidentId: number,
 		userId: number,
 		type: "confirm" | "deny",
+		executor: Executor = databaseClient,
 	): Promise<void> {
-		await databaseClient.query<Result>(
+		await executor.query<Result>(
 			`INSERT INTO contribution (incident_id, user_id, type)
 			VALUES (?, ?, ?)
 			ON DUPLICATE KEY UPDATE type = VALUES(type)`,
@@ -20,8 +21,9 @@ class ContributionRepository {
 
 	async countByIncident(
 		incidentId: number,
+		executor: Executor = databaseClient,
 	): Promise<{ confirm: number; deny: number }> {
-		const [rows] = await databaseClient.query<Rows>(
+		const [rows] = await executor.query<Rows>(
 			`SELECT type, COUNT(*) AS total
 			FROM contribution
 			WHERE incident_id = ?
