@@ -1,6 +1,6 @@
-import type { IncidentListItem } from "@/types/incidentList";
 import { apiFetch } from "@/services/apiClient";
 import type { Incident } from "@/types/incidentDetails";
+import type { IncidentListItem } from "@/types/incidentList";
 
 type GetAllIncidentsResult =
 	| { status: "ok"; incidents: IncidentListItem[] }

@@ -17,7 +17,7 @@ const browse: RequestHandler = async (req, res, next) => {
 
 		const incidents = await incidentRepository.readAllForList(limit);
 		res.status(StatusCodes.OK).json(incidents);
-		} catch (err) {
+	} catch (err) {
 		next(err);
 	}
 };

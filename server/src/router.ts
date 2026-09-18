@@ -1,6 +1,6 @@
 import express from "express";
-import incidentActions from "./modules/incident/incidentActions";
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
+import incidentActions from "./modules/incident/incidentActions";
 import verifyToken from "./services/verifyToken";
 
 const router = express.Router();
