@@ -10,6 +10,7 @@ const router = express.Router();
 // Define Your API Routes Here
 /* ************************************************************************* */
 
+router.get("/api/incidents", incidentActions.browse);
 router.get("/api/incidents/:id", incidentActions.read);
 router.put(
 	"/api/incidents/:id",
