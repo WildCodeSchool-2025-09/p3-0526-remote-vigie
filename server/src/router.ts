@@ -6,6 +6,7 @@ import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
 import requireVerifiedEmail from "./services/requireVerifiedEmail";
 import verifyToken from "./services/verifyToken";
+import addressActions from "./modules/address/addressActions";
 
 const router = express.Router();
 
@@ -41,5 +42,7 @@ router.put(
 	verifyToken,
 	notificationsActions.markSeen,
 );
+
+router.get("/api/addresses/reverse", verifyToken, addressActions.reverse);
 
 export default router;
