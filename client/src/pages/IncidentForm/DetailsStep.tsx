@@ -34,6 +34,7 @@ export default function DetailsStep({
 	const [isOpen, setIsOpen] = useState(false);
 	const panelId = useId();
 	const [isChoosingPosition, setIsChoosingPosition] = useState(false);
+	const [hasTileError, setHasTileError] = useState(false);
 	return (
 		<section className="rounded-2xl bg-base-200 p-4">
 			<button
@@ -88,6 +89,8 @@ export default function DetailsStep({
 									key="picker"
 									value={position}
 									onChange={onPositionChange}
+									hasTileError={hasTileError}
+									onTileError={() => setHasTileError(true)}
 								/>
 								<button
 									type="button"
@@ -110,6 +113,8 @@ export default function DetailsStep({
 									onChange={onPositionChange}
 									draggable={false}
 									className="w-20 shrink-0"
+									hasTileError={hasTileError}
+									onTileError={() => setHasTileError(true)}
 								/>
 								<div className="text-left">
 									{addressOptions.length === 0 &&
@@ -143,6 +148,35 @@ export default function DetailsStep({
 								</div>
 							</div>
 						))}
+
+					{hasTileError && (
+						<div className="mt-4 flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4">
+							<div className="flex items-start gap-3">
+								<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
+									<Icon
+										name="exclamation"
+										className="h-3.5 w-3.5 fill-white"
+										aria-hidden="true"
+									/>
+								</span>
+								<div>
+									<h2 className="font-title text-lg font-bold text-error">
+										Erreur sur la carte
+									</h2>
+									<p className="mt-1 text-sm text-black">
+										Le chargement de la carte a échoué.
+									</p>
+								</div>
+							</div>
+							<button
+								type="button"
+								className="btn btn-md w-full rounded-full border-none bg-error px-5 font-bold text-white"
+								onClick={() => setHasTileError(false)}
+							>
+								Réessayer
+							</button>
+						</div>
+					)}
 				</div>
 			)}
 		</section>

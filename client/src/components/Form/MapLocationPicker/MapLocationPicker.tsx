@@ -4,13 +4,14 @@ import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { useState } from "react";
 
 type MapLocationPickerProps = {
 	value: Position;
 	onChange: (position: Position) => void;
 	draggable?: boolean;
 	className?: string;
+	hasTileError: boolean;
+	onTileError: () => void;
 };
 
 const markerIcon = L.divIcon({
@@ -38,9 +39,9 @@ export default function MapLocationPicker({
 	onChange,
 	draggable = true,
 	className = "w-full",
+	hasTileError,
+	onTileError,
 }: MapLocationPickerProps) {
-	const [hasTileError, setHasTileError] = useState(false);
-
 	return (
 		<div className={className}>
 			<div
@@ -59,7 +60,7 @@ export default function MapLocationPicker({
 						eventHandlers={{
 							tileerror: () => {
 								if (hasTileError === true) return;
-								setHasTileError(true);
+								onTileError();
 							},
 						}}
 						attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -80,19 +81,6 @@ export default function MapLocationPicker({
 					{draggable && <ClickToPlace onChange={onChange} />}
 				</MapContainer>
 			</div>
-
-			{hasTileError && (
-				<div className="w-full">
-					<p className="text-primary ">Erreur sur la carte</p>
-					<button
-						type="button"
-						className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
-						onClick={() => setHasTileError(false)}
-					>
-						Réessayer
-					</button>
-				</div>
-			)}
 		</div>
 	);
 }
