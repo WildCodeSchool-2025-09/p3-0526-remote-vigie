@@ -15,7 +15,7 @@ const browse: RequestHandler = async (req, res, next) => {
 			DEFAULT_LIST_LIMIT;
 		const limit = Math.min(requested, MAX_LIST_LIMIT);
 
-		const incidents = await incidentRepository.readAllActive(limit);
+		const incidents = await incidentRepository.readAllForList(limit);
 		res.status(StatusCodes.OK).json(incidents);
 	} catch (err) {
 		next(err);

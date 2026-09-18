@@ -4,8 +4,8 @@ import type { Rows } from "../../../database/client";
 
 // Only CRUD here (Create, Read, Update, Delete)
 
-// Shape returned by readAllActive(): one row per active incident, with its
-// danger level and its "principal" type — the one carrying the highest gravity.
+// Shape returned by readAllForList(): one row per incident, with its danger
+// level and its "principal" type — the one carrying the highest gravity.
 type IncidentListItem = {
 	id: number;
 	title: string;
@@ -18,10 +18,12 @@ type IncidentListItem = {
 };
 
 class IncidentRepository {
-	// READ — active incidents (in progress AND not expired), most recent first,
-	// capped at `limit`. Two queries: the incidents, then their types, reduced
-	// in JS to keep the highest-gravity type per incident.
-	async readAllActive(limit: number): Promise<IncidentListItem[]> {
+	// READ — all incidents, most recent first, capped at `limit`. No status/
+	// expiry filtering here: that's US10's responsibility (it should default
+	// to active/non-expired to keep today's UX). Two queries: the incidents,
+	// then their types, reduced in JS to keep the highest-gravity type per
+	// incident.
+	async readAllForList(limit: number): Promise<IncidentListItem[]> {
 		const [incidentRows] = await databaseClient.query<Rows>(
 			`SELECT
 				i.id, i.title, i.city, i.status,
@@ -31,7 +33,6 @@ class IncidentRepository {
 				d.weight AS danger_level_weight
 			FROM incident AS i
 			INNER JOIN danger_level AS d ON d.id = i.danger_level_id
-			WHERE i.status = 'in_progress' AND i.expires_at > NOW()
 			ORDER BY i.created_at DESC, i.id DESC
 			LIMIT ?`,
 			[limit],
