@@ -70,6 +70,7 @@
 	--spacer-small: 1rem;
 	--spacer-medium: 2rem;
 	--spacer-large: 3rem;
+	--navigation-height: 5rem;
 
 	/* fonts family */
 	--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
