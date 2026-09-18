@@ -65,13 +65,24 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 					>
 						Incident {dangerLevel.label.toLowerCase()}
 					</span>
-					<span className="badge badge-sm gap-1.5 whitespace-nowrap border-0 font-bold bg-(--primary-light) text-success">
-						<span
-							className="h-1.5 w-1.5 rounded-full bg-success"
-							aria-hidden="true"
-						/>
-						{STATUS_LABEL[status]}
-					</span>
+					{status === "in_progress" ? (
+						<span className="badge badge-accent badge-sm gap-1.5 whitespace-nowrap border-0 font-bold">
+							<span
+								className="h-1.5 w-1.5 rounded-full bg-primary"
+								aria-hidden="true"
+							/>
+							{STATUS_LABEL[status]}
+						</span>
+					) : (
+						<span className="badge badge-sm gap-1.5 whitespace-nowrap border-0 font-bold bg-(--bg-success) text-success">
+							<Icon
+								name="check"
+								className="h-3.5 w-3.5 fill-success"
+								aria-hidden="true"
+							/>
+							{STATUS_LABEL[status]}
+						</span>
+					)}
 				</div>
 				<h2 className="mt-1.5 line-clamp-2 font-title text-lg font-bold text-primary">
 					{incident.title}
