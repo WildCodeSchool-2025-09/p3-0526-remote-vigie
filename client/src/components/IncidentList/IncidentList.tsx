@@ -99,9 +99,9 @@ export default function IncidentList({
 							Rien à signaler autour de vous
 						</h2>
 						<p className="mt-2 text-sm text-black">
-							Aucun incident dans votre zone. Vous serez
-							alerté dès qu'un voisin signale quelque chose près
-							d'une de vos adresses.
+							Aucun incident dans votre zone. Vous serez alerté
+							dès qu'un voisin signale quelque chose près d'une de
+							vos adresses.
 						</p>
 					</div>
 				</output>
@@ -111,9 +111,9 @@ export default function IncidentList({
 
 	return (
 		<div className="flex flex-col gap-3">
-			<p className="text-sm text-black">
+			<h2 className="font-title text-lg font-bold text-primary">
 				Incidents · {incidents.length}
-			</p>
+			</h2>
 
 			<ul className="flex flex-col gap-3">
 				{incidents.map((incident) => (
