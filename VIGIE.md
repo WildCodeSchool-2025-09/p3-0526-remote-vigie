@@ -57,7 +57,7 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 | US03 | Accéder à la liste de tous les incidents | 2 | Guillaume Galinanes | `feat/US03-incident-list` |
 | US04 | Carte interactive (incidents + lieux utiles) | 2 | Guillaume Galinanes | `feat/US04-interactive-map` |
 | US05 | S'inscrire (avec adresse géolocalisée + vérification e-mail) | 2 | Laurent Koehler | `feat/US05-register` |
-| US06 | Se connecter (JWT en cookie httpOnly) | 2 | Laurent Koehler | `feat/US06-login` |
+| US06 | Se connecter (JWT en en-tête `Authorization: Bearer`) | 2 | Laurent Koehler | `feat/US06-login` |
 | US07 | Corriger le contenu descriptif de son incident | 2 | Frédéric Briand | `feat/US07-incident-edit` |
 | US08 | Consulter et commenter un incident (fil plat, citations) | 2 | Frédéric Briand | `feat/US08-incident-comments` |
 | US09 | Centre de notifications in-app (pastille non lues) | 2 | Frédéric Briand | `feat/US09-notification-center` |
@@ -68,6 +68,14 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 | US14 | Confirmer / infirmer un incident (pilote la durée de vie) | 3 | Frédéric Briand | `feat/US14-incident-contributions` |
 | US15 | Partager un incident (menu natif / copie de lien) | 3 | Frédéric Briand | `feat/US15-incident-share` |
 | US16 | Barre de navigation fixe + gabarit commun des pages | 3 | Frédéric Briand | `feat/US16-navigation` |
+| US27 | Ajouter une photo à son signalement depuis son téléphone (vrai upload) | 3 | À affecter | `feat/US27-photo-upload` |
+
+> **US27 est transverse** : elle remplace, pour US01 (création) et US07 (édition), le repli actuel
+> — un simple champ URL — par un vrai import de fichier (redimensionnement, EXIF, stockage,
+> validation MIME/taille). US01 et US07 restent finissables et livrables sans elle (photo
+> optionnelle / repli URL déjà couverts par leurs propres critères d'acceptation) ; US27 vient
+> ensuite compléter les deux. Composant partagé déjà livré par US07 :
+> `client/src/components/Form/PhotoField/PhotoField.tsx`.
 
 ### V2
 
@@ -104,7 +112,7 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 Reproduit d'après les cadres **MCD**, **MLD** et **MPD** du Miro. Implémentation de
 référence : `server/database/schema.sql` (MySQL 8, `utf8mb4_unicode_ci`).
 
-Le modèle a été volontairement **borné au périmètre discuté** : `notification`, `badge`,
+Le modèle a été volontairement **borné au périmètre discuté** : `badge`,
 `oauth_account`, `push_subscription` et l'auto-citation des commentaires sont écartés pour
 l'instant et seront ajoutés au moment de développer les US concernées (voir §4.4).
 
@@ -532,9 +540,11 @@ erDiagram
 Éléments **volontairement différés** lors de la revue du modèle (à intégrer avec l'US
 correspondante, pas avant) :
 
-- **`notification`** (US09/US12/US21) — piste retenue : remplacer la table par un
-  `last_seen_at` sur `user` ; à la connexion, on recalcule ce qui est « nouveau »
-  (commentaire, incident résolu, badge…). À rediscuter en équipe.
+- **US09 — notifications in-app** — aucune table `notification` dédiée pour l'instant :
+    le centre recalcule les événements visibles depuis `user.last_seen_at` (commentaire,
+    incident résolu, badge) et affiche une pastille si des éléments sont non lus. La date
+    est mise à jour lors de la consultation du centre. Le Web Push reste dans le périmètre
+    de l'US21.
 - **`badge`** + relation `earned_at` (US20) — la relation N-N est aujourd'hui sans
   attribut ; or `counter_type` / `counter_param` / `threshold` impliquent une
   progression (« 7 signalements sur 10 ») et une date d'obtention à stocker.
@@ -550,6 +560,25 @@ retrait des attributs d'authentification tant qu'ils ne sont pas cadrés, origin
 types (oui, d'où `incident_incident_type`).
 
 ## 5. Règles métier transverses
+
+### Notifications in-app (US09)
+
+- Le centre est accessible aux utilisateurs connectés.
+- Les événements postérieurs à `user.last_seen_at` sont considérés comme non lus.
+- La pastille est affichée lorsqu'au moins un événement est non lu.
+- L'ouverture du centre marque les événements affichés comme lus en mettant à jour
+    `user.last_seen_at`.
+- `user.last_seen_at` reste la seule frontière de lecture côté serveur, mais elle
+    n'avance que globalement (bouton "Tout marquer comme lu"). Le front ajoute donc un
+    état de lecture par notification, stocké en `sessionStorage` (clé
+    `vigie:read-notifications`, propre à l'onglet/appareil) : sans lui, cliquer sur une
+    seule notification n'avancerait pas `last_seen_at` (sinon on marquerait aussi lues
+    des notifications jamais vues) et elle redeviendrait "non lue" au prochain
+    chargement. Limite assumée : cet état de lecture individuel est perdu sur un autre
+    appareil ou si le `sessionStorage` est vidé — `last_seen_at` reste alors la seule
+    source de vérité qui persiste.
+- Les notifications sont consultables dans l'application ; l'envoi navigateur lorsque
+    l'application est fermée relève de l'US21.
 
 ### Ciblage de l'alerte (US01, US23)
 
@@ -591,13 +620,22 @@ déterminé qui a été alerté, dans quel rayon et pour combien de temps. Seuls
 et photo restent modifiables, et seulement tant que l'incident est `in_progress`. Une
 modification ne renvoie **aucune** alerte ; la fiche indique « modifié le … ».
 
+Le vrai import de fichier photo (redimensionnement, EXIF, stockage) est traité par l'US
+transverse US27, commune à US01 et US07 (§3). En attendant, le champ photo reste une simple
+saisie d'URL côté US07.
+
 ### Authentification (US05, US06)
 
 - Inscription : pseudo + e-mail + mot de passe (indicateur de robustesse, pas de règle de
   composition imposée) + adresse (auto-complétion via l'API Vigie) + acceptation CGU.
   Compte créé non vérifié, e-mail de vérification envoyé.
 - Connexion possible même sans e-mail vérifié ; certaines actions (US01) restent bloquées.
-- Session : **JWT dans un cookie `httpOnly`**, durée fixe, sans renouvellement automatique.
+- Session : **JWT transporté en en-tête `Authorization: Bearer <token>`**, durée fixe (1h),
+  sans renouvellement automatique. *(Révisé le 2026-09-17 : décrit précédemment comme un cookie
+  `httpOnly` ; l'équipe s'est finalement alignée sur le modèle du repo pédagogique
+  [`workshop-js-auth`](https://github.com/WildCodeSchool/workshop-js-auth/tree/jwt), qui utilise
+  un en-tête plutôt qu'un cookie. Conséquence concrète : c'est le **front** qui doit attacher le
+  token à chaque requête protégée, il n'est plus envoyé automatiquement par le navigateur.)*
 - Comparaisons pseudo / e-mail sur formes **normalisées** ; messages d'erreur neutres
   (anti-énumération de comptes).
 

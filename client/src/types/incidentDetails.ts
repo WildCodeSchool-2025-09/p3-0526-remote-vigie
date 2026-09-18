@@ -7,6 +7,7 @@ export type IncidentDangerLevel = {
 };
 
 export type IncidentAuthor = {
+	id: number;
 	pseudo: string;
 };
 

@@ -28,6 +28,7 @@ const read: RequestHandler = async (req, res, next) => {
 	}
 };
 
+<<<<<<< HEAD
 const browseNearby: RequestHandler = async (req, res, next) => {
 	try {
 		const lat = Number(req.query.lat);
@@ -68,6 +69,63 @@ const browseNearby: RequestHandler = async (req, res, next) => {
 		);
 
 		res.json(touching[0] ?? null);
+=======
+const edit: RequestHandler = async (req, res, next) => {
+	try {
+		const id = Number(req.params.id);
+
+		const body = req.body as {
+			title?: unknown;
+			description?: unknown;
+			photoUrl?: unknown;
+		};
+
+		if (
+			typeof body.title !== "string" ||
+			body.title.trim().length === 0 ||
+			body.title.length > 80
+		) {
+			res.sendStatus(StatusCodes.BAD_REQUEST);
+			return;
+		}
+
+		if (
+			body.description != null &&
+			(typeof body.description !== "string" ||
+				body.description.length > 500)
+		) {
+			res.sendStatus(StatusCodes.BAD_REQUEST);
+			return;
+		}
+
+		if (body.photoUrl != null && typeof body.photoUrl !== "string") {
+			res.sendStatus(StatusCodes.BAD_REQUEST);
+			return;
+		}
+
+		const description =
+			body.description == null || body.description.trim().length === 0
+				? null
+				: body.description.trim();
+		const photoUrl =
+			body.photoUrl == null || body.photoUrl.trim().length === 0
+				? null
+				: body.photoUrl.trim();
+
+		await incidentRepository.update(id, {
+			title: body.title.trim(),
+			description,
+			photoUrl,
+		});
+
+		const incident = await incidentRepository.read(id);
+		if (incident == null) {
+			res.sendStatus(StatusCodes.NOT_FOUND);
+			return;
+		}
+
+		res.json(incident);
+>>>>>>> origin/dev
 	} catch (err) {
 		next(err);
 	}
@@ -75,5 +133,9 @@ const browseNearby: RequestHandler = async (req, res, next) => {
 
 export default {
 	read,
+<<<<<<< HEAD
 	browseNearby,
+=======
+	edit,
+>>>>>>> origin/dev
 };

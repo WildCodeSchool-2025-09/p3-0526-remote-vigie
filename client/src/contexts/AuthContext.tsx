@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import type { ReactNode } from "react";
 
 export type Address = {
 	id: number;
@@ -25,7 +26,7 @@ type AuthContextValue = {
 	loading: boolean;
 };
 
-// 🔧 Bouchon de dev — tient lieu de réponse de GET /api/auth/me en attendant l'US06.
+// Bouchon de dev — tient lieu de réponse de GET /api/auth/me en attendant l'US06.
 // Modifier ces valeurs pour tester les cas d'US01 :
 //   emailVerified: true  → le formulaire s'affiche
 //   emailVerified: false → écran « vérifie ton e-mail »
@@ -68,6 +69,14 @@ const AuthContext = createContext<AuthContextValue>({
 	user: STUB_USER,
 	loading: false,
 });
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+	return (
+		<AuthContext.Provider value={{ user: STUB_USER, loading: false }}>
+			{children}
+		</AuthContext.Provider>
+	);
+}
 
 export function useAuth() {
 	return useContext(AuthContext);

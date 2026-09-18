@@ -13,15 +13,20 @@ type Props = {
 	dangerLevel: IncidentDangerLevel;
 	status: IncidentStatus;
 	createdAt: string;
+	editedAt: string | null;
 	author: IncidentAuthor;
 };
 
-function formatReportedAt(iso: string) {
-	const date = new Date(iso);
-	const time = date.toLocaleTimeString("fr-FR", {
+function formatTime(iso: string) {
+	return new Date(iso).toLocaleTimeString("fr-FR", {
 		hour: "2-digit",
 		minute: "2-digit",
 	});
+}
+
+function formatReportedAt(iso: string) {
+	const date = new Date(iso);
+	const time = formatTime(iso);
 
 	const today = new Date();
 	const yesterday = new Date(today);
@@ -41,6 +46,7 @@ export default function IncidentHeader({
 	dangerLevel,
 	status,
 	createdAt,
+	editedAt,
 	author,
 }: Props) {
 	return (
@@ -99,9 +105,12 @@ export default function IncidentHeader({
 				})}
 			</ul>
 
-			<div className="border-t border-primary/10 pt-3 text-sm text-primary/60">
-				<p>Signalé {formatReportedAt(createdAt)}</p>
+			<div className="border-t border-primary/10 pt-3 text-xs text-primary/60">
 				<p>
+					Signalé {formatReportedAt(createdAt)}
+					{editedAt != null && ` · modifié à ${formatTime(editedAt)}`}
+				</p>
+				<p className="mt-1">
 					Par{" "}
 					<strong className="text-primary">{author.pseudo}</strong>
 				</p>

@@ -21,7 +21,7 @@ class CommentSeeder extends AbstractSeeder {
 			const fakeComment = {
 				user_id: this.getRef(`user_${(i + 2) % 10}`).insertId,
 				incident_id: this.getRef(`incident_${i}`).insertId,
-				content: this.faker.lorem.sentence({ min: 5, max: 12 }),
+				content: this.faker.lorem.sentences({ min: 1, max: 4 }),
 			};
 
 			// Insert the fakeComment data into the 'comment' table
