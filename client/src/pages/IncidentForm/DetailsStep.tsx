@@ -4,6 +4,7 @@ import DangerLevelPicker, {
 } from "@/components/Form/DangerLevelPicker/DangerLevelPicker";
 import InputFields from "@/components/Form/InputFields/InputFields";
 import MapLocationPicker from "@/components/Form/MapLocationPicker/MapLocationPicker";
+import PhotoField from "@/components/Form/PhotoField/PhotoField";
 import Icon from "@/components/Icon/Icon";
 import type { Address } from "@/contexts/AuthContext";
 import type { LocationAddress, Position } from "@/types/incidentForm";
@@ -25,6 +26,8 @@ type DetailsStepProps = {
 	placeholder: string;
 	description: string;
 	onDescriptionChange: (description: string) => void;
+	photoUrl: string | null;
+	onPhotoUrlChange: (photoUrl: string | null) => void;
 };
 
 export default function DetailsStep({
@@ -43,6 +46,8 @@ export default function DetailsStep({
 	placeholder,
 	description,
 	onDescriptionChange,
+	photoUrl,
+	onPhotoUrlChange,
 }: DetailsStepProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const panelId = useId();
@@ -209,6 +214,7 @@ export default function DetailsStep({
 						description={description}
 						onDescriptionChange={onDescriptionChange}
 					/>
+					<PhotoField value={photoUrl} onChange={onPhotoUrlChange} />
 				</div>
 			)}
 		</section>

@@ -58,6 +58,7 @@ export default function IncidentForm() {
 		useState<LocationAddress | null>(null);
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
+	const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 	const highestSeverityType = getHighestSeverityType(
 		incidentTypes,
 		selectedTypes,
@@ -314,6 +315,8 @@ export default function IncidentForm() {
 						placeholder={titlePlaceholder}
 						description={description}
 						onDescriptionChange={setDescription}
+						photoUrl={photoUrl}
+						onPhotoUrlChange={setPhotoUrl}
 					/>
 
 					<section className="rounded-2xl bg-base-200 p-4">…</section>
