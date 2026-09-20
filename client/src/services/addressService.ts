@@ -8,6 +8,7 @@ type ReverseGeocodeResult =
 export async function reverseGeocode(
 	lat: number,
 	lng: number,
+	signal?: AbortSignal,
 ): Promise<ReverseGeocodeResult> {
 	try {
 		const params = new URLSearchParams();
@@ -15,6 +16,7 @@ export async function reverseGeocode(
 		params.set("lng", String(lng));
 		const res = await apiFetch(
 			`/api/addresses/reverse?${params.toString()}`,
+			{ signal },
 		);
 		if (!res.ok) return { status: "error" };
 

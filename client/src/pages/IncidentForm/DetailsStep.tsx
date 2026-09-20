@@ -5,7 +5,7 @@ import DangerLevelPicker, {
 import MapLocationPicker from "@/components/Form/MapLocationPicker/MapLocationPicker";
 import Icon from "@/components/Icon/Icon";
 import type { Address } from "@/contexts/AuthContext";
-import type { Position } from "@/types/incidentForm";
+import type { LocationAddress, Position } from "@/types/incidentForm";
 import { useId, useState } from "react";
 
 type DetailsStepProps = {
@@ -18,6 +18,7 @@ type DetailsStepProps = {
 	position: Position | null;
 	onPositionChange: (position: Position) => void;
 	geolocationError: string | null;
+	resolvedAddress: LocationAddress | null;
 };
 
 export default function DetailsStep({
@@ -30,11 +31,18 @@ export default function DetailsStep({
 	position,
 	onPositionChange,
 	geolocationError,
+	resolvedAddress,
 }: DetailsStepProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const panelId = useId();
 	const [isChoosingPosition, setIsChoosingPosition] = useState(false);
 	const [hasTileError, setHasTileError] = useState(false);
+	const positionLabel = position
+		? resolvedAddress
+			? `${resolvedAddress.streetLine}, ${resolvedAddress.city}`
+			: `${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`
+		: null;
+
 	return (
 		<section className="rounded-2xl bg-base-200 p-4">
 			<button
@@ -107,15 +115,20 @@ export default function DetailsStep({
 							</div>
 						) : (
 							<div className="mt-6 flex items-start gap-2 text-left">
-								<MapLocationPicker
-									key="summary"
-									value={position}
-									onChange={onPositionChange}
-									draggable={false}
+								<div
+									role="img"
+									aria-label={`Carte centrée sur ${positionLabel}`}
 									className="w-20 shrink-0"
-									hasTileError={hasTileError}
-									onTileError={() => setHasTileError(true)}
-								/>
+								>
+									<MapLocationPicker
+										key="summary"
+										value={position}
+										onChange={onPositionChange}
+										draggable={false}
+										hasTileError={hasTileError}
+										onTileError={() => setHasTileError(true)}
+									/>
+								</div>
 								<div className="text-left">
 									{addressOptions.length === 0 &&
 										(geolocationError ? (
@@ -131,8 +144,9 @@ export default function DetailsStep({
 										))}
 
 									<p className="text-sm text-primary">
-										{position.lat.toFixed(5)},{" "}
-										{position.lng.toFixed(5)}
+										{resolvedAddress
+											? `${resolvedAddress.streetLine}, ${resolvedAddress.city}`
+											: `${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`}
 									</p>
 									<button
 										type="button"

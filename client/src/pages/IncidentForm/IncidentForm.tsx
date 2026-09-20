@@ -6,6 +6,7 @@ import { getNearbyIncident } from "@/services/incidentService";
 import { getIncidentTypes } from "@/services/incidentTypeService";
 import type {
 	IncidentType,
+	LocationAddress,
 	NearbyIncident,
 	Position,
 } from "@/types/incidentForm";
@@ -15,6 +16,7 @@ import { useNavigate } from "react-router";
 import DetailsStep from "./DetailsStep";
 import IncidentFormSkeleton from "./IncidentFormSkeleton";
 import IncidentTypeStep from "./IncidentTypeStep";
+import { reverseGeocode } from "@/services/addressService";
 
 function computeHighestDangerLevel(
 	incidentTypes: IncidentType[],
@@ -51,6 +53,8 @@ export default function IncidentForm() {
 	);
 	const [duplicateCandidate, setDuplicateCandidate] =
 		useState<NearbyIncident | null>(null);
+	const [resolvedAddress, setResolvedAddress] =
+		useState<LocationAddress | null>(null);
 	const duplicateType =
 		incidentTypes.find((type) => selectedTypes.includes(type.id)) ?? null;
 	const duplicateDistance =
@@ -210,6 +214,30 @@ export default function IncidentForm() {
 		};
 	}, [selectedTypes, position]);
 
+	useEffect(() => {
+		setResolvedAddress(null);
+
+		if (!position) return;
+
+		const controller = new AbortController();
+		const timeoutId = setTimeout(async () => {
+			const result = await reverseGeocode(
+				position.lat,
+				position.lng,
+				controller.signal,
+			);
+
+			if (result.status === "ok") {
+				setResolvedAddress(result.locationAddress);
+			}
+		}, 300);
+
+		return () => {
+			controller.abort();
+			clearTimeout(timeoutId);
+		};
+	}, [position]);
+
 	// PrivateRoute a déjà filtré les non-connectés : ici `user` existe.
 	// S'il n'a pas vérifié son e-mail, on bloque le signalement.
 	if (!user?.emailVerified) {
@@ -269,6 +297,7 @@ export default function IncidentForm() {
 						position={position}
 						onPositionChange={setPosition}
 						geolocationError={geolocationError}
+						resolvedAddress={resolvedAddress}
 					/>
 
 					<section className="rounded-2xl bg-base-200 p-4">…</section>
