@@ -2,6 +2,7 @@ import type { DangerLevel } from "@/components/Form/DangerLevelPicker/DangerLeve
 import DuplicateWarning from "@/components/Form/DuplicateWarning/DuplicateWarning";
 import EmailVerificationNotice from "@/components/Form/EmailVerificationNotice/EmailVerificationNotice";
 import { type Address, useAuth } from "@/contexts/AuthContext";
+import { reverseGeocode } from "@/services/addressService";
 import { getNearbyIncident } from "@/services/incidentService";
 import { getIncidentTypes } from "@/services/incidentTypeService";
 import type {
@@ -11,17 +12,17 @@ import type {
 	Position,
 } from "@/types/incidentForm";
 import { distanceInMeters } from "@/utils/distance";
+import withPreposition from "@/utils/title";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import DetailsStep from "./DetailsStep";
 import IncidentFormSkeleton from "./IncidentFormSkeleton";
 import IncidentTypeStep from "./IncidentTypeStep";
-import { reverseGeocode } from "@/services/addressService";
 
-function computeHighestDangerLevel(
+function getHighestSeverityType(
 	incidentTypes: IncidentType[],
 	selectedTypes: number[],
-): number | null {
+): IncidentType | null {
 	const selected = incidentTypes.filter((type) =>
 		selectedTypes.includes(type.id),
 	);
@@ -30,7 +31,7 @@ function computeHighestDangerLevel(
 
 	return selected.reduce((highest, type) =>
 		type.danger_level_weight > highest.danger_level_weight ? type : highest,
-	).danger_level_id;
+	);
 }
 
 export default function IncidentForm() {
@@ -56,6 +57,15 @@ export default function IncidentForm() {
 	const [resolvedAddress, setResolvedAddress] =
 		useState<LocationAddress | null>(null);
 	const [title, setTitle] = useState("");
+	const highestSeverityType = getHighestSeverityType(
+		incidentTypes,
+		selectedTypes,
+	);
+	const titlePlaceholder =
+		highestSeverityType && resolvedAddress?.city
+			? `${highestSeverityType.label} ${withPreposition(resolvedAddress.city)}`
+			: "Titre — facultatif";
+
 	const duplicateType =
 		incidentTypes.find((type) => selectedTypes.includes(type.id)) ?? null;
 	const duplicateDistance =
@@ -103,8 +113,8 @@ export default function IncidentForm() {
 
 		if (dangerLevelTouched) return;
 
-		setDangerLevel(computeHighestDangerLevel(incidentTypes, selectedTypes));
-	}, [selectedTypes, incidentTypes, dangerLevelTouched]);
+		setDangerLevel(highestSeverityType?.danger_level_id ?? null);
+	}, [selectedTypes, highestSeverityType, dangerLevelTouched]);
 
 	const dangerLevels = useMemo(() => {
 		const map = new Map<number, DangerLevel>();
@@ -301,6 +311,7 @@ export default function IncidentForm() {
 						resolvedAddress={resolvedAddress}
 						title={title}
 						onTitleChange={setTitle}
+						placeholder={titlePlaceholder}
 					/>
 
 					<section className="rounded-2xl bg-base-200 p-4">…</section>

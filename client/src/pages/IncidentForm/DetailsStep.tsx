@@ -22,6 +22,7 @@ type DetailsStepProps = {
 	resolvedAddress: LocationAddress | null;
 	title: string;
 	onTitleChange: (title: string) => void;
+	placeholder: string;
 };
 
 export default function DetailsStep({
@@ -37,6 +38,7 @@ export default function DetailsStep({
 	resolvedAddress,
 	title,
 	onTitleChange,
+	placeholder,
 }: DetailsStepProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const panelId = useId();
@@ -196,7 +198,11 @@ export default function DetailsStep({
 							</button>
 						</div>
 					)}{" "}
-					<InputFields title={title} onTitleChange={onTitleChange} />
+					<InputFields
+						title={title}
+						onTitleChange={onTitleChange}
+						placeholder={placeholder}
+					/>
 				</div>
 			)}
 		</section>

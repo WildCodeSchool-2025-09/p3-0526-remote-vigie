@@ -1,11 +1,13 @@
 type InputFieldsProps = {
 	title: string;
 	onTitleChange: (title: string) => void;
+	placeholder: string;
 };
 
 export default function InputFields({
 	title,
 	onTitleChange,
+	placeholder,
 }: InputFieldsProps) {
 	return (
 		<div className="mt-5 flex flex-col gap-1.5">
@@ -24,7 +26,7 @@ export default function InputFields({
 				id="incident-edit-title"
 				type="text"
 				value={title}
-				placeholder="Ajouter un titre"
+				placeholder={placeholder}
 				onChange={(e) => onTitleChange(e.target.value)}
 				maxLength={150}
 				className="w-full rounded-xl border-2 border-primary/15 bg-base-300 px-4 py-3 pr-8 text-black placeholder:text-black/40 focus:outline-none"
