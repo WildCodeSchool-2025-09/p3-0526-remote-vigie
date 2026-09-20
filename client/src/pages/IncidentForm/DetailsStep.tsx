@@ -23,6 +23,8 @@ type DetailsStepProps = {
 	title: string;
 	onTitleChange: (title: string) => void;
 	placeholder: string;
+	description: string;
+	onDescriptionChange: (description: string) => void;
 };
 
 export default function DetailsStep({
@@ -39,6 +41,8 @@ export default function DetailsStep({
 	title,
 	onTitleChange,
 	placeholder,
+	description,
+	onDescriptionChange,
 }: DetailsStepProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const panelId = useId();
@@ -202,6 +206,8 @@ export default function DetailsStep({
 						title={title}
 						onTitleChange={onTitleChange}
 						placeholder={placeholder}
+						description={description}
+						onDescriptionChange={onDescriptionChange}
 					/>
 				</div>
 			)}

@@ -57,6 +57,7 @@ export default function IncidentForm() {
 	const [resolvedAddress, setResolvedAddress] =
 		useState<LocationAddress | null>(null);
 	const [title, setTitle] = useState("");
+	const [description, setDescription] = useState("");
 	const highestSeverityType = getHighestSeverityType(
 		incidentTypes,
 		selectedTypes,
@@ -65,7 +66,6 @@ export default function IncidentForm() {
 		highestSeverityType && resolvedAddress?.city
 			? `${highestSeverityType.label} ${withPreposition(resolvedAddress.city)}`
 			: "Titre — facultatif";
-
 	const duplicateType =
 		incidentTypes.find((type) => selectedTypes.includes(type.id)) ?? null;
 	const duplicateDistance =
@@ -312,6 +312,8 @@ export default function IncidentForm() {
 						title={title}
 						onTitleChange={setTitle}
 						placeholder={titlePlaceholder}
+						description={description}
+						onDescriptionChange={setDescription}
 					/>
 
 					<section className="rounded-2xl bg-base-200 p-4">…</section>
