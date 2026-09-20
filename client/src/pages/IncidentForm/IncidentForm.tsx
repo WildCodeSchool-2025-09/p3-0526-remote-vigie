@@ -55,6 +55,7 @@ export default function IncidentForm() {
 		useState<NearbyIncident | null>(null);
 	const [resolvedAddress, setResolvedAddress] =
 		useState<LocationAddress | null>(null);
+	const [title, setTitle] = useState("");
 	const duplicateType =
 		incidentTypes.find((type) => selectedTypes.includes(type.id)) ?? null;
 	const duplicateDistance =
@@ -298,6 +299,8 @@ export default function IncidentForm() {
 						onPositionChange={setPosition}
 						geolocationError={geolocationError}
 						resolvedAddress={resolvedAddress}
+						title={title}
+						onTitleChange={setTitle}
 					/>
 
 					<section className="rounded-2xl bg-base-200 p-4">…</section>

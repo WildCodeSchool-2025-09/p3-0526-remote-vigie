@@ -2,6 +2,7 @@ import AddressPicker from "@/components/Form/AddressPicker/AddressPicker";
 import DangerLevelPicker, {
 	type DangerLevel,
 } from "@/components/Form/DangerLevelPicker/DangerLevelPicker";
+import InputFields from "@/components/Form/InputFields/InputFields";
 import MapLocationPicker from "@/components/Form/MapLocationPicker/MapLocationPicker";
 import Icon from "@/components/Icon/Icon";
 import type { Address } from "@/contexts/AuthContext";
@@ -19,6 +20,8 @@ type DetailsStepProps = {
 	onPositionChange: (position: Position) => void;
 	geolocationError: string | null;
 	resolvedAddress: LocationAddress | null;
+	title: string;
+	onTitleChange: (title: string) => void;
 };
 
 export default function DetailsStep({
@@ -32,6 +35,8 @@ export default function DetailsStep({
 	onPositionChange,
 	geolocationError,
 	resolvedAddress,
+	title,
+	onTitleChange,
 }: DetailsStepProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const panelId = useId();
@@ -89,7 +94,6 @@ export default function DetailsStep({
 							onChange={onSelectedAddressIdChange}
 						/>
 					)}
-
 					{position &&
 						(isChoosingPosition ? (
 							<div className="mt-6">
@@ -126,7 +130,9 @@ export default function DetailsStep({
 										onChange={onPositionChange}
 										draggable={false}
 										hasTileError={hasTileError}
-										onTileError={() => setHasTileError(true)}
+										onTileError={() =>
+											setHasTileError(true)
+										}
 									/>
 								</div>
 								<div className="text-left">
@@ -162,7 +168,6 @@ export default function DetailsStep({
 								</div>
 							</div>
 						))}
-
 					{hasTileError && (
 						<div className="mt-4 flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4">
 							<div className="flex items-start gap-3">
@@ -190,7 +195,8 @@ export default function DetailsStep({
 								Réessayer
 							</button>
 						</div>
-					)}
+					)}{" "}
+					<InputFields title={title} onTitleChange={onTitleChange} />
 				</div>
 			)}
 		</section>
