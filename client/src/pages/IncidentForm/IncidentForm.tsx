@@ -55,6 +55,9 @@ export default function IncidentForm() {
 
 	const [dangerLevel, setDangerLevel] = useState<number | null>(null);
 	const [dangerLevelTouched, setDangerLevelTouched] = useState(false);
+	const [dangerLevelError, setDangerLevelError] = useState<string | null>(
+		null,
+	);
 	const [geolocationError, setGeolocationError] = useState<string | null>(
 		null,
 	);
@@ -299,10 +302,33 @@ export default function IncidentForm() {
 
 		if (result.status === "ok") {
 			setConfirmation(result.incident);
-		} else {
-			setServerError("Une erreur est survenue. Veuillez réessayer.");
-			setSubmitting(false);
+			return;
 		}
+
+		setSubmitting(false);
+
+		if (result.status === "unauthorized") {
+			navigate("/login");
+			return;
+		}
+
+		if (result.status === "invalid") {
+			if (result.error === "invalid_type_ids") {
+				setSelectionError(result.message);
+			} else if (result.error === "invalid_danger_level_id") {
+				setDangerLevelError(result.message);
+			} else {
+				setServerError(result.message);
+			}
+			return;
+		}
+
+		if (result.status === "forbidden" || result.status === "tooManyRequests") {
+			setServerError(result.message);
+			return;
+		}
+
+		setServerError("Une erreur est survenue. Veuillez réessayer.");
 	}
 
 	return (
@@ -358,7 +384,9 @@ export default function IncidentForm() {
 						onDangerLevelChange={(id) => {
 							setDangerLevel(id);
 							setDangerLevelTouched(true);
+							setDangerLevelError(null);
 						}}
+						dangerLevelError={dangerLevelError}
 						addressOptions={addressOptions}
 						selectedAddressId={selectedAddressId}
 						onSelectedAddressIdChange={setSelectedAddressId}

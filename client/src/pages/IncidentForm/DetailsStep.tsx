@@ -8,12 +8,13 @@ import PhotoField from "@/components/Form/PhotoField/PhotoField";
 import Icon from "@/components/Icon/Icon";
 import type { Address } from "@/contexts/AuthContext";
 import type { LocationAddress, Position } from "@/types/incidentForm";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 type DetailsStepProps = {
 	dangerLevels: DangerLevel[];
 	dangerLevel: number | null;
 	onDangerLevelChange: (id: number) => void;
+	dangerLevelError: string | null;
 	addressOptions: Address[];
 	selectedAddressId: number | null;
 	onSelectedAddressIdChange: (id: number) => void;
@@ -34,6 +35,7 @@ export default function DetailsStep({
 	dangerLevels,
 	dangerLevel,
 	onDangerLevelChange,
+	dangerLevelError,
 	addressOptions,
 	selectedAddressId,
 	onSelectedAddressIdChange,
@@ -53,6 +55,10 @@ export default function DetailsStep({
 	const panelId = useId();
 	const [isChoosingPosition, setIsChoosingPosition] = useState(false);
 	const [hasTileError, setHasTileError] = useState(false);
+
+	useEffect(() => {
+		if (dangerLevelError) setIsOpen(true);
+	}, [dangerLevelError]);
 	const positionLabel = position
 		? resolvedAddress
 			? `${resolvedAddress.streetLine}, ${resolvedAddress.city}`
@@ -93,6 +99,7 @@ export default function DetailsStep({
 						dangerLevels={dangerLevels}
 						value={dangerLevel}
 						onChange={onDangerLevelChange}
+						error={dangerLevelError}
 					/>
 					{addressOptions.length > 0 && (
 						<AddressPicker

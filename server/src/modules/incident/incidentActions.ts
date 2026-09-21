@@ -152,20 +152,29 @@ const add: RequestHandler = async (req, res, next) => {
 			photoUrl: unknown;
 		};
 		if (!Array.isArray(body.typeIds) || body.typeIds.length === 0) {
-			res.sendStatus(StatusCodes.BAD_REQUEST);
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_type_ids",
+				message: "Veuillez sélectionner au moins un type de signalement.",
+			});
 			return;
 		}
 
 		const typeIds = body.typeIds;
 		if (!typeIds.every((id) => Number.isInteger(id))) {
-			res.sendStatus(StatusCodes.BAD_REQUEST);
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_type_ids",
+				message: "Veuillez sélectionner au moins un type de signalement.",
+			});
 			return;
 		}
 
 		const types = await incidentTypeRepository.readAll();
 		const filteredTypes = types.filter((type) => typeIds.includes(type.id));
 		if (filteredTypes.length === 0) {
-			res.sendStatus(StatusCodes.BAD_REQUEST);
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_type_ids",
+				message: "Veuillez sélectionner au moins un type de signalement.",
+			});
 			return;
 		}
 
@@ -179,20 +188,29 @@ const add: RequestHandler = async (req, res, next) => {
 			lng < -180 ||
 			lng > 180
 		) {
-			res.sendStatus(StatusCodes.BAD_REQUEST);
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_position",
+				message: "La position du signalement est manquante ou invalide.",
+			});
 			return;
 		}
 
 		const dangerLevelId = Number(body.dangerLevelId);
 		if (!Number.isInteger(dangerLevelId) || dangerLevelId <= 0) {
-			res.sendStatus(StatusCodes.BAD_REQUEST);
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_danger_level_id",
+				message: "Le niveau de gravité est manquant ou invalide.",
+			});
 			return;
 		}
 		if (
 			body.title != null &&
 			(typeof body.title !== "string" || body.title.length > 150)
 		) {
-			res.sendStatus(StatusCodes.BAD_REQUEST);
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_title",
+				message: "Le titre dépasse la longueur autorisée (150 caractères).",
+			});
 			return;
 		}
 
@@ -201,12 +219,19 @@ const add: RequestHandler = async (req, res, next) => {
 			(typeof body.description !== "string" ||
 				body.description.length > 1000)
 		) {
-			res.sendStatus(StatusCodes.BAD_REQUEST);
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_description",
+				message:
+					"La description dépasse la longueur autorisée (1000 caractères).",
+			});
 			return;
 		}
 
 		if (body.photoUrl != null && typeof body.photoUrl !== "string") {
-			res.sendStatus(StatusCodes.BAD_REQUEST);
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_photo_url",
+				message: "La photo envoyée est invalide.",
+			});
 			return;
 		}
 
@@ -248,6 +273,26 @@ const add: RequestHandler = async (req, res, next) => {
 			body.photoUrl == null || body.photoUrl.trim().length === 0
 				? null
 				: body.photoUrl.trim();
+
+		const recentByUser = await incidentRepository.readRecentByUser(
+			Number(req.auth.sub),
+		);
+		const isDuplicate = recentByUser.some(
+			(recent) =>
+				recent.typeIds.some((id) => typeIds.includes(id)) &&
+				distanceInMeters(
+					lat,
+					lng,
+					Number(recent.latitude),
+					Number(recent.longitude),
+				) <= 50,
+		);
+		if (isDuplicate) {
+			res.status(StatusCodes.CONFLICT).json({
+				message: "Un signalement identique vient déjà d'être envoyé.",
+			});
+			return;
+		}
 
 		const incidentId = await incidentRepository.create({
 			userId: Number(req.auth.sub),

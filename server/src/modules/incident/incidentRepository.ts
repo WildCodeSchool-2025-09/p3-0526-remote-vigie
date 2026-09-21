@@ -159,6 +159,44 @@ class IncidentRepository {
 		}));
 	}
 
+	async readRecentByUser(userId: number): Promise<NearbyIncident[]> {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT DISTINCT
+			i.id, i.latitude, i.longitude, i.base_alert_radius_meters,
+			i.city, i.created_at
+			FROM incident AS i
+			WHERE i.user_id = ?
+			AND i.created_at >= NOW() - INTERVAL 10 SECOND`,
+			[userId],
+		);
+
+		if (rows.length === 0) return [];
+
+		const [typeRows] = await databaseClient.query<Rows>(
+			`SELECT incident_id, incident_type_id
+			FROM incident_incident_type
+			WHERE incident_id IN (?)`,
+			[rows.map((row) => row.id)],
+		);
+
+		const typesByIncident = new Map<number, number[]>();
+		for (const row of typeRows) {
+			const ids = typesByIncident.get(row.incident_id) ?? [];
+			ids.push(row.incident_type_id);
+			typesByIncident.set(row.incident_id, ids);
+		}
+
+		return rows.map((r) => ({
+			id: r.id,
+			typeIds: typesByIncident.get(r.id) ?? [],
+			latitude: r.latitude,
+			longitude: r.longitude,
+			baseAlertRadiusMeters: r.base_alert_radius_meters,
+			city: r.city,
+			createdAt: r.created_at,
+		}));
+	}
+
 	async findOwnerAndStatus(
 		id: number,
 	): Promise<{ userId: number; status: "in_progress" | "resolved" } | null> {
