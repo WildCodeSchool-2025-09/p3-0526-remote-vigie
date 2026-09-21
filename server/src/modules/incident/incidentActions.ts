@@ -1,9 +1,11 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
+import geocodingService from "../../services/geocodingService";
 
 import { distanceInMeters } from "../../services/distance";
 import incidentTypeRepository from "../incidentType/incidentTypeRepository";
 import incidentRepository from "./incidentRepository";
+import withPreposition from "../../services/title";
 
 // Only BREAD here (Browse, Read, Edit, Add, Delete)
 
@@ -155,6 +157,13 @@ const add: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
+		const types = await incidentTypeRepository.readAll();
+		const filteredTypes = types.filter((type) => typeIds.includes(type.id));
+		if (filteredTypes.length === 0) {
+			res.sendStatus(StatusCodes.BAD_REQUEST);
+			return;
+		}
+
 		const lat = Number(body.latitude);
 		const lng = Number(body.longitude);
 		if (
@@ -195,6 +204,36 @@ const add: RequestHandler = async (req, res, next) => {
 			res.sendStatus(StatusCodes.BAD_REQUEST);
 			return;
 		}
+
+		const lifespanHours = Math.max(
+			...filteredTypes.map((type) => type.lifespan_hours),
+		);
+		const alertRadiusMeters = Math.max(
+			...filteredTypes.map((type) => type.alert_radius_meters),
+		);
+
+		const geocode = await geocodingService.reverse(lat, lng);
+		if (geocode.city === null || geocode.inseeCode === null) {
+			res.sendStatus(StatusCodes.UNPROCESSABLE_ENTITY);
+			return;
+		}
+
+		const highestSeverityType = filteredTypes.reduce((highest, type) =>
+			type.danger_level_weight > highest.danger_level_weight
+				? type
+				: highest,
+		);
+
+		const trimmedTitle =
+			typeof body.title === "string" ? body.title.trim() : "";
+
+		const title =
+			trimmedTitle.length > 0
+				? trimmedTitle
+				: `${highestSeverityType.label} ${withPreposition(geocode.city)}`.slice(
+						0,
+						150,
+					);
 	} catch (err) {
 		next(err);
 	}

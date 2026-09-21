@@ -1,6 +1,6 @@
 import databaseClient from "../../../database/client";
 
-import type { Rows } from "../../../database/client";
+import type { Result, Rows } from "../../../database/client";
 
 // Only CRUD here (Create, Read, Update, Delete)
 
@@ -197,6 +197,60 @@ class IncidentRepository {
 		);
 
 		return Number(rows[0].total);
+	}
+
+	async create(data: {
+		userId: number;
+		dangerLevelId: number;
+		title: string;
+		description: string | null;
+		photoUrl: string | null;
+		latitude: number;
+		longitude: number;
+		lifespanHours: number;
+		alertRadiusMeters: number;
+		city: string;
+		inseeCode: string;
+		typeIds: number[];
+	}): Promise<number> {
+		const connection = await databaseClient.getConnection();
+
+		await connection.beginTransaction();
+
+		const [result] = await connection.query<Result>(
+			`INSERT INTO incident
+			(user_id, danger_level_id, title, description, photo_url,
+			latitude, longitude, base_lifespan_hours, base_alert_radius_meters,
+			city, insee_code, expires_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW() + INTERVAL ? HOUR)`,
+			[
+				data.userId,
+				data.dangerLevelId,
+				data.title,
+				data.description,
+				data.photoUrl,
+				data.latitude,
+				data.longitude,
+				data.lifespanHours,
+				data.alertRadiusMeters,
+				data.city,
+				data.inseeCode,
+				data.lifespanHours,
+			],
+		);
+
+		const incidentId = result.insertId;
+
+		const values = data.typeIds.map((typeId) => [incidentId, typeId]);
+		await connection.query(
+			"INSERT INTO incident_incident_type (incident_id, incident_type_id) VALUES ?",
+			[values],
+		);
+
+		await connection.commit();
+		connection.release();
+
+		return incidentId;
 	}
 }
 
