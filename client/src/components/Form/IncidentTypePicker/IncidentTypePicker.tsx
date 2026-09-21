@@ -67,9 +67,21 @@ export default function IncidentTypePicker({
 			</div>
 
 			{error && (
-				<p id={errorId} role="alert">
-					{error}
-				</p>
+				<div
+					role="alert"
+					className="mt-4 flex w-full items-start gap-3 rounded-2xl bg-(--bg-error) px-5 py-3"
+				>
+					<span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-error">
+						<Icon
+							name="exclamation"
+							className="h-3.5 w-3.5 fill-white"
+							aria-hidden="true"
+						/>
+					</span>
+					<p id={errorId} className="text-sm text-error">
+						{error}
+					</p>
+				</div>
 			)}
 		</fieldset>
 	);

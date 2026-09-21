@@ -3,7 +3,7 @@ import DuplicateWarning from "@/components/Form/DuplicateWarning/DuplicateWarnin
 import EmailVerificationNotice from "@/components/Form/EmailVerificationNotice/EmailVerificationNotice";
 import { type Address, useAuth } from "@/contexts/AuthContext";
 import { reverseGeocode } from "@/services/addressService";
-import { getNearbyIncident } from "@/services/incidentService";
+import { createIncident, getNearbyIncident } from "@/services/incidentService";
 import { getIncidentTypes } from "@/services/incidentTypeService";
 import type {
 	IncidentType,
@@ -48,6 +48,8 @@ export default function IncidentForm() {
 	const [selectedTypes, setSelectedTypes] = useState<number[]>([]);
 	const [loadingTypes, setLoadingTypes] = useState(true);
 	const [typesError, setTypesError] = useState<string | null>(null);
+	const [selectionError, setSelectionError] = useState<string | null>(null);
+
 	const [dangerLevel, setDangerLevel] = useState<number | null>(null);
 	const [dangerLevelTouched, setDangerLevelTouched] = useState(false);
 	const [geolocationError, setGeolocationError] = useState<string | null>(
@@ -258,6 +260,36 @@ export default function IncidentForm() {
 		return <EmailVerificationNotice />;
 	}
 
+	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+
+		if (position === null) return;
+
+		if (selectedTypes.length === 0) {
+			setSelectionError("Sélectionnez au moins un type de signalement.");
+			return;
+		}
+		setSelectionError(null);
+
+		if (dangerLevel === null) return;
+
+		setSubmitting(true);
+
+		const incidentPayload = {
+			typeIds: selectedTypes,
+			latitude: position.lat,
+			longitude: position.lng,
+			dangerLevelId: dangerLevel,
+			title: title,
+			description: description,
+			photoUrl: photoUrl,
+		};
+
+		const result = await createIncident(incidentPayload);
+
+		if (result.status !== "ok") setSubmitting(false);
+	}
+
 	return (
 		<div className="min-h-screen bg-base-100">
 			<header className="relative isolate flex h-44 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
@@ -277,7 +309,10 @@ export default function IncidentForm() {
 			{loadingTypes || position == null ? (
 				<IncidentFormSkeleton />
 			) : (
-				<div className="relative -mt-8 space-y-4 px-4 pb-6">
+				<form
+					onSubmit={handleSubmit}
+					className="relative -mt-8 space-y-4 px-4 pb-6"
+				>
 					{duplicateCandidate && (
 						<DuplicateWarning
 							candidate={duplicateCandidate}
@@ -292,9 +327,13 @@ export default function IncidentForm() {
 					<IncidentTypeStep
 						incidentTypes={incidentTypes}
 						selectedTypes={selectedTypes}
-						onSelectedTypesChange={setSelectedTypes}
+						onSelectedTypesChange={(ids) => {
+							setSelectedTypes(ids);
+							setSelectionError(null);
+						}}
 						loadingTypes={loadingTypes}
 						typesError={typesError}
+						selectionError={selectionError}
 						onRetry={() => loadIncidentTypes()}
 						selectedTypesInstructions={selectedTypesInstructions}
 					/>
@@ -323,7 +362,7 @@ export default function IncidentForm() {
 
 					<section className="rounded-2xl bg-base-200 p-4">…</section>
 					<SubmitIncident submitting={submitting} />
-				</div>
+				</form>
 			)}
 		</div>
 	);

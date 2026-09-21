@@ -12,6 +12,7 @@ type IncidentTypeStepProps = {
 	typesError: string | null;
 	onRetry: () => void;
 	selectedTypesInstructions: SafetyInstructionsItem[];
+	selectionError: string | null;
 };
 
 export default function IncidentTypeStep({
@@ -22,6 +23,7 @@ export default function IncidentTypeStep({
 	typesError,
 	onRetry,
 	selectedTypesInstructions,
+	selectionError,
 }: IncidentTypeStepProps) {
 	return (
 		<section className="rounded-2xl bg-base-200 p-4">
@@ -54,6 +56,7 @@ export default function IncidentTypeStep({
 						incidentTypes={incidentTypes}
 						value={selectedTypes}
 						onChange={onSelectedTypesChange}
+						error={selectionError}
 					/>
 					<SafetyInstructions
 						incidentTypes={selectedTypesInstructions}

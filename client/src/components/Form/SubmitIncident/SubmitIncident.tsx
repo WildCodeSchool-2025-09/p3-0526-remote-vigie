@@ -4,7 +4,7 @@ type SubmitIncidentProps = {
 export default function SubmitIncident({ submitting }: SubmitIncidentProps) {
 	return (
 		<button
-			type="button"
+			type="submit"
 			className="btn btn-accent btn-md grow w-full rounded-full border-none px-5 font-bold"
 			disabled={submitting}
 		>

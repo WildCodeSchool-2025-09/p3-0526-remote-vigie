@@ -89,3 +89,35 @@ export async function updateIncident(
 		return { status: "error" };
 	}
 }
+
+type CreateIncidentPayload = {
+	typeIds: number[];
+	latitude: number;
+	longitude: number;
+	dangerLevelId: number;
+	title: string;
+	description: string | null;
+	photoUrl: string | null;
+};
+
+type CreateIncidentResult =
+	| { status: "ok"; incident: Incident }
+	| { status: "error" };
+
+export async function createIncident(
+	payload: CreateIncidentPayload,
+): Promise<CreateIncidentResult> {
+	try {
+		const res = await apiFetch("/api/incidents", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(payload),
+		});
+
+		if (!res.ok) return { status: "error" };
+
+		return { status: "ok", incident: (await res.json()) as Incident };
+	} catch {
+		return { status: "error" };
+	}
+}
