@@ -133,8 +133,17 @@ const edit: RequestHandler = async (req, res, next) => {
 	}
 };
 
+const add: RequestHandler = async (req, res, next) => {
+	try {
+		// à remplir aux points suivants
+	} catch (err) {
+		next(err);
+	}
+};
+
 export default {
 	read,
 	browseNearby,
 	edit,
+	add,
 };

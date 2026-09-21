@@ -1,5 +1,4 @@
 import express from "express";
-import { StatusCodes } from "http-status-codes";
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
 import incidentActions from "./modules/incident/incidentActions";
 import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
@@ -10,13 +9,12 @@ import addressActions from "./modules/address/addressActions";
 
 const router = express.Router();
 
-// verifyToken pose req.auth ; le handler de création arrive avec l'US07.
-router.post("/api/incidents", verifyToken, requireVerifiedEmail, (req, res) => {
-	res.status(StatusCodes.NOT_IMPLEMENTED).json({
-		message: "Not implemented",
-		userId: req.auth?.sub,
-	});
-});
+router.post(
+	"/api/incidents",
+	verifyToken,
+	requireVerifiedEmail,
+	incidentActions.add,
+);
 
 router.get("/api/incident-types", incidentTypeActions.browse);
 
