@@ -186,6 +186,18 @@ class IncidentRepository {
 			[data.title, data.description, data.photoUrl, id],
 		);
 	}
+
+	async countRecentByUser(userId: number): Promise<number> {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT COUNT(*) AS total
+		FROM incident
+		WHERE user_id = ?
+		AND created_at >= NOW() - INTERVAL 1 HOUR`,
+			[userId],
+		);
+
+		return Number(rows[0].total);
+	}
 }
 
 export default new IncidentRepository();

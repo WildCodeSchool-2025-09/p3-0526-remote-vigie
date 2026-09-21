@@ -135,7 +135,66 @@ const edit: RequestHandler = async (req, res, next) => {
 
 const add: RequestHandler = async (req, res, next) => {
 	try {
-		// à remplir aux points suivants
+		const body = req.body as {
+			typeIds: unknown;
+			latitude: unknown;
+			longitude: unknown;
+			dangerLevelId: unknown;
+			title: unknown;
+			description: unknown;
+			photoUrl: unknown;
+		};
+		if (!Array.isArray(body.typeIds) || body.typeIds.length === 0) {
+			res.sendStatus(StatusCodes.BAD_REQUEST);
+			return;
+		}
+
+		const typeIds = body.typeIds;
+		if (!typeIds.every((id) => Number.isInteger(id))) {
+			res.sendStatus(StatusCodes.BAD_REQUEST);
+			return;
+		}
+
+		const lat = Number(body.latitude);
+		const lng = Number(body.longitude);
+		if (
+			!Number.isFinite(lat) ||
+			!Number.isFinite(lng) ||
+			lat < -90 ||
+			lat > 90 ||
+			lng < -180 ||
+			lng > 180
+		) {
+			res.sendStatus(StatusCodes.BAD_REQUEST);
+			return;
+		}
+
+		const dangerLevelId = Number(body.dangerLevelId);
+		if (!Number.isInteger(dangerLevelId) || dangerLevelId <= 0) {
+			res.sendStatus(StatusCodes.BAD_REQUEST);
+			return;
+		}
+		if (
+			body.title != null &&
+			(typeof body.title !== "string" || body.title.length > 150)
+		) {
+			res.sendStatus(StatusCodes.BAD_REQUEST);
+			return;
+		}
+
+		if (
+			body.description != null &&
+			(typeof body.description !== "string" ||
+				body.description.length > 1000)
+		) {
+			res.sendStatus(StatusCodes.BAD_REQUEST);
+			return;
+		}
+
+		if (body.photoUrl != null && typeof body.photoUrl !== "string") {
+			res.sendStatus(StatusCodes.BAD_REQUEST);
+			return;
+		}
 	} catch (err) {
 		next(err);
 	}

@@ -6,6 +6,7 @@ import notificationsActions from "./modules/notifications/notificationsActions";
 import requireVerifiedEmail from "./services/requireVerifiedEmail";
 import verifyToken from "./services/verifyToken";
 import addressActions from "./modules/address/addressActions";
+import checkIncidentRateLimit from "./services/checkIncidentRateLimit";
 
 const router = express.Router();
 
@@ -13,6 +14,7 @@ router.post(
 	"/api/incidents",
 	verifyToken,
 	requireVerifiedEmail,
+	checkIncidentRateLimit,
 	incidentActions.add,
 );
 
