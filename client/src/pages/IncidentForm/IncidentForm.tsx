@@ -18,6 +18,7 @@ import { useNavigate } from "react-router";
 import DetailsStep from "./DetailsStep";
 import IncidentFormSkeleton from "./IncidentFormSkeleton";
 import IncidentTypeStep from "./IncidentTypeStep";
+import SubmitIncident from "@/components/Form/SubmitIncident/SubmitIncident";
 
 function getHighestSeverityType(
 	incidentTypes: IncidentType[],
@@ -59,6 +60,7 @@ export default function IncidentForm() {
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
 	const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+	const [submitting, setSubmitting] = useState(false);
 	const highestSeverityType = getHighestSeverityType(
 		incidentTypes,
 		selectedTypes,
@@ -320,6 +322,7 @@ export default function IncidentForm() {
 					/>
 
 					<section className="rounded-2xl bg-base-200 p-4">…</section>
+					<SubmitIncident submitting={submitting} />
 				</div>
 			)}
 		</div>
