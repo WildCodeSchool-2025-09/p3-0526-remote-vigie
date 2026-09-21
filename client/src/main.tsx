@@ -11,10 +11,13 @@ import {
 /* ************************************************************************* */
 
 import App from "@/App";
+import PrivateRoute from "@/components/Routing/PrivateRoute/PrivateRoute";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Home from "@/pages/Home/Home";
 import Incident from "@/pages/Incident/Incident";
 import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
 import Login from "@/pages/Login/Login";
+import NotificationCenter from "@/pages/Notification/NotificationCenter";
 import Numbers from "@/pages/Numbers/Numbers";
 import Profile from "@/pages/Profile/Profile";
 import Register from "@/pages/Register/Register";
@@ -107,6 +110,11 @@ const router = createBrowserRouter([
 				path: "register",
 				element: <Register />,
 			},
+			{
+				path: "notifications",
+				element: <PrivateRoute />,
+				children: [{ index: true, element: <NotificationCenter /> }],
+			},
 			...devRoutes,
 		],
 	},
@@ -123,4 +131,8 @@ if (rootElement == null) {
 }
 
 // Render the app inside the root element
-createRoot(rootElement).render(<RouterProvider router={router} />);
+createRoot(rootElement).render(
+	<AuthProvider>
+		<RouterProvider router={router} />
+	</AuthProvider>,
+);

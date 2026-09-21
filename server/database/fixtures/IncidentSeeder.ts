@@ -21,11 +21,12 @@ class IncidentSeeder extends AbstractSeeder {
 				city: "Giverny",
 				inseeCode: "27285",
 			},
+			// Incident de démonstration : proche de l'adresse du premier utilisateur.
 			{
-				latitude: 49.07,
-				longitude: 1.52,
-				city: "Limetz-Villez",
-				inseeCode: "27369",
+				latitude: 49.09,
+				longitude: 1.48,
+				city: "Vernon",
+				inseeCode: "27681",
 			},
 			{
 				latitude: 44.465,
@@ -89,16 +90,16 @@ class IncidentSeeder extends AbstractSeeder {
 			const fakeIncident = {
 				user_id: this.getRef(`user_${i}`).insertId,
 				danger_level_id: this.faker.number.int({ min: 1, max: 5 }),
-				title: this.faker.lorem.sentence({ min: 5, max: 10 }),
-				description: this.faker.lorem.paragraph(),
+				title: this.faker.lorem.sentence({ min: 3, max: 7 }),
+				description: this.faker.lorem.sentences({ min: 1, max: 4 }),
 				photo_url: this.faker.image.urlPicsumPhotos(),
 				latitude: location.latitude,
 				longitude: location.longitude,
 				base_lifespan_hours: baseLifespanHours,
-				base_alert_radius_meters: this.faker.number.int({
-					min: 100,
-					max: 3000,
-				}),
+				base_alert_radius_meters:
+					i === 1
+						? 3000
+						: this.faker.number.int({ min: 100, max: 3000 }),
 				city: location.city,
 				insee_code: location.inseeCode,
 				status: i % 3 === 0 ? "resolved" : "in_progress",

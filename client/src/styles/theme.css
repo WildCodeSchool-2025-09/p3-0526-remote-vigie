@@ -70,8 +70,22 @@
 	--spacer-small: 1rem;
 	--spacer-medium: 2rem;
 	--spacer-large: 3rem;
+	--navigation-height: 5rem;
 
 	/* fonts family */
 	--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 	--font-title: "Playfair Display", ui-serif, Georgia, serif;
+
+	--animate-pop: pop 0.5s ease;
+	@keyframes pop {
+		0% {
+			scale: 0;
+		}
+		75% {
+			scale: 1.05;
+		}
+		100% {
+			scale: 1;
+		}
+	}
 }
