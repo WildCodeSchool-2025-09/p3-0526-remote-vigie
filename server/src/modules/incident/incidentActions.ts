@@ -137,6 +137,11 @@ const edit: RequestHandler = async (req, res, next) => {
 
 const add: RequestHandler = async (req, res, next) => {
 	try {
+		if (req.auth == null) {
+			res.sendStatus(StatusCodes.UNAUTHORIZED);
+			return;
+		}
+
 		const body = req.body as {
 			typeIds: unknown;
 			latitude: unknown;
@@ -234,6 +239,34 @@ const add: RequestHandler = async (req, res, next) => {
 						0,
 						150,
 					);
+
+		const description =
+			body.description == null || body.description.trim().length === 0
+				? null
+				: body.description.trim();
+		const photoUrl =
+			body.photoUrl == null || body.photoUrl.trim().length === 0
+				? null
+				: body.photoUrl.trim();
+
+		const incidentId = await incidentRepository.create({
+			userId: Number(req.auth.sub),
+			dangerLevelId,
+			title,
+			description,
+			photoUrl,
+			latitude: lat,
+			longitude: lng,
+			lifespanHours,
+			alertRadiusMeters,
+			city: geocode.city,
+			inseeCode: geocode.inseeCode,
+			typeIds,
+		});
+
+		const incident = await incidentRepository.read(incidentId);
+
+		res.status(StatusCodes.CREATED).json(incident);
 	} catch (err) {
 		next(err);
 	}

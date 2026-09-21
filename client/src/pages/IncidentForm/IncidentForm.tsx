@@ -1,6 +1,8 @@
 import type { DangerLevel } from "@/components/Form/DangerLevelPicker/DangerLevelPicker";
 import DuplicateWarning from "@/components/Form/DuplicateWarning/DuplicateWarning";
+import Icon from "@/components/Icon/Icon";
 import EmailVerificationNotice from "@/components/Form/EmailVerificationNotice/EmailVerificationNotice";
+import IncidentCreatedNotice from "@/components/Form/IncidentCreatedNotice/IncidentCreatedNotice";
 import { type Address, useAuth } from "@/contexts/AuthContext";
 import { reverseGeocode } from "@/services/addressService";
 import { createIncident, getNearbyIncident } from "@/services/incidentService";
@@ -19,6 +21,7 @@ import DetailsStep from "./DetailsStep";
 import IncidentFormSkeleton from "./IncidentFormSkeleton";
 import IncidentTypeStep from "./IncidentTypeStep";
 import SubmitIncident from "@/components/Form/SubmitIncident/SubmitIncident";
+import type { Incident } from "@/types/incidentDetails";
 
 function getHighestSeverityType(
 	incidentTypes: IncidentType[],
@@ -63,6 +66,9 @@ export default function IncidentForm() {
 	const [description, setDescription] = useState("");
 	const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
+	const [serverError, setServerError] = useState<string | null>(null);
+	const [confirmation, setConfirmation] = useState<Incident | null>(null);
+
 	const highestSeverityType = getHighestSeverityType(
 		incidentTypes,
 		selectedTypes,
@@ -260,6 +266,10 @@ export default function IncidentForm() {
 		return <EmailVerificationNotice />;
 	}
 
+	if (confirmation) {
+		return <IncidentCreatedNotice incident={confirmation} />;
+	}
+
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 
@@ -287,7 +297,12 @@ export default function IncidentForm() {
 
 		const result = await createIncident(incidentPayload);
 
-		if (result.status !== "ok") setSubmitting(false);
+		if (result.status === "ok") {
+			setConfirmation(result.incident);
+		} else {
+			setServerError("Une erreur est survenue. Veuillez réessayer.");
+			setSubmitting(false);
+		}
 	}
 
 	return (
@@ -360,7 +375,21 @@ export default function IncidentForm() {
 						onPhotoUrlChange={setPhotoUrl}
 					/>
 
-					<section className="rounded-2xl bg-base-200 p-4">…</section>
+					{serverError && (
+						<div
+							role="alert"
+							className="flex w-full items-start gap-3 rounded-2xl bg-(--bg-error) px-5 py-3"
+						>
+							<span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-error">
+								<Icon
+									name="exclamation"
+									className="h-3.5 w-3.5 fill-white"
+									aria-hidden="true"
+								/>
+							</span>
+							<p className="text-sm text-error">{serverError}</p>
+						</div>
+					)}
 					<SubmitIncident submitting={submitting} />
 				</form>
 			)}
