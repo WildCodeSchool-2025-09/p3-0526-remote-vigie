@@ -28,7 +28,7 @@ CREATE TABLE `user` (
     `email` VARCHAR(255) NOT NULL,
     `pseudo_normalized` VARCHAR(30) NOT NULL,
     `email_normalized` VARCHAR(255) NOT NULL,
-    `password_hash` CHAR(60) NOT NULL,
+    `password_hash` VARCHAR(255) NOT NULL,
     `email_verified_at` TIMESTAMP NULL DEFAULT NULL,
     `cgu_version` VARCHAR(10) NOT NULL,
     `cgu_accepted_at` TIMESTAMP NOT NULL,
