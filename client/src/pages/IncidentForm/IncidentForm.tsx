@@ -1,12 +1,14 @@
 import type { DangerLevel } from "@/components/Form/DangerLevelPicker/DangerLevelPicker";
 import DuplicateWarning from "@/components/Form/DuplicateWarning/DuplicateWarning";
-import Icon from "@/components/Icon/Icon";
 import EmailVerificationNotice from "@/components/Form/EmailVerificationNotice/EmailVerificationNotice";
 import IncidentCreatedNotice from "@/components/Form/IncidentCreatedNotice/IncidentCreatedNotice";
+import SubmitIncident from "@/components/Form/SubmitIncident/SubmitIncident";
+import Icon from "@/components/Icon/Icon";
 import { type Address, useAuth } from "@/contexts/AuthContext";
 import { reverseGeocode } from "@/services/addressService";
 import { createIncident, getNearbyIncident } from "@/services/incidentService";
 import { getIncidentTypes } from "@/services/incidentTypeService";
+import type { Incident } from "@/types/incidentDetails";
 import type {
 	IncidentType,
 	LocationAddress,
@@ -21,8 +23,6 @@ import { useNavigate } from "react-router";
 import DetailsStep from "./DetailsStep";
 import IncidentFormSkeleton from "./IncidentFormSkeleton";
 import IncidentTypeStep from "./IncidentTypeStep";
-import SubmitIncident from "@/components/Form/SubmitIncident/SubmitIncident";
-import type { Incident } from "@/types/incidentDetails";
 
 function getHighestSeverityType(
 	incidentTypes: IncidentType[],
@@ -328,7 +328,10 @@ export default function IncidentForm() {
 			return;
 		}
 
-		if (result.status === "forbidden" || result.status === "tooManyRequests") {
+		if (
+			result.status === "forbidden" ||
+			result.status === "tooManyRequests"
+		) {
 			setServerError(result.message);
 			return;
 		}
@@ -359,7 +362,7 @@ export default function IncidentForm() {
 					Vos voisins concernés seront alertés aussitôt.
 				</p>
 			</header>
-			{loadingTypes || position == null ? (
+			{loadingTypes ? (
 				<IncidentFormSkeleton />
 			) : (
 				<form
