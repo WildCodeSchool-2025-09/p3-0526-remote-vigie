@@ -231,7 +231,7 @@ export default function IncidentDetails() {
 				<section>
 					<IncidentLocation
 						city={incident.city}
-						inseeCode={incident.inseeCode}
+						postalCode={incident.postalCode}
 						latitude={incident.latitude}
 						longitude={incident.longitude}
 						types={incident.types}

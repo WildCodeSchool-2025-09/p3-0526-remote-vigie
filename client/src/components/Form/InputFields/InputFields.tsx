@@ -24,7 +24,7 @@ export default function InputFields({
 						Titre
 					</label>
 					<span className="text-xs text-primary/40">
-						{title.length} / 150 caractères
+						{title.length} / 80 caractères
 					</span>
 				</div>
 				<input
@@ -33,7 +33,7 @@ export default function InputFields({
 					value={title}
 					placeholder={placeholder}
 					onChange={(e) => onTitleChange(e.target.value)}
-					maxLength={150}
+					maxLength={80}
 					className="w-full rounded-xl border-2 border-primary/15 bg-base-300 px-4 py-3 pr-8 text-black placeholder:text-black/40 focus:outline-none"
 				/>
 			</div>
@@ -46,7 +46,7 @@ export default function InputFields({
 						Description
 					</label>
 					<span className="text-xs text-primary/40">
-						{description.length} / 1000 caractères
+						{description.length} / 500 caractères
 					</span>
 				</div>
 				<textarea
@@ -55,7 +55,7 @@ export default function InputFields({
 					value={description}
 					placeholder="Ajouter une description (facultatif)"
 					onChange={(e) => onDescriptionChange(e.target.value)}
-					maxLength={1000}
+					maxLength={500}
 					className="w-full resize-none rounded-xl border-2 border-primary/15 bg-base-300 px-5 py-4 text-black placeholder:text-black/40 focus:outline-none"
 				/>
 			</div>

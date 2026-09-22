@@ -6,6 +6,7 @@ import { distanceInMeters } from "../../services/distance";
 import incidentTypeRepository from "../incidentType/incidentTypeRepository";
 import incidentRepository from "./incidentRepository";
 import withPreposition from "../../services/title";
+import isFeminine from "../../services/incidentTypeGender";
 
 // Only BREAD here (Browse, Read, Edit, Add, Delete)
 
@@ -205,11 +206,11 @@ const add: RequestHandler = async (req, res, next) => {
 		}
 		if (
 			body.title != null &&
-			(typeof body.title !== "string" || body.title.length > 150)
+			(typeof body.title !== "string" || body.title.length > 80)
 		) {
 			res.status(StatusCodes.BAD_REQUEST).json({
 				error: "invalid_title",
-				message: "Le titre dépasse la longueur autorisée (150 caractères).",
+				message: "Le titre dépasse la longueur autorisée (80 caractères).",
 			});
 			return;
 		}
@@ -217,12 +218,12 @@ const add: RequestHandler = async (req, res, next) => {
 		if (
 			body.description != null &&
 			(typeof body.description !== "string" ||
-				body.description.length > 1000)
+				body.description.length > 500)
 		) {
 			res.status(StatusCodes.BAD_REQUEST).json({
 				error: "invalid_description",
 				message:
-					"La description dépasse la longueur autorisée (1000 caractères).",
+					"La description dépasse la longueur autorisée (500 caractères).",
 			});
 			return;
 		}
@@ -243,10 +244,6 @@ const add: RequestHandler = async (req, res, next) => {
 		);
 
 		const geocode = await geocodingService.reverse(lat, lng);
-		if (geocode.city === null || geocode.inseeCode === null) {
-			res.sendStatus(StatusCodes.UNPROCESSABLE_ENTITY);
-			return;
-		}
 
 		const highestSeverityType = filteredTypes.reduce((highest, type) =>
 			type.danger_level_weight > highest.danger_level_weight
@@ -257,13 +254,15 @@ const add: RequestHandler = async (req, res, next) => {
 		const trimmedTitle =
 			typeof body.title === "string" ? body.title.trim() : "";
 
+		const autoTitle =
+			geocode.city != null
+				? `${highestSeverityType.label} ${withPreposition(geocode.city)}`
+				: `${highestSeverityType.label} signalé${
+						isFeminine(highestSeverityType.code) ? "e" : ""
+					} en dehors de l'agglomération`;
+
 		const title =
-			trimmedTitle.length > 0
-				? trimmedTitle
-				: `${highestSeverityType.label} ${withPreposition(geocode.city)}`.slice(
-						0,
-						150,
-					);
+			trimmedTitle.length > 0 ? trimmedTitle : autoTitle.slice(0, 80);
 
 		const description =
 			body.description == null || body.description.trim().length === 0
@@ -305,6 +304,7 @@ const add: RequestHandler = async (req, res, next) => {
 			lifespanHours,
 			alertRadiusMeters,
 			city: geocode.city,
+			postalCode: geocode.postalCode,
 			inseeCode: geocode.inseeCode,
 			typeIds,
 		});

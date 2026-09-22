@@ -15,6 +15,7 @@ import type {
 } from "@/types/incidentForm";
 import { distanceInMeters } from "@/utils/distance";
 import withPreposition from "@/utils/title";
+import isFeminine from "@/utils/typeGender";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import DetailsStep from "./DetailsStep";
@@ -77,8 +78,12 @@ export default function IncidentForm() {
 		selectedTypes,
 	);
 	const titlePlaceholder =
-		highestSeverityType && resolvedAddress?.city
-			? `${highestSeverityType.label} ${withPreposition(resolvedAddress.city)}`
+		highestSeverityType && resolvedAddress
+			? resolvedAddress.city
+				? `${highestSeverityType.label} ${withPreposition(resolvedAddress.city)}`
+				: `${highestSeverityType.label} signalé${
+						isFeminine(highestSeverityType.code) ? "e" : ""
+					} en dehors de l'agglomération`
 			: "Titre — facultatif";
 	const duplicateType =
 		incidentTypes.find((type) => selectedTypes.includes(type.id)) ?? null;

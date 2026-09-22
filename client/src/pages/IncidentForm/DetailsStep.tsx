@@ -60,7 +60,7 @@ export default function DetailsStep({
 		if (dangerLevelError) setIsOpen(true);
 	}, [dangerLevelError]);
 	const positionLabel = position
-		? resolvedAddress
+		? resolvedAddress?.city
 			? `${resolvedAddress.streetLine}, ${resolvedAddress.city}`
 			: `${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`
 		: null;
@@ -168,9 +168,7 @@ export default function DetailsStep({
 										))}
 
 									<p className="text-sm text-primary">
-										{resolvedAddress
-											? `${resolvedAddress.streetLine}, ${resolvedAddress.city}`
-											: `${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`}
+										{positionLabel}
 									</p>
 									<button
 										type="button"

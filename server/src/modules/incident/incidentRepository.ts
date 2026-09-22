@@ -11,8 +11,9 @@ type IncidentDetails = {
 	photoUrl: string | null;
 	latitude: string;
 	longitude: string;
-	city: string;
-	inseeCode: string;
+	city: string | null;
+	postalCode: string | null;
+	inseeCode: string | null;
 	status: "in_progress" | "resolved";
 	createdAt: Date;
 	editedAt: Date | null;
@@ -35,7 +36,7 @@ type NearbyIncident = {
 	latitude: string;
 	longitude: string;
 	baseAlertRadiusMeters: number;
-	city: string;
+	city: string | null;
 	createdAt: Date;
 };
 
@@ -44,7 +45,7 @@ class IncidentRepository {
 		const [rows] = await databaseClient.query<Rows>(
 			`SELECT
 				i.id, i.user_id, i.title, i.description, i.photo_url,
-				i.latitude, i.longitude, i.city, i.insee_code,
+				i.latitude, i.longitude, i.city, i.postal_code, i.insee_code,
 				i.status, i.created_at, i.edited_at, i.expires_at,
 				d.label AS danger_level_label,
 				d.color AS danger_level_color,
@@ -96,6 +97,7 @@ class IncidentRepository {
 			latitude: row.latitude,
 			longitude: row.longitude,
 			city: row.city,
+			postalCode: row.postal_code,
 			inseeCode: row.insee_code,
 			status: row.status,
 			createdAt: row.created_at,
@@ -247,8 +249,9 @@ class IncidentRepository {
 		longitude: number;
 		lifespanHours: number;
 		alertRadiusMeters: number;
-		city: string;
-		inseeCode: string;
+		city: string | null;
+		postalCode: string | null;
+		inseeCode: string | null;
 		typeIds: number[];
 	}): Promise<number> {
 		const connection = await databaseClient.getConnection();
@@ -259,8 +262,8 @@ class IncidentRepository {
 				`INSERT INTO incident
 			(user_id, danger_level_id, title, description, photo_url,
 			latitude, longitude, base_lifespan_hours, base_alert_radius_meters,
-			city, insee_code, expires_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW() + INTERVAL ? HOUR)`,
+			city, postal_code, insee_code, expires_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW() + INTERVAL ? HOUR)`,
 				[
 					data.userId,
 					data.dangerLevelId,
@@ -272,6 +275,7 @@ class IncidentRepository {
 					data.lifespanHours,
 					data.alertRadiusMeters,
 					data.city,
+					data.postalCode,
 					data.inseeCode,
 					data.lifespanHours,
 				],

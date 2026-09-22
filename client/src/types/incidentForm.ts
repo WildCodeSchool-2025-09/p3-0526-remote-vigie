@@ -23,7 +23,7 @@ export type NearbyIncident = {
 	latitude: string;
 	longitude: string;
 	baseAlertRadiusMeters: number;
-	city: string;
+	city: string | null;
 	createdAt: string;
 };
 

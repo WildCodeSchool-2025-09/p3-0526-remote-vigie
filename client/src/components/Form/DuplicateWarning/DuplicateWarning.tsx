@@ -65,7 +65,8 @@ export default function DuplicateWarning({
 						{title}
 					</h2>
 					<p className="text-sm text-primary/50">
-						{candidate.city} · {formatDistance(distanceMeters)} ·{" "}
+						{candidate.city && `${candidate.city} · `}
+						{formatDistance(distanceMeters)} ·{" "}
 						{formatRelativeTime(candidate.createdAt)}
 					</p>
 				</div>
