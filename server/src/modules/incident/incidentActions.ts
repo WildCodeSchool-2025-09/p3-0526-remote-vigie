@@ -13,7 +13,7 @@ const browse: RequestHandler = async (req, res, next) => {
 		const requested =
 			Number.parseInt(req.query.limit as string, 10) ||
 			DEFAULT_LIST_LIMIT;
-		const limit = Math.min(requested, MAX_LIST_LIMIT);
+		const limit = Math.max(1, Math.min(requested, MAX_LIST_LIMIT));
 
 		const incidents = await incidentRepository.readAllForList(limit);
 		res.status(StatusCodes.OK).json(incidents);
