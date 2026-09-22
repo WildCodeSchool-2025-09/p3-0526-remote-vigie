@@ -10,9 +10,7 @@ export async function getAllIncidents(
 	limit = 15,
 ): Promise<GetAllIncidentsResult> {
 	try {
-		const res = await fetch(
-			`${import.meta.env.VITE_API_URL}/api/incidents?limit=${limit}`,
-		);
+		const res = await apiFetch(`/api/incidents?limit=${limit}`);
 
 		if (!res.ok) return { status: "error" };
 
