@@ -106,6 +106,7 @@ type CreateIncidentResult =
 	| { status: "unauthorized" }
 	| { status: "forbidden"; message: string }
 	| { status: "tooManyRequests"; message: string }
+	| { status: "networkError" }
 	| { status: "error" };
 
 export async function createIncident(
@@ -135,6 +136,6 @@ export async function createIncident(
 
 		return { status: "ok", incident: (await res.json()) as Incident };
 	} catch {
-		return { status: "error" };
+		return { status: "networkError" };
 	}
 }

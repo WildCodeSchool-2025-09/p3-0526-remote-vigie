@@ -333,6 +333,13 @@ export default function IncidentForm() {
 			return;
 		}
 
+		if (result.status === "networkError") {
+			setServerError(
+				"Impossible de contacter le serveur. Vérifiez votre connexion et réessayez.",
+			);
+			return;
+		}
+
 		setServerError("Une erreur est survenue. Veuillez réessayer.");
 	}
 
