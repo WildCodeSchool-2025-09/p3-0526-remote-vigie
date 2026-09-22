@@ -2,11 +2,12 @@ import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 import geocodingService from "../../services/geocodingService";
 
+import alertService from "../../services/alertService";
 import { distanceInMeters } from "../../services/distance";
+import isFeminine from "../../services/incidentTypeGender";
+import withPreposition from "../../services/title";
 import incidentTypeRepository from "../incidentType/incidentTypeRepository";
 import incidentRepository from "./incidentRepository";
-import withPreposition from "../../services/title";
-import isFeminine from "../../services/incidentTypeGender";
 
 // Only BREAD here (Browse, Read, Edit, Add, Delete)
 
@@ -155,7 +156,8 @@ const add: RequestHandler = async (req, res, next) => {
 		if (!Array.isArray(body.typeIds) || body.typeIds.length === 0) {
 			res.status(StatusCodes.BAD_REQUEST).json({
 				error: "invalid_type_ids",
-				message: "Veuillez sélectionner au moins un type de signalement.",
+				message:
+					"Veuillez sélectionner au moins un type de signalement.",
 			});
 			return;
 		}
@@ -164,7 +166,8 @@ const add: RequestHandler = async (req, res, next) => {
 		if (!typeIds.every((id) => Number.isInteger(id))) {
 			res.status(StatusCodes.BAD_REQUEST).json({
 				error: "invalid_type_ids",
-				message: "Veuillez sélectionner au moins un type de signalement.",
+				message:
+					"Veuillez sélectionner au moins un type de signalement.",
 			});
 			return;
 		}
@@ -174,7 +177,8 @@ const add: RequestHandler = async (req, res, next) => {
 		if (filteredTypes.length === 0) {
 			res.status(StatusCodes.BAD_REQUEST).json({
 				error: "invalid_type_ids",
-				message: "Veuillez sélectionner au moins un type de signalement.",
+				message:
+					"Veuillez sélectionner au moins un type de signalement.",
 			});
 			return;
 		}
@@ -191,7 +195,8 @@ const add: RequestHandler = async (req, res, next) => {
 		) {
 			res.status(StatusCodes.BAD_REQUEST).json({
 				error: "invalid_position",
-				message: "La position du signalement est manquante ou invalide.",
+				message:
+					"La position du signalement est manquante ou invalide.",
 			});
 			return;
 		}
@@ -210,7 +215,8 @@ const add: RequestHandler = async (req, res, next) => {
 		) {
 			res.status(StatusCodes.BAD_REQUEST).json({
 				error: "invalid_title",
-				message: "Le titre dépasse la longueur autorisée (80 caractères).",
+				message:
+					"Le titre dépasse la longueur autorisée (80 caractères).",
 			});
 			return;
 		}
@@ -312,6 +318,27 @@ const add: RequestHandler = async (req, res, next) => {
 		const incident = await incidentRepository.read(incidentId);
 
 		res.status(StatusCodes.CREATED).json(incident);
+
+		if (incident) {
+			alertService
+				.dispatch({
+					incidentId,
+					types: incident.types.map((type) => type.label),
+					city: incident.city,
+					postalCode: incident.postalCode,
+					latitude: incident.latitude,
+					longitude: incident.longitude,
+					createdAt: incident.createdAt,
+					radiusMeters: alertRadiusMeters,
+					authorUserId: Number(req.auth.sub),
+				})
+				.catch((err) => {
+					console.error(
+						"Échec de l'envoi des alertes par e-mail",
+						err,
+					);
+				});
+		}
 	} catch (err) {
 		next(err);
 	}
