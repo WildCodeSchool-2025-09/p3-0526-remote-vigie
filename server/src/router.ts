@@ -1,12 +1,12 @@
 import express from "express";
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
+import addressActions from "./modules/address/addressActions";
 import incidentActions from "./modules/incident/incidentActions";
 import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
+import checkIncidentRateLimit from "./services/checkIncidentRateLimit";
 import requireVerifiedEmail from "./services/requireVerifiedEmail";
 import verifyToken from "./services/verifyToken";
-import addressActions from "./modules/address/addressActions";
-import checkIncidentRateLimit from "./services/checkIncidentRateLimit";
 
 const router = express.Router();
 
@@ -21,6 +21,7 @@ router.post(
 router.get("/api/incident-types", incidentTypeActions.browse);
 
 router.get("/api/incidents/nearby", incidentActions.browseNearby);
+router.get("/api/incidents", incidentActions.browse);
 router.get("/api/incidents/:id", incidentActions.read);
 router.put(
 	"/api/incidents/:id",

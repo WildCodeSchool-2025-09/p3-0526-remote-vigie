@@ -31,37 +31,37 @@
 	/* types colors */
 	--fire: #d8323e;
 	--bg-fire: #f4e9df;
-	--insect: #d19a00;
+	--insect: #946d00; /* corrigé AA (était #d19a00, 2.42:1 → 4.52:1) */
 	--bg-insect: #f4f0db;
-	--flood: #1f8fd0;
+	--flood: #1b7ab2; /* corrigé AA (était #1f8fd0, 3.43:1 → 4.50:1) */
 	--bg-flood: #e9efe7;
-	--hail: #6e9ad4;
+	--hail: #3a75c2; /* corrigé AA (était #6e9ad4, 2.79:1 → 4.51:1) */
 	--bg-hail: #eef0e8;
-	--glaze: #2e9aa6;
+	--glaze: #267f89; /* corrigé AA (était #2e9aa6, 3.21:1 → 4.51:1) */
 	--bg-glaze: #eaf0e5;
-	--snow: #93bede;
+	--snow: #3579ac; /* corrigé AA (était #93bede, 1.90:1 → 4.51:1) */
 	--bg-snow: #f0f2e8;
 	--storm: #4f6e7c;
 	--bg-storm: #dfe2da;
 	--wild: #6e4a2e;
 	--bg-wild: #e3ddcf;
-	--tornado: #c2661f;
+	--tornado: #b25d1c; /* corrigé AA (était #c2661f, 3.88:1 → 4.51:1) */
 	--bg-tornado: #efe1cd;
 	--rockfall: #574a5e;
 	--bg-rockfall: #e0ddd6;
 	--animal: #5e4a63;
 	--bg-animal: #e1ddd6;
-	--tree: #2f8a38;
+	--tree: #2d8436; /* corrigé AA (était #2f8a38, 4.20:1 → 4.50:1) */
 	--bg-tree: #dae6d0;
 
 	/* danger levels (1 → 5) */
-	--level-1: #3a8f3f; /* faible */
+	--level-1: #36853b; /* faible — corrigé AA (était #3a8f3f, 3.97:1 → 4.50:1) */
 	--bg-level-1: #f8ffef;
-	--level-2: #9bbb2f; /* modéré */
+	--level-2: #687e20; /* modéré — corrigé AA (était #9bbb2f, 2.17:1 → 4.51:1) */
 	--bg-level-2: #feffed;
-	--level-3: #e0a81f; /* important */
+	--level-3: #926d14; /* important — corrigé AA (était #e0a81f, 2.04:1 → 4.52:1) */
 	--bg-level-3: #fffadd;
-	--level-4: #e8600f; /* élevé */
+	--level-4: #b94d0c; /* élevé — corrigé AA (était #e8600f, 3.05:1 → 4.52:1) */
 	--bg-level-4: #f9f0e9;
 	--level-5: #c1392b; /* critique */
 	--bg-level-5: #fdf1ef;

@@ -1,6 +1,28 @@
 import { apiFetch } from "@/services/apiClient";
 import type { Incident } from "@/types/incidentDetails";
 import type { NearbyIncident } from "@/types/incidentForm";
+import type { IncidentListItem } from "@/types/incidentList";
+
+type GetAllIncidentsResult =
+	| { status: "ok"; incidents: IncidentListItem[] }
+	| { status: "error" };
+
+export async function getAllIncidents(
+	limit = 15,
+): Promise<GetAllIncidentsResult> {
+	try {
+		const res = await apiFetch(`/api/incidents?limit=${limit}`);
+
+		if (!res.ok) return { status: "error" };
+
+		return {
+			status: "ok",
+			incidents: (await res.json()) as IncidentListItem[],
+		};
+	} catch {
+		return { status: "error" }; // réseau, CORS, JSON illisible
+	}
+}
 
 type GetIncidentResult =
 	| { status: "ok"; incident: Incident }
@@ -120,8 +142,15 @@ export async function createIncident(
 		});
 
 		if (res.status === 400) {
-			const body = (await res.json()) as { error: string; message: string };
-			return { status: "invalid", error: body.error, message: body.message };
+			const body = (await res.json()) as {
+				error: string;
+				message: string;
+			};
+			return {
+				status: "invalid",
+				error: body.error,
+				message: body.message,
+			};
 		}
 		if (res.status === 401) return { status: "unauthorized" };
 		if (res.status === 403) {

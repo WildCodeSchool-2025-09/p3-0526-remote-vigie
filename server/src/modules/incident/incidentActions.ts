@@ -11,6 +11,23 @@ import incidentRepository from "./incidentRepository";
 
 // Only BREAD here (Browse, Read, Edit, Add, Delete)
 
+const DEFAULT_LIST_LIMIT = 15;
+const MAX_LIST_LIMIT = 100;
+
+const browse: RequestHandler = async (req, res, next) => {
+	try {
+		const requested =
+			Number.parseInt(req.query.limit as string, 10) ||
+			DEFAULT_LIST_LIMIT;
+		const limit = Math.max(1, Math.min(requested, MAX_LIST_LIMIT));
+
+		const incidents = await incidentRepository.readAllForList(limit);
+		res.status(StatusCodes.OK).json(incidents);
+	} catch (err) {
+		next(err);
+	}
+};
+
 const read: RequestHandler = async (req, res, next) => {
 	try {
 		const id = Number(req.params.id);
@@ -345,6 +362,7 @@ const add: RequestHandler = async (req, res, next) => {
 };
 
 export default {
+	browse,
 	read,
 	browseNearby,
 	edit,
