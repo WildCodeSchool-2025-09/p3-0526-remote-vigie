@@ -16,7 +16,9 @@ export default function IncidentFormSkeleton() {
 			aria-busy="true"
 			aria-label="Chargement des types de signalement"
 		>
-			<span className="sr-only">Chargement des types de signalement…</span>
+			<span className="sr-only">
+				Chargement des types de signalement…
+			</span>
 
 			<div className="rounded-2xl bg-base-200 p-4" aria-hidden="true">
 				<div className="flex items-center gap-2 pb-8">
