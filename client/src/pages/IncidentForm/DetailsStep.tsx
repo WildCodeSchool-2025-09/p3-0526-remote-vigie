@@ -102,15 +102,22 @@ export default function DetailsStep({
 						error={dangerLevelError}
 					/>
 					{addressOptions.length > 0 && (
-						<AddressPicker
-							label={
-								geolocationError ??
-								"Impossible de vous localiser, veuillez choisir une adresse"
-							}
-							addresses={addressOptions}
-							value={selectedAddressId}
-							onChange={onSelectedAddressIdChange}
-						/>
+						<>
+							{geolocationError && (
+								<p role="alert" className="sr-only">
+									{geolocationError}
+								</p>
+							)}
+							<AddressPicker
+								label={
+									geolocationError ??
+									"Impossible de vous localiser, veuillez choisir une adresse"
+								}
+								addresses={addressOptions}
+								value={selectedAddressId}
+								onChange={onSelectedAddressIdChange}
+							/>
+						</>
 					)}
 					{position &&
 						(isChoosingPosition ? (
@@ -156,7 +163,10 @@ export default function DetailsStep({
 								<div className="text-left">
 									{addressOptions.length === 0 &&
 										(geolocationError ? (
-											<p className="font-bold text-primary">
+											<p
+												role="alert"
+												className="font-bold text-primary"
+											>
 												Localisation impossible,
 												veuillez choisir une position
 												sur la carte :
@@ -185,7 +195,10 @@ export default function DetailsStep({
 							</div>
 						))}
 					{hasTileError && (
-						<div className="mt-4 flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4">
+						<div
+							role="alert"
+							className="mt-4 flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4"
+						>
 							<div className="flex items-start gap-3">
 								<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
 									<Icon

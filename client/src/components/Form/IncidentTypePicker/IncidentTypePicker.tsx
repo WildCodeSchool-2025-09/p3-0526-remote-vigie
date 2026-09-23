@@ -4,6 +4,7 @@ import type { IncidentType } from "@/types/incidentForm";
 import { useId } from "react";
 
 type IncidentTypePickerProps = {
+	label: string;
 	incidentTypes: IncidentType[];
 	value: number[];
 	onChange: (ids: number[]) => void;
@@ -11,6 +12,7 @@ type IncidentTypePickerProps = {
 };
 
 export default function IncidentTypePicker({
+	label,
 	incidentTypes,
 	value,
 	onChange,
@@ -28,6 +30,7 @@ export default function IncidentTypePicker({
 
 	return (
 		<fieldset aria-describedby={error ? errorId : undefined}>
+			<legend className="sr-only">{label}</legend>
 			<div className="grid grid-cols-3 gap-x-3 gap-y-6">
 				{incidentTypes.map((type) => {
 					const isSelected = value.includes(type.id);

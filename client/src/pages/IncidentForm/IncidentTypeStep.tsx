@@ -53,6 +53,7 @@ export default function IncidentTypeStep({
 			{!loadingTypes && !typesError && (
 				<>
 					<IncidentTypePicker
+						label="Que voulez-vous signaler ?"
 						incidentTypes={incidentTypes}
 						value={selectedTypes}
 						onChange={onSelectedTypesChange}
