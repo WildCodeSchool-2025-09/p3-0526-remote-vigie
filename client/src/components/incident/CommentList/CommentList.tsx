@@ -97,8 +97,8 @@ export default function CommentList({ incidentId, incidentStatus }: Props) {
 				onRemoveQuote={() => setQuotedComment(null)}
 				onCommentAdded={(comment) => {
 					setComments((current) => [...current, comment]);
-					setNewCommentIds(
-						(current) => new Set(current).add(comment.id),
+					setNewCommentIds((current) =>
+						new Set(current).add(comment.id),
 					);
 					setQuotedComment(null);
 					setAnnouncement(

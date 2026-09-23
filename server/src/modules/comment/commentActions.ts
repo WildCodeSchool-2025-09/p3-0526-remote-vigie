@@ -32,7 +32,10 @@ const add: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		const body = req.body as { content?: unknown; quotedCommentId?: unknown };
+		const body = req.body as {
+			content?: unknown;
+			quotedCommentId?: unknown;
+		};
 
 		if (
 			typeof body.content !== "string" ||
@@ -62,7 +65,8 @@ const add: RequestHandler = async (req, res, next) => {
 			}
 		}
 
-		const incident = await incidentRepository.findOwnerAndStatus(incidentId);
+		const incident =
+			await incidentRepository.findOwnerAndStatus(incidentId);
 
 		if (incident == null) {
 			res.sendStatus(StatusCodes.NOT_FOUND);

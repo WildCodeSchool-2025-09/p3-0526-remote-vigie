@@ -1,9 +1,7 @@
 import { apiFetch } from "@/services/apiClient";
 import type { Comment } from "@/types/comment";
 
-type GetComments =
-	| { status: "ok"; comments: Comment[] }
-	| { status: "error" };
+type GetComments = { status: "ok"; comments: Comment[] } | { status: "error" };
 
 export async function getComments(incidentId: number): Promise<GetComments> {
 	try {

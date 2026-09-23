@@ -1,6 +1,6 @@
 import Icon from "@/components/Icon/Icon";
-import { useAuth } from "@/contexts/AuthContext";
 import type { QuoteTarget } from "@/components/incident/CommentList/CommentList";
+import { useAuth } from "@/contexts/AuthContext";
 import { createComment } from "@/services/commentService";
 import type { Comment } from "@/types/comment";
 import type { IncidentStatus } from "@/types/incidentDetails";
