@@ -14,7 +14,6 @@ import App from "@/App";
 import PrivateRoute from "@/components/Routing/PrivateRoute/PrivateRoute";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Home from "@/pages/Home/Home";
-import Incident from "@/pages/Incident/Incident";
 import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
 import Login from "@/pages/Login/Login";
 import NotFound from "@/pages/NotFound/NotFound";
@@ -90,10 +89,6 @@ const router = createBrowserRouter([
 			{
 				path: "numbers",
 				element: <Numbers />,
-			},
-			{
-				path: "incident",
-				element: <Incident />,
 			},
 			{
 				path: "incident/:id",
