@@ -19,7 +19,10 @@ const requireIncidentAuthor: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		if (req.auth == null || Number(req.auth.sub) !== targetIncident.userId) {
+		if (
+			req.auth == null ||
+			Number(req.auth.sub) !== targetIncident.userId
+		) {
 			res.status(StatusCodes.FORBIDDEN).json({
 				message: "Vous n'êtes pas l'auteur de ce signalement.",
 			});
