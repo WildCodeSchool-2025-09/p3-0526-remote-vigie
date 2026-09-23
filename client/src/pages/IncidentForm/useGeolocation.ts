@@ -1,6 +1,6 @@
 import type { Address, AuthUser } from "@/contexts/AuthContext";
 import type { Position } from "@/types/incidentForm";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function useGeolocation(user: AuthUser | null) {
 	const [addressOptions, setAddressOptions] = useState<Address[]>([]);
@@ -11,6 +11,7 @@ export default function useGeolocation(user: AuthUser | null) {
 	const [geolocationError, setGeolocationError] = useState<string | null>(
 		null,
 	);
+	const hasManualSelectionRef = useRef(false);
 
 	useEffect(() => {
 		function fallbackToPrimaryAddress(error: GeolocationPositionError) {
@@ -45,6 +46,8 @@ export default function useGeolocation(user: AuthUser | null) {
 			}
 		}
 		navigator.geolocation.getCurrentPosition((geoPosition) => {
+			if (hasManualSelectionRef.current) return;
+
 			setPosition({
 				lat: geoPosition.coords.latitude,
 				lng: geoPosition.coords.longitude,
@@ -64,12 +67,17 @@ export default function useGeolocation(user: AuthUser | null) {
 		});
 	}, [addressOptions, selectedAddressId]);
 
+	function onSelectedAddressIdChange(id: number | null) {
+		hasManualSelectionRef.current = true;
+		setSelectedAddressId(id);
+	}
+
 	return {
 		position,
 		onPositionChange: setPosition,
 		addressOptions,
 		selectedAddressId,
-		onSelectedAddressIdChange: setSelectedAddressId,
+		onSelectedAddressIdChange,
 		geolocationError,
 	};
 }

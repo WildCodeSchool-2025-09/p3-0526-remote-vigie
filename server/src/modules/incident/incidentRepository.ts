@@ -9,7 +9,7 @@ import type { Result, Rows } from "../../../database/client";
 type IncidentListItem = {
 	id: number;
 	title: string;
-	city: string;
+	city: string | null;
 	status: "in_progress" | "resolved";
 	createdAt: Date;
 	expiresAt: Date;

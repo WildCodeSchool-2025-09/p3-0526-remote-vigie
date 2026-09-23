@@ -26,7 +26,10 @@ export default function useIncidentTypes(enabled: boolean) {
 	}, []);
 
 	useEffect(() => {
-		if (!enabled) return;
+		if (!enabled) {
+			setLoadingTypes(false);
+			return;
+		}
 
 		const controller = new AbortController();
 		loadIncidentTypes(controller.signal);

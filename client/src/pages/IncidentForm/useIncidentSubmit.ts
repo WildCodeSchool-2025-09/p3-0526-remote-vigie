@@ -31,7 +31,12 @@ export default function useIncidentSubmit({
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 
-		if (position === null) return;
+		if (position === null) {
+			setServerError(
+				"Votre position n'est pas encore déterminée. Veuillez patienter ou choisir une adresse.",
+			);
+			return;
+		}
 
 		if (selectedTypes.length === 0) {
 			setSelectionError("Sélectionnez au moins un type de signalement.");
@@ -39,7 +44,10 @@ export default function useIncidentSubmit({
 		}
 		setSelectionError(null);
 
-		if (dangerLevel === null) return;
+		if (dangerLevel === null) {
+			setDangerLevelError("Sélectionnez un niveau de gravité.");
+			return;
+		}
 
 		setSubmitting(true);
 

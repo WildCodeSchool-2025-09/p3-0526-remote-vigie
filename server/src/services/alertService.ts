@@ -2,6 +2,15 @@ import addressRepository from "../modules/address/addressRepository";
 import mailService from "./mailService";
 import withPreposition from "./title";
 
+function escapeHtml(value: string): string {
+	return value
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
+}
+
 function emailTemplate({
 	type,
 	city,
@@ -41,7 +50,7 @@ function emailTemplate({
 	<div style="padding: 24px; color: #0b4619;">
 		<p>Un signalement de type ${type.join(", ")} a été fait ${place}, le ${formattedDate}.</p>
 		<p style="background: #f6f5e9; border-left: 4px solid #ffcc1d; padding: 12px;">
-			Adresse concernée : <strong>${address}</strong>
+			Adresse concernée : <strong>${escapeHtml(address)}</strong>
 		</p>
 		<p style="text-align: center; margin-top: 24px;">
 			<a href="${link}" style="background: #ffcc1d; color: #0b4619; padding: 12px 24px; border-radius: 999px; text-decoration: none; font-weight: bold; display: inline-block;">

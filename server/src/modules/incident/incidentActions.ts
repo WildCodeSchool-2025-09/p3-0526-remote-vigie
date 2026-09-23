@@ -219,7 +219,10 @@ const add: RequestHandler = async (req, res, next) => {
 		}
 
 		const dangerLevelId = Number(body.dangerLevelId);
-		if (!Number.isInteger(dangerLevelId) || dangerLevelId <= 0) {
+		const validDangerLevelIds = new Set(
+			types.map((type) => type.danger_level_id),
+		);
+		if (!Number.isInteger(dangerLevelId) || !validDangerLevelIds.has(dangerLevelId)) {
 			res.status(StatusCodes.BAD_REQUEST).json({
 				error: "invalid_danger_level_id",
 				message: "Le niveau de gravité est manquant ou invalide.",
