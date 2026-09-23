@@ -128,6 +128,7 @@ type CreateIncidentResult =
 	| { status: "unauthorized" }
 	| { status: "forbidden"; message: string }
 	| { status: "tooManyRequests"; message: string }
+	| { status: "duplicate"; message: string }
 	| { status: "networkError" }
 	| { status: "error" };
 
@@ -160,6 +161,10 @@ export async function createIncident(
 		if (res.status === 429) {
 			const body = (await res.json()) as { message: string };
 			return { status: "tooManyRequests", message: body.message };
+		}
+		if (res.status === 409) {
+			const body = (await res.json()) as { message: string };
+			return { status: "duplicate", message: body.message };
 		}
 		if (!res.ok) return { status: "error" };
 

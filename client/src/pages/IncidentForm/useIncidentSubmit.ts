@@ -80,7 +80,8 @@ export default function useIncidentSubmit({
 
 		if (
 			result.status === "forbidden" ||
-			result.status === "tooManyRequests"
+			result.status === "tooManyRequests" ||
+			result.status === "duplicate"
 		) {
 			setServerError(result.message);
 			return;

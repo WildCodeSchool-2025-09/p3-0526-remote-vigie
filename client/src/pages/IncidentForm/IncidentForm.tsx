@@ -95,7 +95,6 @@ export default function IncidentForm() {
 						incidentTypes={incidentTypes}
 						selectedTypes={selectedTypes}
 						onSelectedTypesChange={onSelectedTypesChange}
-						loadingTypes={loadingTypes}
 						typesError={typesError}
 						selectionError={selectionError}
 						onRetry={onRetry}

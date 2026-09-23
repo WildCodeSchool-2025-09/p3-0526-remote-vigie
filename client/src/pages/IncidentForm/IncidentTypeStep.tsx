@@ -8,7 +8,6 @@ type IncidentTypeStepProps = {
 	incidentTypes: IncidentType[];
 	selectedTypes: number[];
 	onSelectedTypesChange: (ids: number[]) => void;
-	loadingTypes: boolean;
 	typesError: string | null;
 	onRetry: () => void;
 	selectedTypesInstructions: SafetyInstructionsItem[];
@@ -19,7 +18,6 @@ export default function IncidentTypeStep({
 	incidentTypes,
 	selectedTypes,
 	onSelectedTypesChange,
-	loadingTypes,
 	typesError,
 	onRetry,
 	selectedTypesInstructions,
@@ -35,7 +33,6 @@ export default function IncidentTypeStep({
 					Que voulez-vous signaler ?
 				</h2>
 			</div>
-			{loadingTypes && <p>Chargement des types…</p>}
 			{typesError && (
 				<div className="text-center">
 					<p role="alert" className="m-2 ">
@@ -50,7 +47,7 @@ export default function IncidentTypeStep({
 					</button>
 				</div>
 			)}
-			{!loadingTypes && !typesError && (
+			{!typesError && (
 				<>
 					<IncidentTypePicker
 						label="Que voulez-vous signaler ?"

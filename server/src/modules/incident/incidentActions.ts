@@ -329,7 +329,7 @@ const add: RequestHandler = async (req, res, next) => {
 			city: geocode.city,
 			postalCode: geocode.postalCode,
 			inseeCode: geocode.inseeCode,
-			typeIds,
+			typeIds: filteredTypes.map((type) => type.id),
 		});
 
 		const incident = await incidentRepository.read(incidentId);
