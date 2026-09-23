@@ -39,9 +39,6 @@ export default function EmailVerificationNotice() {
 						avons envoyé à l'inscription et cliquez sur le lien de
 						confirmation.
 					</p>
-
-					{/* TODO US06 : bouton « Renvoyer l'e-mail de confirmation »
-					    (appel API fourni par l'US06). */}
 				</section>
 			</div>
 		</div>

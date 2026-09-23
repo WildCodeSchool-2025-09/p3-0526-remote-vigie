@@ -103,9 +103,15 @@ async function dispatch({
 		});
 
 		try {
-			await mailService.send({ to: recipient.email, subject, html });
+			const previewUrl = await mailService.send({
+				to: recipient.email,
+				subject,
+				html,
+			});
 			console.log(
-				`Alerte envoyée à ${recipient.email} pour l'incident ${incidentId}`,
+				`Alerte envoyée à ${recipient.email} pour l'incident ${incidentId}${
+					previewUrl ? ` — aperçu : ${previewUrl}` : ""
+				}`,
 			);
 		} catch (err) {
 			console.error(
