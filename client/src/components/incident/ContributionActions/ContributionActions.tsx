@@ -36,6 +36,7 @@ export default function ContributionActions({
 }: Props) {
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [announcement, setAnnouncement] = useState("");
 	const iconFillClass = disabled ? "fill-primary/20" : "fill-primary";
 	const iconStrokeClass = disabled ? "stroke-primary/20" : "stroke-primary";
 
@@ -53,6 +54,9 @@ export default function ContributionActions({
 				expiresAt: result.expiresAt,
 				myContribution: type,
 			});
+			setAnnouncement(
+				`${type === "confirm" ? "Confirmé" : "Infirmé"}. Décomptes mis à jour : ${result.counts.confirm} confirmations, ${result.counts.deny} infirmations.`,
+			);
 			return;
 		}
 
@@ -61,10 +65,25 @@ export default function ContributionActions({
 
 	return (
 		<div className="flex flex-col gap-2">
+			{error != null && (
+				<div
+					role="alert"
+					className="flex w-full items-center gap-3 rounded-2xl bg-error/10 px-5 py-3 animate-pop"
+				>
+					<Icon
+						name="exclamation"
+						className="h-6 w-6 shrink-0 fill-error"
+						aria-hidden="true"
+					/>
+					<p className="text-sm font-bold text-error">{error}</p>
+				</div>
+			)}
+
 			<div className="flex gap-3">
 				<button
 					type="button"
 					disabled={disabled || pending}
+					aria-pressed={myContribution === "confirm"}
 					onClick={() => handleVote("confirm")}
 					className={`btn btn-md grow rounded-full ${
 						myContribution === "confirm"
@@ -82,6 +101,7 @@ export default function ContributionActions({
 				<button
 					type="button"
 					disabled={disabled || pending}
+					aria-pressed={myContribution === "deny"}
 					onClick={() => handleVote("deny")}
 					className={`btn btn-md grow rounded-full ${
 						myContribution === "deny"
@@ -98,11 +118,9 @@ export default function ContributionActions({
 				</button>
 			</div>
 
-			{error != null && (
-				<p role="alert" className="text-sm text-error">
-					{error}
-				</p>
-			)}
+			<p aria-live="polite" className="sr-only">
+				{announcement}
+			</p>
 		</div>
 	);
 }

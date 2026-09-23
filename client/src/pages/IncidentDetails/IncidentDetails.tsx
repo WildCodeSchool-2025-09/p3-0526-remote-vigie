@@ -261,6 +261,7 @@ export default function IncidentDetails() {
 
 				<IncidentActions
 					incidentId={incident.id}
+					authorId={incident.author.id}
 					status={incident.status}
 					expiresAt={incident.expiresAt}
 					myContribution={incident.myContribution}

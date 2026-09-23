@@ -7,6 +7,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 
 type Props = {
 	incidentId: number;
+	authorId: number;
 	status: IncidentStatus;
 	expiresAt: string;
 	myContribution: "confirm" | "deny" | null;
@@ -20,6 +21,7 @@ type Props = {
 // Emplacement des actions sur l'incident : Confirmer/Infirmer (US14), et à terme le partage (US15)
 export default function IncidentActions({
 	incidentId,
+	authorId,
 	status,
 	expiresAt,
 	myContribution,
@@ -60,6 +62,10 @@ export default function IncidentActions({
 		);
 	}
 
+	if (user != null && user.id === authorId) {
+		return null;
+	}
+
 	if (user == null) {
 		return (
 			<div className="flex flex-col gap-3 border-t border-primary/10 pt-4">
@@ -85,8 +91,6 @@ export default function IncidentActions({
 		);
 	}
 
-	// Membre connecté : vote. Le masquage pour l'auteur n'est pas encore fait
-	// (prochain item de la checklist US14, « Actions sur la fiche »).
 	return (
 		<div className="border-t border-primary/10 pt-5">
 			<ContributionActions
