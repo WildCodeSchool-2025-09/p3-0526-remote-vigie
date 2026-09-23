@@ -157,8 +157,8 @@ export default function IncidentDetails() {
 				<button
 					type="button"
 					className="btn btn-square btn-md rounded-xl border-2 border-white bg-white/20 shadow-none hover:bg-white/50"
-					aria-label="Retour à la carte"
-					onClick={() => navigate("/")}
+					aria-label="Retour à la page précédente"
+					onClick={() => navigate(-1)}
 				>
 					<Icon
 						name="arrowSmallLeft"
