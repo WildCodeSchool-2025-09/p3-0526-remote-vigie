@@ -61,10 +61,7 @@ export default function DangerLevelPicker({
 										: "transparent",
 								}}
 							>
-								<span
-									className="text-base font-bold"
-									style={{ color: levelColor }}
-								>
+								<span className="text-base font-bold text-primary">
 									{level.weight}
 								</span>
 								<span
