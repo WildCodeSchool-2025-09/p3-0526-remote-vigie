@@ -587,9 +587,26 @@ types (oui, d'où `incident_incident_type`).
 1. Utilisateurs dont **une adresse** est dans le rayon du type d'incident.
 2. *(V2, US23)* Utilisateurs dont la **dernière position live** non périmée est dans ce rayon.
 
-Rayon = `alert_radius_meters` du type (aucun réglage personnalisé). Un utilisateur concerné
-par plusieurs sources reçoit **une notification par source**. L'envoi est **asynchrone** :
-la réponse `201` ne l'attend pas.
+Rayon = `alert_radius_meters` du type (aucun réglage personnalisé). Pour l'**e-mail**, un
+utilisateur concerné par plusieurs adresses reçoit **un e-mail par adresse** (pas de
+déduplication par utilisateur). Pour les **notifications in-app**, la règle diffère : **une
+seule notification par incident**, même si plusieurs adresses de l'utilisateur sont
+concernées — décision prise avec le propriétaire d'US09 (2026-09-23), le centre de
+notifications restant un calcul à la volée depuis `user.last_seen_at` (§4.4) plutôt qu'une
+insertion par adresse dans une table dédiée. L'envoi de l'e-mail est **asynchrone** : la
+réponse `201` ne l'attend pas.
+
+### Titre et localisation du signalement (US01)
+
+- **Titre auto-généré si laissé vide** (décision du 2026-09-09) : le serveur (pas le front)
+  génère `<label du type le plus grave> à/au <commune>` (ex. « Feu à Nice », « Inondation au
+  Havre ») si l'utilisateur ne saisit rien. Calculé une seule fois à la création et stocké,
+  comme `base_lifespan_hours`/`base_alert_radius_meters` — jamais recalculé à la lecture.
+- **Repli si aucune commune n'est trouvée** (forêt, zone rurale — décision du 2026-09-22) :
+  `incident.city`/`insee_code`/`postal_code` restent `null` plutôt que de bloquer la création ;
+  l'affichage retombe sur les coordonnées GPS brutes, et le titre auto-généré devient
+  `<label du type> signalé(e) en dehors de l'agglomération` (accord de genre selon le type).
+  Voir §4.1-4.3 : écart avec le MCD/MLD/MPD, à resynchroniser depuis Miro (non fait ici).
 
 ### Durée de vie et expiration (US01, US12, US14)
 
@@ -641,8 +658,11 @@ saisie d'URL côté US07.
 
 ### Limites & garde-fous (issus du Miro)
 
-Nombre maximum de signalements par utilisateur et par heure · âge minimum 15 ans ·
-gravité par défaut par type · pas de suppression d'incident (archive) ni de commentaire.
+**5 signalements maximum par utilisateur et par heure** (`checkIncidentRateLimit`, US01,
+2026-09-21) · protection anti-double-soumission : un signalement quasi identique (au moins un
+type en commun, position à moins de 50 m) du même utilisateur dans les 10 secondes précédentes
+est rejeté (`409`) · âge minimum 15 ans · gravité par défaut par type · pas de suppression
+d'incident (archive) ni de commentaire.
 
 ## 6. Référentiels (données de seed)
 
