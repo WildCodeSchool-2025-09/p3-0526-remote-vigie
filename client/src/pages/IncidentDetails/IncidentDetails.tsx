@@ -143,7 +143,7 @@ export default function IncidentDetails() {
 	return (
 		<div className="INCIDENT-DETAILS-PAGE bg-base-100">
 			<header
-				className="relative isolate flex h-44 justify-center items-center overflow-hidden px-4 pt-4 pb-12 gap-3"
+				className="relative isolate flex h-44 justify-between items-center overflow-hidden px-4 pt-4 pb-12 gap-3"
 				style={{
 					background: incident.types[0]?.color ?? "var(--primary)",
 				}}
