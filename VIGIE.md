@@ -112,7 +112,7 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 Reproduit d'après les cadres **MCD**, **MLD** et **MPD** du Miro. Implémentation de
 référence : `server/database/schema.sql` (MySQL 8, `utf8mb4_unicode_ci`).
 
-Le modèle a été volontairement **borné au périmètre discuté** : `notification`, `badge`,
+Le modèle a été volontairement **borné au périmètre discuté** : `badge`,
 `oauth_account`, `push_subscription` et l'auto-citation des commentaires sont écartés pour
 l'instant et seront ajoutés au moment de développer les US concernées (voir §4.4).
 
@@ -540,9 +540,11 @@ erDiagram
 Éléments **volontairement différés** lors de la revue du modèle (à intégrer avec l'US
 correspondante, pas avant) :
 
-- **`notification`** (US09/US12/US21) — piste retenue : remplacer la table par un
-  `last_seen_at` sur `user` ; à la connexion, on recalcule ce qui est « nouveau »
-  (commentaire, incident résolu, badge…). À rediscuter en équipe.
+- **US09 — notifications in-app** — aucune table `notification` dédiée pour l'instant :
+    le centre recalcule les événements visibles depuis `user.last_seen_at` (commentaire,
+    incident résolu, badge) et affiche une pastille si des éléments sont non lus. La date
+    est mise à jour lors de la consultation du centre. Le Web Push reste dans le périmètre
+    de l'US21.
 - **`badge`** + relation `earned_at` (US20) — la relation N-N est aujourd'hui sans
   attribut ; or `counter_type` / `counter_param` / `threshold` impliquent une
   progression (« 7 signalements sur 10 ») et une date d'obtention à stocker.
@@ -558,6 +560,25 @@ retrait des attributs d'authentification tant qu'ils ne sont pas cadrés, origin
 types (oui, d'où `incident_incident_type`).
 
 ## 5. Règles métier transverses
+
+### Notifications in-app (US09)
+
+- Le centre est accessible aux utilisateurs connectés.
+- Les événements postérieurs à `user.last_seen_at` sont considérés comme non lus.
+- La pastille est affichée lorsqu'au moins un événement est non lu.
+- L'ouverture du centre marque les événements affichés comme lus en mettant à jour
+    `user.last_seen_at`.
+- `user.last_seen_at` reste la seule frontière de lecture côté serveur, mais elle
+    n'avance que globalement (bouton "Tout marquer comme lu"). Le front ajoute donc un
+    état de lecture par notification, stocké en `sessionStorage` (clé
+    `vigie:read-notifications`, propre à l'onglet/appareil) : sans lui, cliquer sur une
+    seule notification n'avancerait pas `last_seen_at` (sinon on marquerait aussi lues
+    des notifications jamais vues) et elle redeviendrait "non lue" au prochain
+    chargement. Limite assumée : cet état de lecture individuel est perdu sur un autre
+    appareil ou si le `sessionStorage` est vidé — `last_seen_at` reste alors la seule
+    source de vérité qui persiste.
+- Les notifications sont consultables dans l'application ; l'envoi navigateur lorsque
+    l'application est fermée relève de l'US21.
 
 ### Ciblage de l'alerte (US01, US23)
 
