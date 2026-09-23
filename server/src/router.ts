@@ -1,8 +1,9 @@
 import express from "express";
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
+import contributionActions from "./modules/contribution/contributionActions";
 import incidentActions from "./modules/incident/incidentActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
-import contributionActions from "./modules/contribution/contributionActions";
+import attachUserIfPresent from "./services/attachUserIfPresent";
 import verifyToken from "./services/verifyToken";
 
 const router = express.Router();
@@ -12,7 +13,7 @@ const router = express.Router();
 /* ************************************************************************* */
 
 router.get("/api/incidents", incidentActions.browse);
-router.get("/api/incidents/:id", incidentActions.read);
+router.get("/api/incidents/:id", attachUserIfPresent, incidentActions.read);
 router.put(
 	"/api/incidents/:id",
 	verifyToken,

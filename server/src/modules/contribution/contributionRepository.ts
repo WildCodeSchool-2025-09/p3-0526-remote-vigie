@@ -39,6 +39,20 @@ class ContributionRepository {
 
 		return counts;
 	}
+
+	async findByUser(
+		incidentId: number,
+		userId: number,
+		executor: Executor = databaseClient,
+	): Promise<"confirm" | "deny" | null> {
+		const [rows] = await executor.query<Rows>(
+			"SELECT type FROM contribution WHERE incident_id = ? AND user_id = ?",
+			[incidentId, userId],
+		);
+
+		const row = rows[0];
+		return row == null ? null : row.type;
+	}
 }
 
 export default new ContributionRepository();
