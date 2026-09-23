@@ -20,7 +20,6 @@ type AuthContextValue = {
 //   emailVerified: false → écran « vérifie ton e-mail »
 //   STUB_USER = null      → redirection vers /login
 const STUB_USER: AuthUser | null = {
-	
 	id: 1,
 	pseudo: "test",
 	email: "test@example.com",

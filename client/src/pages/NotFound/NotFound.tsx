@@ -20,7 +20,7 @@ export default function NotFound() {
 				<p className="mt-1 text-sm text-black">
 					Cette page n'existe pas ou a été déplacée.
 				</p>
-			
+
 				<button
 					type="button"
 					onClick={() => navigate("/")}

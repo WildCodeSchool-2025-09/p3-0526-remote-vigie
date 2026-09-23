@@ -1,5 +1,5 @@
+import { navItems } from "../../../config/NavItemConfig";
 import { useAuth } from "../../../contexts/AuthContext";
-import { navItems } from "../../../types/navItems";
 import NavItem from "../NavItem/NavItem";
 
 function NavBar() {
