@@ -1,5 +1,27 @@
 import { apiFetch } from "@/services/apiClient";
 import type { Incident } from "@/types/incidentDetails";
+import type { IncidentListItem } from "@/types/incidentList";
+
+type GetAllIncidentsResult =
+	| { status: "ok"; incidents: IncidentListItem[] }
+	| { status: "error" };
+
+export async function getAllIncidents(
+	limit = 15,
+): Promise<GetAllIncidentsResult> {
+	try {
+		const res = await apiFetch(`/api/incidents?limit=${limit}`);
+
+		if (!res.ok) return { status: "error" };
+
+		return {
+			status: "ok",
+			incidents: (await res.json()) as IncidentListItem[],
+		};
+	} catch {
+		return { status: "error" }; // réseau, CORS, JSON illisible
+	}
+}
 
 type GetIncidentResult =
 	| { status: "ok"; incident: Incident }
