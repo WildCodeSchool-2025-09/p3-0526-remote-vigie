@@ -1,8 +1,8 @@
 import "dotenv/config";
 
 import databaseClient from "../../database/client";
-import incidentRepository from "../modules/incident/incidentRepository";
-import expiryService from "./expiryService";
+import incidentRepository from "../../src/modules/incident/incidentRepository";
+import expiryService from "../../src/services/expiryService";
 
 import type { Result, Rows } from "../../database/client";
 

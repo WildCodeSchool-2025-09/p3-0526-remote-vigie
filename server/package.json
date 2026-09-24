@@ -8,7 +8,8 @@
 		"expire": "tsx ./bin/expire",
 		"build": "tsx ./bin/migrate",
 		"start": "tsx ./src/main",
-		"test": "jest --verbose"
+		"test": "jest --verbose",
+		"test:unit": "jest --verbose --testPathIgnorePatterns=/tests/"
 	},
 	"dependencies": {
 		"cors": "^2.8.5",

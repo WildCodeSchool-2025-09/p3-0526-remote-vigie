@@ -1,5 +1,5 @@
 import { apiFetch } from "@/services/apiClient";
-import type { Incident } from "@/types/incidentDetails";
+import type { Incident, IncidentCounts } from "@/types/incidentDetails";
 import type { IncidentListItem } from "@/types/incidentList";
 
 type GetAllIncidentsResult =
@@ -73,6 +73,46 @@ export async function updateIncident(
 		if (!res.ok) return { status: "error" };
 
 		return { status: "ok", incident: (await res.json()) as Incident };
+	} catch {
+		return { status: "error" };
+	}
+}
+
+type CreateContributionResult =
+	| { status: "ok"; counts: IncidentCounts; expiresAt: string }
+	| { status: "invalid" }
+	| { status: "forbidden" }
+	| { status: "notFound" }
+	| { status: "resolved" }
+	| { status: "error" };
+
+export async function createContribution(
+	incidentId: string,
+	type: "confirm" | "deny",
+): Promise<CreateContributionResult> {
+	try {
+		const res = await apiFetch(
+			`/api/incidents/${incidentId}/contributions`,
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ type }),
+			},
+		);
+
+		if (res.status === 400) return { status: "invalid" };
+		if (res.status === 403) return { status: "forbidden" };
+		if (res.status === 404) return { status: "notFound" };
+		if (res.status === 409) return { status: "resolved" };
+		if (!res.ok) return { status: "error" };
+
+		return {
+			status: "ok",
+			...((await res.json()) as {
+				counts: IncidentCounts;
+				expiresAt: string;
+			}),
+		};
 	} catch {
 		return { status: "error" };
 	}
