@@ -384,6 +384,16 @@ class IncidentRepository {
 			connection.release();
 		}
 	}
+
+	async closeExpired(): Promise<number> {
+		const [result] = await databaseClient.query<Result>(
+			`UPDATE incident
+			SET status = 'resolved'
+			WHERE status = 'in_progress' AND expires_at <= NOW()`,
+		);
+
+		return result.affectedRows;
+	}
 }
 
 export default new IncidentRepository();
