@@ -34,7 +34,7 @@ export default function InputFields({
 					placeholder={placeholder}
 					onChange={(e) => onTitleChange(e.target.value)}
 					maxLength={80}
-					className="w-full rounded-xl border-2 border-primary/15 bg-base-300 px-4 py-3 pr-8 text-black placeholder:text-black/40 focus:outline-none"
+					className="w-full rounded-xl border border-primary/15 bg-base-300 px-4 py-3 pr-8 text-black placeholder:text-black/40 focus:outline-none"
 				/>
 			</div>
 			<div className="mt-4 flex flex-col gap-1.5">
@@ -56,7 +56,7 @@ export default function InputFields({
 					placeholder="Ajouter une description (facultatif)"
 					onChange={(e) => onDescriptionChange(e.target.value)}
 					maxLength={500}
-					className="w-full resize-none rounded-xl border-2 border-primary/15 bg-base-300 px-5 py-4 text-black placeholder:text-black/40 focus:outline-none"
+					className="w-full resize-none rounded-xl border border-primary/15 bg-base-300 px-5 py-4 text-black placeholder:text-black/40 focus:outline-none"
 				/>
 			</div>
 		</>
