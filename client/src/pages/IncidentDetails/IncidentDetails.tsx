@@ -166,7 +166,7 @@ export default function IncidentDetails() {
 						aria-hidden="true"
 					/>
 				</button>
-				<h1 className="font-title text-2xl font-bold text-white">
+				<h1 className="font-title text-2xl font-bold text-white grow">
 					{incident.title}
 				</h1>
 				{incident.status === "in_progress" &&

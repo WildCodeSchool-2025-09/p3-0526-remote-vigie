@@ -12,34 +12,50 @@ type CommentRow = {
 	quotedComment: { author: { pseudo: string }; content: string } | null;
 };
 
+const SELECT_COMMENT = `
+	SELECT
+		c.id, c.content, c.created_at, u.pseudo AS author_pseudo,
+		qc.content AS quoted_content, qu.pseudo AS quoted_author_pseudo
+	FROM comment AS c
+	INNER JOIN user AS u ON u.id = c.user_id
+	LEFT JOIN comment AS qc ON qc.id = c.quoted_comment_id
+	LEFT JOIN user AS qu ON qu.id = qc.user_id
+`;
+
+function mapRow(row: Rows[number]): CommentRow {
+	return {
+		id: row.id,
+		content: row.content,
+		createdAt: row.created_at,
+		author: { pseudo: row.author_pseudo },
+		quotedComment:
+			row.quoted_content == null
+				? null
+				: {
+						author: { pseudo: row.quoted_author_pseudo },
+						content: row.quoted_content,
+					},
+	};
+}
+
 class CommentRepository {
-	async browseByIncident(incidentId: number): Promise<CommentRow[]> {
+	async readByIncident(incidentId: number): Promise<CommentRow[]> {
 		const [rows] = await databaseClient.query<Rows>(
-			`SELECT
-				c.id, c.content, c.created_at, u.pseudo AS author_pseudo,
-				qc.content AS quoted_content, qu.pseudo AS quoted_author_pseudo
-			FROM comment AS c
-			INNER JOIN user AS u ON u.id = c.user_id
-			LEFT JOIN comment AS qc ON qc.id = c.quoted_comment_id
-			LEFT JOIN user AS qu ON qu.id = qc.user_id
-			WHERE c.incident_id = ?
-			ORDER BY c.id ASC`,
+			`${SELECT_COMMENT} WHERE c.incident_id = ? ORDER BY c.id ASC`,
 			[incidentId],
 		);
 
-		return rows.map((row) => ({
-			id: row.id,
-			content: row.content,
-			createdAt: row.created_at,
-			author: { pseudo: row.author_pseudo },
-			quotedComment:
-				row.quoted_content == null
-					? null
-					: {
-							author: { pseudo: row.quoted_author_pseudo },
-							content: row.quoted_content,
-						},
-		}));
+		return rows.map(mapRow);
+	}
+
+	async read(id: number): Promise<CommentRow | null> {
+		const [rows] = await databaseClient.query<Rows>(
+			`${SELECT_COMMENT} WHERE c.id = ?`,
+			[id],
+		);
+
+		const row = rows[0];
+		return row == null ? null : mapRow(row);
 	}
 
 	async create(data: {

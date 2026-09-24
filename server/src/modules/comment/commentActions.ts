@@ -15,7 +15,7 @@ const browse: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		const comments = await commentRepository.browseByIncident(incidentId);
+		const comments = await commentRepository.readByIncident(incidentId);
 
 		res.json(comments);
 	} catch (err) {
@@ -93,7 +93,9 @@ const add: RequestHandler = async (req, res, next) => {
 			quotedCommentId,
 		});
 
-		res.status(StatusCodes.CREATED).json({ id });
+		const comment = await commentRepository.read(id);
+
+		res.status(StatusCodes.CREATED).json(comment);
 	} catch (err) {
 		next(err);
 	}

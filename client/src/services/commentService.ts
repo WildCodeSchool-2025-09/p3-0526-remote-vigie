@@ -21,7 +21,7 @@ type CreateCommentPayload = {
 };
 
 type CreateComment =
-	| { status: "ok"; id: number }
+	| { status: "ok"; comment: Comment }
 	| { status: "invalid" }
 	| { status: "unauthorized" }
 	| { status: "notFound" }
@@ -45,8 +45,8 @@ export async function createComment(
 		if (res.status === 409) return { status: "resolved" };
 		if (!res.ok) return { status: "error" };
 
-		const body = (await res.json()) as { id: number };
-		return { status: "ok", id: body.id };
+		const comment = (await res.json()) as Comment;
+		return { status: "ok", comment };
 	} catch {
 		return { status: "error" };
 	}

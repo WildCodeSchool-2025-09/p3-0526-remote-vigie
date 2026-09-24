@@ -4,7 +4,7 @@ import CommentItem from "@/components/incident/CommentItem/CommentItem";
 import { getComments } from "@/services/commentService";
 import type { Comment } from "@/types/comment";
 import type { IncidentStatus } from "@/types/incidentDetails";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
 	incidentId: number;
@@ -24,6 +24,7 @@ export default function CommentList({ incidentId, incidentStatus }: Props) {
 		null,
 	);
 	const [announcement, setAnnouncement] = useState("");
+	const commentFormRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		getComments(incidentId).then((result) => {
@@ -78,12 +79,10 @@ export default function CommentList({ incidentId, incidentStatus }: Props) {
 									author: comment.author.pseudo,
 									content: comment.content,
 								});
-								document
-									.getElementById("comment-form")
-									?.scrollIntoView({
-										behavior: "smooth",
-										block: "center",
-									});
+								commentFormRef.current?.scrollIntoView({
+									behavior: "smooth",
+									block: "center",
+								});
 							}}
 						/>
 					))}
@@ -91,6 +90,7 @@ export default function CommentList({ incidentId, incidentStatus }: Props) {
 			)}
 
 			<CommentForm
+				ref={commentFormRef}
 				incidentId={incidentId}
 				incidentStatus={incidentStatus}
 				quotedComment={quotedComment}

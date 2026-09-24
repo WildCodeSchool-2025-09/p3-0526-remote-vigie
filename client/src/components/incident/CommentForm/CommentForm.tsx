@@ -6,11 +6,12 @@ import type { Comment } from "@/types/comment";
 import type { IncidentStatus } from "@/types/incidentDetails";
 import { useId, useState } from "react";
 
-import type { ChangeEvent, FormEvent } from "react";
+import type { ChangeEvent, FormEvent, RefObject } from "react";
 
 const MAX_LENGTH = 500;
 
 type Props = {
+	ref?: RefObject<HTMLDivElement | null>;
 	incidentId: number;
 	incidentStatus: IncidentStatus;
 	quotedComment: QuoteTarget | null;
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export default function CommentForm({
+	ref,
 	incidentId,
 	incidentStatus,
 	quotedComment,
@@ -60,19 +62,7 @@ export default function CommentForm({
 		setIsSubmitting(false);
 
 		if (result.status === "ok") {
-			onCommentAdded({
-				id: result.id,
-				author: { pseudo: user.pseudo },
-				content: content.trim(),
-				createdAt: new Date().toISOString(),
-				quotedComment:
-					quotedComment == null
-						? null
-						: {
-								author: { pseudo: quotedComment.author },
-								content: quotedComment.content,
-							},
-			});
+			onCommentAdded(result.comment);
 			setContent("");
 			return;
 		}
@@ -100,7 +90,7 @@ export default function CommentForm({
 	};
 
 	return (
-		<div id="comment-form" className="mt-4">
+		<div ref={ref} className="mt-4">
 			{!isConnected && (
 				<div className="mb-3 flex items-center gap-3 rounded-2xl bg-base-300 p-3">
 					<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--primary-light)">
