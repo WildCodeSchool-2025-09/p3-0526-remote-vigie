@@ -620,6 +620,16 @@ déterminé qui a été alerté, dans quel rayon et pour combien de temps. Seuls
 et photo restent modifiables, et seulement tant que l'incident est `in_progress`. Une
 modification ne renvoie **aucune** alerte ; la fiche indique « modifié le … ».
 
+### Fil de commentaires (US08)
+
+Fil plat et chronologique, consultable sans compte ; publier demande d'être connecté et que
+l'incident soit `in_progress`. Un commentaire publié n'est ni modifiable ni supprimable.
+**Pas de pagination** : un incident a une durée de vie limitée (`expires_at`), donc un fil reste
+court en pratique — tous les commentaires s'affichent directement (décision prise à l'ouverture
+d'US08, le comportement par lots initialement prévu sur la carte Trello a été retiré).
+**Une seule limite de publication** : la longueur du contenu (500 caractères, `comment.content`).
+Pas de limite de fréquence — la checklist Trello en prévoyait une (`checkCommentRateLimit`),
+retirée à l'ouverture d'US08 pour la même raison que la pagination.
 Le vrai import de fichier photo (redimensionnement, EXIF, stockage) est traité par l'US
 transverse US27, commune à US01 et US07 (§3). En attendant, le champ photo reste une simple
 saisie d'URL côté US07.

@@ -1,6 +1,7 @@
 import express from "express";
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
 import contributionActions from "./modules/contribution/contributionActions";
+import commentActions from "./modules/comment/commentActions";
 import incidentActions from "./modules/incident/incidentActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
 import attachUserIfPresent from "./services/attachUserIfPresent";
@@ -26,6 +27,8 @@ router.post(
 	contributionActions.add,
 );
 
+router.get("/api/incidents/:id/comments", commentActions.browse);
+router.post("/api/incidents/:id/comments", verifyToken, commentActions.add);
 router.get("/api/notifications", verifyToken, notificationsActions.browse);
 
 router.get(
