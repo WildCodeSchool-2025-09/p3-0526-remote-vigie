@@ -20,8 +20,8 @@ class UserLocationSeeder extends AbstractSeeder {
 			const fakeLocation = {
 				user_id: this.getRef(`user_${i}`).insertId,
 				is_enabled: i % 4 !== 0 ? 1 : 0,
-				latitude: 49.09 + i * 0.001,
-				longitude: 1.48 + i * 0.001,
+				latitude: 47.954352 + i * 0.001,
+				longitude: 7.260492 + i * 0.001,
 			};
 
 			// Insert the fakeLocation data into the 'user_location' table
