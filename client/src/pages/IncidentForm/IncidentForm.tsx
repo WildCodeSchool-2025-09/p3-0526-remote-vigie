@@ -1,3 +1,4 @@
+import bgIncident from "@/assets/images/background-incident.jpg";
 import DuplicateWarning from "@/components/Form/DuplicateWarning/DuplicateWarning";
 import EmailVerificationNotice from "@/components/Form/EmailVerificationNotice/EmailVerificationNotice";
 import IncidentCreatedNotice from "@/components/Form/IncidentCreatedNotice/IncidentCreatedNotice";
@@ -61,7 +62,7 @@ export default function IncidentForm() {
 		<div className="min-h-screen bg-base-100">
 			<header className="relative isolate flex h-44 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
 				<img
-					src="/src/assets/images/background-incident.jpg"
+					src={bgIncident}
 					alt=""
 					aria-hidden="true"
 					className="absolute inset-0 -z-10 h-full w-full object-cover opacity-70 mix-blend-multiply"
