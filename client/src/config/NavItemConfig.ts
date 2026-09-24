@@ -4,7 +4,7 @@ export const navItems: NavItemConfig[] = [
 	{ key: "home", to: "/", end: true, label: "Accueil", icon: "map" },
 	{
 		key: "report",
-		to: "/incident",
+		to: "/incident/create",
 		end: true,
 		label: "Signaler",
 		icon: "alert",
