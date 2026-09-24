@@ -1,6 +1,6 @@
 import databaseClient from "../../../database/client";
 
-import type { Rows } from "../../../database/client";
+import type { Result, Rows } from "../../../database/client";
 
 // Only CRUD here (Create, Read, Update, Delete)
 
@@ -219,6 +219,16 @@ class IncidentRepository {
 			WHERE id = ?`,
 			[data.title, data.description, data.photoUrl, id],
 		);
+	}
+
+	async closeExpired(): Promise<number> {
+		const [result] = await databaseClient.query<Result>(
+			`UPDATE incident
+			SET status = 'resolved'
+			WHERE status = 'in_progress' AND expires_at <= NOW()`,
+		);
+
+		return result.affectedRows;
 	}
 }
 
