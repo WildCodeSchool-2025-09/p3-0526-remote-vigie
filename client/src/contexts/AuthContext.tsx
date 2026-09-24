@@ -61,6 +61,7 @@ const STUB_USER: AuthUser | null = {
 		},
 	],
 };
+// const STUB_USER: AuthUser | null = null;
 
 // TODO US06 : remplacer ce fichier par un vrai AuthProvider (appelle GET /api/auth/me
 // au montage, expose login()/logout(), englobe <App/> dans main.tsx).
