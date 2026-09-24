@@ -13,6 +13,7 @@ import Camera from "./interface/camera.svg?react";
 import CheckCircle from "./interface/check-circle.svg?react";
 import Check from "./interface/check.svg?react";
 import CommentAltMiddle from "./interface/comment-alt-middle.svg?react";
+import Comments from "./interface/comments.svg?react";
 import CrossSmall from "./interface/cross-small.svg?react";
 import DiamondExclamation from "./interface/diamond-exclamation.svg?react";
 import Envelope from "./interface/envelope.svg?react";
@@ -22,6 +23,7 @@ import LandLocation from "./interface/land-location.svg?react";
 import Lock from "./interface/lock.svg?react";
 import Marker from "./interface/marker.svg?react";
 import MenuDotsVertical from "./interface/menu-dots-vertical.svg?react";
+import PaperPlane from "./interface/paper-plane.svg?react";
 import Pencil from "./interface/pencil.svg?react";
 import PhoneFlip from "./interface/phone-flip.svg?react";
 import PlusSmall from "./interface/plus-small.svg?react";
@@ -78,6 +80,7 @@ export const icons = {
 	check: Check,
 	checkCircle: CheckCircle,
 	commentAltMiddle: CommentAltMiddle,
+	comments: Comments,
 	crossSmall: CrossSmall,
 	diamondExclamation: DiamondExclamation,
 	envelope: Envelope,
@@ -87,6 +90,7 @@ export const icons = {
 	lock: Lock,
 	marker: Marker,
 	menuDotsVertical: MenuDotsVertical,
+	paperPlane: PaperPlane,
 	pencil: Pencil,
 	phoneFlip: PhoneFlip,
 	plusSmall: PlusSmall,

@@ -118,6 +118,25 @@ class NotificationsRepository {
                ) <= incident.base_alert_radius_meters
            )
        )
+       UNION ALL
+       (
+         SELECT
+           'mention' AS type,
+           c.id AS source_id,
+           c.created_at,
+           incident.id AS incident_id,
+           incident.title AS incident_title,
+           incident.city,
+           incident.status,
+           NULL AS incident_type
+         FROM comment AS c
+         JOIN comment AS quoted ON quoted.id = c.quoted_comment_id
+         JOIN incident ON incident.id = c.incident_id
+         WHERE quoted.user_id = ?
+           AND c.user_id != ?
+           AND incident.user_id != quoted.user_id
+           AND (? IS NULL OR c.created_at > ?)
+       )
        ORDER BY created_at DESC
        LIMIT ? OFFSET ?`,
 			[
@@ -136,6 +155,10 @@ class NotificationsRepository {
 				lastSeenAt,
 				lastSeenAt,
 				userId,
+				userId,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
 				limit,
 				offset,
 			],
@@ -184,6 +207,14 @@ class NotificationsRepository {
                  POINT(incident.longitude, incident.latitude)
                ) <= incident.base_alert_radius_meters
            )
+         UNION ALL
+         SELECT c.id FROM comment AS c
+         JOIN comment AS quoted ON quoted.id = c.quoted_comment_id
+         JOIN incident ON incident.id = c.incident_id
+         WHERE quoted.user_id = ?
+           AND c.user_id != ?
+           AND incident.user_id != quoted.user_id
+           AND (? IS NULL OR c.created_at > ?)
        ) AS events`,
 			[
 				userId,
@@ -201,6 +232,10 @@ class NotificationsRepository {
 				lastSeenAt,
 				lastSeenAt,
 				userId,
+				userId,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
 			],
 		);
 
