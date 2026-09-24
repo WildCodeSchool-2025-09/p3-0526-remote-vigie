@@ -7,8 +7,8 @@ import { type IconName, icons } from "@/assets/icons";
 import type { IncidentType } from "@/types/incidentDetails";
 
 type Props = {
-	city: string;
-	inseeCode: string;
+	city: string | null;
+	postalCode: string | null;
 	latitude: string;
 	longitude: string;
 	types: IncidentType[];
@@ -48,7 +48,7 @@ function createIncidentDivIcon(iconName: IconName, color: string) {
 
 export default function IncidentLocation({
 	city,
-	inseeCode,
+	postalCode,
 	latitude,
 	longitude,
 	types,
@@ -56,6 +56,10 @@ export default function IncidentLocation({
 	const lat = Number(latitude);
 	const lng = Number(longitude);
 	const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
+	const locationLabel =
+		city != null && postalCode != null
+			? `${city} (${postalCode})`
+			: `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 
 	const primaryType = types[0];
 	const iconName: IconName =
@@ -74,7 +78,7 @@ export default function IncidentLocation({
 			{hasCoords ? (
 				<div
 					role="img"
-					aria-label={`Carte de repérage centrée sur ${city}`}
+					aria-label={`Carte de repérage centrée sur ${locationLabel}`}
 					className="h-56 w-full overflow-hidden rounded-2xl border border-primary/10"
 				>
 					<MapContainer
@@ -94,9 +98,7 @@ export default function IncidentLocation({
 					</MapContainer>
 				</div>
 			) : null}
-			<p className="text-sm text-primary">
-				{city}&nbsp;({inseeCode})
-			</p>
+			<p className="text-sm text-primary">{locationLabel}</p>
 		</div>
 	);
 }

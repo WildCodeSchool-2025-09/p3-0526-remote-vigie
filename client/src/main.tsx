@@ -15,6 +15,7 @@ import PrivateRoute from "@/components/Routing/PrivateRoute/PrivateRoute";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Home from "@/pages/Home/Home";
 import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
+import IncidentForm from "@/pages/IncidentForm/IncidentForm";
 import Login from "@/pages/Login/Login";
 import NotFound from "@/pages/NotFound/NotFound";
 import NotificationCenter from "@/pages/Notification/NotificationCenter";
@@ -89,6 +90,16 @@ const router = createBrowserRouter([
 			{
 				path: "numbers",
 				element: <Numbers />,
+			},
+			// Routes réservées aux membres connectés (bouchon US06 en place).
+			{
+				element: <PrivateRoute />,
+				children: [
+					{
+						path: "incident/create",
+						element: <IncidentForm />,
+					},
+				],
 			},
 			{
 				path: "incident/:id",

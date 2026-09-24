@@ -31,8 +31,9 @@ export type Incident = {
 	photoUrl: string | null;
 	latitude: string;
 	longitude: string;
-	city: string;
-	inseeCode: string;
+	city: string | null;
+	postalCode: string | null;
+	inseeCode: string | null;
 	status: IncidentStatus;
 	createdAt: string;
 	editedAt: string | null;

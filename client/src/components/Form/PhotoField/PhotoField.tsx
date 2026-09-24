@@ -5,9 +5,6 @@ type Props = {
 	onChange: (value: string | null) => void;
 };
 
-// Champ photo partagé signalement (US01) / correction (US07). Pas encore de vrai
-// upload : "Ajouter une photo" et "Remplacer" n'ont pas de logique tant qu'US27
-// (upload et redimensionnement des photos) n'est pas branché.
 export default function PhotoField({ value, onChange }: Props) {
 	return (
 		<div className="mt-4 flex flex-col gap-1.5 mb-5">
