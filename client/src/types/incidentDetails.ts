@@ -42,4 +42,5 @@ export type Incident = {
 	author: IncidentAuthor;
 	types: IncidentType[];
 	counts: IncidentCounts;
+	myContribution: "confirm" | "deny" | null;
 };

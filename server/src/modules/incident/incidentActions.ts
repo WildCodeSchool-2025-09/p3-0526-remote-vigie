@@ -37,7 +37,8 @@ const read: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		const incident = await incidentRepository.read(id);
+		const userId = req.auth ? Number(req.auth.sub) : null;
+		const incident = await incidentRepository.read(id, userId);
 		if (incident == null) {
 			res.sendStatus(StatusCodes.NOT_FOUND);
 			return;
@@ -142,7 +143,8 @@ const edit: RequestHandler = async (req, res, next) => {
 			photoUrl,
 		});
 
-		const incident = await incidentRepository.read(id);
+		const userId = req.auth ? Number(req.auth.sub) : null;
+		const incident = await incidentRepository.read(id, userId);
 		if (incident == null) {
 			res.sendStatus(StatusCodes.NOT_FOUND);
 			return;
@@ -338,7 +340,10 @@ const add: RequestHandler = async (req, res, next) => {
 			typeIds: filteredTypes.map((type) => type.id),
 		});
 
-		const incident = await incidentRepository.read(incidentId);
+		const incident = await incidentRepository.read(
+			incidentId,
+			Number(req.auth.sub),
+		);
 
 		res.status(StatusCodes.CREATED).json(incident);
 

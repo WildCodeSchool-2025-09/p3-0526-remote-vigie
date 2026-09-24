@@ -1,11 +1,10 @@
 import databaseClient from "../../../database/client";
+import contributionRepository from "../contribution/contributionRepository";
 
-import type { Result, Rows } from "../../../database/client";
+import type { Executor, Result, Rows } from "../../../database/client";
 
 // Only CRUD here (Create, Read, Update, Delete)
 
-// Shape returned by readAllForList(): one row per incident, with its danger
-// level and its "principal" type — the one carrying the highest gravity.
 type IncidentListItem = {
 	id: number;
 	title: string;
@@ -41,6 +40,7 @@ type IncidentDetails = {
 		safetyInstructions: string | null;
 	}[];
 	counts: { confirm: number; deny: number };
+	myContribution: "confirm" | "deny" | null;
 };
 
 type NearbyIncident = {
@@ -54,11 +54,6 @@ type NearbyIncident = {
 };
 
 class IncidentRepository {
-	// READ — all incidents, most recent first, capped at `limit`. No status/
-	// expiry filtering here: that's US10's responsibility (it should default
-	// to active/non-expired to keep today's UX). Two queries: the incidents,
-	// then their types, reduced in JS to keep the highest-gravity type per
-	// incident.
 	async readAllForList(limit: number): Promise<IncidentListItem[]> {
 		const [incidentRows] = await databaseClient.query<Rows>(
 			`SELECT
@@ -80,8 +75,6 @@ class IncidentRepository {
 
 		const ids = incidentRows.map((row) => row.id as number);
 
-		// Types of these incidents, ordered so the highest-gravity type comes
-		// first for each incident (tie-break on incident_type.id).
 		const [typeRows] = await databaseClient.query<Rows>(
 			`SELECT
 				iit.incident_id,
@@ -94,7 +87,6 @@ class IncidentRepository {
 			[ids],
 		);
 
-		// First type seen for an incident id is its principal (highest-gravity) type.
 		const principalTypeByIncident = new Map<
 			number,
 			{ code: string; label: string; icon: string; color: string }
@@ -126,7 +118,10 @@ class IncidentRepository {
 		}));
 	}
 
-	async read(id: number): Promise<IncidentDetails | null> {
+	async read(
+		id: number,
+		userId: number | null,
+	): Promise<IncidentDetails | null> {
 		const [rows] = await databaseClient.query<Rows>(
 			`SELECT
 				i.id, i.user_id, i.title, i.description, i.photo_url,
@@ -157,22 +152,11 @@ class IncidentRepository {
 			[id],
 		);
 
-		const [countRows] = await databaseClient.query<Rows>(
-			`SELECT type, COUNT(*) AS total
-			FROM contribution
-			WHERE incident_id = ?
-			GROUP BY type`,
-			[id],
-		);
-
-		const rawCounts = countRows as {
-			type: "confirm" | "deny";
-			total: number;
-		}[];
-		const counts = { confirm: 0, deny: 0 };
-		for (const line of rawCounts) {
-			counts[line.type] = Number(line.total);
-		}
+		const counts = await contributionRepository.countByIncident(id);
+		const myContribution =
+			userId == null
+				? null
+				: await contributionRepository.findByUser(id, userId);
 
 		return {
 			id: row.id,
@@ -202,6 +186,7 @@ class IncidentRepository {
 				safetyInstructions: t.safety_instructions,
 			})),
 			counts,
+			myContribution,
 		};
 	}
 
@@ -383,6 +368,33 @@ class IncidentRepository {
 		} finally {
 			connection.release();
 		}
+	}
+
+	async lockBaseLifespan(
+		id: number,
+		executor: Executor,
+	): Promise<{ baseLifespanHours: number; createdAt: Date }> {
+		const [rows] = await executor.query<Rows>(
+			"SELECT base_lifespan_hours, created_at FROM incident WHERE id = ? FOR UPDATE",
+			[id],
+		);
+
+		const row = rows[0];
+		return {
+			baseLifespanHours: row.base_lifespan_hours,
+			createdAt: row.created_at,
+		};
+	}
+
+	async updateExpiry(
+		id: number,
+		expiresAt: Date,
+		executor: Executor = databaseClient,
+	): Promise<void> {
+		await executor.query(
+			"UPDATE incident SET expires_at = ? WHERE id = ?",
+			[expiresAt, id],
+		);
 	}
 
 	async closeExpired(): Promise<number> {

@@ -36,6 +36,18 @@ export default function IncidentDetails() {
 		setJustSaved(true);
 	}
 
+	function handleContributed(result: {
+		counts: Incident["counts"];
+		expiresAt: string;
+		myContribution: NonNullable<Incident["myContribution"]>;
+	}) {
+		setState((current) =>
+			current.status === "ok"
+				? { status: "ok", incident: { ...current.incident, ...result } }
+				: current,
+		);
+	}
+
 	const fetchIncident = useCallback(() => {
 		if (id == null) {
 			setState({ status: "notFound" });
@@ -254,8 +266,12 @@ export default function IncidentDetails() {
 				/>
 
 				<IncidentActions
+					incidentId={incident.id}
+					authorId={incident.author.id}
 					status={incident.status}
 					expiresAt={incident.expiresAt}
+					myContribution={incident.myContribution}
+					onContributed={handleContributed}
 				/>
 			</div>
 		</div>
