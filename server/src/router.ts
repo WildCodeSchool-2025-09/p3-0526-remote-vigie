@@ -2,6 +2,7 @@ import express from "express";
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
 import incidentActions from "./modules/incident/incidentActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
+import usefulPlaceActions from "./modules/usefulPlace/usefulPlaceActions";
 import verifyToken from "./services/verifyToken";
 
 const router = express.Router();
@@ -18,6 +19,8 @@ router.put(
 	requireIncidentAuthor,
 	incidentActions.edit,
 );
+
+router.get("/api/useful-places", usefulPlaceActions.browse);
 
 router.get("/api/notifications", verifyToken, notificationsActions.browse);
 
