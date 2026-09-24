@@ -48,7 +48,7 @@ function emailTemplate({
 		<h1 style="font-family: 'Playfair Display', ui-serif, Georgia, serif; color: #ffcc1d; margin: 0; font-size: 20px;">Vigie vous alerte</h1>
 	</div>
 	<div style="padding: 24px; color: #0b4619;">
-		<p>Un signalement de type ${type.join(", ")} a été fait ${place}, le ${formattedDate}.</p>
+		<p>Un signalement de type ${type.map(escapeHtml).join(", ")} a été fait ${escapeHtml(place)}, le ${formattedDate}.</p>
 		<p style="background: #f6f5e9; border-left: 4px solid #ffcc1d; padding: 12px;">
 			Adresse concernée : <strong>${escapeHtml(address)}</strong>
 		</p>
