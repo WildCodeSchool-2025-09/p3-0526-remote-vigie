@@ -1,7 +1,7 @@
 import supertest from "supertest";
 
-import app from "../../src/app";
 import databaseClient from "../../database/client";
+import app from "../../src/app";
 
 // Import the repository whose SQL calls we mock: routes.spec.ts tests the
 // HTTP layer (route → action → status/JSON), not the SQL itself.
@@ -154,7 +154,9 @@ describe("POST /api/incidents", () => {
 		jest.spyOn(databaseClient, "query").mockResolvedValue([
 			[{ email_verified_at: new Date() }],
 		] as never);
-		jest.spyOn(incidentRepository, "countRecentByUser").mockResolvedValue(0);
+		jest.spyOn(incidentRepository, "countRecentByUser").mockResolvedValue(
+			0,
+		);
 		jest.spyOn(incidentTypeRepository, "readAll").mockResolvedValue([
 			fakeType,
 		]);
@@ -164,18 +166,22 @@ describe("POST /api/incidents", () => {
 			postalCode: "69000",
 			inseeCode: "69123",
 		});
-		jest.spyOn(incidentRepository, "readRecentByUser").mockResolvedValue([]);
+		jest.spyOn(incidentRepository, "readRecentByUser").mockResolvedValue(
+			[],
+		);
 		jest.spyOn(incidentRepository, "create").mockResolvedValue(42);
 		jest.spyOn(incidentRepository, "read").mockResolvedValue(fakeIncident);
 		// Fire-and-forget after the response: mocked so no real e-mail is sent.
 		jest.spyOn(alertService, "dispatch").mockResolvedValue(undefined);
 
-		const response = await supertest(app).post("/api/incidents").send({
-			typeIds: [1],
-			latitude: 45.75,
-			longitude: 4.85,
-			dangerLevelId: 4,
-		});
+		const response = await supertest(app)
+			.post("/api/incidents")
+			.send({
+				typeIds: [1],
+				latitude: 45.75,
+				longitude: 4.85,
+				dangerLevelId: 4,
+			});
 
 		expect(response.status).toBe(201);
 	});
