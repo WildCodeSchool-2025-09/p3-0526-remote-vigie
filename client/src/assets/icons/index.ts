@@ -13,6 +13,7 @@ import Camera from "./interface/camera.svg?react";
 import CheckCircle from "./interface/check-circle.svg?react";
 import Check from "./interface/check.svg?react";
 import CommentAltMiddle from "./interface/comment-alt-middle.svg?react";
+import Comments from "./interface/comments.svg?react";
 import CrossSmall from "./interface/cross-small.svg?react";
 import DiamondExclamation from "./interface/diamond-exclamation.svg?react";
 import Envelope from "./interface/envelope.svg?react";
@@ -79,6 +80,7 @@ export const icons = {
 	check: Check,
 	checkCircle: CheckCircle,
 	commentAltMiddle: CommentAltMiddle,
+	comments: Comments,
 	crossSmall: CrossSmall,
 	diamondExclamation: DiamondExclamation,
 	envelope: Envelope,
