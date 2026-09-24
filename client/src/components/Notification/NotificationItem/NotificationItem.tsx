@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import type { IconName } from "../../../assets/icons";
 import type { Notification } from "../../../types/notification";
+import { formatDate } from "../../../utils/formatDate";
 import Icon from "../../Icon/Icon";
 
 const iconByType = {
@@ -101,20 +102,6 @@ const dangerLevelLabelByLevel: Record<number, string> = {
 	5: "critique",
 };
 
-function formatDate(date: string) {
-	const value = new Date(date);
-	if (Number.isNaN(value.getTime())) return "Récemment";
-	const elapsedMinutes = Math.max(
-		0,
-		Math.floor((Date.now() - value.getTime()) / 60000),
-	);
-	if (elapsedMinutes < 60) return `il y a ${elapsedMinutes || 1} min`;
-	const elapsedHours = Math.floor(elapsedMinutes / 60);
-	if (elapsedHours < 24) return `il y a ${elapsedHours} h`;
-	const elapsedDays = Math.floor(elapsedHours / 24);
-	return `il y a ${elapsedDays} j`;
-}
-
 function NotificationItem({
 	notification,
 	onRead,
@@ -123,14 +110,11 @@ function NotificationItem({
 	onRead: (notification: Notification) => void;
 }) {
 	const navigate = useNavigate();
-	const incidentType =
-		notification.incident_type as keyof typeof incidentStyleByType;
+	const incidentType = notification.incident_type ?? "fire";
 	const iconName =
 		notification.type === "incident" ||
 		notification.type === "incident_resolved"
-			? (incidentIconByType[
-					notification.incident_type as keyof typeof incidentIconByType
-				] ?? "fire")
+			? incidentIconByType[incidentType]
 			: ((iconByType as Record<string, IconName>)[notification.type] ??
 				"notification");
 	const typeIconStyle =
