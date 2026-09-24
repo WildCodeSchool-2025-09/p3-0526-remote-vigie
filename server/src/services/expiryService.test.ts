@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 import databaseClient from "../../database/client";
+import incidentRepository from "../modules/incident/incidentRepository";
 import expiryService from "./expiryService";
 
 import type { Result, Rows } from "../../database/client";
@@ -109,5 +110,45 @@ describe("expiryService.run", () => {
 		expect(await readStatus(id)).toBe("resolved");
 
 		await deleteIncident(id);
+	});
+
+	// Two overlapping calls on the same row: MySQL's row locking on UPDATE
+	// serializes them, so the row ends up resolved exactly once, no crash.
+	test("deux exécutions simultanées ne clôturent pas deux fois le même incident", async () => {
+		const id = await insertIncident(
+			"in_progress",
+			new Date(Date.now() - 60 * 60 * 1000),
+		);
+
+		await expect(
+			Promise.all([
+				incidentRepository.closeExpired(),
+				incidentRepository.closeExpired(),
+			]),
+		).resolves.toBeDefined();
+
+		expect(await readStatus(id)).toBe("resolved");
+
+		await deleteIncident(id);
+	});
+
+	// closeExpired() throws: run() catches it, logs it, and doesn't crash the process.
+	test("erreur pendant la clôture : journalisée, ne fait pas planter run()", async () => {
+		const consoleError = jest
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		const closeExpired = jest
+			.spyOn(incidentRepository, "closeExpired")
+			.mockRejectedValueOnce(new Error("boom"));
+
+		await expect(expiryService.run()).resolves.toBeUndefined();
+
+		expect(consoleError).toHaveBeenCalled();
+
+		closeExpired.mockRestore();
+		consoleError.mockRestore();
+
+		// The next run behaves normally again (nothing stuck/broken).
+		await expect(expiryService.run()).resolves.toBeUndefined();
 	});
 });
