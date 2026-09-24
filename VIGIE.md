@@ -52,7 +52,7 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 | US | Intitulé | Prio | Responsable(s) | Branche |
 |----|----------|------|----------------|---------|
 | US00 | Initialisation du projet (stack, alias, routing, thème, layout) | — | Équipe | `feat/US00-init` |
-| US01 | Signaler un incident → alerter les voisins concernés | 1 | Laurent Koehler, Julien Roussel | `feat/US01-incident-form` |
+| US01 | Signaler un incident → alerter les voisins concernés | 1 | Laurent Koehler | `feat/US01-incident-form` |
 | US02 | Consulter le détail d'un incident | 1 | Frédéric Briand | `feat/US02-incident-details` |
 | US03 | Accéder à la liste de tous les incidents | 2 | Guillaume Galinanes | `feat/US03-incident-list` |
 | US04 | Carte interactive (incidents + lieux utiles) | 2 | Guillaume Galinanes | `feat/US04-interactive-map` |
@@ -60,14 +60,14 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 | US06 | Se connecter (JWT en en-tête `Authorization: Bearer`) | 2 | Laurent Koehler | `feat/US06-login` |
 | US07 | Corriger le contenu descriptif de son incident | 2 | Frédéric Briand | `feat/US07-incident-edit` |
 | US08 | Consulter et commenter un incident (fil plat, citations) | 2 | Frédéric Briand | `feat/US08-incident-comments` |
-| US09 | Centre de notifications in-app (pastille non lues) | 2 | Frédéric Briand | `feat/US09-notification-center` |
+| US09 | Centre de notifications in-app (pastille non lues) | 2 | Julien Roussel | `feat/US09-notification-center` |
 | US10 | Rechercher et trier les incidents (+ inclure les résolus) | 2 | Guillaume Galinanes | `feat/US10-search-sort` |
 | US11 | Bandeau de vigilance météo (Météo-France) selon l'adresse | 3 | Guillaume Galinanes | `feat/US11-weather-vigilance` |
 | US12 | Clôture automatique des incidents expirés (tâche planifiée) | 3 | Julien Roussel | `feat/US12-incident-expiry` |
 | US13 | Liste des numéros utiles (bouton sur la Home) | 3 | Ivona Galikova | `feat/US13-emergency-numbers` |
 | US14 | Confirmer / infirmer un incident (pilote la durée de vie) | 3 | Frédéric Briand | `feat/US14-incident-contributions` |
 | US15 | Partager un incident (menu natif / copie de lien) | 3 | Frédéric Briand | `feat/US15-incident-share` |
-| US16 | Barre de navigation fixe + gabarit commun des pages | 3 | Frédéric Briand | `feat/US16-navigation` |
+| US16 | Barre de navigation fixe + gabarit commun des pages | 3 | Julien Roussel | `feat/US16-navigation` |
 | US27 | Ajouter une photo à son signalement depuis son téléphone (vrai upload) | 3 | À affecter | `feat/US27-photo-upload` |
 
 > **US27 est transverse** : elle remplace, pour US01 (création) et US07 (édition), le repli actuel
