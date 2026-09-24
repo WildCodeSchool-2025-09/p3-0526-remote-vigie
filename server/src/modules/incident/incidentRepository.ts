@@ -1,15 +1,14 @@
 import databaseClient from "../../../database/client";
+import contributionRepository from "../contribution/contributionRepository";
 
-import type { Rows } from "../../../database/client";
+import type { Executor, Result, Rows } from "../../../database/client";
 
 // Only CRUD here (Create, Read, Update, Delete)
 
-// Shape returned by readAllForList(): one row per incident, with its danger
-// level and its "principal" type — the one carrying the highest gravity.
 type IncidentListItem = {
 	id: number;
 	title: string;
-	city: string;
+	city: string | null;
 	status: "in_progress" | "resolved";
 	createdAt: Date;
 	expiresAt: Date;
@@ -24,8 +23,9 @@ type IncidentDetails = {
 	photoUrl: string | null;
 	latitude: string;
 	longitude: string;
-	city: string;
-	inseeCode: string;
+	city: string | null;
+	postalCode: string | null;
+	inseeCode: string | null;
 	status: "in_progress" | "resolved";
 	createdAt: Date;
 	editedAt: Date | null;
@@ -40,14 +40,20 @@ type IncidentDetails = {
 		safetyInstructions: string | null;
 	}[];
 	counts: { confirm: number; deny: number };
+	myContribution: "confirm" | "deny" | null;
+};
+
+type NearbyIncident = {
+	id: number;
+	typeIds: number[];
+	latitude: string;
+	longitude: string;
+	baseAlertRadiusMeters: number;
+	city: string | null;
+	createdAt: Date;
 };
 
 class IncidentRepository {
-	// READ — all incidents, most recent first, capped at `limit`. No status/
-	// expiry filtering here: that's US10's responsibility (it should default
-	// to active/non-expired to keep today's UX). Two queries: the incidents,
-	// then their types, reduced in JS to keep the highest-gravity type per
-	// incident.
 	async readAllForList(limit: number): Promise<IncidentListItem[]> {
 		const [incidentRows] = await databaseClient.query<Rows>(
 			`SELECT
@@ -69,8 +75,6 @@ class IncidentRepository {
 
 		const ids = incidentRows.map((row) => row.id as number);
 
-		// Types of these incidents, ordered so the highest-gravity type comes
-		// first for each incident (tie-break on incident_type.id).
 		const [typeRows] = await databaseClient.query<Rows>(
 			`SELECT
 				iit.incident_id,
@@ -83,7 +87,6 @@ class IncidentRepository {
 			[ids],
 		);
 
-		// First type seen for an incident id is its principal (highest-gravity) type.
 		const principalTypeByIncident = new Map<
 			number,
 			{ code: string; label: string; icon: string; color: string }
@@ -115,11 +118,14 @@ class IncidentRepository {
 		}));
 	}
 
-	async read(id: number): Promise<IncidentDetails | null> {
+	async read(
+		id: number,
+		userId: number | null,
+	): Promise<IncidentDetails | null> {
 		const [rows] = await databaseClient.query<Rows>(
 			`SELECT
 				i.id, i.user_id, i.title, i.description, i.photo_url,
-				i.latitude, i.longitude, i.city, i.insee_code,
+				i.latitude, i.longitude, i.city, i.postal_code, i.insee_code,
 				i.status, i.created_at, i.edited_at, i.expires_at,
 				d.label AS danger_level_label,
 				d.color AS danger_level_color,
@@ -146,22 +152,11 @@ class IncidentRepository {
 			[id],
 		);
 
-		const [countRows] = await databaseClient.query<Rows>(
-			`SELECT type, COUNT(*) AS total
-			FROM contribution
-			WHERE incident_id = ?
-			GROUP BY type`,
-			[id],
-		);
-
-		const rawCounts = countRows as {
-			type: "confirm" | "deny";
-			total: number;
-		}[];
-		const counts = { confirm: 0, deny: 0 };
-		for (const line of rawCounts) {
-			counts[line.type] = Number(line.total);
-		}
+		const counts = await contributionRepository.countByIncident(id);
+		const myContribution =
+			userId == null
+				? null
+				: await contributionRepository.findByUser(id, userId);
 
 		return {
 			id: row.id,
@@ -171,6 +166,7 @@ class IncidentRepository {
 			latitude: row.latitude,
 			longitude: row.longitude,
 			city: row.city,
+			postalCode: row.postal_code,
 			inseeCode: row.insee_code,
 			status: row.status,
 			createdAt: row.created_at,
@@ -190,7 +186,87 @@ class IncidentRepository {
 				safetyInstructions: t.safety_instructions,
 			})),
 			counts,
+			myContribution,
 		};
+	}
+
+	async readNearbyOngoingByTypes(
+		typeIds: number[],
+	): Promise<NearbyIncident[]> {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT DISTINCT
+			i.id, i.latitude, i.longitude, i.base_alert_radius_meters,
+			i.city, i.created_at
+			FROM incident AS i
+			INNER JOIN incident_incident_type AS iit ON iit.incident_id = i.id
+			WHERE i.status = 'in_progress'
+			AND iit.incident_type_id IN (?)`,
+			[typeIds],
+		);
+
+		if (rows.length === 0) return [];
+
+		const [typeRows] = await databaseClient.query<Rows>(
+			`SELECT incident_id, incident_type_id
+			FROM incident_incident_type
+			WHERE incident_id IN (?)`,
+			[rows.map((row) => row.id)],
+		);
+
+		const typesByIncident = new Map<number, number[]>();
+		for (const row of typeRows) {
+			const ids = typesByIncident.get(row.incident_id) ?? [];
+			ids.push(row.incident_type_id);
+			typesByIncident.set(row.incident_id, ids);
+		}
+
+		return rows.map((r) => ({
+			id: r.id,
+			typeIds: typesByIncident.get(r.id) ?? [],
+			latitude: r.latitude,
+			longitude: r.longitude,
+			baseAlertRadiusMeters: r.base_alert_radius_meters,
+			city: r.city,
+			createdAt: r.created_at,
+		}));
+	}
+
+	async readRecentByUser(userId: number): Promise<NearbyIncident[]> {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT DISTINCT
+			i.id, i.latitude, i.longitude, i.base_alert_radius_meters,
+			i.city, i.created_at
+			FROM incident AS i
+			WHERE i.user_id = ?
+			AND i.created_at >= NOW() - INTERVAL 10 SECOND`,
+			[userId],
+		);
+
+		if (rows.length === 0) return [];
+
+		const [typeRows] = await databaseClient.query<Rows>(
+			`SELECT incident_id, incident_type_id
+			FROM incident_incident_type
+			WHERE incident_id IN (?)`,
+			[rows.map((row) => row.id)],
+		);
+
+		const typesByIncident = new Map<number, number[]>();
+		for (const row of typeRows) {
+			const ids = typesByIncident.get(row.incident_id) ?? [];
+			ids.push(row.incident_type_id);
+			typesByIncident.set(row.incident_id, ids);
+		}
+
+		return rows.map((r) => ({
+			id: r.id,
+			typeIds: typesByIncident.get(r.id) ?? [],
+			latitude: r.latitude,
+			longitude: r.longitude,
+			baseAlertRadiusMeters: r.base_alert_radius_meters,
+			city: r.city,
+			createdAt: r.created_at,
+		}));
 	}
 
 	async findOwnerAndStatus(
@@ -219,6 +295,116 @@ class IncidentRepository {
 			WHERE id = ?`,
 			[data.title, data.description, data.photoUrl, id],
 		);
+	}
+
+	async countRecentByUser(userId: number): Promise<number> {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT COUNT(*) AS total
+		FROM incident
+		WHERE user_id = ?
+		AND created_at >= NOW() - INTERVAL 1 HOUR`,
+			[userId],
+		);
+
+		return Number(rows[0].total);
+	}
+
+	async create(data: {
+		userId: number;
+		dangerLevelId: number;
+		title: string;
+		description: string | null;
+		photoUrl: string | null;
+		latitude: number;
+		longitude: number;
+		lifespanHours: number;
+		alertRadiusMeters: number;
+		city: string | null;
+		postalCode: string | null;
+		inseeCode: string | null;
+		typeIds: number[];
+	}): Promise<number> {
+		const connection = await databaseClient.getConnection();
+		try {
+			await connection.beginTransaction();
+
+			const [result] = await connection.query<Result>(
+				`INSERT INTO incident
+			(user_id, danger_level_id, title, description, photo_url,
+			latitude, longitude, base_lifespan_hours, base_alert_radius_meters,
+			city, postal_code, insee_code, expires_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW() + INTERVAL ? HOUR)`,
+				[
+					data.userId,
+					data.dangerLevelId,
+					data.title,
+					data.description,
+					data.photoUrl,
+					data.latitude,
+					data.longitude,
+					data.lifespanHours,
+					data.alertRadiusMeters,
+					data.city,
+					data.postalCode,
+					data.inseeCode,
+					data.lifespanHours,
+				],
+			);
+
+			const incidentId = result.insertId;
+
+			const values = data.typeIds.map((typeId) => [incidentId, typeId]);
+			await connection.query(
+				"INSERT INTO incident_incident_type (incident_id, incident_type_id) VALUES ?",
+				[values],
+			);
+
+			await connection.commit();
+
+			return incidentId;
+		} catch (err) {
+			await connection.rollback();
+			throw err;
+		} finally {
+			connection.release();
+		}
+	}
+
+	async lockBaseLifespan(
+		id: number,
+		executor: Executor,
+	): Promise<{ baseLifespanHours: number; createdAt: Date }> {
+		const [rows] = await executor.query<Rows>(
+			"SELECT base_lifespan_hours, created_at FROM incident WHERE id = ? FOR UPDATE",
+			[id],
+		);
+
+		const row = rows[0];
+		return {
+			baseLifespanHours: row.base_lifespan_hours,
+			createdAt: row.created_at,
+		};
+	}
+
+	async updateExpiry(
+		id: number,
+		expiresAt: Date,
+		executor: Executor = databaseClient,
+	): Promise<void> {
+		await executor.query(
+			"UPDATE incident SET expires_at = ? WHERE id = ?",
+			[expiresAt, id],
+		);
+	}
+
+	async closeExpired(): Promise<number> {
+		const [result] = await databaseClient.query<Result>(
+			`UPDATE incident
+			SET status = 'resolved'
+			WHERE status = 'in_progress' AND expires_at <= NOW()`,
+		);
+
+		return result.affectedRows;
 	}
 }
 

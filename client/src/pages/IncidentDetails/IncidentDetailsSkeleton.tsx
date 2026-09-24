@@ -46,6 +46,13 @@ export default function IncidentDetailsSkeleton() {
 				{/* SafetyInstructions */}
 				<div className="skeleton h-20 w-full rounded-2xl" />
 
+				{/* CommentList */}
+				<div className="flex flex-col gap-3">
+					<div className="skeleton h-6 w-32" />
+					<div className="skeleton h-20 w-full rounded-2xl" />
+					<div className="skeleton h-20 w-full rounded-2xl" />
+				</div>
+
 				{/* IncidentActions */}
 				<div className="flex gap-3 border-t border-primary/10 pt-4">
 					<div className="skeleton h-12 w-full rounded-full" />

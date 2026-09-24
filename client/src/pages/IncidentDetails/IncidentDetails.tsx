@@ -1,6 +1,7 @@
 import bgIncidentDetails from "@/assets/images/background-incident-details.jpg";
 import Icon from "@/components/Icon/Icon";
 import SafetyInstructions from "@/components/SafetyInstructions/SafetyInstructions";
+import CommentList from "@/components/incident/CommentList/CommentList";
 import IncidentActions from "@/components/incident/IncidentActions/IncidentActions";
 import IncidentContent from "@/components/incident/IncidentContent/IncidentContent";
 import IncidentContributions from "@/components/incident/IncidentContributions/IncidentContributions";
@@ -33,6 +34,18 @@ export default function IncidentDetails() {
 		setState({ status: "ok", incident: updated });
 		editModalRef.current?.close();
 		setJustSaved(true);
+	}
+
+	function handleContributed(result: {
+		counts: Incident["counts"];
+		expiresAt: string;
+		myContribution: NonNullable<Incident["myContribution"]>;
+	}) {
+		setState((current) =>
+			current.status === "ok"
+				? { status: "ok", incident: { ...current.incident, ...result } }
+				: current,
+		);
 	}
 
 	const fetchIncident = useCallback(() => {
@@ -142,7 +155,7 @@ export default function IncidentDetails() {
 	return (
 		<div className="INCIDENT-DETAILS-PAGE bg-base-100">
 			<header
-				className="relative isolate flex h-44 justify-center items-center overflow-hidden px-4 pt-4 pb-12 gap-3"
+				className="relative isolate flex h-44 justify-between items-center overflow-hidden px-4 pt-4 pb-12 gap-3"
 				style={{
 					background: incident.types[0]?.color ?? "var(--primary)",
 				}}
@@ -156,8 +169,8 @@ export default function IncidentDetails() {
 				<button
 					type="button"
 					className="btn btn-square btn-md rounded-xl border-2 border-white bg-white/20 shadow-none hover:bg-white/50"
-					aria-label="Retour à la carte"
-					onClick={() => navigate("/")}
+					aria-label="Retour à la page précédente"
+					onClick={() => navigate(-1)}
 				>
 					<Icon
 						name="arrowSmallLeft"
@@ -165,7 +178,7 @@ export default function IncidentDetails() {
 						aria-hidden="true"
 					/>
 				</button>
-				<h1 className="font-title text-2xl font-bold text-white">
+				<h1 className="font-title text-2xl font-bold text-white grow">
 					{incident.title}
 				</h1>
 				{incident.status === "in_progress" &&
@@ -231,7 +244,7 @@ export default function IncidentDetails() {
 				<section>
 					<IncidentLocation
 						city={incident.city}
-						inseeCode={incident.inseeCode}
+						postalCode={incident.postalCode}
 						latitude={incident.latitude}
 						longitude={incident.longitude}
 						types={incident.types}
@@ -247,9 +260,18 @@ export default function IncidentDetails() {
 
 				<SafetyInstructions incidentTypes={incident.types} />
 
+				<CommentList
+					incidentId={incident.id}
+					incidentStatus={incident.status}
+				/>
+
 				<IncidentActions
+					incidentId={incident.id}
+					authorId={incident.author.id}
 					status={incident.status}
 					expiresAt={incident.expiresAt}
+					myContribution={incident.myContribution}
+					onContributed={handleContributed}
 				/>
 			</div>
 		</div>
