@@ -70,11 +70,53 @@ class NotificationsRepository {
            incident.title AS incident_title,
            incident.city,
            incident.status,
-           NULL AS incident_type
+           (
+            SELECT incident_type.code
+            FROM incident_incident_type
+            JOIN incident_type ON incident_type.id = incident_incident_type.incident_type_id
+            JOIN danger_level ON danger_level.id = incident_type.danger_level_id
+            WHERE incident_incident_type.incident_id = incident.id
+            ORDER BY danger_level.weight DESC, incident_type.code ASC
+            LIMIT 1
+           ) AS incident_type
          FROM incident
          WHERE incident.user_id = ?
            AND incident.status = 'resolved'
            AND (? IS NULL OR incident.updated_at > ?)
+       )
+       UNION ALL
+       (
+         SELECT
+           'incident_resolved' AS type,
+           incident.id AS source_id,
+           incident.updated_at AS created_at,
+           incident.id AS incident_id,
+           incident.title AS incident_title,
+           incident.city,
+           incident.status,
+           (
+            SELECT incident_type.code
+            FROM incident_incident_type
+            JOIN incident_type ON incident_type.id = incident_incident_type.incident_type_id
+            JOIN danger_level ON danger_level.id = incident_type.danger_level_id
+            WHERE incident_incident_type.incident_id = incident.id
+            ORDER BY danger_level.weight DESC, incident_type.code ASC
+            LIMIT 1
+           ) AS incident_type
+
+         FROM incident
+         WHERE incident.user_id != ?
+           AND incident.status = 'resolved'
+           AND (? IS NULL OR incident.updated_at > ?)
+           AND EXISTS (
+             SELECT 1
+             FROM address
+             WHERE address.user_id = ?
+               AND ST_Distance_Sphere(
+                 POINT(address.longitude, address.latitude),
+                 POINT(incident.longitude, incident.latitude)
+               ) <= incident.base_alert_radius_meters
+           )
        )
        ORDER BY created_at DESC
        LIMIT ? OFFSET ?`,
@@ -90,6 +132,10 @@ class NotificationsRepository {
 				userId,
 				lastSeenAt,
 				lastSeenAt,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
 				limit,
 				offset,
 			],
@@ -125,6 +171,19 @@ class NotificationsRepository {
          SELECT incident.id FROM incident
          WHERE incident.user_id = ? AND incident.status = 'resolved'
            AND (? IS NULL OR incident.updated_at > ?)
+         UNION ALL
+         SELECT incident.id FROM incident
+         WHERE incident.user_id != ? AND incident.status = 'resolved'
+           AND (? IS NULL OR incident.updated_at > ?)
+           AND EXISTS (
+             SELECT 1
+             FROM address
+             WHERE address.user_id = ?
+               AND ST_Distance_Sphere(
+                 POINT(address.longitude, address.latitude),
+                 POINT(incident.longitude, incident.latitude)
+               ) <= incident.base_alert_radius_meters
+           )
        ) AS events`,
 			[
 				userId,
@@ -138,6 +197,10 @@ class NotificationsRepository {
 				userId,
 				lastSeenAt,
 				lastSeenAt,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
 			],
 		);
 
