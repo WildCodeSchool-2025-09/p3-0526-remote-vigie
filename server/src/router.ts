@@ -1,6 +1,7 @@
 import express from "express";
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
 import addressActions from "./modules/address/addressActions";
+import commentActions from "./modules/comment/commentActions";
 import incidentActions from "./modules/incident/incidentActions";
 import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
@@ -30,6 +31,8 @@ router.put(
 	incidentActions.edit,
 );
 
+router.get("/api/incidents/:id/comments", commentActions.browse);
+router.post("/api/incidents/:id/comments", verifyToken, commentActions.add);
 router.get("/api/notifications", verifyToken, notificationsActions.browse);
 
 router.get(

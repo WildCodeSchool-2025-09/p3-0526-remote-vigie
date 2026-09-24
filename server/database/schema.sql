@@ -163,14 +163,17 @@ CREATE TABLE `comment` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id` INT UNSIGNED NOT NULL,
     `incident_id` INT UNSIGNED NOT NULL,
+    `quoted_comment_id` INT UNSIGNED NULL DEFAULT NULL,
     `content` VARCHAR(500) NOT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `idx_comment_user` (`user_id`),
     KEY `idx_comment_incident_created` (`incident_id`, `created_at`),
+    KEY `idx_comment_quoted` (`quoted_comment_id`),
     CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_comment_incident` FOREIGN KEY (`incident_id`) REFERENCES `incident` (`id`) ON DELETE CASCADE
+    CONSTRAINT `fk_comment_incident` FOREIGN KEY (`incident_id`) REFERENCES `incident` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_comment_quoted` FOREIGN KEY (`quoted_comment_id`) REFERENCES `comment` (`id`) ON DELETE SET NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `useful_number` (

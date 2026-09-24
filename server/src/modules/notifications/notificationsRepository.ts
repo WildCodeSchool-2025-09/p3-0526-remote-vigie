@@ -76,6 +76,25 @@ class NotificationsRepository {
            AND incident.status = 'resolved'
            AND (? IS NULL OR incident.updated_at > ?)
        )
+       UNION ALL
+       (
+         SELECT
+           'mention' AS type,
+           c.id AS source_id,
+           c.created_at,
+           incident.id AS incident_id,
+           incident.title AS incident_title,
+           incident.city,
+           incident.status,
+           NULL AS incident_type
+         FROM comment AS c
+         JOIN comment AS quoted ON quoted.id = c.quoted_comment_id
+         JOIN incident ON incident.id = c.incident_id
+         WHERE quoted.user_id = ?
+           AND c.user_id != ?
+           AND incident.user_id != quoted.user_id
+           AND (? IS NULL OR c.created_at > ?)
+       )
        ORDER BY created_at DESC
        LIMIT ? OFFSET ?`,
 			[
@@ -87,6 +106,10 @@ class NotificationsRepository {
 				userId,
 				lastSeenAt,
 				lastSeenAt,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
 				userId,
 				lastSeenAt,
 				lastSeenAt,
@@ -125,6 +148,14 @@ class NotificationsRepository {
          SELECT incident.id FROM incident
          WHERE incident.user_id = ? AND incident.status = 'resolved'
            AND (? IS NULL OR incident.updated_at > ?)
+         UNION ALL
+         SELECT c.id FROM comment AS c
+         JOIN comment AS quoted ON quoted.id = c.quoted_comment_id
+         JOIN incident ON incident.id = c.incident_id
+         WHERE quoted.user_id = ?
+           AND c.user_id != ?
+           AND incident.user_id != quoted.user_id
+           AND (? IS NULL OR c.created_at > ?)
        ) AS events`,
 			[
 				userId,
@@ -135,6 +166,10 @@ class NotificationsRepository {
 				userId,
 				lastSeenAt,
 				lastSeenAt,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
 				userId,
 				lastSeenAt,
 				lastSeenAt,
