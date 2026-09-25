@@ -19,6 +19,8 @@ export type IncidentListItem = {
 	id: number;
 	title: string;
 	city: string | null;
+	latitude: string;
+	longitude: string;
 	status: "in_progress" | "resolved";
 	createdAt: string;
 	expiresAt: string;

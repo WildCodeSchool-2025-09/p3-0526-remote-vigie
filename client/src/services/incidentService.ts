@@ -1,4 +1,5 @@
 import { apiFetch } from "@/services/apiClient";
+import type { Bounds } from "@/types/bounds";
 import type { Incident, IncidentCounts } from "@/types/incidentDetails";
 import type { NearbyIncident } from "@/types/incidentForm";
 import type { IncidentListItem } from "@/types/incidentList";
@@ -21,6 +22,35 @@ export async function getAllIncidents(
 		};
 	} catch {
 		return { status: "error" }; // réseau, CORS, JSON illisible
+	}
+}
+
+// Incidents visible in the map's current viewport — a separate call from
+// getAllIncidents(): the map keeps its own zone-filtered fetch, independent
+// of the text list (US03), see US04.
+export async function getIncidentsInBounds(
+	bounds: Bounds,
+	limit = 300,
+): Promise<GetAllIncidentsResult> {
+	try {
+		const params = new URLSearchParams({
+			north: String(bounds.north),
+			south: String(bounds.south),
+			east: String(bounds.east),
+			west: String(bounds.west),
+			limit: String(limit),
+		});
+
+		const res = await apiFetch(`/api/incidents?${params.toString()}`);
+
+		if (!res.ok) return { status: "error" };
+
+		return {
+			status: "ok",
+			incidents: (await res.json()) as IncidentListItem[],
+		};
+	} catch {
+		return { status: "error" };
 	}
 }
 
