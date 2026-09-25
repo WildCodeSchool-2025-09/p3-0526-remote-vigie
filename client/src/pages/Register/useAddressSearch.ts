@@ -5,6 +5,9 @@ import {
 import { useEffect, useState } from "react";
 
 export default function useAddressSearch() {
+	const [manualMode, setManualMode] = useState(false);
+	const [city, setCity] = useState("");
+	const [postalCode, setPostalCode] = useState("");
 	const [addressQuery, setAddressQuery] = useState("");
 	const [addressSuggestions, setAddressSuggestions] = useState<
 		AddressSuggestion[]
@@ -39,5 +42,11 @@ export default function useAddressSearch() {
 		setAddressSuggestions,
 		selectedAddress,
 		setSelectedAddress,
+		manualMode,
+		setManualMode,
+		city,
+		setCity,
+		postalCode,
+		setPostalCode,
 	};
 }

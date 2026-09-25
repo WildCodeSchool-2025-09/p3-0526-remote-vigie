@@ -28,6 +28,12 @@ export default function Register() {
 		setAddressSuggestions,
 		selectedAddress,
 		setSelectedAddress,
+		manualMode,
+		setManualMode,
+		city,
+		setCity,
+		postalCode,
+		setPostalCode,
 	} = useAddressSearch();
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -253,42 +259,93 @@ export default function Register() {
 							>
 								Votre adresse
 							</label>
-							<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
-								<input
-									id="register-address"
-									value={addressQuery}
-									onChange={(e) =>
-										setAddressQuery(e.target.value)
-									}
-									type="text"
-									placeholder="12 allée de l'exemple, 15800 Polminhac"
-									className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
-								/>
-							</section>
-							{addressSuggestions.length > 0 && (
-								<div className="mt-2 flex flex-col gap-2">
-									{addressSuggestions.map((suggestion) => (
-										<button
-											key={suggestion.inseeCode}
-											type="button"
-											onClick={() => {
-												setSelectedAddress(suggestion);
-												setAddressQuery(
-													suggestion.name,
-												);
-												setAddressSuggestions([]);
-											}}
-											className="rounded-2xl border border-primary/15 bg-base-300 p-3 text-left"
-										>
-											<span className="block font-bold text-primary">
-												{suggestion.name}
-											</span>
-											<span className="block text-sm text-primary/70">
-												{suggestion.postalCode}
-											</span>
-										</button>
-									))}
+							{!manualMode && (
+								<>
+									<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
+										<input
+											id="register-address"
+											value={addressQuery}
+											onChange={(e) =>
+												setAddressQuery(e.target.value)
+											}
+											type="text"
+											placeholder="12 allée de l'exemple, 15800 Polminhac"
+											className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+										/>
+									</section>
+									{addressSuggestions.length > 0 && (
+										<div className="mt-2 flex flex-col gap-2">
+											{addressSuggestions.map(
+												(suggestion) => (
+													<button
+														key={
+															suggestion.inseeCode
+														}
+														type="button"
+														onClick={() => {
+															setSelectedAddress(
+																suggestion,
+															);
+															setAddressQuery(
+																suggestion.name,
+															);
+															setAddressSuggestions(
+																[],
+															);
+														}}
+														className="rounded-2xl border border-primary/15 bg-base-300 p-3 text-left"
+													>
+														<span className="block font-bold text-primary">
+															{suggestion.name}
+														</span>
+														<span className="block text-sm text-primary/70">
+															{
+																suggestion.postalCode
+															}
+														</span>
+													</button>
+												),
+											)}
+										</div>
+									)}
+								</>
+							)}
+							{manualMode && (
+								<div className="flex flex-col gap-2">
+									<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
+										<input
+											id="register-city"
+											value={city}
+											onChange={(e) =>
+												setCity(e.target.value)
+											}
+											type="text"
+											placeholder="Ville"
+											className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+										/>
+									</section>
+									<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
+										<input
+											id="register-postal-code"
+											value={postalCode}
+											onChange={(e) =>
+												setPostalCode(e.target.value)
+											}
+											type="text"
+											placeholder="Code postal"
+											className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+										/>
+									</section>
 								</div>
+							)}
+							{!manualMode && (
+								<button
+									type="button"
+									onClick={() => setManualMode(true)}
+									className="self-start text-sm font-bold text-primary underline"
+								>
+									Je ne trouve pas mon adresse
+								</button>
 							)}
 							<p className="text-xs text-primary/50">
 								Elle définit la zone où vous serez alerté.
