@@ -1,10 +1,12 @@
 import bgHome from "@/assets/images/background-home.jpg";
 import Icon from "@/components/Icon/Icon";
+import PasswordStrengthMeter from "@/components/Register/PasswordStrengthMeter/PasswordStrengthMeter";
 import SubmitRegister from "@/components/Register/SubmitRegister/SubmitRegister";
 
 import type { RegisterFieldError } from "@/types/register";
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import usePasswordStrength from "./usePasswordStrength";
 
 export default function Register() {
 	const navigate = useNavigate();
@@ -13,6 +15,7 @@ export default function Register() {
 	const emailRef = useRef<HTMLInputElement>(null);
 
 	const [password, setPassword] = useState("");
+	const { score, label } = usePasswordStrength(password);
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 	const [cguAccepted, setCguAccepted] = useState(false);
@@ -184,6 +187,9 @@ export default function Register() {
 									</button>
 								</div>
 							</section>
+							{password.length > 0 && (
+								<PasswordStrengthMeter score={score} label={label} />
+							)}
 							{fieldErrors.password && (
 								<p className="text-xs font-semibold text-error">
 									{fieldErrors.password}
