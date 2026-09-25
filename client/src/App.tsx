@@ -1,36 +1,31 @@
-import { NavLink, Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import "./index.css";
-import Icon from "./components/Icon/Icon";
-import NotificationBadge from "./components/Notification/NotificationBadge/NotificationBadge";
-import { useAuth } from "./contexts/AuthContext";
+import NavBar from "./components/Navigation/NavBar/NavBar";
 import { NotificationProvider } from "./contexts/Notification/NotificationContext";
 
 function App() {
-	const { user } = useAuth();
+	const { pathname } = useLocation();
+	const isDevHelpRoute =
+		pathname === "/help" || pathname.startsWith("/help/");
 
 	return (
 		<NotificationProvider>
+			<a
+				href="#main-content"
+				className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-(--primary) focus:px-4 focus:py-2 focus:text-(--bg-light) focus:no-underline"
+			>
+				Aller au contenu principal
+			</a>
 			{/* Structure globale */}
-			<div className="GLOBAL-LAYOUT flex h-dvh flex-col">
-				<div className="grow">
+			<div className="flex h-dvh flex-col bg-(--bg-dark) lg:flex-row">
+				<div
+					id="main-content"
+					tabIndex={-1}
+					className="grow lg:min-w-0 lg:overflow-y-auto"
+				>
 					<Outlet />
 				</div>
-				{/* Placeholder de la navigation (US16) */}
-				<nav className="flex items-center justify-between bg-primary px-4 text-white">
-					<span>Navigation</span>
-					{user != null && (
-						<NavLink
-							to="/notifications"
-							className="relative flex items-center gap-2 text-white no-underline"
-						>
-							<span className="relative">
-								<Icon name="notification" className="size-6" />
-								<NotificationBadge />
-							</span>
-							Notifications
-						</NavLink>
-					)}
-				</nav>
+				{!isDevHelpRoute && <NavBar />}
 			</div>
 		</NotificationProvider>
 	);

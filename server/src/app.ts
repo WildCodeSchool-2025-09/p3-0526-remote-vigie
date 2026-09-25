@@ -111,6 +111,7 @@ if (fs.existsSync(clientBuildPath)) {
 // Important: Error-handling middleware should be defined last, after other app.use() and routes calls.
 
 import type { ErrorRequestHandler } from "express";
+import { StatusCodes } from "http-status-codes";
 
 // Define a middleware function to log errors
 const logErrors: ErrorRequestHandler = (err, req, res, next) => {
@@ -122,8 +123,18 @@ const logErrors: ErrorRequestHandler = (err, req, res, next) => {
 	next(err);
 };
 
-// Mount the logErrors middleware globally
+// Define a middleware function to send a generic error response,
+// without ever exposing technical details (stack trace, SQL, etc.) to the client
+const sendErrorResponse: ErrorRequestHandler = (_err, _req, res, _next) => {
+	res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+		error: "internal_server_error",
+		message: "Une erreur est survenue. Veuillez réessayer plus tard.",
+	});
+};
+
+// Mount the error-handling middlewares globally, in order: log, then respond
 app.use(logErrors);
+app.use(sendErrorResponse);
 
 /* ************************************************************************* */
 
