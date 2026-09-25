@@ -5,6 +5,7 @@ import geocodingService from "../../services/geocodingService";
 import alertService from "../../services/alertService";
 import { distanceInMeters } from "../../services/distance";
 import isFeminine from "../../services/incidentTypeGender";
+import parseBounds from "../../services/parseBounds";
 import withPreposition from "../../services/title";
 import incidentTypeRepository from "../incidentType/incidentTypeRepository";
 import incidentRepository from "./incidentRepository";
@@ -13,15 +14,23 @@ import incidentRepository from "./incidentRepository";
 
 const DEFAULT_LIST_LIMIT = 15;
 const MAX_LIST_LIMIT = 100;
+// Higher ceiling for the map (US04): a visible zone can legitimately hold
+// more markers than the text list ever shows at once.
+const MAX_MAP_LIMIT = 300;
 
 const browse: RequestHandler = async (req, res, next) => {
 	try {
+		const bounds = parseBounds(req.query);
 		const requested =
 			Number.parseInt(req.query.limit as string, 10) ||
 			DEFAULT_LIST_LIMIT;
-		const limit = Math.max(1, Math.min(requested, MAX_LIST_LIMIT));
+		const maxLimit = bounds ? MAX_MAP_LIMIT : MAX_LIST_LIMIT;
+		const limit = Math.max(1, Math.min(requested, maxLimit));
 
-		const incidents = await incidentRepository.readAllForList(limit);
+		const incidents = await incidentRepository.readAllForList(
+			limit,
+			bounds,
+		);
 		res.status(StatusCodes.OK).json(incidents);
 	} catch (err) {
 		next(err);

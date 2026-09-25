@@ -1,4 +1,5 @@
 import databaseClient from "../../../database/client";
+import type { Bounds } from "../../services/parseBounds";
 import contributionRepository from "../contribution/contributionRepository";
 
 import type { Executor, Result, Rows } from "../../../database/client";
@@ -9,6 +10,8 @@ type IncidentListItem = {
 	id: number;
 	title: string;
 	city: string | null;
+	latitude: string;
+	longitude: string;
 	status: "in_progress" | "resolved";
 	createdAt: Date;
 	expiresAt: Date;
@@ -54,19 +57,33 @@ type NearbyIncident = {
 };
 
 class IncidentRepository {
-	async readAllForList(limit: number): Promise<IncidentListItem[]> {
+	// `bounds`, when given, restricts the result to incidents whose position
+	// falls inside that rectangle — used by the map (US04), which only wants
+	// what's currently visible. Omitted, the query is unfiltered (US03's list).
+	async readAllForList(
+		limit: number,
+		bounds: Bounds | null = null,
+	): Promise<IncidentListItem[]> {
+		const whereClause = bounds
+			? "WHERE i.latitude BETWEEN ? AND ? AND i.longitude BETWEEN ? AND ?"
+			: "";
+		const whereParams = bounds
+			? [bounds.south, bounds.north, bounds.west, bounds.east]
+			: [];
+
 		const [incidentRows] = await databaseClient.query<Rows>(
 			`SELECT
-				i.id, i.title, i.city, i.status,
+				i.id, i.title, i.city, i.latitude, i.longitude, i.status,
 				i.created_at, i.expires_at,
 				d.label  AS danger_level_label,
 				d.color  AS danger_level_color,
 				d.weight AS danger_level_weight
 			FROM incident AS i
 			INNER JOIN danger_level AS d ON d.id = i.danger_level_id
+			${whereClause}
 			ORDER BY i.created_at DESC, i.id DESC
 			LIMIT ?`,
-			[limit],
+			[...whereParams, limit],
 		);
 
 		if (incidentRows.length === 0) {
@@ -106,6 +123,8 @@ class IncidentRepository {
 			id: row.id,
 			title: row.title,
 			city: row.city,
+			latitude: row.latitude,
+			longitude: row.longitude,
 			status: row.status,
 			createdAt: row.created_at,
 			expiresAt: row.expires_at,

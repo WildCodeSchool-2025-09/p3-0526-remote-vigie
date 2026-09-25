@@ -24,6 +24,8 @@ describe("GET /api/incidents", () => {
 				id: 1,
 				title: "Incendie rue de la Paix",
 				city: "Lyon",
+				latitude: "45.75",
+				longitude: "4.85",
 				status: "in_progress" as const,
 				createdAt: new Date("2026-09-20T10:00:00.000Z"),
 				expiresAt: new Date("2026-09-21T10:00:00.000Z"),
@@ -75,9 +77,27 @@ describe("GET /api/incidents", () => {
 			const response = await supertest(app).get(`/api/incidents${query}`);
 
 			expect(response.status).toBe(200);
-			expect(readAllForList).toHaveBeenCalledWith(expectedLimit);
+			expect(readAllForList).toHaveBeenCalledWith(expectedLimit, null);
 		},
 	);
+
+	it("should parse north/south/east/west into bounds and raise the limit cap to 300", async () => {
+		const readAllForList = jest
+			.spyOn(incidentRepository, "readAllForList")
+			.mockResolvedValue([]);
+
+		const response = await supertest(app).get(
+			"/api/incidents?limit=500&north=51.5&south=41&east=9.8&west=-5.5",
+		);
+
+		expect(response.status).toBe(200);
+		expect(readAllForList).toHaveBeenCalledWith(300, {
+			north: 51.5,
+			south: 41,
+			east: 9.8,
+			west: -5.5,
+		});
+	});
 });
 
 // Test suite for the POST /api/incidents route
