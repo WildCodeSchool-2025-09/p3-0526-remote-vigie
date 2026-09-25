@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import bgHome from "@/assets/images/backgroud-home.jpg";
+import bgHome from "@/assets/images/background-home.jpg";
 import VigieLogo from "@/assets/images/vigie-ligne.svg?react";
 import IncidentList from "@/components/IncidentList/IncidentList";
 import { getAllIncidents } from "@/services/incidentService";

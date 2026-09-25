@@ -2,7 +2,7 @@
 
 import Example from "@/_dev/design-system/Example";
 import SectionLabel from "@/_dev/design-system/SectionLabel";
-import bgHome from "@/assets/images/backgroud-home.jpg";
+import bgHome from "@/assets/images/background-home.jpg";
 import bgIncidentDetails from "@/assets/images/background-incident-details.jpg";
 import bgIncident from "@/assets/images/background-incident.jpg";
 
@@ -72,7 +72,7 @@ export default function LayoutExamples() {
 					description="Même structure, on change juste l'image (src)."
 					code={`<header className="relative isolate flex h-44 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
   <img
-    src="/src/assets/images/backgroud-home.jpg"
+    src={bgHome}
     alt=""
     aria-hidden="true"
     className="absolute inset-0 -z-10 h-full w-full object-cover opacity-70 mix-blend-multiply"
