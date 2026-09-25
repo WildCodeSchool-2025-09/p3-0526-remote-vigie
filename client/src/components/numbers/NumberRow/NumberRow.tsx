@@ -10,6 +10,10 @@ export default function NumberRow({ entry }: Props) {
 	const href =
 		entry.action === "sms" ? `sms:${dialNumber}` : `tel:${dialNumber}`;
 	const label = entry.action === "sms" ? "SMS" : "Appeler";
+	const ariaLabel =
+		entry.action === "sms"
+			? `Envoyer un SMS à ${entry.name} : ${entry.number}`
+			: `Appeler ${entry.name} : ${entry.number}`;
 
 	return (
 		<section className="flex items-center gap-3 rounded-2xl bg-base-300 p-4">
@@ -26,6 +30,7 @@ export default function NumberRow({ entry }: Props) {
 
 			<a
 				href={href}
+				aria-label={ariaLabel}
 				className={
 					entry.action === "sms"
 						? "btn btn-sm shrink-0 gap-1.5 rounded-full border-2 border-primary bg-transparent px-4 font-bold text-primary shadow-none hover:bg-primary/10"
