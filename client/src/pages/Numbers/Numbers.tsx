@@ -1,89 +1,9 @@
 import Icon from "@/components/Icon/Icon";
 import NumberRow from "@/components/numbers/NumberRow/NumberRow";
+import { getEmergencyNumbers } from "@/services/numberService";
 import type { EmergencyCategory } from "@/types/numbers";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-
-const CATEGORIES: EmergencyCategory[] = [
-	{
-		title: "Urgences · 24 h/24",
-		numbers: [
-			{
-				name: "Urgences européennes",
-				number: "112",
-				description: "Depuis tout pays de l'Union européenne",
-				action: "call",
-			},
-			{
-				name: "Pompiers",
-				number: "18",
-				description: "Incendie, accident, inondation",
-				action: "call",
-			},
-			{
-				name: "SAMU",
-				number: "15",
-				description: "Urgence médicale",
-				action: "call",
-			},
-			{
-				name: "Police secours",
-				number: "17",
-				description: "Danger sur la route, atteinte aux personnes",
-				action: "call",
-			},
-		],
-	},
-	{
-		title: "Urgences spécifiques",
-		numbers: [
-			{
-				name: "Sourds et malentendants",
-				number: "114",
-				description: "Par SMS, tchat ou visio",
-				action: "sms",
-			},
-			{
-				name: "Secours en mer",
-				number: "196",
-				description: "Littoral et plans d'eau",
-				action: "call",
-			},
-		],
-	},
-	{
-		title: "Santé",
-		numbers: [
-			{
-				name: "Médecin de garde",
-				number: "116 117",
-				description: "Soins non urgents, nuit et week-end",
-				action: "call",
-			},
-			{
-				name: "Centre antipoison (Orfila)",
-				number: "01 45 42 59 59",
-				description:
-					"Ingestion, contact avec un produit toxique · redirige vers le centre régional le plus proche",
-				action: "call",
-			},
-		],
-	},
-];
-
-// Simule un appel réseau en attendant que la liste soit servie par une vraie API.
-// En prod, l'échec est désactivé (~30% en dev uniquement).
-function loadEmergencyNumbers(): Promise<EmergencyCategory[]> {
-	return new Promise((resolve, reject) => {
-		setTimeout(() => {
-			if (import.meta.env.DEV && Math.random() < 0.3) {
-				reject(new Error("Failed to load emergency numbers"));
-			} else {
-				resolve(CATEGORIES);
-			}
-		}, 500);
-	});
-}
 
 type Status = "loading" | "error" | "success";
 
@@ -94,13 +14,13 @@ export default function Numbers() {
 
 	const load = useCallback(async () => {
 		setStatus("loading");
-		try {
-			const data = await loadEmergencyNumbers();
-			setCategories(data);
-			setStatus("success");
-		} catch {
+		const result = await getEmergencyNumbers();
+		if (result.status === "error") {
 			setStatus("error");
+			return;
 		}
+		setCategories(result.categories);
+		setStatus("success");
 	}, []);
 
 	useEffect(() => {
