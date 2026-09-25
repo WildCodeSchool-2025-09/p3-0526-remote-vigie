@@ -71,13 +71,12 @@ const CATEGORIES: EmergencyCategory[] = [
 	},
 ];
 
-// Simule un appel réseau (délai + échec aléatoire ~30%) en attendant que la liste
-// soit servie par une vraie API. À remplacer par un fetch réel, le reste du
-// composant (loading/error/retry) restera valable tel quel.
+// Simule un appel réseau en attendant que la liste soit servie par une vraie API.
+// En prod, l'échec est désactivé (~30% en dev uniquement).
 function loadEmergencyNumbers(): Promise<EmergencyCategory[]> {
 	return new Promise((resolve, reject) => {
 		setTimeout(() => {
-			if (Math.random() < 0.3) {
+			if (import.meta.env.DEV && Math.random() < 0.3) {
 				reject(new Error("Failed to load emergency numbers"));
 			} else {
 				resolve(CATEGORIES);
