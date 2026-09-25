@@ -1,16 +1,32 @@
 import Icon from "@/components/Icon/Icon";
+import ContributionActions from "@/components/incident/ContributionActions/ContributionActions";
 import { useAuth } from "@/contexts/AuthContext";
-import type { IncidentStatus } from "@/types/incidentDetails";
+import type { IncidentCounts, IncidentStatus } from "@/types/incidentDetails";
 import { formatDateTime } from "@/utils/formatDate";
 import { Link, useLocation, useNavigate } from "react-router";
 
 type Props = {
+	incidentId: number;
+	authorId: number;
 	status: IncidentStatus;
 	expiresAt: string;
+	myContribution: "confirm" | "deny" | null;
+	onContributed: (result: {
+		counts: IncidentCounts;
+		expiresAt: string;
+		myContribution: "confirm" | "deny";
+	}) => void;
 };
 
 // Emplacement des actions sur l'incident : Confirmer/Infirmer (US14), et à terme le partage (US15)
-export default function IncidentActions({ status, expiresAt }: Props) {
+export default function IncidentActions({
+	incidentId,
+	authorId,
+	status,
+	expiresAt,
+	myContribution,
+	onContributed,
+}: Props) {
 	const { user, loading } = useAuth();
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -26,7 +42,7 @@ export default function IncidentActions({ status, expiresAt }: Props) {
 				<div className="flex items-start gap-3 rounded-3xl bg-base-300 p-4">
 					<Icon
 						name="checkCircle"
-						className="h-6 w-6 shrink-0 fill-success"
+						className="h-6 w-6 shrink-0 fill-success text-success"
 						aria-hidden="true"
 					/>
 					<p className="mt-1 text-sm text-primary/80">
@@ -46,6 +62,10 @@ export default function IncidentActions({ status, expiresAt }: Props) {
 		);
 	}
 
+	if (user != null && user.id === authorId) {
+		return null;
+	}
+
 	if (user == null) {
 		return (
 			<div className="flex flex-col gap-3 border-t border-primary/10 pt-4">
@@ -53,32 +73,12 @@ export default function IncidentActions({ status, expiresAt }: Props) {
 					Connectez-vous pour confirmer ou infirmer ce signalement.
 				</p>
 
-				<div className="flex gap-3">
-					<button
-						type="button"
-						disabled
-						className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
-					>
-						<Icon
-							name="check"
-							className="h-4 w-4 fill-primary/20"
-							aria-hidden="true"
-						/>
-						Confirmer
-					</button>
-					<button
-						type="button"
-						disabled
-						className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
-					>
-						<Icon
-							name="crossSmall"
-							className="h-5 w-5 fill-primary/20"
-							aria-hidden="true"
-						/>
-						Infirmer
-					</button>
-				</div>
+				<ContributionActions
+					incidentId={incidentId}
+					myContribution={null}
+					onContributed={onContributed}
+					disabled
+				/>
 
 				<Link
 					to="/login"
@@ -91,31 +91,13 @@ export default function IncidentActions({ status, expiresAt }: Props) {
 		);
 	}
 
-	// Membre connecté : emplacement réservé, comportement du clic = US14.
 	return (
-		<div className="flex gap-3 border-t border-primary/10 pt-5">
-			<button
-				type="button"
-				className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
-			>
-				<Icon
-					name="check"
-					className="h-4 w-4 fill-primary stroke-1 stroke-primary"
-					aria-hidden="true"
-				/>
-				Confirmer
-			</button>
-			<button
-				type="button"
-				className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
-			>
-				<Icon
-					name="crossSmall"
-					className="h-5 w-5 fill-primary"
-					aria-hidden="true"
-				/>
-				Infirmer
-			</button>
+		<div className="border-t border-primary/10 pt-5">
+			<ContributionActions
+				incidentId={incidentId}
+				myContribution={myContribution}
+				onContributed={onContributed}
+			/>
 		</div>
 	);
 }

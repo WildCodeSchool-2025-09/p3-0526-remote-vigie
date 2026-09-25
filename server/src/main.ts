@@ -9,6 +9,11 @@ import "../database/checkConnection";
 // Import the Express application from ./app
 import app from "./app";
 
+// Start the incident-expiry cron (US12)
+import expiryService from "./services/expiryService";
+
+expiryService.schedule();
+
 // Get the port from the environment variables
 const port = process.env.APP_PORT;
 

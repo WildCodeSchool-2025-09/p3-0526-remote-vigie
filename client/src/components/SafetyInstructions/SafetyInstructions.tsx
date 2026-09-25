@@ -65,10 +65,7 @@ export default function SafetyInstructions({ incidentTypes }: Props) {
 					>
 						{instructions.map((type) => (
 							<p key={type.code}>
-								<span
-									className="font-bold"
-									style={{ color: type.color }}
-								>
+								<span className="font-bold text-black">
 									{type.label}
 								</span>
 								<span className="text-black">

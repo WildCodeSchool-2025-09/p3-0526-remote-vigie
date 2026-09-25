@@ -1,0 +1,87 @@
+import databaseClient from "../../../database/client";
+
+import type { Result, Rows } from "../../../database/client";
+
+// Only CRUD here (Create, Read, Update, Delete)
+
+type CommentRow = {
+	id: number;
+	content: string;
+	createdAt: Date;
+	author: { pseudo: string };
+	quotedComment: { author: { pseudo: string }; content: string } | null;
+};
+
+const SELECT_COMMENT = `
+	SELECT
+		c.id, c.content, c.created_at, u.pseudo AS author_pseudo,
+		qc.content AS quoted_content, qu.pseudo AS quoted_author_pseudo
+	FROM comment AS c
+	INNER JOIN user AS u ON u.id = c.user_id
+	LEFT JOIN comment AS qc ON qc.id = c.quoted_comment_id
+	LEFT JOIN user AS qu ON qu.id = qc.user_id
+`;
+
+function mapRow(row: Rows[number]): CommentRow {
+	return {
+		id: row.id,
+		content: row.content,
+		createdAt: row.created_at,
+		author: { pseudo: row.author_pseudo },
+		quotedComment:
+			row.quoted_content == null
+				? null
+				: {
+						author: { pseudo: row.quoted_author_pseudo },
+						content: row.quoted_content,
+					},
+	};
+}
+
+class CommentRepository {
+	async readByIncident(incidentId: number): Promise<CommentRow[]> {
+		const [rows] = await databaseClient.query<Rows>(
+			`${SELECT_COMMENT} WHERE c.incident_id = ? ORDER BY c.id ASC`,
+			[incidentId],
+		);
+
+		return rows.map(mapRow);
+	}
+
+	async read(id: number): Promise<CommentRow | null> {
+		const [rows] = await databaseClient.query<Rows>(
+			`${SELECT_COMMENT} WHERE c.id = ?`,
+			[id],
+		);
+
+		const row = rows[0];
+		return row == null ? null : mapRow(row);
+	}
+
+	async create(data: {
+		userId: number;
+		incidentId: number;
+		content: string;
+		quotedCommentId: number | null;
+	}): Promise<number> {
+		const [result] = await databaseClient.query<Result>(
+			`INSERT INTO comment (user_id, incident_id, content, quoted_comment_id)
+			VALUES (?, ?, ?, ?)`,
+			[data.userId, data.incidentId, data.content, data.quotedCommentId],
+		);
+
+		return result.insertId;
+	}
+
+	async findIncidentId(id: number): Promise<number | null> {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT incident_id FROM comment WHERE id = ?",
+			[id],
+		);
+
+		const row = rows[0];
+		return row == null ? null : row.incident_id;
+	}
+}
+
+export default new CommentRepository();
