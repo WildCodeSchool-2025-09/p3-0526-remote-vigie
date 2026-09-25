@@ -5,7 +5,7 @@ import type { NextFunction, Request, Response } from "express";
 const validBody = {
 	pseudo: "marion_c",
 	email: "test@test.com",
-	password: "password123",
+	password: "Password1!",
 	cguAccepted: true,
 };
 
@@ -41,6 +41,10 @@ describe("validateRegisterInput", () => {
 		},
 		{ label: "mot de passe vide", overrides: { password: "" } },
 		{ label: "mot de passe trop court", overrides: { password: "abc123" } },
+		{
+			label: "mot de passe sans majuscule/chiffre/caractère spécial",
+			overrides: { password: "abcdefgh" },
+		},
 		{ label: "CGU non acceptées", overrides: { cguAccepted: false } },
 	])("$label : répond 400 et n'appelle pas next", ({ overrides }) => {
 		const { res, next } = runValidation({ ...validBody, ...overrides });

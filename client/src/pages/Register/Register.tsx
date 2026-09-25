@@ -32,19 +32,29 @@ export default function Register() {
 		} else if (pseudo.includes("@")) {
 			errors.pseudo = "Votre pseudo ne peut pas contenir de @";
 		}
+
 		if (email === "") {
 			errors.email = "Vous devez saisir une adresse email";
 		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			errors.email = "Vous devez saisir une adresse email valide";
 		}
+
 		if (password === "") {
 			errors.password = "Vous devez saisir un mot de passe";
 		} else if (password.length < 8) {
 			errors.password =
 				"Votre mot de passe doit faire au moins 8 caractères";
+		} else if (
+			!/[A-Z]/.test(password) ||
+			!/[0-9]/.test(password) ||
+			!/[^A-Za-z0-9]/.test(password)
+		) {
+			errors.password =
+				"Le mot de passe doit contenir au moins une majuscule, un chiffre et un caractère spécial";
 		} else if (password !== confirmPassword) {
 			errors.password = "Les deux mots de passe doivent correspondre";
 		}
+
 		if (cguAccepted === false) {
 			errors.cgu =
 				"Vous devez accepter les conditions générales d'utilisation";
