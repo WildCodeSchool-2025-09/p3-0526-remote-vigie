@@ -1,13 +1,15 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 
+import parseBounds from "../../services/parseBounds";
 import usefulPlaceRepository from "./usefulPlaceRepository";
 
 // Only BREAD here (Browse, Read, Edit, Add, Delete)
 
-const browse: RequestHandler = async (_req, res, next) => {
+const browse: RequestHandler = async (req, res, next) => {
 	try {
-		const usefulPlaces = await usefulPlaceRepository.readAll();
+		const bounds = parseBounds(req.query);
+		const usefulPlaces = await usefulPlaceRepository.readAll(bounds);
 		res.status(StatusCodes.OK).json(usefulPlaces);
 	} catch (err) {
 		next(err);

@@ -1,4 +1,5 @@
 import databaseClient from "../../../database/client";
+import type { Bounds } from "../../services/parseBounds";
 
 import type { Rows } from "../../../database/client";
 
@@ -23,16 +24,29 @@ type UsefulPlaceListItem = {
 };
 
 class UsefulPlaceRepository {
-	// READ — all useful places. No pagination/zone filter yet: like
+	// READ — useful places, optionally restricted to a zone (`bounds`, used
+	// by the map so it only asks for what's currently visible). Like
 	// useful_number, this table is a small, national reference list fed by
-	// a sync script (not by user actions), so a straight SELECT is enough.
-	async readAll(): Promise<UsefulPlaceListItem[]> {
+	// a sync script (not by user actions) — no result cap needed even
+	// unfiltered, a straight SELECT is enough.
+	async readAll(
+		bounds: Bounds | null = null,
+	): Promise<UsefulPlaceListItem[]> {
+		const whereClause = bounds
+			? "WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?"
+			: "";
+		const whereParams = bounds
+			? [bounds.south, bounds.north, bounds.west, bounds.east]
+			: [];
+
 		const [rows] = await databaseClient.query<Rows>(
 			`SELECT
 				id, name, category, latitude, longitude,
 				street_line, city, phone_number
 			FROM useful_place
+			${whereClause}
 			ORDER BY id ASC`,
+			whereParams,
 		);
 
 		return rows.map((row) => ({
