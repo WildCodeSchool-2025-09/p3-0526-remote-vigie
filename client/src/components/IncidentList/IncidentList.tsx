@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 import Icon from "@/components/Icon/Icon";
 import IncidentCard from "@/components/IncidentCard/IncidentCard";
 import type { IncidentListItem } from "@/types/incidentList";
@@ -8,6 +10,12 @@ type IncidentListProps = {
 	hasError: boolean;
 	onRetry: () => void;
 	limit: number;
+	// Sélectionné (US04) : met la carte correspondante en surbrillance.
+	selectedIncidentId?: number | null;
+	// Premier clic sur une carte non sélectionnée (US04, décision du 25/09) :
+	// sélectionne et recentre la carte interactive dessus, au lieu de naviguer
+	// directement. Le second clic (carte déjà sélectionnée) navigue toujours.
+	onSelectIncident?: (incident: IncidentListItem) => void;
 };
 
 function IncidentCardSkeleton() {
@@ -31,7 +39,24 @@ export default function IncidentList({
 	hasError,
 	onRetry,
 	limit,
+	selectedIncidentId = null,
+	onSelectIncident,
 }: IncidentListProps) {
+	// Une carte par incident affiché, pour que la sélection (US04, décision du
+	// 25/09) puisse faire défiler la liste jusqu'à la carte concernée, même
+	// quand la sélection vient d'un marqueur de la carte interactive plutôt
+	// que d'un clic direct dans cette liste.
+	const itemRefs = useRef(new Map<number, HTMLLIElement>());
+
+	useEffect(() => {
+		if (selectedIncidentId == null) return;
+
+		const element = itemRefs.current.get(selectedIncidentId);
+		// `block: "nearest"` : ne défile que si la carte est hors champ, sans
+		// la recentrer inutilement si elle est déjà visible.
+		element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+	}, [selectedIncidentId]);
+
 	if (isLoading) {
 		return (
 			<output aria-live="polite" className="flex flex-col gap-3">
@@ -117,8 +142,21 @@ export default function IncidentList({
 
 			<ul className="flex flex-col gap-3">
 				{incidents.map((incident) => (
-					<li key={incident.id}>
-						<IncidentCard incident={incident} />
+					<li
+						key={incident.id}
+						ref={(element) => {
+							if (element) {
+								itemRefs.current.set(incident.id, element);
+							} else {
+								itemRefs.current.delete(incident.id);
+							}
+						}}
+					>
+						<IncidentCard
+							incident={incident}
+							isSelected={incident.id === selectedIncidentId}
+							onSelect={onSelectIncident}
+						/>
 					</li>
 				))}
 			</ul>

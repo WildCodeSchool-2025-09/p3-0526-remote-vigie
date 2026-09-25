@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import bgHome from "@/assets/images/backgroud-home.jpg";
 import VigieLogo from "@/assets/images/vigie-ligne.svg?react";
 import IncidentList from "@/components/IncidentList/IncidentList";
+import IncidentMap from "@/components/IncidentMap/IncidentMap";
 import { getAllIncidents } from "@/services/incidentService";
 import type { IncidentListItem } from "@/types/incidentList";
 
@@ -12,6 +13,26 @@ export default function Home() {
 	const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
+	// Partagé avec IncidentMap (clic en deux temps) et IncidentList (surbrillance) —
+	// voir plan US04, décision du 24/09.
+	const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(
+		null,
+	);
+	// Demande de recentrage transmise à IncidentMap quand la sélection vient
+	// d'une carte de la liste plutôt que d'un marqueur (décision du 25/09) —
+	// Home.tsx n'a pas accès à l'instance Leaflet, seule IncidentMap l'a.
+	const [mapPanRequest, setMapPanRequest] = useState<{
+		lat: number;
+		lng: number;
+	} | null>(null);
+
+	const handleSelectFromList = useCallback((incident: IncidentListItem) => {
+		setSelectedIncidentId(incident.id);
+		setMapPanRequest({
+			lat: Number(incident.latitude),
+			lng: Number(incident.longitude),
+		});
+	}, []);
 
 	const loadIncidents = useCallback(() => {
 		setIsLoading(true);
@@ -39,14 +60,16 @@ export default function Home() {
 		return loadIncidents();
 	}, [loadIncidents]);
 
-	// Chevauchement avec le header réservé aux états "placeholder" (chargement,
-	// erreur, vide) : la vraie liste de cartes n'en a pas besoin. À revoir avec
-	// l'US04 : la carte, une fois codée, deviendra l'élément qui chevauche le
-	// header, indépendamment de l'état de la liste en dessous.
-	const showsPlaceholder = isLoading || hasError || incidents.length === 0;
-
+	// Chevauchement avec le header : c'est la carte qui le porte (premier
+	// élément sous le header) — repris de la dette technique tracée sur US03
+	// depuis le 18/09, avec l'US04.
+	// Comportement de défilement tranché le 25/09 : header et carte restent
+	// fixes, seule la liste défile en dessous. La carte est donc sortie du
+	// conteneur `overflow-y-auto` (plutôt qu'un `position: sticky` sur place),
+	// pour un layout à trois blocs empilés simple à raisonner : header / carte
+	// / zone de liste qui défile.
 	return (
-		<div className="fixed inset-x-0 top-0 flex h-[calc(100dvh-var(--navigation-height))] flex-col bg-base-100">
+		<div className="flex h-full flex-col bg-base-100">
 			<header className="relative isolate flex h-44 shrink-0 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
 				<img
 					src={bgHome}
@@ -63,15 +86,24 @@ export default function Home() {
 				</h1>
 			</header>
 
-			<div
-				className={`relative flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto px-4 pb-6 ${showsPlaceholder ? "-mt-8" : ""}`}
-			>
+			<div className="-mt-8 shrink-0 px-4">
+				<IncidentMap
+					selectedIncidentId={selectedIncidentId}
+					onSelectIncident={setSelectedIncidentId}
+					panRequest={mapPanRequest}
+					className="h-[38vh] w-full overflow-hidden rounded-2xl"
+				/>
+			</div>
+
+			<div className="mt-4 flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-6">
 				<IncidentList
 					incidents={incidents}
 					isLoading={isLoading}
 					hasError={hasError}
 					onRetry={loadIncidents}
 					limit={INCIDENTS_LIST_LIMIT}
+					selectedIncidentId={selectedIncidentId}
+					onSelectIncident={handleSelectFromList}
 				/>
 			</div>
 		</div>

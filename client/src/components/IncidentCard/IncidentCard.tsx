@@ -7,6 +7,12 @@ import { formatRelativeTime } from "@/utils/formatRelativeTime";
 
 type IncidentCardProps = {
 	incident: IncidentListItem;
+	// Clic en deux temps (US04, décision du 25/09) : premier clic → sélection
+	// (et recentrage de la carte sur cet incident), second clic sur une carte
+	// déjà sélectionnée → navigation vers la fiche détaillée. Symétrique du
+	// comportement des marqueurs de la carte interactive.
+	isSelected?: boolean;
+	onSelect?: (incident: IncidentListItem) => void;
 };
 
 const STATUS_LABEL: Record<IncidentListItem["status"], string> = {
@@ -14,7 +20,11 @@ const STATUS_LABEL: Record<IncidentListItem["status"], string> = {
 	resolved: "Résolu",
 };
 
-export default function IncidentCard({ incident }: IncidentCardProps) {
+export default function IncidentCard({
+	incident,
+	isSelected = false,
+	onSelect,
+}: IncidentCardProps) {
 	const { dangerLevel, type, status } = incident;
 
 	const typeColorVar = type ? `var(--${type.code})` : "var(--grey)";
@@ -22,13 +32,27 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 	const relativeTime = formatRelativeTime(incident.createdAt);
 	const cityLabel = incident.city ?? "position non précisée";
 
-	const ariaLabel = `${incident.title} — ${type?.label ?? "Incident"}, ${dangerLevel.label}, ${cityLabel}, ${relativeTime}`;
+	const ariaLabel = `${incident.title} — ${type?.label ?? "Incident"}, ${dangerLevel.label}, ${cityLabel}, ${relativeTime}${
+		isSelected
+			? ", sélectionné, appuyez de nouveau pour voir le détail"
+			: ""
+	}`;
+
+	function handleClick(event: React.MouseEvent<HTMLAnchorElement>) {
+		if (!isSelected && onSelect) {
+			event.preventDefault();
+			onSelect(incident);
+		}
+	}
 
 	return (
 		<Link
 			to={`/incident/${incident.id}`}
 			aria-label={ariaLabel}
-			className="flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3"
+			onClick={handleClick}
+			className={`flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 ${
+				isSelected ? "ring-2 ring-accent ring-offset-2" : ""
+			}`}
 			style={{ borderLeftColor: typeColorVar }}
 		>
 			<div className="flex w-14 shrink-0 flex-col items-center gap-1">
