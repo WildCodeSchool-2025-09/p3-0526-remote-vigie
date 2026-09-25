@@ -55,5 +55,6 @@ router.put(
 );
 
 router.get("/api/addresses/reverse", verifyToken, addressActions.reverse);
+router.get("/api/addresses/search", addressActions.search);
 
 export default router;

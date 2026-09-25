@@ -253,12 +253,28 @@ export default function Register() {
 							</section>
 						</div>
 						<div className="flex flex-col gap-1.5">
-							<label
-								htmlFor="register-address"
-								className="text-primary"
-							>
-								Votre adresse
-							</label>
+							<div className="flex items-center justify-between">
+								<label
+									htmlFor="register-address"
+									className="text-primary"
+								>
+									Votre adresse
+								</label>
+								{manualMode && (
+									<button
+										type="button"
+										onClick={() => setManualMode(false)}
+										aria-label="Revenir à la recherche d'adresse"
+										className="btn btn-square btn-sm rounded-xl border-2 border-primary/15 bg-transparent shadow-none hover:bg-primary/10"
+									>
+										<Icon
+											name="arrowSmallLeft"
+											className="h-4 w-4 fill-primary"
+											aria-hidden="true"
+										/>
+									</button>
+								)}
+							</div>
 							{!manualMode && (
 								<>
 									<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
@@ -278,9 +294,7 @@ export default function Register() {
 											{addressSuggestions.map(
 												(suggestion) => (
 													<button
-														key={
-															suggestion.inseeCode
-														}
+														key={suggestion.name}
 														type="button"
 														onClick={() => {
 															setSelectedAddress(
