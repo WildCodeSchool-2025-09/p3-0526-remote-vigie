@@ -1,10 +1,12 @@
 import backgroundIncident from "@/assets/images/background-incident.jpg";
+import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNotVerifiedBanner";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { useNavigate } from "react-router";
 
 export default function Profile() {
 	const { user, logout } = useAuth();
 	const navigate = useNavigate();
+	const showsEmailBanner = user != null && !user.emailVerified;
 
 	const handleLogout = () => {
 		logout();
@@ -24,8 +26,10 @@ export default function Profile() {
 					Mon profil
 				</h1>
 			</header>
-
-			<div className="relative mx-4 -mt-8 flex flex-col gap-6 rounded-3xl bg-base-200 px-5 pt-6 pb-8">
+			<EmailNotVerifiedBanner />
+			<div
+				className={`relative mx-4 flex flex-col gap-6 rounded-3xl bg-base-200 px-5 pt-6 pb-8 ${showsEmailBanner ? "mt-4" : "-mt-8"}`}
+			>
 				<p className="text-primary">
 					Connecté en tant que <strong>{user?.pseudo}</strong>
 				</p>
