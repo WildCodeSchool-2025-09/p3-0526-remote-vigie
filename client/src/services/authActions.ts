@@ -1,5 +1,5 @@
-import type { AuthUser } from "../types/auth";
-import { apiFetch } from "./apiClient";
+import { apiFetch } from "@/services/apiClient";
+import type { AuthUser } from "@/types/auth";
 
 type LoginResponse = {
 	token: string;

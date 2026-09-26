@@ -1,18 +1,18 @@
 import {
+	getNotificationKey,
+	getReadNotifications,
+	resetNotificationCache,
+} from "@/contexts/Notification/readNotifications";
+import { useAuth } from "@/contexts/auth/AuthContext";
+import notificationService from "@/services/notificationService";
+import type { NotificationContextValue } from "@/types/notification";
+import {
 	createContext,
 	useCallback,
 	useContext,
 	useEffect,
 	useState,
 } from "react";
-import notificationService from "../../services/notificationService";
-import type { NotificationContextValue } from "../../types/notification";
-import { useAuth } from "../auth/AuthContext";
-import {
-	getNotificationKey,
-	getReadNotifications,
-	resetNotificationCache,
-} from "./readNotifications";
 
 const NotificationContext = createContext<NotificationContextValue | null>(
 	null,

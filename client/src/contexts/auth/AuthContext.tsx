@@ -1,11 +1,8 @@
+import { setAuthToken } from "@/services/apiClient";
+import { login as loginRequest, me as meRequest } from "@/services/authActions";
+import type { AuthUser } from "@/types/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { setAuthToken } from "../../services/apiClient";
-import {
-	login as loginRequest,
-	me as meRequest,
-} from "../../services/authActions";
-import type { AuthUser } from "../../types/auth";
 
 type AuthContextValue = {
 	user: AuthUser | null;

@@ -6,9 +6,9 @@ import CardExamples from "@/_dev/design-system/CardExamples";
 import FormInputExamples from "@/_dev/design-system/FormInputExamples";
 import LayoutExamples from "@/_dev/design-system/LayoutExamples";
 import MapExamples from "@/_dev/design-system/Map";
+import OtherExamples from "@/_dev/design-system/OtherExamples";
 import TitlesExamples from "@/_dev/design-system/TitlesExamples";
 import { type ComponentType, type ReactNode, useState } from "react";
-import OtherExamples from "./OtherExamples";
 
 type Family = {
 	id: string;

@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from "react-router";
-import "./index.css";
-import NavBar from "./components/Navigation/NavBar/NavBar";
-import { NotificationProvider } from "./contexts/Notification/NotificationContext";
+import "@/index.css";
+import NavBar from "@/components/Navigation/NavBar/NavBar";
+import { NotificationProvider } from "@/contexts/Notification/NotificationContext";
 
 function App() {
 	const { pathname } = useLocation();

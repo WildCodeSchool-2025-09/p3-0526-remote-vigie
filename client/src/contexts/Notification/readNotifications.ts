@@ -1,4 +1,4 @@
-import type { Notification } from "../../types/notification";
+import type { Notification } from "@/types/notification";
 
 export const readNotificationsKey = "vigie:read-notifications";
 
