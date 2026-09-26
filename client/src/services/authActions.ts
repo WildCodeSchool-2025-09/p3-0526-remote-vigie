@@ -19,8 +19,13 @@ export async function login(identifier: string, password: string) {
 	});
 
 	if (!response.ok) {
-		const data = (await response.json()) as { message?: string };
-		throw new Error(data.message ?? "Connexion impossible.");
+		const data = (await response.json().catch(() => null)) as {
+			message?: string;
+		} | null;
+		throw new Error(
+			data?.message ??
+				"Une erreur est survenue côté serveur. Réessaie dans un instant.",
+		);
 	}
 
 	return response.json() as Promise<LoginResponse>;

@@ -51,6 +51,7 @@ export default function Login() {
 			await login(identifier, password);
 			navigate("/", { replace: true });
 		} catch (err) {
+			setPassword("");
 			if (err instanceof TypeError) {
 				setServerError(
 					"Impossible de contacter le serveur. Vérifie ta connexion.",
