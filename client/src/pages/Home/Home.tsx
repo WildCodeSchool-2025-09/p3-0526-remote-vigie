@@ -46,7 +46,7 @@ export default function Home() {
 	const showsPlaceholder = isLoading || hasError || incidents.length === 0;
 
 	return (
-		<div className="fixed inset-x-0 top-0 flex h-[calc(100dvh-var(--navigation-height))] flex-col bg-base-100">
+		<div className="fixed inset-x-0 top-0 flex h-[calc(100dvh-var(--navigation-height))] flex-col bg-base-100 lg:left-24 lg:h-dvh">
 			<header className="relative isolate flex h-44 shrink-0 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
 				<img
 					src={bgHome}
