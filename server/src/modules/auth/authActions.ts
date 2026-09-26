@@ -6,6 +6,7 @@ import {
 	resetAttempts,
 } from "../../middlewares/checkLoginRateLimit";
 import { signAuthToken } from "../../services/jwt";
+import addressRepository from "../address/addressRepository";
 import usersRepository from "../users/usersRepository";
 
 const login: RequestHandler = async (req, res, next) => {
@@ -65,21 +66,28 @@ const login: RequestHandler = async (req, res, next) => {
 		next(err);
 	}
 };
+
 const me: RequestHandler = async (req, res, next) => {
 	try {
 		const userId = Number(req.auth?.sub);
 		const user = await usersRepository.read(userId);
 
 		if (user == null) {
-			res.sendStatus(StatusCodes.UNAUTHORIZED);
+			res.status(StatusCodes.UNAUTHORIZED).json({
+				error: "unauthorized",
+				message: "Session invalide.",
+			});
 			return;
 		}
+
+		const addresses = await addressRepository.findByUserId(userId);
 
 		res.json({
 			id: user.id,
 			pseudo: user.pseudo,
 			email: user.email,
 			emailVerified: user.email_verified_at != null,
+			addresses,
 		});
 	} catch (err) {
 		next(err);
