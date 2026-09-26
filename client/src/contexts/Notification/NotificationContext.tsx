@@ -7,7 +7,7 @@ import {
 } from "react";
 import notificationService from "../../services/notificationService";
 import type { NotificationContextValue } from "../../types/notification";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../auth/AuthContext";
 import {
 	getNotificationKey,
 	getReadNotifications,

@@ -1,0 +1,33 @@
+import type { AuthUser } from "../types/auth";
+import { apiFetch } from "./apiClient";
+
+type LoginResponse = {
+	token: string;
+	user: {
+		id: number;
+		pseudo: string;
+		email: string;
+		emailVerified: boolean;
+	};
+};
+
+export async function login(identifier: string, password: string) {
+	const response = await apiFetch("/api/auth/login", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ identifier, password }),
+	});
+
+	if (!response.ok) {
+		const data = (await response.json()) as { message?: string };
+		throw new Error(data.message ?? "Connexion impossible.");
+	}
+
+	return response.json() as Promise<LoginResponse>;
+}
+
+export async function me() {
+	const response = await apiFetch("/api/auth/me");
+	if (!response.ok) return null;
+	return response.json() as Promise<AuthUser>;
+}

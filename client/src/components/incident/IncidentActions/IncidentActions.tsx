@@ -1,6 +1,6 @@
 import Icon from "@/components/Icon/Icon";
 import ContributionActions from "@/components/incident/ContributionActions/ContributionActions";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth/AuthContext";
 import type { IncidentCounts, IncidentStatus } from "@/types/incidentDetails";
 import { formatDateTime } from "@/utils/formatDate";
 import { Link, useLocation, useNavigate } from "react-router";

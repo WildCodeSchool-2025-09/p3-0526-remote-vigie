@@ -1,4 +1,4 @@
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth/AuthContext";
 import withPreposition from "@/utils/title";
 import isFeminine from "@/utils/typeGender";
 import useDuplicateDetection from "./useDuplicateDetection";
