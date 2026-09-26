@@ -1,6 +1,7 @@
 import express from "express";
 import checkLoginRateLimit from "./middlewares/checkLoginRateLimit";
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
+import validateLoginInput from "./middlewares/validateLoginInput";
 import addressActions from "./modules/address/addressActions";
 import authActions from "./modules/auth/authActions";
 import commentActions from "./modules/comment/commentActions";
@@ -18,7 +19,12 @@ const router = express.Router();
 /* ************************************************************************* */
 // Define Your API Routes Here
 /* ************************************************************************* */
-router.post("/api/auth/login", checkLoginRateLimit, authActions.login);
+router.post(
+	"/api/auth/login",
+	validateLoginInput,
+	checkLoginRateLimit,
+	authActions.login,
+);
 
 router.get("/api/auth/me", verifyToken, authActions.me);
 

@@ -12,17 +12,9 @@ import usersRepository from "../users/usersRepository";
 const login: RequestHandler = async (req, res, next) => {
 	try {
 		const { identifier, password } = req.body as {
-			identifier?: string;
-			password?: string;
+			identifier: string;
+			password: string;
 		};
-
-		if (!identifier || !password) {
-			res.status(StatusCodes.BAD_REQUEST).json({
-				error: "invalid_input",
-				message: "Identifiant et mot de passe requis.",
-			});
-			return;
-		}
 
 		const key = `${req.ip}:${identifier.toLowerCase()}`;
 
