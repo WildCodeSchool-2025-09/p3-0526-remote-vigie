@@ -21,7 +21,7 @@ function App() {
 				<div
 					id="main-content"
 					tabIndex={-1}
-					className="grow lg:min-w-0 lg:overflow-y-auto"
+					className="grow min-h-0 overflow-y-auto lg:min-w-0"
 				>
 					<Outlet />
 				</div>
