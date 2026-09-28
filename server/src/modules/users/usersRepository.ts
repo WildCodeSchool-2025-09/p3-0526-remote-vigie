@@ -16,6 +16,22 @@ class UsersRepository {
 			[userId],
 		);
 	}
+
+	async findByEmailNormalized(emailNormalized: string) {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT id FROM user WHERE email_normalized = ?",
+			[emailNormalized],
+		);
+		return rows[0];
+	}
+
+	async findByPseudoNormalized(pseudoNormalized: string) {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT id FROM user WHERE pseudo_normalized = ?",
+			[pseudoNormalized],
+		);
+		return rows[0];
+	}
 }
 
 export default new UsersRepository();
