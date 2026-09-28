@@ -1,5 +1,5 @@
 import databaseClient from "../../../database/client";
-import type { Rows } from "../../../database/client";
+import type { Result, Rows } from "../../../database/client";
 
 class UsersRepository {
 	async read(userId: number) {
@@ -31,6 +31,70 @@ class UsersRepository {
 			[pseudoNormalized],
 		);
 		return rows[0];
+	}
+
+	async create(data: {
+		pseudo: string;
+		email: string;
+		pseudoNormalized: string;
+		emailNormalized: string;
+		passwordHash: string;
+		cguVersion: string;
+		cguAcceptedAt: Date;
+		postalCode: string;
+		city: string;
+		inseeCode: string;
+		latitude: number;
+		longitude: number;
+		isApproximate: boolean;
+	}): Promise<number> {
+		const connection = await databaseClient.getConnection();
+		try {
+			await connection.beginTransaction();
+
+			const [result] = await connection.query<Result>(
+				`INSERT INTO user
+					(pseudo, email, pseudo_normalized, email_normalized,
+					password_hash, cgu_version, cgu_accepted_at)
+				VALUES (?, ?, ?, ?, ?, ?, ?)`,
+				[
+					data.pseudo,
+					data.email,
+					data.pseudoNormalized,
+					data.emailNormalized,
+					data.passwordHash,
+					data.cguVersion,
+					data.cguAcceptedAt,
+				],
+			);
+
+			const userId = result.insertId;
+
+			await connection.query(
+				`INSERT INTO address
+					(user_id, postal_code, city, insee_code,
+					latitude, longitude, is_approximate, is_primary)
+				VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+				[
+					userId,
+					data.postalCode,
+					data.city,
+					data.inseeCode,
+					data.latitude,
+					data.longitude,
+					data.isApproximate,
+				],
+			);
+
+			await connection.commit();
+
+			return userId;
+		} catch (err) {
+			await connection.rollback();
+			throw err;
+		} finally {
+			connection.release();
+		}
 	}
 }
 

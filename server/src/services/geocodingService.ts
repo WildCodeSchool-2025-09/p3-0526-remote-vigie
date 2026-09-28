@@ -53,6 +53,7 @@ async function reverse(
 async function search(query: string): Promise<
 	{
 		name: string;
+		city: string;
 		postalCode: string;
 		inseeCode: string;
 		latitude: number;
@@ -77,6 +78,7 @@ async function search(query: string): Promise<
 				geometry: { coordinates: [number, number] };
 			}) => ({
 				name: feature.properties.label,
+				city: feature.properties.city,
 				postalCode: feature.properties.postcode,
 				inseeCode: feature.properties.citycode,
 				latitude: feature.geometry.coordinates[1],

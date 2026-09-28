@@ -31,6 +31,7 @@ export async function reverseGeocode(
 
 export type AddressSuggestion = {
 	name: string;
+	city: string;
 	postalCode: string;
 	inseeCode: string;
 	latitude: number;

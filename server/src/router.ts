@@ -10,6 +10,10 @@ import attachUserIfPresent from "./services/attachUserIfPresent";
 import checkIncidentRateLimit from "./services/checkIncidentRateLimit";
 import requireVerifiedEmail from "./services/requireVerifiedEmail";
 import verifyToken from "./services/verifyToken";
+import validateRegisterInput from "./services/validateRegisterInput";
+import checkUserUniqueness from "./services/checkUserUniqueness";
+import authActions from "./modules/auth/authActions";
+import usersActions from "./modules/users/usersActions";
 
 const router = express.Router();
 
@@ -56,5 +60,12 @@ router.put(
 
 router.get("/api/addresses/reverse", verifyToken, addressActions.reverse);
 router.get("/api/addresses/search", addressActions.search);
+router.post(
+	"/api/users",
+	validateRegisterInput,
+	checkUserUniqueness,
+	authActions.hashPassword,
+	usersActions.add,
+);
 
 export default router;
