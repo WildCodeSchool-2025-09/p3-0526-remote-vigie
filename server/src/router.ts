@@ -14,6 +14,7 @@ import validateRegisterInput from "./services/validateRegisterInput";
 import checkUserUniqueness from "./services/checkUserUniqueness";
 import authActions from "./modules/auth/authActions";
 import usersActions from "./modules/users/usersActions";
+import checkRegisterRateLimit from "./services/checkRegisterRateLimit";
 
 const router = express.Router();
 
@@ -64,6 +65,7 @@ router.post(
 	"/api/users",
 	validateRegisterInput,
 	checkUserUniqueness,
+	checkRegisterRateLimit,
 	authActions.hashPassword,
 	usersActions.add,
 );
