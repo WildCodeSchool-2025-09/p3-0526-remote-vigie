@@ -26,7 +26,7 @@ const reverse: RequestHandler = async (req, res, next) => {
 	}
 };
 
-const search: RequestHandler = async (req, res, next) => {
+const search: RequestHandler = async (req, res) => {
 	try {
 		const query = req.query.q;
 		if (typeof query !== "string" || query.trim().length === 0) {
@@ -38,7 +38,7 @@ const search: RequestHandler = async (req, res, next) => {
 
 		res.json(results);
 	} catch (err) {
-		next(err);
+		res.sendStatus(StatusCodes.SERVICE_UNAVAILABLE);
 	}
 };
 

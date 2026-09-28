@@ -39,7 +39,8 @@ export type AddressSuggestion = {
 
 type SearchAddressResult =
 	| { status: "ok"; suggestions: AddressSuggestion[] }
-	| { status: "error" };
+	| { status: "error" }
+	| { status: "unavailable" };
 
 export async function searchAddress(
 	query: string,
@@ -52,6 +53,9 @@ export async function searchAddress(
 			`/api/addresses/search?${params.toString()}`,
 			{ signal },
 		);
+
+		if (res.status === 503) return { status: "unavailable" };
+
 		if (!res.ok) return { status: "error" };
 
 		return {

@@ -25,9 +25,9 @@ export default function Register() {
 		addressQuery,
 		setAddressQuery,
 		addressSuggestions,
-		setAddressSuggestions,
 		selectedAddress,
-		setSelectedAddress,
+		selectSuggestion,
+		addressServiceUnavailable,
 		manualMode,
 		setManualMode,
 		city,
@@ -70,6 +70,10 @@ export default function Register() {
 				"Le mot de passe doit contenir au moins une majuscule, un chiffre et un caractère spécial";
 		} else if (password !== confirmPassword) {
 			errors.password = "Les deux mots de passe doivent correspondre";
+		}
+
+		if (addressServiceUnavailable === true) {
+			errors.address = "Le service d'adresse est indisponible";
 		}
 
 		if (cguAccepted === false) {
@@ -296,17 +300,11 @@ export default function Register() {
 													<button
 														key={suggestion.name}
 														type="button"
-														onClick={() => {
-															setSelectedAddress(
+														onClick={() =>
+															selectSuggestion(
 																suggestion,
-															);
-															setAddressQuery(
-																suggestion.name,
-															);
-															setAddressSuggestions(
-																[],
-															);
-														}}
+															)
+														}
 														className="rounded-2xl border border-primary/15 bg-base-300 p-3 text-left"
 													>
 														<span className="block font-bold text-primary">
@@ -365,6 +363,11 @@ export default function Register() {
 								Elle définit la zone où vous serez alerté.
 								Enregistrée comme votre adresse principale.
 							</p>
+							{fieldErrors.address && (
+								<p className="text-xs font-semibold text-error">
+									{fieldErrors.address}
+								</p>
+							)}
 						</div>
 
 						<div className="flex items-start gap-3">

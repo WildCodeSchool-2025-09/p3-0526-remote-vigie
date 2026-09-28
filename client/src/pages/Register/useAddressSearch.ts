@@ -2,7 +2,7 @@ import {
 	type AddressSuggestion,
 	searchAddress,
 } from "@/services/addressService";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function useAddressSearch() {
 	const [manualMode, setManualMode] = useState(false);
@@ -12,9 +12,25 @@ export default function useAddressSearch() {
 	const [addressSuggestions, setAddressSuggestions] = useState<
 		AddressSuggestion[]
 	>([]);
+	const [addressServiceUnavailable, setAddressServiceUnavailable] =
+		useState(false);
 	const [selectedAddress, setSelectedAddress] =
 		useState<AddressSuggestion | null>(null);
+	const skipNextSearchRef = useRef(false);
+
+	function selectSuggestion(suggestion: AddressSuggestion) {
+		skipNextSearchRef.current = true;
+		setSelectedAddress(suggestion);
+		setAddressQuery(suggestion.name);
+		setAddressSuggestions([]);
+	}
+
 	useEffect(() => {
+		if (skipNextSearchRef.current) {
+			skipNextSearchRef.current = false;
+			return;
+		}
+
 		if (addressQuery.length < 3) {
 			setAddressSuggestions([]);
 			return;
@@ -24,8 +40,13 @@ export default function useAddressSearch() {
 		const timeoutId = setTimeout(async () => {
 			const result = await searchAddress(addressQuery, controller.signal);
 
+			if (result.status === "unavailable") {
+				setAddressServiceUnavailable(true);
+			}
+
 			if (result.status === "ok") {
 				setAddressSuggestions(result.suggestions);
+				setAddressServiceUnavailable(false);
 			}
 		}, 300);
 
@@ -42,6 +63,9 @@ export default function useAddressSearch() {
 		setAddressSuggestions,
 		selectedAddress,
 		setSelectedAddress,
+		selectSuggestion,
+		addressServiceUnavailable,
+		setAddressServiceUnavailable,
 		manualMode,
 		setManualMode,
 		city,

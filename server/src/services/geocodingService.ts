@@ -91,7 +91,7 @@ async function search(query: string): Promise<
 			{ query },
 		);
 
-		return [];
+		throw error;
 	}
 }
 
