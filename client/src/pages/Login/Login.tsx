@@ -11,7 +11,7 @@ type FieldErrors = {
 
 const fieldBase =
 	"relative flex items-center rounded-2xl border px-4 py-3.5 transition-colors";
-const fieldNeutral = "border-primary/15 bg-base-300";
+const fieldNeutral = "border-primary/60 bg-base-300";
 const fieldError = "border-error bg-error/10";
 
 export default function Login() {
@@ -132,7 +132,7 @@ export default function Login() {
 										? "login-identifier-message"
 										: undefined
 								}
-								className="w-full bg-transparent pr-8 text-black placeholder:text-black/40 focus:outline-none"
+								className="w-full bg-transparent pr-8 text-black placeholder:text-black/60 focus:outline-none"
 							/>
 							<Icon
 								name="exclamation"
@@ -177,7 +177,7 @@ export default function Login() {
 										? "login-password-message"
 										: undefined
 								}
-								className="w-full bg-transparent pr-2 text-black placeholder:text-black/40 focus:outline-none"
+								className="w-full bg-transparent pr-2 text-black placeholder:text-black/60 focus:outline-none"
 							/>
 							<button
 								type="button"
@@ -214,7 +214,7 @@ export default function Login() {
 					</button>
 				</form>
 
-				<p className="mt-6 text-center text-sm text-primary/60">
+				<p className="mt-6 text-center text-sm text-primary/80">
 					Pas encore de compte ?{" "}
 					<Link
 						to="/register"
