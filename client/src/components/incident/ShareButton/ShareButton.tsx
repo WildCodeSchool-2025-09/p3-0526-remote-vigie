@@ -3,10 +3,7 @@ import type { Incident } from "@/types/incidentDetails";
 import buildShareContent from "@/utils/buildShareContent";
 import { useState } from "react";
 
-type Props = Pick<
-	Incident,
-	"id" | "types" | "city" | "latitude" | "longitude"
->;
+type Props = Pick<Incident, "id" | "types" | "city" | "latitude" | "longitude">;
 
 type ShareState =
 	| { status: "idle" }
@@ -22,8 +19,11 @@ export default function ShareButton(props: Props) {
 		if (typeof navigator.share === "function") {
 			try {
 				await navigator.share({ title, text, url });
-			} catch {
-				// Menu fermé ou partage annulé par l'utilisateur : pas d'erreur à afficher.
+			} catch (error) {
+				if (error instanceof Error && error.name === "AbortError") {
+					return;
+				}
+				console.error("navigator.share a échoué", error);
 			}
 			return;
 		}
@@ -65,9 +65,12 @@ export default function ShareButton(props: Props) {
 				{state.status === "copyFailed" && (
 					<p className="text-sm text-primary/80">
 						Copie impossible. Voici le lien à copier :{" "}
-						<span className="select-all break-all font-semibold underline">
+						<a
+							href={state.url}
+							className="select-all break-all font-semibold underline"
+						>
 							{state.url}
-						</span>
+						</a>
 					</p>
 				)}
 			</div>
