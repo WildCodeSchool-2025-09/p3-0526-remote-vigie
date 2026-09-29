@@ -24,7 +24,7 @@ export async function login(identifier: string, password: string) {
 		} | null;
 		throw new Error(
 			data?.message ??
-				"Une erreur est survenue côté serveur. Réessaie dans un instant.",
+				"Une erreur est survenue côté serveur. Réessayez dans un instant.",
 		);
 	}
 

@@ -54,7 +54,7 @@ export default function Login() {
 			setPassword("");
 			if (err instanceof TypeError) {
 				setServerError(
-					"Impossible de contacter le serveur. Vérifie ta connexion.",
+					"Impossible de contacter le serveur. Vérifiez votre connexion.",
 				);
 			} else {
 				setServerError(
