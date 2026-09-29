@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import withPreposition from "@/utils/title";
+import withPreposition from "@/utils/withPreposition";
 import isFeminine from "@/utils/typeGender";
 import useDuplicateDetection from "./useDuplicateDetection";
 import useGeolocation from "./useGeolocation";
