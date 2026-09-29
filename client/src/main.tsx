@@ -23,6 +23,7 @@ import NotificationCenter from "@/pages/Notification/NotificationCenter";
 import Numbers from "@/pages/Numbers/Numbers";
 import Profile from "@/pages/Profile/Profile";
 import Register from "@/pages/Register/Register";
+import VerifyEmail from "@/pages/VerifyEmail/VerifyEmail";
 
 // DEV ONLY — pas des pages de l'app, voir src/_dev/README.md
 // Le bloc `if (import.meta.env.DEV)` est tree-shaké par Vite dans un build de prod :
@@ -121,6 +122,10 @@ const router = createBrowserRouter([
 			{
 				path: "cgu",
 				element: <Cgu />,
+			},
+			{
+				path: "verify-email",
+				element: <VerifyEmail />,
 			},
 			{
 				path: "notifications",

@@ -72,3 +72,44 @@ export async function register(
 		return { status: "error" };
 	}
 }
+
+type VerifyEmailResult =
+	| { status: "success"; message: string }
+	| { status: "expired"; message: string }
+	| { status: "error"; message: string };
+
+export async function verifyEmail(token: string): Promise<VerifyEmailResult> {
+	try {
+		const res = await apiFetch("/api/users/verify-email", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ token }),
+		});
+		const body = (await res.json()) as { message?: string };
+
+		if (res.status === 200) {
+			return {
+				status: "success",
+				message:
+					body.message ?? "Votre adresse e-mail a bien été vérifiée.",
+			};
+		}
+
+		if (res.status === 410) {
+			return {
+				status: "expired",
+				message: body.message ?? "Ce lien de vérification a expiré.",
+			};
+		}
+
+		return {
+			status: "error",
+			message: body.message ?? "Ce lien de vérification est invalide.",
+		};
+	} catch {
+		return {
+			status: "error",
+			message: "Une erreur est survenue. Veuillez réessayer plus tard.",
+		};
+	}
+}
