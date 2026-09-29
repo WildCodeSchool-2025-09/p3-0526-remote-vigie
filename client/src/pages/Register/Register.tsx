@@ -217,13 +217,21 @@ export default function Register() {
 									type="text"
 									placeholder="Votre pseudo"
 									className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+									aria-describedby={
+										fieldErrors.pseudo
+											? "register-pseudo-error"
+											: undefined
+									}
 								/>
 							</section>
-							<p className="text-xs text-primary/50">
+							<p className="text-xs text-primary">
 								Visible par vos voisins sur vos signalements.
 							</p>
 							{fieldErrors.pseudo && (
-								<p className="text-xs font-semibold text-error">
+								<p
+									id="register-pseudo-error"
+									className="text-xs font-semibold text-error"
+								>
 									{fieldErrors.pseudo}
 								</p>
 							)}
@@ -242,10 +250,18 @@ export default function Register() {
 									type="text"
 									placeholder="marion.c@exemple.fr"
 									className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+									aria-describedby={
+										fieldErrors.email
+											? "register-email-error"
+											: undefined
+									}
 								/>
 							</section>
 							{fieldErrors.email && (
-								<p className="text-xs font-semibold text-error">
+								<p
+									id="register-email-error"
+									className="text-xs font-semibold text-error"
+								>
 									{fieldErrors.email}
 								</p>
 							)}
@@ -270,6 +286,11 @@ export default function Register() {
 										}
 										placeholder="..."
 										className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+										aria-describedby={
+											fieldErrors.password
+												? "register-password-error"
+												: undefined
+										}
 									/>
 									<button
 										type="button"
@@ -289,7 +310,10 @@ export default function Register() {
 								/>
 							)}
 							{fieldErrors.password && (
-								<p className="text-xs font-semibold text-error">
+								<p
+									id="register-password-error"
+									className="text-xs font-semibold text-error"
+								>
 									{fieldErrors.password}
 								</p>
 							)}
@@ -370,6 +394,11 @@ export default function Register() {
 											placeholder="12 allée de l'exemple, 15800 Polminhac"
 											className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
 											autoComplete="off"
+											aria-describedby={
+												fieldErrors.address
+													? "register-address-error"
+													: undefined
+											}
 										/>
 									</section>
 									{addressSuggestions.length > 0 && (
@@ -423,6 +452,11 @@ export default function Register() {
 											type="text"
 											placeholder="Ville"
 											className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+											aria-describedby={
+												fieldErrors.address
+													? "register-address-error"
+													: undefined
+											}
 										/>
 									</section>
 									<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
@@ -435,6 +469,11 @@ export default function Register() {
 											type="text"
 											placeholder="Code postal"
 											className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+											aria-describedby={
+												fieldErrors.address
+													? "register-address-error"
+													: undefined
+											}
 										/>
 									</section>
 								</div>
@@ -448,12 +487,15 @@ export default function Register() {
 									Je ne trouve pas mon adresse
 								</button>
 							)}
-							<p className="text-xs text-primary/50">
+							<p className="text-xs text-primary">
 								Elle définit la zone où vous serez alerté.
 								Enregistrée comme votre adresse principale.
 							</p>
 							{fieldErrors.address && (
-								<p className="text-xs font-semibold text-error">
+								<p
+									id="register-address-error"
+									className="text-xs font-semibold text-error"
+								>
 									{fieldErrors.address}
 								</p>
 							)}
@@ -473,6 +515,11 @@ export default function Register() {
 										"--radius-selector": "0.25rem",
 									} as React.CSSProperties
 								}
+								aria-describedby={
+									fieldErrors.cgu
+										? "register-cgu-error"
+										: undefined
+								}
 							/>
 							<label
 								htmlFor="register-cgu"
@@ -486,18 +533,23 @@ export default function Register() {
 							</label>
 						</div>
 						{fieldErrors.cgu && (
-							<p className="text-xs font-semibold text-error">
+							<p
+								id="register-cgu-error"
+								className="text-xs font-semibold text-error"
+							>
 								{fieldErrors.cgu}
 							</p>
 						)}
 					</div>
 				</section>
 				<section className="text-center">
-					{serverError && (
-						<p className="mb-3 text-sm font-semibold text-error">
-							{serverError}
-						</p>
-					)}
+					<div aria-live="polite">
+						{serverError && (
+							<p className="mb-3 text-sm font-semibold text-error">
+								{serverError}
+							</p>
+						)}
+					</div>
 					<SubmitRegister submitting={submitting} />
 					<p className="mt-3 text-sm text-primary">
 						Déjà inscrit ?{" "}
