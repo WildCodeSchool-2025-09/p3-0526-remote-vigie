@@ -64,10 +64,11 @@ router.get("/api/addresses/search", addressActions.search);
 router.post(
 	"/api/users",
 	validateRegisterInput,
-	checkUserUniqueness,
 	checkRegisterRateLimit,
+	checkUserUniqueness,
 	authActions.hashPassword,
 	usersActions.add,
 );
+router.post("/api/users/verify-email", usersActions.verifyEmail);
 
 export default router;

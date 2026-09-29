@@ -96,6 +96,37 @@ class UsersRepository {
 			connection.release();
 		}
 	}
+
+	async setVerificationToken(
+		userId: number,
+		tokenHash: string,
+		expiresAt: Date,
+	) {
+		await databaseClient.query(
+			"UPDATE user SET email_verification_token_hash = ?, email_verification_expires_at = ? WHERE id = ?",
+			[tokenHash, expiresAt, userId],
+		);
+	}
+
+	async findByVerificationTokenHash(tokenHash: string) {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT id FROM user WHERE email_verification_token_hash = ?",
+			[tokenHash],
+		);
+		return rows[0];
+	}
+
+	async verifyEmail(tokenHash: string): Promise<boolean> {
+		const [result] = await databaseClient.query<Result>(
+			`UPDATE user
+			SET email_verified_at = NOW(), email_verification_token_hash = NULL, email_verification_expires_at = NULL
+		WHERE email_verification_token_hash = ?
+			AND email_verification_expires_at > NOW()
+			AND email_verified_at IS NULL`,
+			[tokenHash],
+		);
+		return result.affectedRows === 1;
+	}
 }
 
 export default new UsersRepository();
