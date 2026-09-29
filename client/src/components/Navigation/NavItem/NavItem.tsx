@@ -4,7 +4,7 @@ import Icon from "../../Icon/Icon";
 import NotificationBadge from "../../Notification/NotificationBadge/NotificationBadge";
 
 const baseClassName =
-	"relative flex flex-col items-center justify-center gap-0.5 text-xs font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent) focus-visible:rounded-sm";
+	"relative flex flex-col items-center justify-center gap-0.5 text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent) focus-visible:rounded-sm";
 
 function NavItem({
 	to,
