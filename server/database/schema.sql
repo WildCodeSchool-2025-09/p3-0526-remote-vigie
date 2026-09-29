@@ -30,6 +30,8 @@ CREATE TABLE `user` (
     `email_normalized` VARCHAR(255) NOT NULL,
     `password_hash` VARCHAR(255) NOT NULL,
     `email_verified_at` TIMESTAMP NULL DEFAULT NULL,
+    `email_verification_token_hash` VARCHAR(255) NULL,
+    `email_verification_expires_at` DATETIME NULL,
     `cgu_version` VARCHAR(10) NOT NULL,
     `cgu_accepted_at` TIMESTAMP NOT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
