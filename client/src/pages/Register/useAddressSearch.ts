@@ -27,11 +27,18 @@ export default function useAddressSearch() {
 		setHighlightedIndex(-1);
 	}
 
+	function enterManualMode() {
+		setSelectedAddress(null);
+		setManualMode(true);
+	}
+
 	useEffect(() => {
 		if (skipNextSearchRef.current) {
 			skipNextSearchRef.current = false;
 			return;
 		}
+
+		setSelectedAddress(null);
 
 		if (addressQuery.length < 3) {
 			setAddressSuggestions([]);
@@ -68,6 +75,7 @@ export default function useAddressSearch() {
 		selectedAddress,
 		setSelectedAddress,
 		selectSuggestion,
+		enterManualMode,
 		highlightedIndex,
 		setHighlightedIndex,
 		addressServiceUnavailable,

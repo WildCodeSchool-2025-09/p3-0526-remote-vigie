@@ -93,15 +93,17 @@ export default function useRegisterSubmit({
 
 		setFieldErrors({});
 
-		const address = selectedAddress
-			? {
-					city: selectedAddress.city,
-					postalCode: selectedAddress.postalCode,
-					inseeCode: selectedAddress.inseeCode,
-					latitude: selectedAddress.latitude,
-					longitude: selectedAddress.longitude,
-				}
-			: { city: city.trim(), postalCode: postalCode.trim() };
+		const address = manualMode
+			? { city: city.trim(), postalCode: postalCode.trim() }
+			: selectedAddress
+				? {
+						city: selectedAddress.city,
+						postalCode: selectedAddress.postalCode,
+						inseeCode: selectedAddress.inseeCode,
+						latitude: selectedAddress.latitude,
+						longitude: selectedAddress.longitude,
+					}
+				: { city: city.trim(), postalCode: postalCode.trim() };
 
 		setSubmitting(true);
 		const result = await register({

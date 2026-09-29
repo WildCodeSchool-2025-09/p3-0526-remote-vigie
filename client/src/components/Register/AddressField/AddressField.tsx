@@ -15,6 +15,7 @@ export default function AddressField({
 		setAddressQuery,
 		addressSuggestions,
 		selectSuggestion,
+		enterManualMode,
 		highlightedIndex,
 		setHighlightedIndex,
 		manualMode,
@@ -143,7 +144,7 @@ export default function AddressField({
 			{!manualMode && (
 				<button
 					type="button"
-					onClick={() => setManualMode(true)}
+					onClick={enterManualMode}
 					className="self-start text-sm font-bold text-primary underline"
 				>
 					Je ne trouve pas mon adresse
