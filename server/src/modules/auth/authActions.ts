@@ -1,10 +1,6 @@
 import argon2 from "argon2";
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
-import {
-	registerFailedAttempt,
-	resetAttempts,
-} from "../../middlewares/checkLoginRateLimit";
 import { signAuthToken } from "../../services/jwt";
 import addressRepository from "../address/addressRepository";
 import usersRepository from "../users/usersRepository";
@@ -16,8 +12,6 @@ const login: RequestHandler = async (req, res, next) => {
 			password: string;
 		};
 
-		const key = `${req.ip}:${identifier.toLowerCase()}`;
-
 		const user = await usersRepository.findByIdentifier(identifier);
 		const invalidCredentials = () => {
 			res.status(StatusCodes.UNAUTHORIZED).json({
@@ -27,7 +21,6 @@ const login: RequestHandler = async (req, res, next) => {
 		};
 
 		if (user == null) {
-			registerFailedAttempt(key);
 			invalidCredentials();
 			return;
 		}
@@ -37,13 +30,11 @@ const login: RequestHandler = async (req, res, next) => {
 			password,
 		);
 		if (!passwordMatches) {
-			registerFailedAttempt(key);
 			invalidCredentials();
 			return;
 		}
 
 		const token = signAuthToken(user.id);
-		resetAttempts(key);
 
 		res.json({
 			token,
