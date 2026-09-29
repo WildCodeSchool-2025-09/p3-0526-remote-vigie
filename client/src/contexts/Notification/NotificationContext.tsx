@@ -50,9 +50,12 @@ export function NotificationProvider({
 		}
 	}, []);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: user?.id must stay a dependency to reset the cache on session change (login/logout)
 	useEffect(() => {
 		resetNotificationCache();
+		if (user?.id == null) {
+			setUnreadCount(0);
+			return;
+		}
 		void refreshUnreadCount();
 	}, [user?.id, refreshUnreadCount]);
 
