@@ -2,12 +2,12 @@ import bgHome from "@/assets/images/background-home.jpg";
 import Icon from "@/components/Icon/Icon";
 import PasswordStrengthMeter from "@/components/Register/PasswordStrengthMeter/PasswordStrengthMeter";
 import SubmitRegister from "@/components/Register/SubmitRegister/SubmitRegister";
+import { register } from "@/services/userService";
 import type { RegisterFieldError } from "@/types/register";
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import useAddressSearch from "./useAddressSearch";
 import usePasswordStrength from "./usePasswordStrength";
-import { register } from "@/services/userService";
 
 export default function Register() {
 	const navigate = useNavigate();
@@ -30,6 +30,8 @@ export default function Register() {
 		addressSuggestions,
 		selectedAddress,
 		selectSuggestion,
+		highlightedIndex,
+		setHighlightedIndex,
 		addressServiceUnavailable,
 		manualMode,
 		setManualMode,
@@ -38,6 +40,25 @@ export default function Register() {
 		postalCode,
 		setPostalCode,
 	} = useAddressSearch();
+
+	const handleAddressKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (addressSuggestions.length === 0) return;
+
+		if (e.key === "ArrowDown") {
+			e.preventDefault();
+			setHighlightedIndex(
+				(prev) => (prev + 1) % addressSuggestions.length,
+			);
+		} else if (e.key === "ArrowUp") {
+			e.preventDefault();
+			setHighlightedIndex((prev) =>
+				prev <= 0 ? addressSuggestions.length - 1 : prev - 1,
+			);
+		} else if (e.key === "Enter" && highlightedIndex >= 0) {
+			e.preventDefault();
+			selectSuggestion(addressSuggestions[highlightedIndex]);
+		}
+	};
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -336,7 +357,7 @@ export default function Register() {
 								)}
 							</div>
 							{!manualMode && (
-								<>
+								<div className="relative">
 									<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
 										<input
 											id="register-address"
@@ -344,15 +365,17 @@ export default function Register() {
 											onChange={(e) =>
 												setAddressQuery(e.target.value)
 											}
+											onKeyDown={handleAddressKeyDown}
 											type="text"
 											placeholder="12 allée de l'exemple, 15800 Polminhac"
 											className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+											autoComplete="off"
 										/>
 									</section>
 									{addressSuggestions.length > 0 && (
-										<div className="mt-2 flex flex-col gap-2">
+										<div className="absolute inset-x-0 top-full z-20 mt-2 flex flex-col gap-1 rounded-2xl border border-primary/15 bg-base-300 p-2 shadow-lg">
 											{addressSuggestions.map(
-												(suggestion) => (
+												(suggestion, index) => (
 													<button
 														key={suggestion.name}
 														type="button"
@@ -361,7 +384,17 @@ export default function Register() {
 																suggestion,
 															)
 														}
-														className="rounded-2xl border border-primary/15 bg-base-300 p-3 text-left"
+														onMouseEnter={() =>
+															setHighlightedIndex(
+																index,
+															)
+														}
+														className={`rounded-xl p-3 text-left ${
+															index ===
+															highlightedIndex
+																? "bg-primary/10"
+																: ""
+														}`}
 													>
 														<span className="block font-bold text-primary">
 															{suggestion.name}
@@ -376,7 +409,7 @@ export default function Register() {
 											)}
 										</div>
 									)}
-								</>
+								</div>
 							)}
 							{manualMode && (
 								<div className="flex flex-col gap-2">

@@ -60,7 +60,7 @@ async function search(query: string): Promise<
 		longitude: number;
 	}[]
 > {
-	const url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}`;
+	const url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5`;
 
 	try {
 		const res = await fetch(url, {

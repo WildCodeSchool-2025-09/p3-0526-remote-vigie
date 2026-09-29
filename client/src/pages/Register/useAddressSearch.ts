@@ -16,6 +16,7 @@ export default function useAddressSearch() {
 		useState(false);
 	const [selectedAddress, setSelectedAddress] =
 		useState<AddressSuggestion | null>(null);
+	const [highlightedIndex, setHighlightedIndex] = useState(-1);
 	const skipNextSearchRef = useRef(false);
 
 	function selectSuggestion(suggestion: AddressSuggestion) {
@@ -23,6 +24,7 @@ export default function useAddressSearch() {
 		setSelectedAddress(suggestion);
 		setAddressQuery(suggestion.name);
 		setAddressSuggestions([]);
+		setHighlightedIndex(-1);
 	}
 
 	useEffect(() => {
@@ -33,6 +35,7 @@ export default function useAddressSearch() {
 
 		if (addressQuery.length < 3) {
 			setAddressSuggestions([]);
+			setHighlightedIndex(-1);
 			return;
 		}
 
@@ -47,6 +50,7 @@ export default function useAddressSearch() {
 			if (result.status === "ok") {
 				setAddressSuggestions(result.suggestions);
 				setAddressServiceUnavailable(false);
+				setHighlightedIndex(-1);
 			}
 		}, 300);
 
@@ -64,6 +68,8 @@ export default function useAddressSearch() {
 		selectedAddress,
 		setSelectedAddress,
 		selectSuggestion,
+		highlightedIndex,
+		setHighlightedIndex,
 		addressServiceUnavailable,
 		setAddressServiceUnavailable,
 		manualMode,
