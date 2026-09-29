@@ -1,170 +1,50 @@
 import bgHome from "@/assets/images/background-home.jpg";
 import Icon from "@/components/Icon/Icon";
+import AddressField from "@/components/Register/AddressField/AddressField";
 import PasswordStrengthMeter from "@/components/Register/PasswordStrengthMeter/PasswordStrengthMeter";
 import SubmitRegister from "@/components/Register/SubmitRegister/SubmitRegister";
-import { register } from "@/services/userService";
-import type { RegisterFieldError } from "@/types/register";
-import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import useAddressSearch from "./useAddressSearch";
 import usePasswordStrength from "./usePasswordStrength";
+import useRegisterSubmit from "./useRegisterSubmit";
 
 export default function Register() {
 	const navigate = useNavigate();
 
-	const pseudoRef = useRef<HTMLInputElement>(null);
-	const emailRef = useRef<HTMLInputElement>(null);
-
-	const [password, setPassword] = useState("");
-	const { score, label } = usePasswordStrength(password);
-	const [confirmPassword, setConfirmPassword] = useState("");
-	const [showPassword, setShowPassword] = useState(false);
-	const [cguAccepted, setCguAccepted] = useState(false);
-	const [fieldErrors, setFieldErrors] = useState<RegisterFieldError>({});
-	const [submitting, setSubmitting] = useState(false);
-	const [serverError, setServerError] = useState<string | null>(null);
-
+	const addressSearch = useAddressSearch();
 	const {
-		addressQuery,
-		setAddressQuery,
-		addressSuggestions,
 		selectedAddress,
-		selectSuggestion,
-		highlightedIndex,
-		setHighlightedIndex,
 		addressServiceUnavailable,
 		manualMode,
-		setManualMode,
 		city,
-		setCity,
 		postalCode,
-		setPostalCode,
-	} = useAddressSearch();
+	} = addressSearch;
 
-	const handleAddressKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if (addressSuggestions.length === 0) return;
+	const {
+		pseudoRef,
+		emailRef,
+		password,
+		setPassword,
+		confirmPassword,
+		setConfirmPassword,
+		showPassword,
+		setShowPassword,
+		cguAccepted,
+		setCguAccepted,
+		fieldErrors,
+		submitting,
+		serverError,
+		handleSubmit,
+	} = useRegisterSubmit({
+		selectedAddress,
+		addressServiceUnavailable,
+		manualMode,
+		city,
+		postalCode,
+	});
 
-		if (e.key === "ArrowDown") {
-			e.preventDefault();
-			setHighlightedIndex(
-				(prev) => (prev + 1) % addressSuggestions.length,
-			);
-		} else if (e.key === "ArrowUp") {
-			e.preventDefault();
-			setHighlightedIndex((prev) =>
-				prev <= 0 ? addressSuggestions.length - 1 : prev - 1,
-			);
-		} else if (e.key === "Enter" && highlightedIndex >= 0) {
-			e.preventDefault();
-			selectSuggestion(addressSuggestions[highlightedIndex]);
-		}
-	};
+	const { score, label } = usePasswordStrength(password);
 
-	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-
-		const pseudo = pseudoRef.current?.value.trim() ?? "";
-		const email = emailRef.current?.value.trim() ?? "";
-
-		const errors: RegisterFieldError = {};
-
-		if (pseudo === "") {
-			errors.pseudo = "Vous devez renseigner un pseudo";
-		} else if (pseudo.includes("@")) {
-			errors.pseudo = "Votre pseudo ne peut pas contenir de @";
-		}
-
-		if (email === "") {
-			errors.email = "Vous devez saisir une adresse email";
-		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-			errors.email = "Vous devez saisir une adresse email valide";
-		}
-
-		if (password === "") {
-			errors.password = "Vous devez saisir un mot de passe";
-		} else if (password.length < 8) {
-			errors.password =
-				"Votre mot de passe doit faire au moins 8 caractères";
-		} else if (
-			!/[A-Z]/.test(password) ||
-			!/[0-9]/.test(password) ||
-			!/[^A-Za-z0-9]/.test(password)
-		) {
-			errors.password =
-				"Le mot de passe doit contenir au moins une majuscule, un chiffre et un caractère spécial";
-		} else if (password !== confirmPassword) {
-			errors.password = "Les deux mots de passe doivent correspondre";
-		}
-
-		if (addressServiceUnavailable === true) {
-			errors.address = "Le service d'adresse est indisponible";
-		}
-
-		if (cguAccepted === false) {
-			errors.cgu =
-				"Vous devez accepter les conditions générales d'utilisation";
-		}
-
-		if (!manualMode && selectedAddress == null) {
-			errors.address = "Veuillez sélectionner une adresse.";
-		} else if (
-			manualMode &&
-			(city.trim() === "" || postalCode.trim() === "")
-		) {
-			errors.address = "Veuillez renseigner la ville et le code postal.";
-		}
-
-		if (Object.keys(errors).length > 0) {
-			setFieldErrors(errors);
-			return;
-		}
-
-		setFieldErrors({});
-
-		const address = selectedAddress
-			? {
-					city: selectedAddress.city,
-					postalCode: selectedAddress.postalCode,
-					inseeCode: selectedAddress.inseeCode,
-					latitude: selectedAddress.latitude,
-					longitude: selectedAddress.longitude,
-				}
-			: { city: city.trim(), postalCode: postalCode.trim() };
-
-		setSubmitting(true);
-		const result = await register({
-			pseudo,
-			email,
-			password,
-			cguAccepted,
-			address,
-		});
-		setSubmitting(false);
-
-		if (result.status === "ok") {
-			navigate("/");
-			return;
-		}
-		if (result.status === "invalid") {
-			setFieldErrors(result.errors);
-			return;
-		}
-		if (result.status === "conflict") {
-			setFieldErrors({ [result.field]: result.message });
-			return;
-		}
-		if (result.status === "tooManyRequests") {
-			setPassword("");
-			setConfirmPassword("");
-			setServerError(result.message);
-			return;
-		}
-		setPassword("");
-		setConfirmPassword("");
-		setServerError(
-			"Une erreur est survenue. Veuillez réessayer plus tard.",
-		);
-	};
 	return (
 		<div className="min-h-screen bg-base-100">
 			<header className="relative isolate flex h-44 flex-col shrink-0 justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
@@ -357,149 +237,10 @@ export default function Register() {
 								</div>
 							</section>
 						</div>
-						<div className="flex flex-col gap-1.5">
-							<div className="flex items-center justify-between">
-								<label
-									htmlFor="register-address"
-									className="text-primary"
-								>
-									Votre adresse
-								</label>
-								{manualMode && (
-									<button
-										type="button"
-										onClick={() => setManualMode(false)}
-										aria-label="Revenir à la recherche d'adresse"
-										className="btn btn-square btn-sm rounded-xl border-2 border-primary/15 bg-transparent shadow-none hover:bg-primary/10"
-									>
-										<Icon
-											name="arrowSmallLeft"
-											className="h-4 w-4 fill-primary"
-											aria-hidden="true"
-										/>
-									</button>
-								)}
-							</div>
-							{!manualMode && (
-								<div className="relative">
-									<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
-										<input
-											id="register-address"
-											value={addressQuery}
-											onChange={(e) =>
-												setAddressQuery(e.target.value)
-											}
-											onKeyDown={handleAddressKeyDown}
-											type="text"
-											placeholder="12 allée de l'exemple, 15800 Polminhac"
-											className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
-											autoComplete="off"
-											aria-describedby={
-												fieldErrors.address
-													? "register-address-error"
-													: undefined
-											}
-										/>
-									</section>
-									{addressSuggestions.length > 0 && (
-										<div className="absolute inset-x-0 top-full z-20 mt-2 flex flex-col gap-1 rounded-2xl border border-primary/15 bg-base-300 p-2 shadow-lg">
-											{addressSuggestions.map(
-												(suggestion, index) => (
-													<button
-														key={suggestion.name}
-														type="button"
-														onClick={() =>
-															selectSuggestion(
-																suggestion,
-															)
-														}
-														onMouseEnter={() =>
-															setHighlightedIndex(
-																index,
-															)
-														}
-														className={`rounded-xl p-3 text-left ${
-															index ===
-															highlightedIndex
-																? "bg-primary/10"
-																: ""
-														}`}
-													>
-														<span className="block font-bold text-primary">
-															{suggestion.name}
-														</span>
-														<span className="block text-sm text-primary/70">
-															{
-																suggestion.postalCode
-															}
-														</span>
-													</button>
-												),
-											)}
-										</div>
-									)}
-								</div>
-							)}
-							{manualMode && (
-								<div className="flex flex-col gap-2">
-									<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
-										<input
-											id="register-city"
-											value={city}
-											onChange={(e) =>
-												setCity(e.target.value)
-											}
-											type="text"
-											placeholder="Ville"
-											className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
-											aria-describedby={
-												fieldErrors.address
-													? "register-address-error"
-													: undefined
-											}
-										/>
-									</section>
-									<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
-										<input
-											id="register-postal-code"
-											value={postalCode}
-											onChange={(e) =>
-												setPostalCode(e.target.value)
-											}
-											type="text"
-											placeholder="Code postal"
-											className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
-											aria-describedby={
-												fieldErrors.address
-													? "register-address-error"
-													: undefined
-											}
-										/>
-									</section>
-								</div>
-							)}
-							{!manualMode && (
-								<button
-									type="button"
-									onClick={() => setManualMode(true)}
-									className="self-start text-sm font-bold text-primary underline"
-								>
-									Je ne trouve pas mon adresse
-								</button>
-							)}
-							<p className="text-xs text-primary">
-								Elle définit la zone où vous serez alerté.
-								Enregistrée comme votre adresse principale.
-							</p>
-							{fieldErrors.address && (
-								<p
-									id="register-address-error"
-									className="text-xs font-semibold text-error"
-								>
-									{fieldErrors.address}
-								</p>
-							)}
-						</div>
+						<AddressField
+							addressSearch={addressSearch}
+							error={fieldErrors.address}
+						/>
 
 						<div className="flex items-start gap-3">
 							<input

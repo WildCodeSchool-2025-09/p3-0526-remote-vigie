@@ -1,13 +1,15 @@
 import type { RequestHandler } from "express";
-import geocodingService from "../../services/geocodingService";
 import { StatusCodes } from "http-status-codes";
-import usersRepository from "./usersRepository";
+import geocodingService from "../../services/geocodingService";
+import mailService from "../../services/mailService";
+import { normalizeEmail } from "../../services/normalize";
 import {
 	generateVerificationToken,
 	hashToken,
 } from "../../services/verificationToken";
-import mailService from "../../services/mailService";
-import { normalizeEmail } from "../../services/normalize";
+import usersRepository from "./usersRepository";
+
+const VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 
 function escapeHtml(value: string): string {
 	return value
@@ -47,6 +49,39 @@ function verificationEmailTemplate({
 `;
 
 	return { subject, html };
+}
+
+async function sendVerificationEmail(
+	userId: number,
+	pseudo: string,
+	email: string,
+): Promise<void> {
+	const verificationToken = generateVerificationToken();
+	const verificationTokenHash = hashToken(verificationToken);
+	const verificationExpiresAt = new Date(
+		Date.now() + VERIFICATION_TOKEN_TTL_MS,
+	);
+
+	await usersRepository.setVerificationToken(
+		userId,
+		verificationTokenHash,
+		verificationExpiresAt,
+	);
+
+	const link = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
+	const { subject, html } = verificationEmailTemplate({ pseudo, link });
+
+	try {
+		const previewUrl = await mailService.send({ to: email, subject, html });
+		console.log(
+			`E-mail de vérification envoyé à ${email}${previewUrl ? ` — aperçu : ${previewUrl}` : ""}`,
+		);
+	} catch (err) {
+		console.error(
+			`Échec d'envoi de l'e-mail de vérification à ${email}`,
+			err,
+		);
+	}
 }
 
 const add: RequestHandler = async (req, res, next) => {
@@ -102,43 +137,14 @@ const add: RequestHandler = async (req, res, next) => {
 			isApproximate,
 		});
 
-		const verificationToken = generateVerificationToken();
-		const verificationTokenHash = hashToken(verificationToken);
-		const verificationExpiresAt = new Date(
-			Date.now() + 24 * 60 * 60 * 1000,
-		);
+		await sendVerificationEmail(userId, body.pseudo, body.email);
 
-		await usersRepository.setVerificationToken(
-			userId,
-			verificationTokenHash,
-			verificationExpiresAt,
-		);
-		const link = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
-		const { subject, html } = verificationEmailTemplate({
-			pseudo: body.pseudo,
-			link,
-		});
-
-		try {
-			const previewUrl = await mailService.send({
-				to: body.email,
-				subject,
-				html,
-			});
-			console.log(
-				`E-mail de vérification envoyé à ${body.email}${previewUrl ? ` — aperçu : ${previewUrl}` : ""}`,
-			);
-		} catch (err) {
-			console.error(
-				`Échec d'envoi de l'e-mail de vérification à ${body.email}`,
-				err,
-			);
-		}
 		res.status(StatusCodes.CREATED).json({ id: userId });
 	} catch (err) {
 		next(err);
 	}
 };
+
 const verifyEmail: RequestHandler = async (req, res, next) => {
 	try {
 		const { token } = req.body as { token: unknown };
@@ -198,39 +204,7 @@ const resendVerification: RequestHandler = async (req, res, next) => {
 		);
 
 		if (user && user.email_verified_at == null) {
-			const verificationToken = generateVerificationToken();
-			const verificationTokenHash = hashToken(verificationToken);
-			const verificationExpiresAt = new Date(
-				Date.now() + 24 * 60 * 60 * 1000,
-			);
-
-			await usersRepository.setVerificationToken(
-				user.id,
-				verificationTokenHash,
-				verificationExpiresAt,
-			);
-
-			const link = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
-			const { subject, html } = verificationEmailTemplate({
-				pseudo: user.pseudo,
-				link,
-			});
-
-			try {
-				const previewUrl = await mailService.send({
-					to: email,
-					subject,
-					html,
-				});
-				console.log(
-					`E-mail de vérification renvoyé à ${email}${previewUrl ? ` — aperçu : ${previewUrl}` : ""}`,
-				);
-			} catch (err) {
-				console.error(
-					`Échec du renvoi de l'e-mail de vérification à ${email}`,
-					err,
-				);
-			}
+			await sendVerificationEmail(user.id, user.pseudo, email);
 		}
 
 		res.status(StatusCodes.OK).json({
