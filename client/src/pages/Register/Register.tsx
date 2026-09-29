@@ -7,6 +7,7 @@ import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import useAddressSearch from "./useAddressSearch";
 import usePasswordStrength from "./usePasswordStrength";
+import { register } from "@/services/userService";
 
 export default function Register() {
 	const navigate = useNavigate();
@@ -21,6 +22,8 @@ export default function Register() {
 	const [cguAccepted, setCguAccepted] = useState(false);
 	const [fieldErrors, setFieldErrors] = useState<RegisterFieldError>({});
 	const [submitting, setSubmitting] = useState(false);
+	const [serverError, setServerError] = useState<string | null>(null);
+
 	const {
 		addressQuery,
 		setAddressQuery,
@@ -36,7 +39,7 @@ export default function Register() {
 		setPostalCode,
 	} = useAddressSearch();
 
-	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		const pseudo = pseudoRef.current?.value.trim() ?? "";
@@ -80,14 +83,67 @@ export default function Register() {
 			errors.cgu =
 				"Vous devez accepter les conditions générales d'utilisation";
 		}
+
+		if (!manualMode && selectedAddress == null) {
+			errors.address = "Veuillez sélectionner une adresse.";
+		} else if (
+			manualMode &&
+			(city.trim() === "" || postalCode.trim() === "")
+		) {
+			errors.address = "Veuillez renseigner la ville et le code postal.";
+		}
+
 		if (Object.keys(errors).length > 0) {
 			setFieldErrors(errors);
 			return;
 		}
 
 		setFieldErrors({});
-	};
 
+		const address = selectedAddress
+			? {
+					city: selectedAddress.city,
+					postalCode: selectedAddress.postalCode,
+					inseeCode: selectedAddress.inseeCode,
+					latitude: selectedAddress.latitude,
+					longitude: selectedAddress.longitude,
+				}
+			: { city: city.trim(), postalCode: postalCode.trim() };
+
+		setSubmitting(true);
+		const result = await register({
+			pseudo,
+			email,
+			password,
+			cguAccepted,
+			address,
+		});
+		setSubmitting(false);
+
+		if (result.status === "ok") {
+			navigate("/");
+			return;
+		}
+		if (result.status === "invalid") {
+			setFieldErrors(result.errors);
+			return;
+		}
+		if (result.status === "conflict") {
+			setFieldErrors({ [result.field]: result.message });
+			return;
+		}
+		if (result.status === "tooManyRequests") {
+			setPassword("");
+			setConfirmPassword("");
+			setServerError(result.message);
+			return;
+		}
+		setPassword("");
+		setConfirmPassword("");
+		setServerError(
+			"Une erreur est survenue. Veuillez réessayer plus tard.",
+		);
+	};
 	return (
 		<div className="min-h-screen bg-base-100">
 			<header className="relative isolate flex h-44 flex-col shrink-0 justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
@@ -404,6 +460,11 @@ export default function Register() {
 					</div>
 				</section>
 				<section className="text-center">
+					{serverError && (
+						<p className="mb-3 text-sm font-semibold text-error">
+							{serverError}
+						</p>
+					)}
 					<SubmitRegister submitting={submitting} />
 					<p className="mt-3 text-sm text-primary">
 						Déjà inscrit ?{" "}
