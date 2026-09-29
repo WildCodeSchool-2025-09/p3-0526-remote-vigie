@@ -113,3 +113,34 @@ export async function verifyEmail(token: string): Promise<VerifyEmailResult> {
 		};
 	}
 }
+
+type ResendVerificationResult =
+	| { status: "ok"; message: string }
+	| { status: "tooManyRequests"; message: string }
+	| { status: "error" };
+
+export async function resendVerification(
+	email: string,
+): Promise<ResendVerificationResult> {
+	try {
+		const res = await apiFetch("/api/users/resend-verification", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ email }),
+		});
+		const body = (await res.json()) as { message?: string };
+
+		if (res.status === 429) {
+			return {
+				status: "tooManyRequests",
+				message: body.message ?? "Trop de demandes. Réessayez plus tard.",
+			};
+		}
+
+		if (!res.ok) return { status: "error" };
+
+		return { status: "ok", message: body.message ?? "" };
+	} catch {
+		return { status: "error" };
+	}
+}
