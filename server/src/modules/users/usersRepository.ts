@@ -19,7 +19,7 @@ class UsersRepository {
 
 	async findByEmailNormalized(emailNormalized: string) {
 		const [rows] = await databaseClient.query<Rows>(
-			"SELECT id FROM user WHERE email_normalized = ?",
+			"SELECT id, pseudo, email_verified_at FROM user WHERE email_normalized = ?",
 			[emailNormalized],
 		);
 		return rows[0];

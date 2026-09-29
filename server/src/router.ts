@@ -15,6 +15,7 @@ import checkUserUniqueness from "./services/checkUserUniqueness";
 import authActions from "./modules/auth/authActions";
 import usersActions from "./modules/users/usersActions";
 import checkRegisterRateLimit from "./services/checkRegisterRateLimit";
+import checkResendVerificationRateLimit from "./services/checkResendVerificationRateLimit";
 
 const router = express.Router();
 
@@ -70,5 +71,10 @@ router.post(
 	usersActions.add,
 );
 router.post("/api/users/verify-email", usersActions.verifyEmail);
+router.post(
+	"/api/users/resend-verification",
+	checkResendVerificationRateLimit,
+	usersActions.resendVerification,
+);
 
 export default router;

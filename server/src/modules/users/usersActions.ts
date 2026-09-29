@@ -7,6 +7,7 @@ import {
 	hashToken,
 } from "../../services/verificationToken";
 import mailService from "../../services/mailService";
+import { normalizeEmail } from "../../services/normalize";
 
 function escapeHtml(value: string): string {
 	return value
@@ -180,7 +181,69 @@ const verifyEmail: RequestHandler = async (req, res, next) => {
 	}
 };
 
+const resendVerification: RequestHandler = async (req, res, next) => {
+	try {
+		const { email } = req.body as { email: unknown };
+
+		if (typeof email !== "string" || email.trim() === "") {
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_input",
+				message: "Adresse e-mail manquante.",
+			});
+			return;
+		}
+
+		const user = await usersRepository.findByEmailNormalized(
+			normalizeEmail(email),
+		);
+
+		if (user && user.email_verified_at == null) {
+			const verificationToken = generateVerificationToken();
+			const verificationTokenHash = hashToken(verificationToken);
+			const verificationExpiresAt = new Date(
+				Date.now() + 24 * 60 * 60 * 1000,
+			);
+
+			await usersRepository.setVerificationToken(
+				user.id,
+				verificationTokenHash,
+				verificationExpiresAt,
+			);
+
+			const link = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
+			const { subject, html } = verificationEmailTemplate({
+				pseudo: user.pseudo,
+				link,
+			});
+
+			try {
+				const previewUrl = await mailService.send({
+					to: email,
+					subject,
+					html,
+				});
+				console.log(
+					`E-mail de vérification renvoyé à ${email}${previewUrl ? ` — aperçu : ${previewUrl}` : ""}`,
+				);
+			} catch (err) {
+				console.error(
+					`Échec du renvoi de l'e-mail de vérification à ${email}`,
+					err,
+				);
+			}
+		}
+
+		res.status(StatusCodes.OK).json({
+			message:
+				"Si un compte existe avec cette adresse et n'est pas encore vérifié, un nouvel e-mail vient d'être envoyé.",
+		});
+	} catch (err) {
+		next(err);
+	}
+};
+
 export default {
 	add,
 	verifyEmail,
+	resendVerification,
 };
