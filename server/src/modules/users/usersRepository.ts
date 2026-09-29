@@ -19,7 +19,7 @@ class UsersRepository {
 
 	async findByEmailNormalized(emailNormalized: string) {
 		const [rows] = await databaseClient.query<Rows>(
-			"SELECT id, pseudo, email_verified_at FROM user WHERE email_normalized = ?",
+			"SELECT id, pseudo, email_verified_at, password_hash FROM user WHERE email_normalized = ?",
 			[emailNormalized],
 		);
 		return rows[0];
@@ -27,10 +27,14 @@ class UsersRepository {
 
 	async findByPseudoNormalized(pseudoNormalized: string) {
 		const [rows] = await databaseClient.query<Rows>(
-			"SELECT id FROM user WHERE pseudo_normalized = ?",
+			"SELECT id, pseudo, email_verified_at, password_hash FROM user WHERE pseudo_normalized = ?",
 			[pseudoNormalized],
 		);
 		return rows[0];
+	}
+
+	async remove(userId: number) {
+		await databaseClient.query("DELETE FROM user WHERE id = ?", [userId]);
 	}
 
 	async create(data: {
