@@ -6,18 +6,31 @@
 
 let authToken: string | null = null;
 
+let onUnauthorized: (() => void) | null = null;
+
+export function setOnUnauthorized(handler: (() => void) | null) {
+	onUnauthorized = handler;
+}
+
 export function setAuthToken(token: string | null) {
 	authToken = token;
 }
 
-export function apiFetch(path: string, options: RequestInit = {}) {
+export async function apiFetch(path: string, options: RequestInit = {}) {
+	const sentToken = authToken;
 	const headers = new Headers(options.headers);
-	if (authToken != null) {
-		headers.set("Authorization", `Bearer ${authToken}`);
+	if (sentToken != null) {
+		headers.set("Authorization", `Bearer ${sentToken}`);
 	}
 
-	return fetch(`${import.meta.env.VITE_API_URL}${path}`, {
+	const response = await fetch(`${import.meta.env.VITE_API_URL}${path}`, {
 		...options,
 		headers,
 	});
+
+	if (response.status === 401 && sentToken != null) {
+		onUnauthorized?.();
+	}
+
+	return response;
 }

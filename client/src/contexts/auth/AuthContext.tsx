@@ -1,7 +1,13 @@
-import { setAuthToken } from "@/services/apiClient";
+import { setAuthToken, setOnUnauthorized } from "@/services/apiClient";
 import { login as loginRequest, me as meRequest } from "@/services/authActions";
 import type { AuthUser } from "@/types/auth";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useState,
+} from "react";
 import type { ReactNode } from "react";
 
 type AuthContextValue = {
@@ -44,11 +50,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		setUser(fetchedUser);
 	};
 
-	const logout = () => {
+	const logout = useCallback(() => {
 		localStorage.removeItem("vigie_token");
 		setAuthToken(null);
 		setUser(null);
-	};
+	}, []);
+
+	useEffect(() => {
+		setOnUnauthorized(logout);
+		return () => setOnUnauthorized(null);
+	}, [logout]);
 
 	return (
 		<AuthContext.Provider value={{ user, loading, login, logout }}>
