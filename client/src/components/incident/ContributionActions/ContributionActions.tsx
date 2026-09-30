@@ -1,6 +1,7 @@
 import Icon from "@/components/Icon/Icon";
 import { createContribution } from "@/services/incidentService";
 import type { IncidentCounts } from "@/types/incidentDetails";
+import type { ReactNode } from "react";
 import { useState } from "react";
 
 type ContributionType = "confirm" | "deny";
@@ -14,6 +15,7 @@ type Props = {
 		myContribution: ContributionType;
 	}) => void;
 	disabled?: boolean;
+	trailingAction?: ReactNode;
 };
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -33,6 +35,7 @@ export default function ContributionActions({
 	myContribution,
 	onContributed,
 	disabled = false,
+	trailingAction,
 }: Props) {
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -116,6 +119,7 @@ export default function ContributionActions({
 					/>
 					{myContribution === "deny" ? "Infirmé" : "Infirmer"}
 				</button>
+				{trailingAction}
 			</div>
 
 			<p aria-live="polite" className="sr-only">
