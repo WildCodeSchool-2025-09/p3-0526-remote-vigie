@@ -76,7 +76,7 @@ export default function AddressField({
 							onKeyDown={handleAddressKeyDown}
 							type="text"
 							placeholder="12 allée de l'exemple, 15800 Polminhac"
-							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 							autoComplete="off"
 							aria-describedby={
 								error ? "register-address-error" : undefined
@@ -123,7 +123,7 @@ export default function AddressField({
 							onChange={(e) => setCity(e.target.value)}
 							type="text"
 							placeholder="Ville"
-							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 							aria-describedby={
 								error ? "register-address-error" : undefined
 							}
@@ -139,7 +139,7 @@ export default function AddressField({
 							onChange={(e) => setPostalCode(e.target.value)}
 							type="text"
 							placeholder="Code postal"
-							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 							aria-describedby={
 								error ? "register-address-error" : undefined
 							}
