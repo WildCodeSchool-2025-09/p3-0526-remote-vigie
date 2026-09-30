@@ -27,8 +27,15 @@ export default function useAddressSearch() {
 		setHighlightedIndex(-1);
 	}
 
+	function updateAddressQuery(value: string) {
+		skipNextSearchRef.current = false;
+		setSelectedAddress(null);
+		setAddressQuery(value);
+	}
+
 	function enterManualMode() {
 		setSelectedAddress(null);
+		setAddressServiceUnavailable(false);
 		setManualMode(true);
 	}
 
@@ -37,8 +44,6 @@ export default function useAddressSearch() {
 			skipNextSearchRef.current = false;
 			return;
 		}
-
-		setSelectedAddress(null);
 
 		if (addressQuery.length < 3) {
 			setAddressSuggestions([]);
@@ -70,6 +75,7 @@ export default function useAddressSearch() {
 	return {
 		addressQuery,
 		setAddressQuery,
+		updateAddressQuery,
 		addressSuggestions,
 		setAddressSuggestions,
 		selectedAddress,

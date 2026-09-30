@@ -218,6 +218,11 @@ export default function Register() {
 										}
 										placeholder="..."
 										className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+										aria-describedby={
+											fieldErrors.password
+												? "register-password-error"
+												: undefined
+										}
 									/>
 									{confirmPassword.length > 0 && (
 										<Icon

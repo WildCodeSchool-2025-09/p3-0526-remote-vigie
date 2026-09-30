@@ -7,6 +7,7 @@ const validBody = {
 	email: "test@test.com",
 	password: "Password1!",
 	cguAccepted: true,
+	address: { city: "Paris", postalCode: "75001" },
 };
 
 // Fabrique de faux req/res/next et appelle le middleware avec un body donné —

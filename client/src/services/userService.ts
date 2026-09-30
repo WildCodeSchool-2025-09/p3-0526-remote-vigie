@@ -20,7 +20,7 @@ export type RegisterPayload = {
 type RegisterResult =
 	| { status: "ok"; id: number }
 	| { status: "invalid"; errors: RegisterFieldError }
-	| { status: "conflict"; field: "email" | "pseudo"; message: string }
+	| { status: "conflict"; field: "email" | "pseudo" | null; message: string }
 	| { status: "tooManyRequests"; message: string }
 	| { status: "error" };
 
@@ -54,11 +54,11 @@ export async function register(
 				error: string;
 				message: string;
 			};
-			return {
-				status: "conflict",
-				field: body.error === "email_already_used" ? "email" : "pseudo",
-				message: body.message,
-			};
+			let field: "email" | "pseudo" | null = null;
+			if (body.error === "email_already_used") field = "email";
+			else if (body.error === "pseudo_already_used") field = "pseudo";
+
+			return { status: "conflict", field, message: body.message };
 		}
 
 		if (res.status === 429) {

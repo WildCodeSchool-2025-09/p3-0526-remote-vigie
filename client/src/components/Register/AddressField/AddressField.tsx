@@ -12,7 +12,7 @@ export default function AddressField({
 }: AddressFieldProps) {
 	const {
 		addressQuery,
-		setAddressQuery,
+		updateAddressQuery,
 		addressSuggestions,
 		selectSuggestion,
 		enterManualMode,
@@ -72,7 +72,7 @@ export default function AddressField({
 						<input
 							id="register-address"
 							value={addressQuery}
-							onChange={(e) => setAddressQuery(e.target.value)}
+							onChange={(e) => updateAddressQuery(e.target.value)}
 							onKeyDown={handleAddressKeyDown}
 							type="text"
 							placeholder="12 allée de l'exemple, 15800 Polminhac"

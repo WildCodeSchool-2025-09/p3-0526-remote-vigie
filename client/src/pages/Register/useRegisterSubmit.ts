@@ -1,7 +1,7 @@
 import type { AddressSuggestion } from "@/services/addressService";
 import { register } from "@/services/userService";
 import type { RegisterFieldError } from "@/types/register";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 type Params = {
@@ -31,6 +31,25 @@ export default function useRegisterSubmit({
 	const [fieldErrors, setFieldErrors] = useState<RegisterFieldError>({});
 	const [submitting, setSubmitting] = useState(false);
 	const [serverError, setServerError] = useState<string | null>(null);
+
+	useEffect(() => {
+		const fieldOrder: (keyof RegisterFieldError)[] = [
+			"pseudo",
+			"email",
+			"password",
+			"address",
+			"cgu",
+		];
+		const firstField = fieldOrder.find((field) => fieldErrors[field]);
+		if (!firstField) return;
+
+		const id =
+			firstField === "address" && manualMode
+				? "register-city"
+				: `register-${firstField}`;
+
+		document.getElementById(id)?.focus();
+	}, [fieldErrors, manualMode]);
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -69,16 +88,14 @@ export default function useRegisterSubmit({
 			errors.password = "Les deux mots de passe doivent correspondre";
 		}
 
-		if (addressServiceUnavailable === true) {
-			errors.address = "Le service d'adresse est indisponible";
-		}
-
 		if (cguAccepted === false) {
 			errors.cgu =
 				"Vous devez accepter les conditions générales d'utilisation";
 		}
 
-		if (!manualMode && selectedAddress == null) {
+		if (!manualMode && addressServiceUnavailable === true) {
+			errors.address = "Le service d'adresse est indisponible";
+		} else if (!manualMode && selectedAddress == null) {
 			errors.address = "Veuillez sélectionner une adresse.";
 		} else if (
 			manualMode &&
@@ -127,7 +144,11 @@ export default function useRegisterSubmit({
 			return;
 		}
 		if (result.status === "conflict") {
-			setFieldErrors({ [result.field]: result.message });
+			if (result.field) {
+				setFieldErrors({ [result.field]: result.message });
+			} else {
+				setServerError(result.message);
+			}
 			return;
 		}
 		if (result.status === "tooManyRequests") {
