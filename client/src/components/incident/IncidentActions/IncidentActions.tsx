@@ -1,11 +1,16 @@
 import Icon from "@/components/Icon/Icon";
 import ContributionActions from "@/components/incident/ContributionActions/ContributionActions";
-import { useAuth } from "@/contexts/auth/AuthContext";
-import type { IncidentCounts, IncidentStatus } from "@/types/incidentDetails";
+import ShareButton from "@/components/incident/ShareButton/ShareButton";
+import { useAuth } from "@/contexts/AuthContext";
+import type {
+	Incident,
+	IncidentCounts,
+	IncidentStatus,
+} from "@/types/incidentDetails";
 import { formatDateTime } from "@/utils/formatDate";
 import { Link, useLocation, useNavigate } from "react-router";
 
-type Props = {
+type Props = Pick<Incident, "types" | "city" | "latitude" | "longitude"> & {
 	incidentId: number;
 	authorId: number;
 	status: IncidentStatus;
@@ -18,10 +23,14 @@ type Props = {
 	}) => void;
 };
 
-// Emplacement des actions sur l'incident : Confirmer/Infirmer (US14), et à terme le partage (US15)
+// Emplacement des actions sur l'incident : Confirmer/Infirmer (US14), Partager (US15)
 export default function IncidentActions({
 	incidentId,
 	authorId,
+	types,
+	city,
+	latitude,
+	longitude,
 	status,
 	expiresAt,
 	myContribution,
@@ -35,7 +44,16 @@ export default function IncidentActions({
 		return null;
 	}
 
-	// `expires_at` sert de date de résolution : c'est le seul chemin vers "resolved" (cron US12), donc la valeur la porte déjà.
+	const shareButton = (
+		<ShareButton
+			id={incidentId}
+			types={types}
+			city={city}
+			latitude={latitude}
+			longitude={longitude}
+		/>
+	);
+
 	if (status === "resolved") {
 		return (
 			<div className="flex flex-col gap-3 border-t border-primary/10 pt-4">
@@ -51,19 +69,24 @@ export default function IncidentActions({
 					</p>
 				</div>
 
-				<button
-					type="button"
-					onClick={() => navigate("/")}
-					className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
-				>
-					Retour à l'accueil
-				</button>
+				<div className="flex gap-3">
+					<button
+						type="button"
+						onClick={() => navigate("/")}
+						className="btn btn-accent btn-md grow rounded-full border-none px-5 font-bold"
+					>
+						Retour à l'accueil
+					</button>
+					{shareButton}
+				</div>
 			</div>
 		);
 	}
 
 	if (user != null && user.id === authorId) {
-		return null;
+		return (
+			<div className="border-t border-primary/10 pt-4">{shareButton}</div>
+		);
 	}
 
 	if (user == null) {
@@ -78,6 +101,7 @@ export default function IncidentActions({
 					myContribution={null}
 					onContributed={onContributed}
 					disabled
+					trailingAction={shareButton}
 				/>
 
 				<Link
@@ -97,6 +121,7 @@ export default function IncidentActions({
 				incidentId={incidentId}
 				myContribution={myContribution}
 				onContributed={onContributed}
+				trailingAction={shareButton}
 			/>
 		</div>
 	);

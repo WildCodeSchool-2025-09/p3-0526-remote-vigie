@@ -148,7 +148,9 @@ class IncidentRepository {
 			`SELECT t.code, t.label, t.icon, t.color, t.safety_instructions
 			FROM incident_incident_type AS iit
 			INNER JOIN incident_type AS t ON t.id = iit.incident_type_id
-			WHERE iit.incident_id = ?`,
+			INNER JOIN danger_level AS tdl ON tdl.id = t.danger_level_id
+			WHERE iit.incident_id = ?
+			ORDER BY tdl.weight DESC, t.id ASC`,
 			[id],
 		);
 
