@@ -92,6 +92,7 @@ const add: RequestHandler = async (req, res, next) => {
 			password_hash: string;
 			emailNormalized: string;
 			pseudoNormalized: string;
+			reclaimUserIds: number[];
 			address: {
 				city: string;
 				postalCode: string;
@@ -135,12 +136,27 @@ const add: RequestHandler = async (req, res, next) => {
 			latitude,
 			longitude,
 			isApproximate,
+			reclaimUserIds: body.reclaimUserIds,
 		});
 
 		await sendVerificationEmail(userId, body.pseudo, body.email);
 
 		res.status(StatusCodes.CREATED).json({ id: userId });
 	} catch (err) {
+		if (
+			err &&
+			typeof err === "object" &&
+			"code" in err &&
+			err.code === "ER_DUP_ENTRY"
+		) {
+			res.status(StatusCodes.CONFLICT).json({
+				error: "already_used",
+				message:
+					"Ce pseudo ou cette adresse e-mail vient d'être pris. Veuillez réessayer.",
+			});
+			return;
+		}
+
 		next(err);
 	}
 };

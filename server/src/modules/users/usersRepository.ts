@@ -51,10 +51,18 @@ class UsersRepository {
 		latitude: number;
 		longitude: number;
 		isApproximate: boolean;
+		reclaimUserIds: number[];
 	}): Promise<number> {
 		const connection = await databaseClient.getConnection();
 		try {
 			await connection.beginTransaction();
+
+			if (data.reclaimUserIds.length > 0) {
+				await connection.query(
+					"DELETE FROM user WHERE id IN (?) AND email_verified_at IS NULL",
+					[data.reclaimUserIds],
+				);
+			}
 
 			const [result] = await connection.query<Result>(
 				`INSERT INTO user

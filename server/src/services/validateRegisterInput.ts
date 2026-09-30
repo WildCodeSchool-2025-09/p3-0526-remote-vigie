@@ -1,12 +1,59 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 
+function isValidAddress(address: unknown): boolean {
+	if (typeof address !== "object" || address === null) {
+		return false;
+	}
+
+	const { city, postalCode, inseeCode, latitude, longitude } = address as {
+		city: unknown;
+		postalCode: unknown;
+		inseeCode?: unknown;
+		latitude?: unknown;
+		longitude?: unknown;
+	};
+
+	if (typeof city !== "string" || city.trim() === "" || city.length > 100) {
+		return false;
+	}
+
+	if (typeof postalCode !== "string" || !/^\d{5}$/.test(postalCode)) {
+		return false;
+	}
+
+	if (
+		inseeCode !== undefined &&
+		(typeof inseeCode !== "string" ||
+			!/^(\d{5}|2[AB]\d{3})$/i.test(inseeCode))
+	) {
+		return false;
+	}
+
+	if (
+		latitude !== undefined &&
+		(typeof latitude !== "number" || latitude < -90 || latitude > 90)
+	) {
+		return false;
+	}
+
+	if (
+		longitude !== undefined &&
+		(typeof longitude !== "number" || longitude < -180 || longitude > 180)
+	) {
+		return false;
+	}
+
+	return true;
+}
+
 const validateRegisterInput: RequestHandler = (req, res, next) => {
 	const body = req.body as {
 		pseudo: unknown;
 		email: unknown;
 		password: unknown;
 		cguAccepted: unknown;
+		address: unknown;
 	};
 
 	const errors: Record<string, string> = {};
@@ -14,7 +61,8 @@ const validateRegisterInput: RequestHandler = (req, res, next) => {
 	if (
 		typeof body.pseudo !== "string" ||
 		body.pseudo.trim() === "" ||
-		body.pseudo.includes("@")
+		body.pseudo.includes("@") ||
+		body.pseudo.length > 30
 	) {
 		errors.pseudo = "Veuillez renseigner un pseudo valide.";
 	}
@@ -22,6 +70,7 @@ const validateRegisterInput: RequestHandler = (req, res, next) => {
 	if (
 		typeof body.email !== "string" ||
 		body.email.trim() === "" ||
+		body.email.length > 255 ||
 		!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)
 	) {
 		errors.email = "Veuillez renseigner une adresse e-mail valide.";
@@ -40,6 +89,10 @@ const validateRegisterInput: RequestHandler = (req, res, next) => {
 
 	if (typeof body.cguAccepted !== "boolean" || body.cguAccepted === false) {
 		errors.cgu = "Vous devez accepter les CGU.";
+	}
+
+	if (!isValidAddress(body.address)) {
+		errors.address = "Veuillez renseigner une adresse valide.";
 	}
 
 	if (Object.keys(errors).length > 0) {
