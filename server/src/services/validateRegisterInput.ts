@@ -6,12 +6,22 @@ function isValidAddress(address: unknown): boolean {
 		return false;
 	}
 
-	const { city, postalCode, inseeCode, latitude, longitude } = address as {
+	const {
+		city,
+		postalCode,
+		inseeCode,
+		latitude,
+		longitude,
+		streetLine,
+		isApproximate,
+	} = address as {
 		city: unknown;
 		postalCode: unknown;
 		inseeCode?: unknown;
 		latitude?: unknown;
 		longitude?: unknown;
+		streetLine?: unknown;
+		isApproximate?: unknown;
 	};
 
 	if (typeof city !== "string" || city.trim() === "" || city.length > 100) {
@@ -41,6 +51,17 @@ function isValidAddress(address: unknown): boolean {
 		longitude !== undefined &&
 		(typeof longitude !== "number" || longitude < -180 || longitude > 180)
 	) {
+		return false;
+	}
+
+	if (
+		streetLine !== undefined &&
+		(typeof streetLine !== "string" || streetLine.length > 255)
+	) {
+		return false;
+	}
+
+	if (isApproximate !== undefined && typeof isApproximate !== "boolean") {
 		return false;
 	}
 

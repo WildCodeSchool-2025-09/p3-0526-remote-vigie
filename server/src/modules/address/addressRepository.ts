@@ -20,6 +20,7 @@ class AddressRepository {
 FROM address
 INNER JOIN user ON user.id = address.user_id
 WHERE address.user_id != ?
+AND address.is_approximate = 0
 AND ST_Distance_Sphere(
 	POINT(address.longitude, address.latitude),
 	POINT(?, ?)

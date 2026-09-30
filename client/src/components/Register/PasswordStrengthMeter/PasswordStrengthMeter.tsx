@@ -6,7 +6,7 @@ type PasswordStrengthMeterProps = {
 // Inverse des niveaux de gravité des incidents (theme.css) : --level-1 (vert,
 // "faible" danger) devient le meilleur score, --level-5 (rouge, "critique")
 // le pire — d'où l'ordre décroissant ici.
-const SEGMENT_LEVELS = [5, 4, 2, 1];
+const SEGMENT_LEVELS = [5, 4, 3, 2, 1];
 
 export default function PasswordStrengthMeter({
 	score,

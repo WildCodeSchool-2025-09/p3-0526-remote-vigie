@@ -58,6 +58,8 @@ async function search(query: string): Promise<
 		inseeCode: string;
 		latitude: number;
 		longitude: number;
+		type: string;
+		streetLine: string;
 	}[]
 > {
 	const url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5`;
@@ -83,6 +85,8 @@ async function search(query: string): Promise<
 				inseeCode: feature.properties.citycode,
 				latitude: feature.geometry.coordinates[1],
 				longitude: feature.geometry.coordinates[0],
+				type: feature.properties.type,
+				streetLine: feature.properties.name,
 			}),
 		);
 	} catch (error) {
@@ -107,35 +111,24 @@ async function geocodeCentroid(
 } | null> {
 	const url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city)}&postcode=${encodeURIComponent(postalCode)}&type=municipality&limit=1`;
 
-	try {
-		const res = await fetch(url, {
-			signal: AbortSignal.timeout(TIMEOUT_MS),
-		});
-		if (!res.ok) {
-			throw new Error(`Response status: ${res.status}`);
-		}
-		const result = await res.json();
-		const feature = result.features?.[0];
+	const res = await fetch(url, {
+		signal: AbortSignal.timeout(TIMEOUT_MS),
+	});
+	if (!res.ok) {
+		throw new Error(`Response status: ${res.status}`);
+	}
+	const result = await res.json();
+	const feature = result.features?.[0];
 
-		if (!feature) {
-			return null;
-		}
-
-		return {
-			inseeCode: feature.properties.citycode,
-			latitude: feature.geometry.coordinates[1],
-			longitude: feature.geometry.coordinates[0],
-		};
-	} catch (error) {
-		console.error(
-			error instanceof Error
-				? error.message
-				: "Erreur inconnue lors de la recherche",
-			{ city, postalCode },
-		);
-
+	if (!feature) {
 		return null;
 	}
+
+	return {
+		inseeCode: feature.properties.citycode,
+		latitude: feature.geometry.coordinates[1],
+		longitude: feature.geometry.coordinates[0],
+	};
 }
 
 export default { reverse, search, geocodeCentroid };

@@ -36,6 +36,8 @@ export type AddressSuggestion = {
 	inseeCode: string;
 	latitude: number;
 	longitude: number;
+	type: string;
+	streetLine: string;
 };
 
 type SearchAddressResult =

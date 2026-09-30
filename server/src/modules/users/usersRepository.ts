@@ -19,7 +19,7 @@ class UsersRepository {
 
 	async findByEmailNormalized(emailNormalized: string) {
 		const [rows] = await databaseClient.query<Rows>(
-			"SELECT id, pseudo, email_verified_at, password_hash FROM user WHERE email_normalized = ?",
+			"SELECT id, pseudo, email, email_verified_at, password_hash FROM user WHERE email_normalized = ?",
 			[emailNormalized],
 		);
 		return rows[0];
@@ -48,6 +48,7 @@ class UsersRepository {
 		postalCode: string;
 		city: string;
 		inseeCode: string;
+		streetLine: string | null;
 		latitude: number;
 		longitude: number;
 		isApproximate: boolean;
@@ -84,14 +85,15 @@ class UsersRepository {
 
 			await connection.query(
 				`INSERT INTO address
-					(user_id, postal_code, city, insee_code,
+					(user_id, postal_code, city, insee_code, street_line,
 					latitude, longitude, is_approximate, is_primary)
-				VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
 				[
 					userId,
 					data.postalCode,
 					data.city,
 					data.inseeCode,
+					data.streetLine,
 					data.latitude,
 					data.longitude,
 					data.isApproximate,

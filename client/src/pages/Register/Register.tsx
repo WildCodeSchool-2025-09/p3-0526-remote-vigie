@@ -96,7 +96,7 @@ export default function Register() {
 									ref={pseudoRef}
 									type="text"
 									placeholder="Votre pseudo"
-									className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+									className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 									aria-describedby={
 										fieldErrors.pseudo
 											? "register-pseudo-error"
@@ -129,7 +129,7 @@ export default function Register() {
 									ref={emailRef}
 									type="text"
 									placeholder="marion.c@exemple.fr"
-									className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+									className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 									aria-describedby={
 										fieldErrors.email
 											? "register-email-error"
@@ -165,7 +165,7 @@ export default function Register() {
 											setPassword(e.target.value)
 										}
 										placeholder="..."
-										className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+										className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 										aria-describedby={
 											fieldErrors.password
 												? "register-password-error"
@@ -217,7 +217,7 @@ export default function Register() {
 											setConfirmPassword(e.target.value)
 										}
 										placeholder="..."
-										className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+										className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 									/>
 									{confirmPassword.length > 0 && (
 										<Icon

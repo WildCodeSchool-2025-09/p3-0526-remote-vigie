@@ -12,6 +12,8 @@ export type RegisterPayload = {
 		inseeCode?: string;
 		latitude?: number;
 		longitude?: number;
+		streetLine?: string;
+		isApproximate?: boolean;
 	};
 };
 
@@ -62,6 +64,18 @@ export async function register(
 		if (res.status === 429) {
 			const body = (await res.json()) as { message: string };
 			return { status: "tooManyRequests", message: body.message };
+		}
+
+		if (res.status === 503) {
+			const body = (await res.json()) as { message?: string };
+			return {
+				status: "invalid",
+				errors: {
+					address:
+						body.message ??
+						"Le service d'adresse est momentanément indisponible.",
+				},
+			};
 		}
 
 		if (!res.ok) return { status: "error" };
@@ -133,7 +147,8 @@ export async function resendVerification(
 		if (res.status === 429) {
 			return {
 				status: "tooManyRequests",
-				message: body.message ?? "Trop de demandes. Réessayez plus tard.",
+				message:
+					body.message ?? "Trop de demandes. Réessayez plus tard.",
 			};
 		}
 

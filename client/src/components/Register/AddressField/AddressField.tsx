@@ -76,7 +76,7 @@ export default function AddressField({
 							onKeyDown={handleAddressKeyDown}
 							type="text"
 							placeholder="12 allée de l'exemple, 15800 Polminhac"
-							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 							autoComplete="off"
 							aria-describedby={
 								error ? "register-address-error" : undefined
@@ -113,6 +113,9 @@ export default function AddressField({
 			)}
 			{manualMode && (
 				<div className="flex flex-col gap-2">
+					<label htmlFor="register-city" className="sr-only">
+						Ville
+					</label>
 					<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
 						<input
 							id="register-city"
@@ -120,12 +123,15 @@ export default function AddressField({
 							onChange={(e) => setCity(e.target.value)}
 							type="text"
 							placeholder="Ville"
-							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 							aria-describedby={
 								error ? "register-address-error" : undefined
 							}
 						/>
 					</section>
+					<label htmlFor="register-postal-code" className="sr-only">
+						Code postal
+					</label>
 					<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
 						<input
 							id="register-postal-code"
@@ -133,7 +139,7 @@ export default function AddressField({
 							onChange={(e) => setPostalCode(e.target.value)}
 							type="text"
 							placeholder="Code postal"
-							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-none"
+							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 							aria-describedby={
 								error ? "register-address-error" : undefined
 							}

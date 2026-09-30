@@ -34,6 +34,7 @@ export default function useRegisterSubmit({
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
+		setServerError(null);
 
 		const pseudo = pseudoRef.current?.value.trim() ?? "";
 		const email = emailRef.current?.value.trim() ?? "";
@@ -102,6 +103,8 @@ export default function useRegisterSubmit({
 						inseeCode: selectedAddress.inseeCode,
 						latitude: selectedAddress.latitude,
 						longitude: selectedAddress.longitude,
+						streetLine: selectedAddress.streetLine,
+						isApproximate: selectedAddress.type !== "housenumber",
 					}
 				: { city: city.trim(), postalCode: postalCode.trim() };
 

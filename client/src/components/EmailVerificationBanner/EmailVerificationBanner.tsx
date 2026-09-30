@@ -10,12 +10,24 @@ export default function EmailVerificationBanner({
 }: EmailVerificationBannerProps) {
 	const [sending, setSending] = useState(false);
 	const [sent, setSent] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
 	const handleResend = async () => {
 		setSending(true);
-		await resendVerification(email);
+		setError(null);
+		const result = await resendVerification(email);
 		setSending(false);
-		setSent(true);
+
+		if (result.status === "ok") {
+			setSent(true);
+			return;
+		}
+
+		setError(
+			result.status === "tooManyRequests"
+				? result.message
+				: "Une erreur est survenue. Veuillez réessayer plus tard.",
+		);
 	};
 
 	return (
@@ -30,9 +42,10 @@ export default function EmailVerificationBanner({
 				Bienvenue sur Vigie
 			</p>
 			<p className="text-sm text-primary/70">
-				Pour finaliser votre inscription et pouvoir vous connecter,
-				consultez votre boîte de réception et cliquez sur le lien de
-				vérification que nous vous avons envoyé.
+				Pour finaliser votre inscription, consultez votre boîte de
+				réception et cliquez sur le lien de vérification que nous vous
+				avons envoyé. Tant que votre e-mail n'est pas vérifié, certaines
+				actions (comme signaler un incident) restent indisponibles.
 			</p>
 			<button
 				type="button"
@@ -42,6 +55,9 @@ export default function EmailVerificationBanner({
 			>
 				{sent ? "E-mail renvoyé" : "Renvoyer l'e-mail"}
 			</button>
+			{error && (
+				<p className="text-xs font-semibold text-error">{error}</p>
+			)}
 		</section>
 	);
 }

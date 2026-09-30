@@ -99,16 +99,31 @@ const add: RequestHandler = async (req, res, next) => {
 				inseeCode?: string;
 				latitude?: number;
 				longitude?: number;
+				streetLine?: string;
+				isApproximate?: boolean;
 			};
 		};
-		let { latitude, longitude, inseeCode } = body.address;
-		let isApproximate = false;
+		let { latitude, longitude, inseeCode, streetLine } = body.address;
+		let isApproximate = body.address.isApproximate ?? true;
 
 		if (latitude == null || longitude == null || inseeCode == null) {
-			const centroid = await geocodingService.geocodeCentroid(
-				body.address.city,
-				body.address.postalCode,
-			);
+			let centroid: Awaited<
+				ReturnType<typeof geocodingService.geocodeCentroid>
+			>;
+
+			try {
+				centroid = await geocodingService.geocodeCentroid(
+					body.address.city,
+					body.address.postalCode,
+				);
+			} catch {
+				res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
+					error: "address_service_unavailable",
+					message:
+						"Le service d'adresse est momentanément indisponible. Veuillez réessayer.",
+				});
+				return;
+			}
 
 			if (!centroid) {
 				res.status(StatusCodes.BAD_REQUEST).json({
@@ -133,6 +148,7 @@ const add: RequestHandler = async (req, res, next) => {
 			city: body.address.city,
 			postalCode: body.address.postalCode,
 			inseeCode,
+			streetLine: streetLine ?? null,
 			latitude,
 			longitude,
 			isApproximate,
@@ -220,7 +236,7 @@ const resendVerification: RequestHandler = async (req, res, next) => {
 		);
 
 		if (user && user.email_verified_at == null) {
-			await sendVerificationEmail(user.id, user.pseudo, email);
+			await sendVerificationEmail(user.id, user.pseudo, user.email);
 		}
 
 		res.status(StatusCodes.OK).json({
