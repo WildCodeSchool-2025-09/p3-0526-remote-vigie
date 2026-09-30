@@ -63,7 +63,9 @@ export default function VerifyEmail() {
 			<h1 className="sr-only">Vérification d'e-mail</h1>
 			<div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl bg-base-300 p-4 text-center">
 				{status === "pending" ? (
-					<p className="text-sm text-black">Vérification en cours...</p>
+					<p className="text-sm text-black">
+						Vérification en cours...
+					</p>
 				) : (
 					<>
 						{status === "success" && (
@@ -116,7 +118,9 @@ export default function VerifyEmail() {
 							}
 							className="btn btn-accent btn-md w-full rounded-full border-none px-5 font-bold"
 						>
-							{status === "success" ? "Se connecter" : "Retour à l'accueil"}
+							{status === "success"
+								? "Se connecter"
+								: "Retour à l'accueil"}
 						</button>
 					</>
 				)}

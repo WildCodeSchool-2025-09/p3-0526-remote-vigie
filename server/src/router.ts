@@ -1,21 +1,21 @@
 import express from "express";
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
 import addressActions from "./modules/address/addressActions";
+import authActions from "./modules/auth/authActions";
 import commentActions from "./modules/comment/commentActions";
 import contributionActions from "./modules/contribution/contributionActions";
 import incidentActions from "./modules/incident/incidentActions";
 import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
+import usersActions from "./modules/users/usersActions";
 import attachUserIfPresent from "./services/attachUserIfPresent";
 import checkIncidentRateLimit from "./services/checkIncidentRateLimit";
-import requireVerifiedEmail from "./services/requireVerifiedEmail";
-import verifyToken from "./services/verifyToken";
-import validateRegisterInput from "./services/validateRegisterInput";
-import checkUserUniqueness from "./services/checkUserUniqueness";
-import authActions from "./modules/auth/authActions";
-import usersActions from "./modules/users/usersActions";
 import checkRegisterRateLimit from "./services/checkRegisterRateLimit";
 import checkResendVerificationRateLimit from "./services/checkResendVerificationRateLimit";
+import checkUserUniqueness from "./services/checkUserUniqueness";
+import requireVerifiedEmail from "./services/requireVerifiedEmail";
+import validateRegisterInput from "./services/validateRegisterInput";
+import verifyToken from "./services/verifyToken";
 
 const router = express.Router();
 

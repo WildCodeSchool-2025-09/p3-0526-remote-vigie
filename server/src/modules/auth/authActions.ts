@@ -1,5 +1,5 @@
-import type { RequestHandler } from "express";
 import argon2, { type HashOptions } from "argon2";
+import type { RequestHandler } from "express";
 
 const hashingOptions: HashOptions = {
 	type: argon2.argon2id,
