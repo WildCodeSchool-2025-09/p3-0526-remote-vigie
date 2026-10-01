@@ -32,11 +32,11 @@ function NavItem({
 
 	const iconElement = showNotificationBadge ? (
 		<span className="relative">
-			<Icon name={icon} className={iconClassName} />
+			<Icon name={icon} className={iconClassName} aria-hidden="true" />
 			<NotificationBadge />
 		</span>
 	) : (
-		<Icon name={icon} className={iconClassName} />
+		<Icon name={icon} className={iconClassName} aria-hidden="true" />
 	);
 
 	if (disabled) {
