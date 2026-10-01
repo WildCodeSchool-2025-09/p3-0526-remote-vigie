@@ -19,7 +19,7 @@ class UsersRepository {
 	async findByIdentifier(identifier: string) {
 		const normalized = identifier.toLowerCase();
 		const [rows] = await databaseClient.query<Rows>(
-			"SELECT * FROM user WHERE email_normalized = ? OR pseudo_normalized = ?",
+			"SELECT id, pseudo, email, email_verified_at, password_hash FROM user WHERE email_normalized = ? OR pseudo_normalized = ?",
 			[normalized, normalized],
 		);
 		return rows[0] ?? null;
