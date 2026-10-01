@@ -57,9 +57,7 @@ type NearbyIncident = {
 };
 
 class IncidentRepository {
-	// `bounds`, when given, restricts the result to incidents whose position
-	// falls inside that rectangle — used by the map (US04), which only wants
-	// what's currently visible. Omitted, the query is unfiltered (US03's list).
+	// With `bounds`, only incidents located inside that rectangle.
 	async readAllForList(
 		limit: number,
 		bounds: Bounds | null = null,

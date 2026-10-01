@@ -14,8 +14,7 @@ import incidentRepository from "./incidentRepository";
 
 const DEFAULT_LIST_LIMIT = 15;
 const MAX_LIST_LIMIT = 100;
-// Higher ceiling for the map (US04): a visible zone can legitimately hold
-// more markers than the text list ever shows at once.
+// Higher ceiling when a zone is given (map).
 const MAX_MAP_LIMIT = 300;
 
 const browse: RequestHandler = async (req, res, next) => {

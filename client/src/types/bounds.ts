@@ -1,6 +1,4 @@
-// Geographic bounding box of the map's current viewport, read from
-// react-leaflet's `map.getBounds()`. Shared shape between incidentService
-// and usefulPlaceService — both filter their GET by the same 4 params.
+// Map's visible zone (from `map.getBounds()`), sent as north/south/east/west.
 
 export type Bounds = {
 	north: number;

@@ -59,8 +59,6 @@ describe("GET /api/useful-places", () => {
 			.spyOn(usefulPlaceRepository, "readAll")
 			.mockResolvedValue([]);
 
-		// Missing "west": parseBounds must treat this as no filter at all,
-		// not as a partial/broken one.
 		const response = await supertest(app).get(
 			"/api/useful-places?north=51.5&south=41&east=9.8",
 		);

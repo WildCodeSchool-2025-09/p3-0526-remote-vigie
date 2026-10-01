@@ -6,9 +6,7 @@ type GetUsefulPlacesResult =
 	| { status: "ok"; usefulPlaces: UsefulPlace[] }
 	| { status: "error" };
 
-// `bounds` is optional: omitted, the API returns every useful place (no
-// cap, small reference table). The map (US04) always passes its current
-// viewport, so it only asks for what's visible.
+// Without `bounds`, returns every useful place; the map passes its visible zone.
 export async function getUsefulPlaces(
 	bounds?: Bounds,
 ): Promise<GetUsefulPlacesResult> {

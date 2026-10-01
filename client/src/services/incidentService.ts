@@ -25,9 +25,7 @@ export async function getAllIncidents(
 	}
 }
 
-// Incidents visible in the map's current viewport — a separate call from
-// getAllIncidents(): the map keeps its own zone-filtered fetch, independent
-// of the text list (US03), see US04.
+// Incidents in the map's visible zone (separate call from getAllIncidents).
 export async function getIncidentsInBounds(
 	bounds: Bounds,
 	limit = 300,

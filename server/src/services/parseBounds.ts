@@ -5,11 +5,8 @@ export type Bounds = {
 	west: number;
 };
 
-// Reads north/south/east/west from a request's query string. Returns null
-// when any of the four is missing or not a finite number — callers then
-// treat the request as "no zone filter" rather than erroring out, since
-// these four params are always optional (used by the map, never by the
-// plain incident/useful-place lists).
+// Reads north/south/east/west from the query string. Returns null if any is
+// missing or not a finite number, meaning "no zone filter".
 export default function parseBounds(query: {
 	north?: unknown;
 	south?: unknown;
