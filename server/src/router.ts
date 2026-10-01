@@ -1,4 +1,5 @@
 import express from "express";
+import decodePhoto from "./middlewares/decodePhoto";
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
 import addressActions from "./modules/address/addressActions";
 import authActions from "./modules/auth/authActions";
@@ -7,6 +8,7 @@ import contributionActions from "./modules/contribution/contributionActions";
 import incidentActions from "./modules/incident/incidentActions";
 import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
+import photoActions from "./modules/photo/photoActions";
 import usersActions from "./modules/users/usersActions";
 import attachUserIfPresent from "./services/attachUserIfPresent";
 import checkAddressSearchRateLimit from "./services/checkAddressSearchRateLimit";
@@ -25,8 +27,11 @@ router.post(
 	verifyToken,
 	requireVerifiedEmail,
 	checkIncidentRateLimit,
+	decodePhoto,
 	incidentActions.add,
 );
+
+router.get("/uploads/:filename", photoActions.read);
 
 router.get("/api/incident-types", incidentTypeActions.browse);
 
@@ -37,6 +42,7 @@ router.put(
 	"/api/incidents/:id",
 	verifyToken,
 	requireIncidentAuthor,
+	decodePhoto,
 	incidentActions.edit,
 );
 router.post(

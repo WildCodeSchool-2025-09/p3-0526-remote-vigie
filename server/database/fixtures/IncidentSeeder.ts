@@ -92,7 +92,10 @@ class IncidentSeeder extends AbstractSeeder {
 				danger_level_id: this.faker.number.int({ min: 1, max: 5 }),
 				title: this.faker.lorem.sentence({ min: 3, max: 7 }),
 				description: this.faker.lorem.sentences({ min: 1, max: 4 }),
-				photo_url: this.faker.image.urlPicsumPhotos(),
+				// Photos versionnées dans server/public/demo (servies par
+				// express.static), pas dans uploads/ ni chez un hébergeur externe :
+				// elles survivent à un redéploiement et ne cassent jamais.
+				photo_url: `/demo/incident-${i}.jpg`,
 				latitude: location.latitude,
 				longitude: location.longitude,
 				base_lifespan_hours: baseLifespanHours,
