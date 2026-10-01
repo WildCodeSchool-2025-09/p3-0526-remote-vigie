@@ -1,4 +1,5 @@
 import express from "express";
+import decodePhoto from "./middlewares/decodePhoto";
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
 import addressActions from "./modules/address/addressActions";
 import commentActions from "./modules/comment/commentActions";
@@ -19,6 +20,7 @@ router.post(
 	verifyToken,
 	requireVerifiedEmail,
 	checkIncidentRateLimit,
+	decodePhoto,
 	incidentActions.add,
 );
 
@@ -33,6 +35,7 @@ router.put(
 	"/api/incidents/:id",
 	verifyToken,
 	requireIncidentAuthor,
+	decodePhoto,
 	incidentActions.edit,
 );
 router.post(

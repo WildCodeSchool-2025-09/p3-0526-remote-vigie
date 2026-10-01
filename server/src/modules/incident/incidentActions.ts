@@ -2,9 +2,11 @@ import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 import geocodingService from "../../services/geocodingService";
 
+import type { DecodedPhoto } from "../../middlewares/decodePhoto";
 import alertService from "../../services/alertService";
 import { distanceInMeters } from "../../services/distance";
 import isFeminine from "../../services/incidentTypeGender";
+import { deletePhotoFile, savePhoto } from "../../services/photoStorage";
 import withPreposition from "../../services/title";
 import incidentTypeRepository from "../incidentType/incidentTypeRepository";
 import incidentRepository from "./incidentRepository";
@@ -137,11 +139,25 @@ const edit: RequestHandler = async (req, res, next) => {
 				? null
 				: body.photoUrl.trim();
 
-		await incidentRepository.update(id, {
-			title: body.title.trim(),
-			description,
-			photoUrl,
-		});
+		// Écrite après toutes les validations : aucun fichier orphelin si le
+		// formulaire est refusé.
+		const decodedPhoto = res.locals.photo as DecodedPhoto | undefined;
+		const uploadedPhotoUrl = decodedPhoto
+			? await savePhoto(decodedPhoto.buffer, decodedPhoto.mime)
+			: null;
+
+		try {
+			await incidentRepository.update(id, {
+				title: body.title.trim(),
+				description,
+				photoUrl: uploadedPhotoUrl ?? photoUrl,
+			});
+		} catch (err) {
+			if (uploadedPhotoUrl != null) {
+				await deletePhotoFile(uploadedPhotoUrl);
+			}
+			throw err;
+		}
 
 		const userId = req.auth ? Number(req.auth.sub) : null;
 		const incident = await incidentRepository.read(id, userId);
@@ -324,21 +340,36 @@ const add: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		const incidentId = await incidentRepository.create({
-			userId: Number(req.auth.sub),
-			dangerLevelId,
-			title,
-			description,
-			photoUrl,
-			latitude: lat,
-			longitude: lng,
-			lifespanHours,
-			alertRadiusMeters,
-			city: geocode.city,
-			postalCode: geocode.postalCode,
-			inseeCode: geocode.inseeCode,
-			typeIds: filteredTypes.map((type) => type.id),
-		});
+		// Écrite après toutes les validations et le contrôle de doublon : aucun
+		// fichier orphelin si le signalement est refusé.
+		const decodedPhoto = res.locals.photo as DecodedPhoto | undefined;
+		const uploadedPhotoUrl = decodedPhoto
+			? await savePhoto(decodedPhoto.buffer, decodedPhoto.mime)
+			: null;
+
+		let incidentId: number;
+		try {
+			incidentId = await incidentRepository.create({
+				userId: Number(req.auth.sub),
+				dangerLevelId,
+				title,
+				description,
+				photoUrl: uploadedPhotoUrl ?? photoUrl,
+				latitude: lat,
+				longitude: lng,
+				lifespanHours,
+				alertRadiusMeters,
+				city: geocode.city,
+				postalCode: geocode.postalCode,
+				inseeCode: geocode.inseeCode,
+				typeIds: filteredTypes.map((type) => type.id),
+			});
+		} catch (err) {
+			if (uploadedPhotoUrl != null) {
+				await deletePhotoFile(uploadedPhotoUrl);
+			}
+			throw err;
+		}
 
 		const incident = await incidentRepository.read(
 			incidentId,
