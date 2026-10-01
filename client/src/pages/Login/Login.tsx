@@ -49,7 +49,6 @@ export default function Login() {
 
 		try {
 			await login(identifier, password);
-			navigate("/", { replace: true });
 		} catch (err) {
 			setPassword("");
 			if (err instanceof TypeError) {
