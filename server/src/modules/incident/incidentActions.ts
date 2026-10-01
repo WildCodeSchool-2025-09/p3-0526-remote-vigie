@@ -104,7 +104,7 @@ const edit: RequestHandler = async (req, res, next) => {
 		const body = req.body as {
 			title?: unknown;
 			description?: unknown;
-			photoUrl?: unknown;
+			photo?: unknown;
 		};
 
 		if (
@@ -125,38 +125,55 @@ const edit: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		if (body.photoUrl != null && typeof body.photoUrl !== "string") {
-			res.sendStatus(StatusCodes.BAD_REQUEST);
-			return;
-		}
-
 		const description =
 			body.description == null || body.description.trim().length === 0
 				? null
 				: body.description.trim();
-		const photoUrl =
-			body.photoUrl == null || body.photoUrl.trim().length === 0
-				? null
-				: body.photoUrl.trim();
+
+		const decodedPhoto = res.locals.photo as DecodedPhoto | undefined;
+
+		// photo absente : on garde l'actuelle ; photo: null : on la retire ;
+		// photo envoyée : elle remplace l'actuelle.
+		const photoRemoved = body.photo === null;
+		const photoChanges = decodedPhoto != null || photoRemoved;
+
+		// Lue avant toute modification, pour supprimer l'ancien fichier une fois
+		// la base à jour.
+		const previousPhotoUrl = photoChanges
+			? await incidentRepository.findPhotoUrl(id)
+			: null;
 
 		// Écrite après toutes les validations : aucun fichier orphelin si le
 		// formulaire est refusé.
-		const decodedPhoto = res.locals.photo as DecodedPhoto | undefined;
 		const uploadedPhotoUrl = decodedPhoto
 			? await savePhoto(decodedPhoto.buffer, decodedPhoto.mime)
 			: null;
+
+		const photoUrl = uploadedPhotoUrl ?? (photoRemoved ? null : undefined);
 
 		try {
 			await incidentRepository.update(id, {
 				title: body.title.trim(),
 				description,
-				photoUrl: uploadedPhotoUrl ?? photoUrl,
+				photoUrl,
 			});
 		} catch (err) {
 			if (uploadedPhotoUrl != null) {
 				await deletePhotoFile(uploadedPhotoUrl);
 			}
 			throw err;
+		}
+
+		// Après l'UPDATE seulement : si la base avait échoué, l'ancienne photo
+		// serait restée référencée. Un échec de suppression ne fait pas échouer
+		// la modification, déjà enregistrée.
+		if (previousPhotoUrl != null) {
+			await deletePhotoFile(previousPhotoUrl).catch((err) => {
+				console.error(
+					"Échec de la suppression de l'ancienne photo",
+					err,
+				);
+			});
 		}
 
 		const userId = req.auth ? Number(req.auth.sub) : null;
@@ -186,7 +203,6 @@ const add: RequestHandler = async (req, res, next) => {
 			dangerLevelId: unknown;
 			title: unknown;
 			description: unknown;
-			photoUrl: unknown;
 		};
 		if (!Array.isArray(body.typeIds) || body.typeIds.length === 0) {
 			res.status(StatusCodes.BAD_REQUEST).json({
@@ -275,14 +291,6 @@ const add: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		if (body.photoUrl != null && typeof body.photoUrl !== "string") {
-			res.status(StatusCodes.BAD_REQUEST).json({
-				error: "invalid_photo_url",
-				message: "La photo envoyée est invalide.",
-			});
-			return;
-		}
-
 		const lifespanHours = Math.max(
 			...filteredTypes.map((type) => type.lifespan_hours),
 		);
@@ -315,10 +323,6 @@ const add: RequestHandler = async (req, res, next) => {
 			body.description == null || body.description.trim().length === 0
 				? null
 				: body.description.trim();
-		const photoUrl =
-			body.photoUrl == null || body.photoUrl.trim().length === 0
-				? null
-				: body.photoUrl.trim();
 
 		const recentByUser = await incidentRepository.readRecentByUser(
 			Number(req.auth.sub),
@@ -354,7 +358,7 @@ const add: RequestHandler = async (req, res, next) => {
 				dangerLevelId,
 				title,
 				description,
-				photoUrl: uploadedPhotoUrl ?? photoUrl,
+				photoUrl: uploadedPhotoUrl,
 				latitude: lat,
 				longitude: lng,
 				lifespanHours,
