@@ -59,10 +59,7 @@ describe("GET /api/incidents", () => {
 		);
 	});
 
-	// Boundary value analysis on `limit`: no value (default), just above the
-	// cap, and a negative value (regression — Number.parseInt("-5") is
-	// truthy, so it used to bypass the default-limit fallback and reach the
-	// repository, then MySQL, which rejects a negative LIMIT, unclamped).
+	// Valeurs limites de `limit` : absent, au-dessus du plafond, négatif.
 	it.each([
 		{ query: "", expectedLimit: 15 },
 		{ query: "?limit=500", expectedLimit: 100 },
