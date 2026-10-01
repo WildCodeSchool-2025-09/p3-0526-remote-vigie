@@ -39,6 +39,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				}
 				setUser(fetchedUser);
 			})
+			.catch(() => {
+				setAuthToken(null);
+				setUser(null);
+			})
 			.finally(() => setLoading(false));
 	}, []);
 
