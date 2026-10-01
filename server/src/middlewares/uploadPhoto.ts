@@ -52,6 +52,9 @@ const uploadPhoto: RequestHandler = (req, res, next) => {
 				return;
 			}
 
+			// Format réel détecté, pour choisir l'extension à l'écriture.
+			res.locals.photoMime = result.mime;
+
 			next();
 		} catch (error) {
 			next(error);

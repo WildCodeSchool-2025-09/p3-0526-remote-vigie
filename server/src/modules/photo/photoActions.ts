@@ -1,7 +1,10 @@
+import path from "node:path";
+
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 
 import {
+	MIME_BY_EXTENSION,
 	PHOTO_FILENAME_PATTERN,
 	UPLOADS_DIR,
 } from "../../services/photoStorage";
@@ -20,7 +23,8 @@ const read: RequestHandler = (req, res) => {
 			root: UPLOADS_DIR,
 			dotfiles: "deny",
 			headers: {
-				"Content-Type": "image/jpeg",
+				"Content-Type":
+					MIME_BY_EXTENSION[path.extname(filename).slice(1)],
 				"X-Content-Type-Options": "nosniff",
 				"Cache-Control": "public, max-age=31536000, immutable",
 			},
