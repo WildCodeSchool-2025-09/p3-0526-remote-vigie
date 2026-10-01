@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 
+import { cleanPhoto } from "../services/photoCleaning";
 import {
 	PHOTO_MAX_BYTES,
 	type PhotoMime,
@@ -57,7 +58,22 @@ const decodePhoto: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		res.locals.photo = { buffer, mime: result.mime } satisfies DecodedPhoto;
+		// En-tête valide mais contenu corrompu : le décodage échoue ici.
+		let cleaned: Buffer;
+		try {
+			cleaned = await cleanPhoto(buffer, result.mime);
+		} catch {
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "photo_unreadable",
+				message: "La photo est illisible ou corrompue.",
+			});
+			return;
+		}
+
+		res.locals.photo = {
+			buffer: cleaned,
+			mime: result.mime,
+		} satisfies DecodedPhoto;
 
 		next();
 	} catch (err) {

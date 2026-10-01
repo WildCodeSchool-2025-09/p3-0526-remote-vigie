@@ -2,6 +2,14 @@ import sharp from "sharp";
 
 export const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 
+// Plus grand côté conservé, comme côté navigateur.
+export const PHOTO_MAX_SIDE = 1600;
+
+// Garde-fou : ré-encoder oblige à décoder l'image, et quelques Mo de PNG peuvent
+// annoncer des dizaines de milliers de pixels de côté (bombe de décompression).
+// Refusé d'après l'en-tête, avant tout décodage.
+export const PHOTO_MAX_PIXELS = 50_000_000;
+
 const ALLOWED_FORMATS = {
 	jpeg: "image/jpeg",
 	png: "image/png",
@@ -36,9 +44,21 @@ export async function validatePhoto(buffer: Buffer): Promise<PhotoValidation> {
 	};
 
 	try {
-		const { format } = await sharp(buffer).metadata();
+		const {
+			format,
+			width = 0,
+			height = 0,
+		} = await sharp(buffer).metadata();
 
 		if (format != null && format in ALLOWED_FORMATS) {
+			if (width * height > PHOTO_MAX_PIXELS) {
+				return {
+					ok: false,
+					error: "photo_too_large",
+					message: "Les dimensions de la photo sont trop grandes.",
+				};
+			}
+
 			return {
 				ok: true,
 				mime: ALLOWED_FORMATS[format as keyof typeof ALLOWED_FORMATS],
