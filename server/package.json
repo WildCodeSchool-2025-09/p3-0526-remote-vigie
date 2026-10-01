@@ -6,6 +6,7 @@
 		"db:migrate": "tsx ./bin/migrate",
 		"db:seed": "tsx ./bin/seed",
 		"expire": "tsx ./bin/expire",
+		"sync:places": "tsx ./bin/syncUsefulPlaces",
 		"build": "tsx ./bin/migrate",
 		"start": "tsx ./src/main",
 		"test": "jest --verbose",

@@ -5,7 +5,7 @@ import type { Rows } from "../../../database/client";
 
 // Only CRUD here (Create, Read, Update, Delete)
 
-type UsefulPlaceCategory =
+export type UsefulPlaceCategory =
 	| "fire_station"
 	| "veterinary"
 	| "hospital"
@@ -23,12 +23,20 @@ type UsefulPlaceListItem = {
 	phoneNumber: string | null;
 };
 
+export type UsefulPlaceUpsertRow = {
+	name: string;
+	category: UsefulPlaceCategory;
+	latitude: number;
+	longitude: number;
+	streetLine: string | null;
+	city: string | null;
+	phoneNumber: string | null;
+	osmType: "node" | "way" | "relation";
+	osmId: number;
+};
+
 class UsefulPlaceRepository {
-	// READ — useful places, optionally restricted to a zone (`bounds`, used
-	// by the map so it only asks for what's currently visible). Like
-	// useful_number, this table is a small, national reference list fed by
-	// a sync script (not by user actions) — no result cap needed even
-	// unfiltered, a straight SELECT is enough.
+	// Without `bounds`, returns the whole table (~35,000 rows once synced).
 	async readAll(
 		bounds: Bounds | null = null,
 	): Promise<UsefulPlaceListItem[]> {
@@ -59,6 +67,42 @@ class UsefulPlaceRepository {
 			city: row.city,
 			phoneNumber: row.phone_number,
 		}));
+	}
+
+	// Insère ou met à jour (clé unique `osm_type` + `osm_id`) : relancer la
+	// synchro ne crée pas de doublons.
+	async upsertMany(rows: UsefulPlaceUpsertRow[]): Promise<void> {
+		if (rows.length === 0) return;
+
+		const placeholders = rows
+			.map(() => "(?, ?, ?, ?, ?, ?, ?, ?, ?)")
+			.join(", ");
+		const values = rows.flatMap((row) => [
+			row.name,
+			row.category,
+			row.latitude,
+			row.longitude,
+			row.streetLine,
+			row.city,
+			row.phoneNumber,
+			row.osmType,
+			row.osmId,
+		]);
+
+		await databaseClient.query(
+			`INSERT INTO useful_place
+				(name, category, latitude, longitude, street_line, city, phone_number, osm_type, osm_id)
+			VALUES ${placeholders}
+			ON DUPLICATE KEY UPDATE
+				name = VALUES(name),
+				category = VALUES(category),
+				latitude = VALUES(latitude),
+				longitude = VALUES(longitude),
+				street_line = VALUES(street_line),
+				city = VALUES(city),
+				phone_number = VALUES(phone_number)`,
+			values,
+		);
 	}
 }
 
