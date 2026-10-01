@@ -15,14 +15,11 @@ export default function Home() {
 	const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
-	// Partagé avec IncidentMap (clic en deux temps) et IncidentList (surbrillance) —
-	// voir plan US04, décision du 24/09.
+	// Incident sélectionné, partagé entre la carte et la liste.
 	const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(
 		null,
 	);
-	// Demande de recentrage transmise à IncidentMap quand la sélection vient
-	// d'une carte de la liste plutôt que d'un marqueur (décision du 25/09) —
-	// Home.tsx n'a pas accès à l'instance Leaflet, seule IncidentMap l'a.
+	// Recentrage demandé à la carte quand la sélection vient de la liste.
 	const [mapPanRequest, setMapPanRequest] = useState<{
 		lat: number;
 		lng: number;
@@ -62,17 +59,9 @@ export default function Home() {
 		return loadIncidents();
 	}, [loadIncidents]);
 
-	// Chevauchement avec le header : c'est la carte qui le porte (premier
-	// élément sous le header) — repris de la dette technique tracée sur US03
-	// depuis le 18/09, avec l'US04.
-	// Comportement de défilement tranché le 25/09 : header et carte restent
-	// fixes, seule la liste défile en dessous. La carte est donc sortie du
-	// conteneur `overflow-y-auto` (plutôt qu'un `position: sticky` sur place),
-	// pour un layout à trois blocs empilés simple à raisonner : header / carte
-	// / zone de liste qui défile.
 	return (
 		<div className="flex h-full flex-col bg-base-100">
-			<header className="relative isolate flex h-44 shrink-0 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
+			<header className="relative isolate flex h-44 shrink-0 flex-col justify-start overflow-hidden bg-primary px-4 pt-18">
 				<img
 					src={bgHome}
 					alt=""
@@ -97,7 +86,7 @@ export default function Home() {
 				/>
 			</div>
 
-			<div className="mt-4 flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-6">
+			<div className="mt-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-6">
 				<IncidentList
 					incidents={incidents}
 					isLoading={isLoading}
