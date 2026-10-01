@@ -77,6 +77,9 @@ export default function useRegisterSubmit({
 		} else if (password.length < 8) {
 			errors.password =
 				"Votre mot de passe doit faire au moins 8 caractères";
+		} else if (password.length > 128) {
+			errors.password =
+				"Votre mot de passe ne peut pas dépasser 128 caractères";
 		} else if (
 			!/[A-Z]/.test(password) ||
 			!/[0-9]/.test(password) ||

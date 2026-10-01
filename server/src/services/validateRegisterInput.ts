@@ -101,6 +101,7 @@ const validateRegisterInput: RequestHandler = (req, res, next) => {
 		typeof body.password !== "string" ||
 		body.password.trim() === "" ||
 		body.password.length < 8 ||
+		body.password.length > 128 ||
 		!/[A-Z]/.test(body.password) ||
 		!/[0-9]/.test(body.password) ||
 		!/[^A-Za-z0-9]/.test(body.password)
