@@ -39,8 +39,10 @@ export default function IncidentForm() {
 		titlePlaceholder,
 		description,
 		onDescriptionChange,
-		photoUrl,
-		onPhotoUrlChange,
+		photo,
+		onPhotoChange,
+		photoProcessing,
+		onPhotoProcessingChange,
 		duplicateCandidate,
 		duplicateType,
 		duplicateDistance,
@@ -118,8 +120,9 @@ export default function IncidentForm() {
 						placeholder={titlePlaceholder}
 						description={description}
 						onDescriptionChange={onDescriptionChange}
-						photoUrl={photoUrl}
-						onPhotoUrlChange={onPhotoUrlChange}
+						photo={photo}
+						onPhotoChange={onPhotoChange}
+						onPhotoProcessingChange={onPhotoProcessingChange}
 					/>
 
 					{serverError && (
@@ -137,7 +140,9 @@ export default function IncidentForm() {
 							<p className="text-sm text-error">{serverError}</p>
 						</div>
 					)}
-					<SubmitIncident submitting={submitting} />
+					<SubmitIncident
+						submitting={submitting || photoProcessing}
+					/>
 				</form>
 			)}
 		</div>

@@ -57,6 +57,11 @@ app.use(
 
 // Uncomment one or more of these options depending on the format of the data sent by your client:
 
+// Seules ces deux routes reçoivent une photo (base64) : limite relevée.
+// Un corps déjà lu n'est pas relu par le parseur global ci-dessous.
+app.post("/api/incidents", express.json({ limit: "7mb" }));
+app.put("/api/incidents/:id", express.json({ limit: "7mb" }));
+
 app.use(express.json());
 // app.use(express.urlencoded());
 // app.use(express.text());

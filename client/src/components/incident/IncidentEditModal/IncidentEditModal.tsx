@@ -23,7 +23,12 @@ export default function IncidentEditModal({
 }: Props) {
 	const [titleValue, setTitleValue] = useState(title);
 	const [descriptionValue, setDescriptionValue] = useState(description ?? "");
-	const [photoUrlValue, setPhotoUrlValue] = useState(photoUrl);
+	// undefined : on garde la photo actuelle ; null : on la retire ; chaîne :
+	// data URL de la nouvelle photo, déjà redimensionnée.
+	const [photoValue, setPhotoValue] = useState<string | null | undefined>(
+		undefined,
+	);
+	const [photoProcessing, setPhotoProcessing] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
 	const [serverError, setServerError] = useState<string | null>(null);
 
@@ -35,19 +40,21 @@ export default function IncidentEditModal({
 		const result = await updateIncident(String(id), {
 			title: titleValue,
 			description: descriptionValue,
-			photoUrl: photoUrlValue,
+			photo: photoValue,
 		});
 
 		setSubmitting(false);
 
 		if (result.status === "ok") {
+			setPhotoValue(undefined);
 			onSaved(result.incident);
 			return;
 		}
 
 		if (result.status === "invalid") {
 			setServerError(
-				"Le titre est obligatoire et les champs ont une longueur maximale : vérifiez votre saisie.",
+				result.message ??
+					"Le titre est obligatoire et les champs ont une longueur maximale : vérifiez votre saisie.",
 			);
 			return;
 		}
@@ -157,8 +164,10 @@ export default function IncidentEditModal({
 					</div>
 
 					<PhotoField
-						value={photoUrlValue}
-						onChange={setPhotoUrlValue}
+						value={photoValue}
+						existingUrl={photoUrl}
+						onChange={setPhotoValue}
+						onProcessingChange={setPhotoProcessing}
 					/>
 
 					{serverError != null && (
@@ -180,7 +189,7 @@ export default function IncidentEditModal({
 					<div className="flex gap-3 w-full border-t border-primary/10 pt-5">
 						<button
 							type="submit"
-							disabled={submitting}
+							disabled={submitting || photoProcessing}
 							className="btn btn-accent btn-md basis-2/3 grow rounded-full border-none px-5 font-bold disabled:opacity-60"
 							aria-label="Enregistrer"
 						>

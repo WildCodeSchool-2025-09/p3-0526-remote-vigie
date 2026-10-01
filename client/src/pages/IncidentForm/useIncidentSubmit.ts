@@ -23,7 +23,9 @@ export default function useIncidentSubmit({
 
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
-	const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+	// Data URL de la photo déjà redimensionnée, ou null.
+	const [photo, setPhoto] = useState<string | null>(null);
+	const [photoProcessing, setPhotoProcessing] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [confirmation, setConfirmation] = useState<Incident | null>(null);
@@ -58,7 +60,7 @@ export default function useIncidentSubmit({
 			dangerLevelId: dangerLevel,
 			title,
 			description,
-			photoUrl,
+			photo,
 		};
 
 		const result = await createIncident(incidentPayload);
@@ -110,8 +112,10 @@ export default function useIncidentSubmit({
 		onTitleChange: setTitle,
 		description,
 		onDescriptionChange: setDescription,
-		photoUrl,
-		onPhotoUrlChange: setPhotoUrl,
+		photo,
+		onPhotoChange: setPhoto,
+		photoProcessing,
+		onPhotoProcessingChange: setPhotoProcessing,
 		submitting,
 		serverError,
 		confirmation,
