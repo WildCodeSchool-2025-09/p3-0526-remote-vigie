@@ -100,4 +100,16 @@
 			translate: 0;
 		}
 	}
+
+	--animate-marker-pulse: marker-pulse 1.6s ease-out infinite;
+	@keyframes marker-pulse {
+		0% {
+			scale: 1;
+			opacity: 0.55;
+		}
+		100% {
+			scale: 2.4;
+			opacity: 0;
+		}
+	}
 }

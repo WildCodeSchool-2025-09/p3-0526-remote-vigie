@@ -7,10 +7,6 @@ import { formatRelativeTime } from "@/utils/formatRelativeTime";
 
 type IncidentCardProps = {
 	incident: IncidentListItem;
-	// Clic en deux temps (US04, décision du 25/09) : premier clic → sélection
-	// (et recentrage de la carte sur cet incident), second clic sur une carte
-	// déjà sélectionnée → navigation vers la fiche détaillée. Symétrique du
-	// comportement des marqueurs de la carte interactive.
 	isSelected?: boolean;
 	onSelect?: (incident: IncidentListItem) => void;
 };
@@ -33,24 +29,29 @@ export default function IncidentCard({
 	const cityLabel = incident.city ?? "position non précisée";
 
 	const ariaLabel = `${incident.title} — ${type?.label ?? "Incident"}, ${dangerLevel.label}, ${cityLabel}, ${relativeTime}${
-		isSelected
-			? ", sélectionné, appuyez de nouveau pour voir le détail"
-			: ""
+		isSelected ? ", sélectionné" : ""
 	}`;
 
-	function handleClick(event: React.MouseEvent<HTMLAnchorElement>) {
-		if (!isSelected && onSelect) {
+	function handleActivate() {
+		onSelect?.(incident);
+	}
+
+	function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+		if (event.key === "Enter" || event.key === " ") {
 			event.preventDefault();
-			onSelect(incident);
+			handleActivate();
 		}
 	}
 
 	return (
-		<Link
-			to={`/incident/${incident.id}`}
+		// biome-ignore lint/a11y/useSemanticElements: un <button> ne peut pas contenir le <Link> "Voir le détail".
+		<div
+			role="button"
+			tabIndex={0}
 			aria-label={ariaLabel}
-			onClick={handleClick}
-			className={`flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 ${
+			onClick={handleActivate}
+			onKeyDown={handleKeyDown}
+			className={`flex cursor-pointer items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 ${
 				isSelected ? "ring-2 ring-accent ring-offset-2" : ""
 			}`}
 			style={{ borderLeftColor: typeColorVar }}
@@ -117,11 +118,21 @@ export default function IncidentCard({
 				</p>
 			</div>
 
-			<Icon
-				name="angleSmallRight"
-				className="h-4 w-4 shrink-0 fill-primary/30"
-				aria-hidden="true"
-			/>
-		</Link>
+			{isSelected ? (
+				<Link
+					to={`/incident/${incident.id}`}
+					onClick={(event) => event.stopPropagation()}
+					className="btn btn-accent btn-sm shrink-0 rounded-full"
+				>
+					Voir le détail
+				</Link>
+			) : (
+				<Icon
+					name="angleSmallRight"
+					className="h-4 w-4 shrink-0 fill-primary/30"
+					aria-hidden="true"
+				/>
+			)}
+		</div>
 	);
 }

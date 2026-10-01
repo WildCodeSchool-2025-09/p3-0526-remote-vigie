@@ -4,11 +4,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import {
 	MapContainer,
 	Marker,
+	Popup,
 	TileLayer,
 	useMap,
 	useMapEvents,
 } from "react-leaflet";
-import { useNavigate } from "react-router";
+import { Link } from "react-router";
 import "leaflet/dist/leaflet.css";
 
 import { type IconName, icons } from "@/assets/icons";
@@ -19,24 +20,24 @@ import type { Bounds } from "@/types/bounds";
 import type { IncidentListItem } from "@/types/incidentList";
 import { getDefaultMapCenter } from "@/utils/getDefaultMapCenter";
 
-// France métropolitaine, Corse comprise — au-delà, rien à afficher (décision
-// du 23/09/2026). [sud-ouest, nord-est].
+// [sud-ouest, nord-est]
 const FRANCE_BOUNDS: [[number, number], [number, number]] = [
 	[41.0, -5.5],
 	[51.5, 9.8],
 ];
 const DEFAULT_ZOOM = 6;
 const MIN_ZOOM = 5;
-// Zoom appliqué à la sélection d'un signalement (marqueur ou carte de liste,
-// décision du 25/09) — reprend volontairement la valeur déjà utilisée par
-// IncidentLocation.tsx (US02) pour la mini-carte d'un incident seul, pour que
-// "regarder un incident de près" ait toujours le même niveau de zoom dans
-// toute l'application.
 const SELECTION_ZOOM = 15;
-// Anti-rebond entre un déplacement de carte et le rechargement des
-// marqueurs (checklist "Intégration de la carte") : évite de spammer le
-// serveur pendant un glisser continu.
+const SELECTION_TRANSITION_DURATION_SECONDS = 1;
+const MAP_TRANSITION_FADE_MS = 900;
 const BOUNDS_FETCH_DEBOUNCE_MS = 400;
+
+// Vrai si aucune nouvelle tuile n'est à charger (même zoom, point déjà visible).
+function isTargetAlreadyInView(map: L.Map, lat: number, lng: number): boolean {
+	return (
+		map.getZoom() === SELECTION_ZOOM && map.getBounds().contains([lat, lng])
+	);
+}
 
 function leafletBoundsToBounds(bounds: L.LatLngBounds): Bounds {
 	return {
@@ -47,10 +48,8 @@ function leafletBoundsToBounds(bounds: L.LatLngBounds): Bounds {
 	};
 }
 
-// Même patron que IncidentLocation.tsx (US02) : L.divIcon() +
-// renderToStaticMarkup(), pastille blanche cerclée de la couleur du type.
-// `isSelected` grossit l'anneau — c'est la seule différence visuelle du
-// clic en deux temps (décision du 24/09).
+// Icône du marqueur : pastille blanche cerclée de la couleur du type. Quand
+// `isSelected`, elle grossit et un anneau pulse autour.
 function createIncidentDivIcon(
 	iconName: IconName,
 	color: string,
@@ -62,24 +61,50 @@ function createIncidentDivIcon(
 
 	const html = renderToStaticMarkup(
 		<div
+			className="animate-pop"
 			style={{
+				position: "relative",
 				width: size,
 				height: size,
-				borderRadius: "50%",
 				display: "flex",
 				alignItems: "center",
 				justifyContent: "center",
-				background: "white",
-				border: `${isSelected ? 3 : 2}px solid ${color}`,
-				boxShadow: isSelected
-					? `0 0 0 3px color-mix(in srgb, ${color} 35%, transparent)`
-					: "0 1px 4px rgba(0, 0, 0, 0.3)",
 			}}
 		>
-			<SvgIcon
-				style={{ width: iconSize, height: iconSize, fill: color }}
-				aria-hidden="true"
-			/>
+			{isSelected && (
+				<span
+					aria-hidden="true"
+					className="animate-marker-pulse"
+					style={{
+						position: "absolute",
+						inset: 0,
+						borderRadius: "50%",
+						backgroundColor: color,
+						pointerEvents: "none",
+					}}
+				/>
+			)}
+			<div
+				style={{
+					position: "relative",
+					width: size,
+					height: size,
+					borderRadius: "50%",
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+					background: "white",
+					border: `${isSelected ? 3 : 2}px solid ${color}`,
+					boxShadow: isSelected
+						? `0 0 0 3px color-mix(in srgb, ${color} 35%, transparent)`
+						: "0 1px 4px rgba(0, 0, 0, 0.3)",
+				}}
+			>
+				<SvgIcon
+					style={{ width: iconSize, height: iconSize, fill: color }}
+					aria-hidden="true"
+				/>
+			</div>
 		</div>,
 	);
 
@@ -91,9 +116,8 @@ function createIncidentDivIcon(
 	});
 }
 
-// Rendu à part : seul un composant monté à l'intérieur de <MapContainer>
-// peut accéder à l'instance Leaflet (hooks react-leaflet), d'où ce petit
-// composant sans rendu visuel, juste posé comme enfant de la carte.
+// Composant sans rendu : seuls les enfants de <MapContainer> accèdent à
+// l'instance Leaflet (hooks react-leaflet). Signale la zone visible au parent.
 function MapViewportWatcher({
 	onViewportChange,
 }: {
@@ -103,9 +127,7 @@ function MapViewportWatcher({
 		moveend: () => onViewportChange(leafletBoundsToBounds(map.getBounds())),
 	});
 
-	// Ne doit s'exécuter qu'au montage : `map` est stable pour toute la vie du
-	// composant (react-leaflet), `onViewportChange` est mémoïsée par le parent.
-	// biome-ignore lint/correctness/useExhaustiveDependencies: montage uniquement, voir commentaire ci-dessus.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: montage uniquement (`map` est stable, `onViewportChange` mémoïsée).
 	useEffect(() => {
 		onViewportChange(leafletBoundsToBounds(map.getBounds()));
 	}, []);
@@ -113,23 +135,29 @@ function MapViewportWatcher({
 	return null;
 }
 
-// Recentre la carte quand la sélection vient de l'extérieur (une carte de la
-// liste US03 cliquée, pas un marqueur) : Home.tsx ne connaît pas l'instance
-// Leaflet, donc la demande de recentrage lui est transmise en prop plutôt
-// qu'appelée directement — ce petit composant fait le pont, comme
-// MapViewportWatcher pour les évènements de déplacement.
+// Recentre la carte sur la demande reçue en prop (sélection depuis la liste).
 function MapPanRequestWatcher({
 	request,
+	onTransitionStart,
 }: {
 	request: { lat: number; lng: number } | null;
+	onTransitionStart: () => void;
 }) {
 	const map = useMap();
 
 	useEffect(() => {
 		if (request) {
-			map.flyTo([request.lat, request.lng], SELECTION_ZOOM);
+			if (!isTargetAlreadyInView(map, request.lat, request.lng)) {
+				onTransitionStart();
+			}
+			// Une popup restée ouverte gênerait le déplacement (autoPan).
+			map.closePopup();
+			map.setView([request.lat, request.lng], SELECTION_ZOOM, {
+				animate: true,
+				duration: SELECTION_TRANSITION_DURATION_SECONDS,
+			});
 		}
-	}, [request, map]);
+	}, [request, map, onTransitionStart]);
 
 	return null;
 }
@@ -161,15 +189,26 @@ function IncidentMarker({
 			position={[Number(incident.latitude), Number(incident.longitude)]}
 			icon={icon}
 			eventHandlers={{ click: () => onSelect(incident, map) }}
-		/>
+		>
+			<Popup>
+				<p className="font-title text-sm font-bold text-primary">
+					{incident.title}
+				</p>
+				<Link
+					to={`/incident/${incident.id}`}
+					className="btn btn-accent btn-xs mt-2 rounded-full"
+				>
+					Voir les détails
+				</Link>
+			</Popup>
+		</Marker>
 	);
 }
 
 type IncidentMapProps = {
 	selectedIncidentId: number | null;
 	onSelectIncident: (id: number) => void;
-	// Demande de recentrage venue d'ailleurs que d'un marqueur (typiquement :
-	// une carte de la liste US03 cliquée) — voir MapPanRequestWatcher.
+	// Demande de recentrage venue de la liste.
 	panRequest?: { lat: number; lng: number } | null;
 	className?: string;
 };
@@ -181,23 +220,34 @@ export default function IncidentMap({
 	className = "h-[38vh] w-full",
 }: IncidentMapProps) {
 	const { user } = useAuth();
-	const navigate = useNavigate();
 
-	// États locaux propres à la carte, indépendants du fetch partagé du
-	// composant parent qui alimente IncidentList (US03) — voir plan US04.
+	// Données propres à la carte, indépendantes de la liste (zone visible).
 	const [mapIncidents, setMapIncidents] = useState<IncidentListItem[]>([]);
 	const [mapIncidentsLoading, setMapIncidentsLoading] = useState(true);
 	const [mapError, setMapError] = useState(false);
 
-	// Lieux utiles : récupérés dès maintenant (même appel groupé), mais pas
-	// encore affichés en marqueurs — ça viendra avec les icônes dédiées. Pas
-	// de message d'erreur pour eux (checklist "Gestion des états") : un échec
-	// se traduit juste par une absence silencieuse de marqueurs plus tard.
+	// Lieux utiles : récupérés mais pas encore affichés en marqueurs.
 	const [, setUsefulPlacesLoading] = useState(true);
 	const [, setUsefulPlacesError] = useState(false);
 
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const lastBoundsRef = useRef<Bounds | null>(null);
+
+	// Voile affiché pendant le déplacement, le temps que les tuiles se chargent.
+	const [isTransitioning, setIsTransitioning] = useState(false);
+	const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+		null,
+	);
+
+	const triggerTransitionFade = useCallback(() => {
+		setIsTransitioning(true);
+		if (transitionTimeoutRef.current) {
+			clearTimeout(transitionTimeoutRef.current);
+		}
+		transitionTimeoutRef.current = setTimeout(() => {
+			setIsTransitioning(false);
+		}, MAP_TRANSITION_FADE_MS);
+	}, []);
 
 	const loadMapData = useCallback((bounds: Bounds) => {
 		lastBoundsRef.current = bounds;
@@ -238,24 +288,30 @@ export default function IncidentMap({
 	useEffect(() => {
 		return () => {
 			if (debounceRef.current) clearTimeout(debounceRef.current);
+			if (transitionTimeoutRef.current) {
+				clearTimeout(transitionTimeoutRef.current);
+			}
 		};
 	}, []);
 
 	const initialCenter = useMemo(() => getDefaultMapCenter(user), [user]);
 
+	// Sélectionne l'incident et recentre la carte dessus.
 	const handleSelectIncident = useCallback(
 		(incident: IncidentListItem, map: L.Map) => {
-			if (selectedIncidentId === incident.id) {
-				navigate(`/incident/${incident.id}`);
-				return;
-			}
 			onSelectIncident(incident.id);
-			map.flyTo(
-				[Number(incident.latitude), Number(incident.longitude)],
-				SELECTION_ZOOM,
-			);
+			const lat = Number(incident.latitude);
+			const lng = Number(incident.longitude);
+			if (!isTargetAlreadyInView(map, lat, lng)) {
+				triggerTransitionFade();
+			}
+			// Pas de closePopup() : fermerait la popup que ce clic vient d'ouvrir.
+			map.setView([lat, lng], SELECTION_ZOOM, {
+				animate: true,
+				duration: SELECTION_TRANSITION_DURATION_SECONDS,
+			});
 		},
-		[selectedIncidentId, onSelectIncident, navigate],
+		[onSelectIncident, triggerTransitionFade],
 	);
 
 	return (
@@ -278,6 +334,13 @@ export default function IncidentMap({
 					Impossible de charger les signalements sur la carte.
 				</div>
 			)}
+			{/* Voile de fondu : MapContainer ne met pas à jour son className après le montage. */}
+			<div
+				aria-hidden="true"
+				className={`pointer-events-none absolute inset-0 z-1000 bg-base-100 transition-opacity duration-300 ${
+					isTransitioning ? "opacity-80" : "opacity-0"
+				}`}
+			/>
 			<MapContainer
 				center={initialCenter}
 				zoom={DEFAULT_ZOOM}
@@ -287,7 +350,10 @@ export default function IncidentMap({
 				className="h-full w-full"
 			>
 				<MapViewportWatcher onViewportChange={handleViewportChange} />
-				<MapPanRequestWatcher request={panRequest} />
+				<MapPanRequestWatcher
+					request={panRequest}
+					onTransitionStart={triggerTransitionFade}
+				/>
 				<TileLayer
 					attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 					url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
