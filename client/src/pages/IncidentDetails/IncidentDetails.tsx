@@ -268,6 +268,10 @@ export default function IncidentDetails() {
 				<IncidentActions
 					incidentId={incident.id}
 					authorId={incident.author.id}
+					types={incident.types}
+					city={incident.city}
+					latitude={incident.latitude}
+					longitude={incident.longitude}
 					status={incident.status}
 					expiresAt={incident.expiresAt}
 					myContribution={incident.myContribution}

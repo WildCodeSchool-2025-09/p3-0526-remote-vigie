@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
-import withPreposition from "@/utils/title";
 import isFeminine from "@/utils/typeGender";
+import withPreposition from "@/utils/withPreposition";
 import useDuplicateDetection from "./useDuplicateDetection";
 import useGeolocation from "./useGeolocation";
 import useIncidentSubmit from "./useIncidentSubmit";
@@ -60,8 +60,10 @@ export default function useIncidentForm() {
 		onTitleChange,
 		description,
 		onDescriptionChange,
-		photoUrl,
-		onPhotoUrlChange,
+		photo,
+		onPhotoChange,
+		photoProcessing,
+		onPhotoProcessingChange,
 		submitting,
 		serverError,
 		confirmation,
@@ -101,8 +103,10 @@ export default function useIncidentForm() {
 		titlePlaceholder,
 		description,
 		onDescriptionChange,
-		photoUrl,
-		onPhotoUrlChange,
+		photo,
+		onPhotoChange,
+		photoProcessing,
+		onPhotoProcessingChange,
 		duplicateCandidate,
 		duplicateType,
 		duplicateDistance,
