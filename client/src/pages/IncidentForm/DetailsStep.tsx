@@ -27,8 +27,9 @@ type DetailsStepProps = {
 	placeholder: string;
 	description: string;
 	onDescriptionChange: (description: string) => void;
-	photoUrl: string | null;
-	onPhotoUrlChange: (photoUrl: string | null) => void;
+	photo: string | null;
+	onPhotoChange: (photo: string | null) => void;
+	onPhotoProcessingChange: (processing: boolean) => void;
 };
 
 export default function DetailsStep({
@@ -48,8 +49,9 @@ export default function DetailsStep({
 	placeholder,
 	description,
 	onDescriptionChange,
-	photoUrl,
-	onPhotoUrlChange,
+	photo,
+	onPhotoChange,
+	onPhotoProcessingChange,
 }: DetailsStepProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const panelId = useId();
@@ -232,7 +234,11 @@ export default function DetailsStep({
 						description={description}
 						onDescriptionChange={onDescriptionChange}
 					/>
-					<PhotoField value={photoUrl} onChange={onPhotoUrlChange} />
+					<PhotoField
+						value={photo}
+						onChange={(value) => onPhotoChange(value ?? null)}
+						onProcessingChange={onPhotoProcessingChange}
+					/>
 				</div>
 			)}
 		</section>
