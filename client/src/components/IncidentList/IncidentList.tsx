@@ -10,11 +10,7 @@ type IncidentListProps = {
 	hasError: boolean;
 	onRetry: () => void;
 	limit: number;
-	// Sélectionné (US04) : met la carte correspondante en surbrillance.
 	selectedIncidentId?: number | null;
-	// Premier clic sur une carte non sélectionnée (US04, décision du 25/09) :
-	// sélectionne et recentre la carte interactive dessus, au lieu de naviguer
-	// directement. Le second clic (carte déjà sélectionnée) navigue toujours.
 	onSelectIncident?: (incident: IncidentListItem) => void;
 };
 
@@ -42,18 +38,13 @@ export default function IncidentList({
 	selectedIncidentId = null,
 	onSelectIncident,
 }: IncidentListProps) {
-	// Une carte par incident affiché, pour que la sélection (US04, décision du
-	// 25/09) puisse faire défiler la liste jusqu'à la carte concernée, même
-	// quand la sélection vient d'un marqueur de la carte interactive plutôt
-	// que d'un clic direct dans cette liste.
+	// Élément <li> de chaque incident, pour faire défiler jusqu'à l'incident sélectionné.
 	const itemRefs = useRef(new Map<number, HTMLLIElement>());
 
 	useEffect(() => {
 		if (selectedIncidentId == null) return;
 
 		const element = itemRefs.current.get(selectedIncidentId);
-		// `block: "nearest"` : ne défile que si la carte est hors champ, sans
-		// la recentrer inutilement si elle est déjà visible.
 		element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
 	}, [selectedIncidentId]);
 
@@ -134,10 +125,17 @@ export default function IncidentList({
 		);
 	}
 
+	// À la limite, d'autres incidents existent peut-être : "Au moins" plutôt qu'un total.
+	const incidentWord = incidents.length > 1 ? "incidents" : "incident";
+	const countLabel =
+		incidents.length === limit
+			? `Au moins ${incidents.length} ${incidentWord}`
+			: `Il y a ${incidents.length} ${incidentWord}`;
+
 	return (
 		<div className="flex flex-col gap-3">
 			<h2 className="font-title text-lg font-bold text-primary">
-				Incidents · {incidents.length}
+				{countLabel} dans cette zone
 			</h2>
 
 			<ul className="flex flex-col gap-3">
@@ -162,7 +160,7 @@ export default function IncidentList({
 			</ul>
 
 			{incidents.length === limit && (
-				<p className="text-xs text-primary/50">
+				<p className="text-center text-xs text-primary/50">
 					Seuls les {limit} incidents les plus récents sont affichés.
 				</p>
 			)}
