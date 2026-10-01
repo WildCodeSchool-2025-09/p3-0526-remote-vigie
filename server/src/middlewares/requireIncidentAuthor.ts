@@ -12,21 +12,24 @@ const requireIncidentAuthor: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		const current = await incidentRepository.findOwnerAndStatus(id);
+		const targetIncident = await incidentRepository.findOwnerAndStatus(id);
 
-		if (current == null) {
+		if (targetIncident == null) {
 			res.sendStatus(StatusCodes.NOT_FOUND);
 			return;
 		}
 
-		if (req.auth == null || Number(req.auth.sub) !== current.userId) {
+		if (
+			req.auth == null ||
+			Number(req.auth.sub) !== targetIncident.userId
+		) {
 			res.status(StatusCodes.FORBIDDEN).json({
 				message: "Vous n'êtes pas l'auteur de ce signalement.",
 			});
 			return;
 		}
 
-		if (current.status === "resolved") {
+		if (targetIncident.status === "resolved") {
 			res.status(StatusCodes.CONFLICT).json({
 				message: "Cet incident est résolu, il n'est plus modifiable.",
 			});

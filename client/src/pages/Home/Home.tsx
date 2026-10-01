@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router";
 
 import bgHome from "@/assets/images/backgroud-home.jpg";
 import VigieLogo from "@/assets/images/vigie-ligne.svg?react";
+import Icon from "@/components/Icon/Icon";
 import IncidentList from "@/components/IncidentList/IncidentList";
 import { getAllIncidents } from "@/services/incidentService";
 import type { IncidentListItem } from "@/types/incidentList";
@@ -73,6 +75,32 @@ export default function Home() {
 					onRetry={loadIncidents}
 					limit={INCIDENTS_LIST_LIMIT}
 				/>
+
+				<Link
+					to="/numbers"
+					className="flex w-full items-center gap-3 rounded-2xl bg-accent px-5 py-3"
+				>
+					<span className="btn btn-square btn-md shrink-0 rounded-2xl border-none bg-primary">
+						<Icon
+							name="phoneFlip"
+							className="h-5 w-5 fill-accent"
+							aria-hidden="true"
+						/>
+					</span>
+					<div className="min-w-0 flex-1">
+						<p className="font-title text-lg font-bold text-primary">
+							Numéros utiles
+						</p>
+						<p className="mt-0.5 text-sm text-primary/70">
+							Urgences, santé et services
+						</p>
+					</div>
+					<Icon
+						name="angleSmallRight"
+						className="h-4 w-4 shrink-0 fill-primary/60"
+						aria-hidden="true"
+					/>
+				</Link>
 			</div>
 		</div>
 	);

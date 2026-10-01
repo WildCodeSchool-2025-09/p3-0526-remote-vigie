@@ -16,10 +16,18 @@ const client = mysql.createPool({
 export default client;
 
 // Types export
-import type { Pool, ResultSetHeader, RowDataPacket } from "mysql2/promise";
+import type {
+	Pool,
+	PoolConnection,
+	ResultSetHeader,
+	RowDataPacket,
+} from "mysql2/promise";
 
 type DatabaseClient = Pool;
 type Result = ResultSetHeader;
 type Rows = RowDataPacket[];
+// A repository method can run on the pool directly, or on a connection
+// checked out for a transaction (see contributionActions.add).
+type Executor = Pool | PoolConnection;
 
-export type { DatabaseClient, Result, Rows };
+export type { DatabaseClient, Result, Rows, Executor };

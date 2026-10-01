@@ -18,7 +18,7 @@ export type IncidentListType = {
 export type IncidentListItem = {
 	id: number;
 	title: string;
-	city: string;
+	city: string | null;
 	status: "in_progress" | "resolved";
 	createdAt: string;
 	expiresAt: string;

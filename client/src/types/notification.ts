@@ -5,6 +5,20 @@ export type NotificationType =
 	| "badge"
 	| "mention";
 
+export type IncidentTypeCode =
+	| "fire"
+	| "insect"
+	| "flood"
+	| "hail"
+	| "glaze"
+	| "snow"
+	| "storm"
+	| "wild"
+	| "tornado"
+	| "rockfall"
+	| "animal"
+	| "tree";
+
 export type Notification = {
 	type: NotificationType;
 	source_id: number;
@@ -13,7 +27,7 @@ export type Notification = {
 	incident_title?: string;
 	city: string;
 	status: string;
-	incident_type?: string;
+	incident_type?: IncidentTypeCode;
 	danger_level?: number;
 	is_read?: boolean;
 };

@@ -12,20 +12,27 @@ class CommentSeeder extends AbstractSeeder {
 		});
 	}
 
-	// The run method - Populate the 'comment' table with fake data
+	async run() {
+		for (let i = 0; i < 12; i += 1) {
+			const incidentIndex = i % 10;
 
-	run() {
-		// Generate and insert fake data into the 'comment' table
-		for (let i = 0; i < 10; i += 1) {
 			// Generate fake comment data matching the `comment` table columns
 			const fakeComment = {
+				refName: `comment_${i}`,
 				user_id: this.getRef(`user_${(i + 2) % 10}`).insertId,
-				incident_id: this.getRef(`incident_${i}`).insertId,
-				content: this.faker.lorem.sentences({ min: 1, max: 4 }),
+				incident_id: this.getRef(`incident_${incidentIndex}`).insertId,
+				content: this.faker.lorem.sentence({ min: 1, max: 4 }),
+				...(i === 10 && {
+					quoted_comment_id: this.getRef("comment_0").insertId,
+				}),
+				...(i === 11 && {
+					quoted_comment_id: this.getRef("comment_1").insertId,
+				}),
 			};
 
 			// Insert the fakeComment data into the 'comment' table
 			this.insert(fakeComment);
+			await this.promises.at(-1);
 		}
 	}
 }

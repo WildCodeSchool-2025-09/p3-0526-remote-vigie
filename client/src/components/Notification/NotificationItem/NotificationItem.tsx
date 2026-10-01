@@ -1,97 +1,115 @@
 import { useNavigate } from "react-router";
 import type { IconName } from "../../../assets/icons";
 import type { Notification } from "../../../types/notification";
+import { formatDate } from "../../../utils/formatDate";
 import Icon from "../../Icon/Icon";
 
-const iconByType = {
-	comment: "commentAltMiddle",
-	incident: "fire",
-	badge: "diamondExclamation",
-	mention: "commentAltMiddle",
-} as const;
+type IncidentTypeConfig = {
+	icon: IconName;
+	style: string;
+	border: string;
+};
 
-const incidentIconByType = {
-	fire: "fire",
-	insect: "insect",
-	flood: "flood",
-	hail: "hail",
-	glaze: "glaze",
-	snow: "snow",
-	storm: "storm",
-	wild: "wild",
-	tornado: "tornado",
-	rockfall: "rockfall",
-	animal: "animal",
-	tree: "tree",
-} as const;
+const incidentTypeConfig: Record<string, IncidentTypeConfig> = {
+	fire: {
+		icon: "fire",
+		style: "bg-[var(--bg-fire)] text-[var(--fire)]",
+		border: "border-l-[var(--fire)]",
+	},
+	insect: {
+		icon: "insect",
+		style: "bg-[var(--bg-insect)] text-[var(--insect)]",
+		border: "border-l-[var(--insect)]",
+	},
+	flood: {
+		icon: "flood",
+		style: "bg-[var(--bg-flood)] text-[var(--flood)]",
+		border: "border-l-[var(--flood)]",
+	},
+	hail: {
+		icon: "hail",
+		style: "bg-[var(--bg-hail)] text-[var(--hail)]",
+		border: "border-l-[var(--hail)]",
+	},
+	glaze: {
+		icon: "glaze",
+		style: "bg-[var(--bg-glaze)] text-[var(--glaze)]",
+		border: "border-l-[var(--glaze)]",
+	},
+	snow: {
+		icon: "snow",
+		style: "bg-[var(--bg-snow)] text-[var(--snow)]",
+		border: "border-l-[var(--snow)]",
+	},
+	storm: {
+		icon: "storm",
+		style: "bg-[var(--bg-storm)] text-[var(--storm)]",
+		border: "border-l-[var(--storm)]",
+	},
+	wild: {
+		icon: "wild",
+		style: "bg-[var(--bg-wild)] text-[var(--wild)]",
+		border: "border-l-[var(--wild)]",
+	},
+	tornado: {
+		icon: "tornado",
+		style: "bg-[var(--bg-tornado)] text-[var(--tornado)]",
+		border: "border-l-[var(--tornado)]",
+	},
+	rockfall: {
+		icon: "rockfall",
+		style: "bg-[var(--bg-rockfall)] text-[var(--rockfall)]",
+		border: "border-l-[var(--rockfall)]",
+	},
+	animal: {
+		icon: "animal",
+		style: "bg-[var(--bg-animal)] text-[var(--animal)]",
+		border: "border-l-[var(--animal)]",
+	},
+	tree: {
+		icon: "tree",
+		style: "bg-[var(--bg-tree)] text-[var(--tree)]",
+		border: "border-l-[var(--tree)]",
+	},
+};
 
-const titleByType = {
-	comment: "Nouveau commentaire sur votre incident",
-	incident_resolved: "Incident résolu",
-	incident: "Nouvel incident près de chez vous",
-	badge: "Vous avez obtenu un badge",
-	mention: "Vous êtes cité dans un commentaire",
-} as const;
+type NotificationTypeConfig = {
+	title: string;
+	icon?: IconName;
+	iconStyle?: string;
+	border?: string;
+};
 
-const iconStyleByType = {
-	comment:
-		"bg-[var(--accent-light)] text-[var(--warning)] border-2 border-[var(--accent)]",
-	badge: "bg-[var(--accent-light)] text-[var(--accent)] border-2 border-[var(--accent)]",
-	mention:
-		"bg-[var(--secondary-light)] text-[var(--secondary)] border-2 border-[var(--secondary)]",
-} as const;
+// icon/iconStyle/border absents pour "incident"/"incident_resolved" : ces deux
+// types empruntent leur icône/couleur/bordure à incidentTypeConfig (voir plus bas).
+const notificationTypeConfig: Record<string, NotificationTypeConfig> = {
+	comment: {
+		title: "Nouveau commentaire sur votre incident",
+		icon: "comments",
+		iconStyle: "bg-[var(--bg-warning)] fill-[var(--warning)]",
+		border: "border-l-[var(--warning)]",
+	},
+	incident: {
+		title: "Nouvel incident près de chez vous",
+	},
+	incident_resolved: {
+		title: "Incident résolu",
+	},
+	badge: {
+		title: "Vous avez obtenu un badge",
+		icon: "diamondExclamation",
+		iconStyle: "bg-[var(--bg-warning)] text-[var(--warning)]",
+		border: "border-l-[var(--warning)]",
+	},
+	mention: {
+		title: "Vous êtes cité dans un commentaire",
+		icon: "comments",
+		iconStyle: "bg-[var(--secondary-light)] text-[var(--secondary)]",
+	},
+};
 
-const incidentStyleByType = {
-	fire: "bg-[var(--bg-fire)] text-[var(--fire)] border-2 border-[var(--fire)]",
-	insect: "bg-[var(--bg-insect)] text-[var(--insect)] border-2 border-[var(--insect)]",
-	flood: "bg-[var(--bg-flood)] text-[var(--flood)] border-2 border-[var(--flood)]",
-	hail: "bg-[var(--bg-hail)] text-[var(--hail)] border-2 border-[var(--hail)]",
-	glaze: "bg-[var(--bg-glaze)] text-[var(--glaze)] border-2 border-[var(--glaze)]",
-	snow: "bg-[var(--bg-snow)] text-[var(--snow)] border-2 border-[var(--snow)]",
-	storm: "bg-[var(--bg-storm)] text-[var(--storm)] border-2 border-[var(--storm)]",
-	wild: "bg-[var(--bg-wild)] text-[var(--wild)] border-2 border-[var(--wild)]",
-	tornado:
-		"bg-[var(--bg-tornado)] text-[var(--tornado)] border-2 border-[var(--tornado)]",
-	rockfall:
-		"bg-[var(--bg-rockfall)] text-[var(--rockfall)] border-2 border-[var(--rockfall)]",
-	animal: "bg-[var(--bg-animal)] text-[var(--animal)] border-2 border-[var(--animal)]",
-	tree: "bg-[var(--bg-tree)] text-[var(--tree)] border-2 border-[var(--tree)]",
-} as const;
-
-const incidentBorderByType = {
-	fire: "border-l-[var(--fire)]",
-	insect: "border-l-[var(--insect)]",
-	flood: "border-l-[var(--flood)]",
-	hail: "border-l-[var(--hail)]",
-	glaze: "border-l-[var(--glaze)]",
-	snow: "border-l-[var(--snow)]",
-	storm: "border-l-[var(--storm)]",
-	wild: "border-l-[var(--wild)]",
-	tornado: "border-l-[var(--tornado)]",
-	rockfall: "border-l-[var(--rockfall)]",
-	animal: "border-l-[var(--animal)]",
-	tree: "border-l-[var(--tree)]",
-} as const;
-
-const commentBorder = "border-l-[var(--accent)]";
-const badgeBorder = "border-l-[var(--accent)]";
 const readBorder = "border-l-[var(--grey)]";
-const readIconStyle = "bg-base-200 text-(--grey) border-2 border-(--grey)";
-
-const incidentLabelByType = {
-	fire: "Feu",
-	insect: "Insectes",
-	flood: "Inondation",
-	hail: "Grêle",
-	glaze: "Verglas",
-	snow: "Neige",
-	storm: "Tempête",
-	wild: "Foudre",
-	tornado: "Tornade",
-	rockfall: "Éboulement",
-	animal: "Animal sauvage",
-	tree: "Chute d'arbre",
-} as const;
+const readIconStyle = "bg-base-200 text-(--grey)";
 
 const dangerLevelLabelByLevel: Record<number, string> = {
 	1: "faible",
@@ -101,20 +119,6 @@ const dangerLevelLabelByLevel: Record<number, string> = {
 	5: "critique",
 };
 
-function formatDate(date: string) {
-	const value = new Date(date);
-	if (Number.isNaN(value.getTime())) return "Récemment";
-	const elapsedMinutes = Math.max(
-		0,
-		Math.floor((Date.now() - value.getTime()) / 60000),
-	);
-	if (elapsedMinutes < 60) return `il y a ${elapsedMinutes || 1} min`;
-	const elapsedHours = Math.floor(elapsedMinutes / 60);
-	if (elapsedHours < 24) return `il y a ${elapsedHours} h`;
-	const elapsedDays = Math.floor(elapsedHours / 24);
-	return `il y a ${elapsedDays} j`;
-}
-
 function NotificationItem({
 	notification,
 	onRead,
@@ -123,41 +127,29 @@ function NotificationItem({
 	onRead: (notification: Notification) => void;
 }) {
 	const navigate = useNavigate();
+
+	const isIncidentType =
+		notification.type === "incident" ||
+		notification.type === "incident_resolved";
 	const incidentType =
-		notification.incident_type as keyof typeof incidentStyleByType;
-	const iconName =
-		notification.type === "incident" ||
-		notification.type === "incident_resolved"
-			? (incidentIconByType[
-					notification.incident_type as keyof typeof incidentIconByType
-				] ?? "fire")
-			: ((iconByType as Record<string, IconName>)[notification.type] ??
-				"notification");
-	const typeIconStyle =
-		notification.type === "incident" ||
-		notification.type === "incident_resolved"
-			? (incidentStyleByType[incidentType] ?? incidentStyleByType.fire)
-			: ((iconStyleByType as Record<string, string>)[notification.type] ??
-				iconStyleByType.mention);
-	const incidentBorder =
-		incidentBorderByType[incidentType] ?? incidentBorderByType.fire;
-	const incidentLabel = incidentLabelByType[incidentType];
-	const label = notification.type === "badge" ? undefined : incidentLabel;
-	const title =
-		(titleByType as Record<string, string>)[notification.type] ??
-		"Nouvelle notification";
+		incidentTypeConfig[notification.incident_type ?? "fire"] ??
+		incidentTypeConfig.fire;
+	const typeConfig = notificationTypeConfig[notification.type];
+
+	const iconName = isIncidentType
+		? incidentType.icon
+		: (typeConfig?.icon ?? "notification");
+	const typeIconStyle = isIncidentType
+		? incidentType.style
+		: (typeConfig?.iconStyle ?? notificationTypeConfig.mention.iconStyle);
+	const title = typeConfig?.title ?? "Nouvelle notification";
 	const isUnread = notification.is_read === false;
 	const iconStyle = isUnread ? typeIconStyle : readIconStyle;
-	const typeBorder =
-		notification.type === "incident" ||
-		notification.type === "incident_resolved"
-			? incidentBorder
-			: notification.type === "comment"
-				? commentBorder
-				: notification.type === "badge"
-					? badgeBorder
-					: "";
+	const typeBorder = isIncidentType
+		? incidentType.border
+		: (typeConfig?.border ?? "");
 	const borderColor = isUnread ? typeBorder : readBorder;
+
 	const meta = [
 		notification.city,
 		notification.danger_level
@@ -185,33 +177,23 @@ function NotificationItem({
 		<button
 			type="button"
 			onClick={handleClick}
-			className={`flex items-start gap-3 h-26 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 ${borderColor}`}
+			className={`flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 ${borderColor}`}
 		>
-			<div className="flex shrink-0 flex-col items-center gap-1 self-center">
-				<div
-					className={`relative grid size-13 place-items-center rounded-2xl sm:size-15 ${iconStyle}`}
-				>
+			<div
+				className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ${iconStyle}`}
+			>
+				<Icon name={iconName} className="h-7 w-7" aria-hidden="true" />
+				{notification.type === "incident_resolved" && (
 					<Icon
-						name={iconName}
-						className="size-7 sm:size-8"
+						name="checkCircle"
+						className="absolute -right-1 -top-1 size-4 rounded-full bg-base-300 text-(--error) sm:size-5"
 						aria-hidden="true"
 					/>
-					{notification.type === "incident_resolved" && (
-						<Icon
-							name="checkCircle"
-							className="absolute -right-1 -top-1 size-4 rounded-full bg-base-300 text-(--error) sm:size-5"
-							aria-hidden="true"
-						/>
-					)}
-				</div>
-				{label && (
-					<span className="text-left text-sm font-bold leading-tight">
-						{label}
-					</span>
 				)}
 			</div>
-			<div className="min-w-0 grow">
-				<div className="flex items-center gap-2 text-sm text-secondary/55">
+
+			<div className="min-w-0 flex-1">
+				<div className="flex flex-wrap items-center gap-1.5">
 					{isUnread ? (
 						<span className="rounded-full bg-(--error)/15 px-2 py-0.5 text-xs font-bold text-(--error)">
 							Non lue
@@ -221,22 +203,18 @@ function NotificationItem({
 							Lue
 						</span>
 					)}
-					<time dateTime={notification.created_at}>
-						{formatDate(notification.created_at)}
-					</time>
 				</div>
-				<h2 className="font-title text-left text-lg font-bold text-primary line-clamp-1">
-					{notification.type === "incident"
-						? (notification.incident_title ?? title)
-						: title}
+				<h2 className="mt-1.5 font-title text-left text-lg font-bold text-primary line-clamp-2 leading-6">
+					{title}
 				</h2>
-				<p className="mt-1 truncate text-left text-sm text-secondary/60">
-					{meta}
+				<p className="mt-1 text-left text-xs text-primary/50">
+					{meta} · {formatDate(notification.created_at)}
 				</p>
 			</div>
+
 			<Icon
 				name="angleSmallRight"
-				className="size-6 shrink-0 self-center text-secondary/45"
+				className="h-4 w-4 shrink-0 fill-primary/30"
 				aria-hidden="true"
 			/>
 		</button>

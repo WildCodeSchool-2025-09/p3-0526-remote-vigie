@@ -20,8 +20,9 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 	const typeColorVar = type ? `var(--${type.code})` : "var(--grey)";
 	const typeBgVar = type ? `var(--bg-${type.code})` : "var(--bg-dark)";
 	const relativeTime = formatRelativeTime(incident.createdAt);
+	const cityLabel = incident.city ?? "position non précisée";
 
-	const ariaLabel = `${incident.title} — ${type?.label ?? "Incident"}, ${dangerLevel.label}, ${incident.city}, ${relativeTime}`;
+	const ariaLabel = `${incident.title} — ${type?.label ?? "Incident"}, ${dangerLevel.label}, ${cityLabel}, ${relativeTime}`;
 
 	return (
 		<Link
@@ -88,7 +89,7 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 					{incident.title}
 				</h2>
 				<p className="mt-1 text-xs text-primary/50">
-					{incident.city} · {relativeTime}
+					{cityLabel} · {relativeTime}
 				</p>
 			</div>
 
