@@ -1,4 +1,4 @@
-import type { Address, AuthUser } from "@/contexts/AuthContext";
+import type { Address, AuthUser } from "@/types/auth";
 import type { Position } from "@/types/incidentForm";
 import { useEffect, useRef, useState } from "react";
 

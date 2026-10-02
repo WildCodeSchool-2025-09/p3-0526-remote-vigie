@@ -1,4 +1,4 @@
-import type { AuthUser } from "@/contexts/AuthContext";
+import type { AuthUser } from "@/types/auth";
 
 // Fallback when there is no connected user with a primary address.
 const PARIS_CENTER: [number, number] = [48.8566, 2.3522];

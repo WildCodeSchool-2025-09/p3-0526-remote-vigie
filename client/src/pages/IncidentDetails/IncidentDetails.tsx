@@ -1,4 +1,5 @@
 import bgIncidentDetails from "@/assets/images/background-incident-details.jpg";
+import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNotVerifiedBanner";
 import Icon from "@/components/Icon/Icon";
 import SafetyInstructions from "@/components/SafetyInstructions/SafetyInstructions";
 import CommentList from "@/components/incident/CommentList/CommentList";
@@ -8,7 +9,7 @@ import IncidentContributions from "@/components/incident/IncidentContributions/I
 import IncidentEditModal from "@/components/incident/IncidentEditModal/IncidentEditModal";
 import IncidentHeader from "@/components/incident/IncidentHeader/IncidentHeader";
 import IncidentLocation from "@/components/incident/IncidentLocation/IncidentLocation";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth/AuthContext";
 import IncidentDetailsSkeleton from "@/pages/IncidentDetails/IncidentDetailsSkeleton";
 import { getIncidentById } from "@/services/incidentService";
 import type { Incident } from "@/types/incidentDetails";
@@ -24,6 +25,7 @@ type ViewState =
 export default function IncidentDetails() {
 	const navigate = useNavigate();
 	const { user } = useAuth();
+	const showsEmailBanner = user != null && !user.emailVerified;
 	const { id } = useParams();
 	const [state, setState] = useState<ViewState>({ status: "loading" });
 	const [justSaved, setJustSaved] = useState(false);
@@ -202,6 +204,8 @@ export default function IncidentDetails() {
 					)}
 			</header>
 
+			<EmailNotVerifiedBanner />
+
 			<IncidentEditModal
 				dialogRef={editModalRef}
 				id={incident.id}
@@ -211,7 +215,9 @@ export default function IncidentDetails() {
 				onSaved={handleIncidentSaved}
 			/>
 
-			<div className="relative -mt-8 space-y-4 px-4 pb-6">
+			<div
+				className={`relative space-y-4 px-4 pb-6 ${showsEmailBanner ? "mt-4" : "-mt-8"}`}
+			>
 				{justSaved && (
 					<div className="flex w-full items-start gap-3 rounded-2xl bg-accent px-5 py-3 animate-pop">
 						<Icon

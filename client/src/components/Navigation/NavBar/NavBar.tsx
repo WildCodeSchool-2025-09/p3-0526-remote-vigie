@@ -1,6 +1,6 @@
-import { navItems } from "../../../config/NavItemConfig";
-import { useAuth } from "../../../contexts/AuthContext";
-import NavItem from "../NavItem/NavItem";
+import NavItem from "@/components/Navigation/NavItem/NavItem";
+import { navItems } from "@/config/NavItemConfig";
+import { useAuth } from "@/contexts/auth/AuthContext";
 
 function NavBar() {
 	const { user } = useAuth();

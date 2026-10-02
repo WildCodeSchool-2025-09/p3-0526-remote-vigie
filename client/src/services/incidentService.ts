@@ -106,12 +106,13 @@ export async function getNearbyIncident(
 type UpdateIncidentPayload = {
 	title: string;
 	description: string | null;
-	photoUrl: string | null;
+	// Data URL de la nouvelle photo ; null la retire ; absent (undefined) la garde.
+	photo?: string | null;
 };
 
 type UpdateIncidentResult =
 	| { status: "ok"; incident: Incident }
-	| { status: "invalid" }
+	| { status: "invalid"; message?: string }
 	| { status: "forbidden" }
 	| { status: "notFound" }
 	| { status: "resolved" }
@@ -128,7 +129,13 @@ export async function updateIncident(
 			body: JSON.stringify(payload),
 		});
 
-		if (res.status === 400) return { status: "invalid" };
+		if (res.status === 400) {
+			// Les erreurs de photo portent un message ; les autres 400 n'ont pas de corps.
+			const body = (await res.json().catch(() => null)) as {
+				message?: string;
+			} | null;
+			return { status: "invalid", message: body?.message };
+		}
 		if (res.status === 403) return { status: "forbidden" };
 		if (res.status === 404) return { status: "notFound" };
 		if (res.status === 409) return { status: "resolved" };
@@ -147,7 +154,8 @@ type CreateIncidentPayload = {
 	dangerLevelId: number;
 	title: string;
 	description: string | null;
-	photoUrl: string | null;
+	// Data URL de la photo redimensionnée, ou null.
+	photo: string | null;
 };
 
 type CreateIncidentResult =

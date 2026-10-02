@@ -21,7 +21,7 @@ import "leaflet/dist/leaflet.css";
 
 import { type IconName, icons } from "@/assets/icons";
 import UsefulPlaceMarker from "@/components/UsefulPlaceMarker/UsefulPlaceMarker";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth/AuthContext";
 import { getIncidentsInBounds } from "@/services/incidentService";
 import { getUsefulPlaces } from "@/services/usefulPlaceService";
 import type { Bounds } from "@/types/bounds";

@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 
-import bgHome from "@/assets/images/backgroud-home.jpg";
+import bgHome from "@/assets/images/background-home.jpg";
 import VigieLogo from "@/assets/images/vigie-ligne.svg?react";
+import EmailVerificationBanner from "@/components/EmailVerificationBanner/EmailVerificationBanner";
 import Icon from "@/components/Icon/Icon";
 import IncidentList from "@/components/IncidentList/IncidentList";
 import IncidentMap from "@/components/IncidentMap/IncidentMap";
+import { useAuth } from "@/contexts/auth/AuthContext";
 import { getAllIncidents } from "@/services/incidentService";
 import type { IncidentListItem } from "@/types/incidentList";
 
 const INCIDENTS_LIST_LIMIT = 15;
 
 export default function Home() {
+	const { user } = useAuth();
 	const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
@@ -59,6 +62,8 @@ export default function Home() {
 		return loadIncidents();
 	}, [loadIncidents]);
 
+	const showsEmailVerificationBanner = user != null && !user.emailVerified;
+
 	return (
 		<div className="flex h-full flex-col bg-base-100">
 			<header className="relative isolate flex h-44 shrink-0 flex-col justify-start overflow-hidden bg-primary px-4 pt-18">
@@ -77,7 +82,15 @@ export default function Home() {
 				</h1>
 			</header>
 
-			<div className="relative -mt-8 shrink-0 px-4">
+			{showsEmailVerificationBanner && (
+				<div className="relative -mt-8 mb-4 px-4">
+					<EmailVerificationBanner email={user.email} />
+				</div>
+			)}
+
+			<div
+				className={`relative shrink-0 px-4 ${showsEmailVerificationBanner ? "" : "-mt-8"}`}
+			>
 				<a
 					href="#incident-list"
 					className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-6 focus:z-1100 focus:rounded-full focus:bg-accent focus:px-3 focus:py-1 focus:text-xs focus:font-bold focus:text-primary"
