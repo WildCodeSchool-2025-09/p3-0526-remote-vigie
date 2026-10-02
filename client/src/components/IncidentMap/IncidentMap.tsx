@@ -28,6 +28,7 @@ import type { Bounds } from "@/types/bounds";
 import type { IncidentListItem } from "@/types/incidentList";
 import type { UsefulPlace } from "@/types/usefulPlace";
 import { getDefaultMapCenter } from "@/utils/getDefaultMapCenter";
+import { useDelayedFlag } from "./useDelayedFlag";
 
 // [sud-ouest, nord-est]
 const FRANCE_BOUNDS: [[number, number], [number, number]] = [
@@ -39,9 +40,14 @@ const MIN_ZOOM = 5;
 const SELECTION_ZOOM = 15;
 // Sous ce zoom, les lieux utiles ne sont ni chargés ni affichés.
 const USEFUL_PLACES_MIN_ZOOM = 14;
+// L'indice « Zoomez… » n'apparaît qu'à partir de ce zoom, assez près pour que zoomer révèle des lieux.
+const ZOOM_HINT_MIN_ZOOM = 11;
 const SELECTION_TRANSITION_DURATION_SECONDS = 1;
 const MAP_TRANSITION_FADE_MS = 900;
 const BOUNDS_FETCH_DEBOUNCE_MS = 400;
+// Un message de chargement n'apparaît que si l'attente dépasse ce délai.
+const LOADING_MESSAGE_DELAY_MS = 400;
+const LOADING_MESSAGE_MIN_VISIBLE_MS = 400;
 
 // Vrai si aucune nouvelle tuile n'est à charger (même zoom, point déjà visible).
 function isTargetAlreadyInView(map: L.Map, lat: number, lng: number): boolean {
@@ -227,7 +233,7 @@ export default function IncidentMap({
 	const [usefulPlaces, setUsefulPlaces] = useState<UsefulPlace[]>([]);
 	const [usefulPlacesLoading, setUsefulPlacesLoading] = useState(false);
 	const [usefulPlacesError, setUsefulPlacesError] = useState(false);
-	const [isBelowPlacesZoom, setIsBelowPlacesZoom] = useState(true);
+	const [showsZoomHint, setShowsZoomHint] = useState(false);
 
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const lastBoundsRef = useRef<Bounds | null>(null);
@@ -269,14 +275,14 @@ export default function IncidentMap({
 
 	const loadUsefulPlaces = useCallback((bounds: Bounds, zoom: number) => {
 		if (zoom < USEFUL_PLACES_MIN_ZOOM) {
-			setIsBelowPlacesZoom(true);
+			setShowsZoomHint(zoom >= ZOOM_HINT_MIN_ZOOM);
 			setUsefulPlaces([]);
 			setUsefulPlacesLoading(false);
 			setUsefulPlacesError(false);
 			return;
 		}
 
-		setIsBelowPlacesZoom(false);
+		setShowsZoomHint(false);
 		setUsefulPlacesLoading(true);
 		setUsefulPlacesError(false);
 		getUsefulPlaces(bounds).then((result) => {
@@ -320,6 +326,17 @@ export default function IncidentMap({
 
 	const initialCenter = useMemo(() => getDefaultMapCenter(user), [user]);
 
+	const showMapIncidentsLoading = useDelayedFlag(
+		mapIncidentsLoading,
+		LOADING_MESSAGE_DELAY_MS,
+		LOADING_MESSAGE_MIN_VISIBLE_MS,
+	);
+	const showUsefulPlacesLoading = useDelayedFlag(
+		usefulPlacesLoading,
+		LOADING_MESSAGE_DELAY_MS,
+		LOADING_MESSAGE_MIN_VISIBLE_MS,
+	);
+
 	// Vrai quand la zone ne contient aucun signalement (les lieux utiles ne comptent pas).
 	const isZoneEmpty =
 		!mapIncidentsLoading && !mapError && mapIncidents.length === 0;
@@ -344,7 +361,7 @@ export default function IncidentMap({
 
 	return (
 		<div className={`relative ${className}`}>
-			{mapIncidentsLoading && (
+			{showMapIncidentsLoading && (
 				<output
 					aria-live="polite"
 					className="absolute top-2 right-2 left-2 z-1000 flex justify-center"
@@ -380,12 +397,12 @@ export default function IncidentMap({
 						Rien à signaler autour de vous.
 					</output>
 				)}
-				{(isBelowPlacesZoom || usefulPlacesLoading) && (
+				{(showsZoomHint || showUsefulPlacesLoading) && (
 					<output
 						aria-live="polite"
 						className="rounded-full bg-base-100/90 px-3 py-1 text-xs font-bold text-primary shadow"
 					>
-						{isBelowPlacesZoom
+						{showsZoomHint
 							? "Zoomez pour voir les lieux utiles"
 							: "Chargement des lieux utiles…"}
 					</output>
