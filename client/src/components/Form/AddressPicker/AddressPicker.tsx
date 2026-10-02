@@ -1,4 +1,4 @@
-import type { Address } from "@/contexts/AuthContext";
+import type { Address } from "@/types/auth";
 
 type AddressPickerProps = {
 	label: string;

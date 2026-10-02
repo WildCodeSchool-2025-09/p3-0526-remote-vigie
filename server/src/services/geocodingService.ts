@@ -50,4 +50,85 @@ async function reverse(
 	}
 }
 
-export default { reverse };
+async function search(query: string): Promise<
+	{
+		name: string;
+		city: string;
+		postalCode: string;
+		inseeCode: string;
+		latitude: number;
+		longitude: number;
+		type: string;
+		streetLine: string;
+	}[]
+> {
+	const url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5`;
+
+	try {
+		const res = await fetch(url, {
+			signal: AbortSignal.timeout(TIMEOUT_MS),
+		});
+		if (!res.ok) {
+			throw new Error(`Response status: ${res.status}`);
+		}
+		const result = await res.json();
+		const features = result.features ?? [];
+
+		return features.map(
+			(feature: {
+				properties: Record<string, string>;
+				geometry: { coordinates: [number, number] };
+			}) => ({
+				name: feature.properties.label,
+				city: feature.properties.city,
+				postalCode: feature.properties.postcode,
+				inseeCode: feature.properties.citycode,
+				latitude: feature.geometry.coordinates[1],
+				longitude: feature.geometry.coordinates[0],
+				type: feature.properties.type,
+				streetLine: feature.properties.name,
+			}),
+		);
+	} catch (error) {
+		console.error(
+			error instanceof Error
+				? error.message
+				: "Erreur inconnue lors de la recherche d'adresse",
+			{ query },
+		);
+
+		throw error;
+	}
+}
+
+async function geocodeCentroid(
+	city: string,
+	postalCode: string,
+): Promise<{
+	inseeCode: string;
+	latitude: number;
+	longitude: number;
+} | null> {
+	const url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city)}&postcode=${encodeURIComponent(postalCode)}&type=municipality&limit=1`;
+
+	const res = await fetch(url, {
+		signal: AbortSignal.timeout(TIMEOUT_MS),
+	});
+	if (!res.ok) {
+		throw new Error(`Response status: ${res.status}`);
+	}
+	const result = await res.json();
+	const feature = result.features?.[0];
+
+	if (!feature) {
+		return null;
+	}
+
+	return {
+		inseeCode: feature.properties.citycode,
+		latitude: feature.geometry.coordinates[1],
+		longitude: feature.geometry.coordinates[0],
+	};
+}
+
+export default { reverse, search, geocodeCentroid };

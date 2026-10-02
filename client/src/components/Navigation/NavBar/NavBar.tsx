@@ -1,8 +1,8 @@
 import DangerModal from "@/components/Danger/DangerModal/DangerModal";
+import NavItem from "@/components/Navigation/NavItem/NavItem";
+import { navItems } from "@/config/NavItemConfig";
+import { useAuth } from "@/contexts/auth/AuthContext";
 import { useRef } from "react";
-import { navItems } from "../../../config/NavItemConfig";
-import { useAuth } from "../../../contexts/AuthContext";
-import NavItem from "../NavItem/NavItem";
 
 function NavBar() {
 	const { user } = useAuth();
