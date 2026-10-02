@@ -29,6 +29,13 @@ AND ST_Distance_Sphere(
 
 		return rows;
 	}
+	async findByUserId(userId: number) {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT id, latitude, longitude, is_primary, created_at, label, street_line, postal_code, city FROM address WHERE user_id = ?",
+			[userId],
+		);
+		return rows;
+	}
 }
 
 export default new AddressRepository();

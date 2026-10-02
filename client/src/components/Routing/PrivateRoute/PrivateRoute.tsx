@@ -1,4 +1,4 @@
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth/AuthContext";
 import { Navigate, Outlet, useLocation } from "react-router";
 
 export default function PrivateRoute() {

@@ -12,7 +12,7 @@ import {
 
 import App from "@/App";
 import PrivateRoute from "@/components/Routing/PrivateRoute/PrivateRoute";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider } from "@/contexts/auth/AuthContext";
 import Home from "@/pages/Home/Home";
 import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
 import IncidentForm from "@/pages/IncidentForm/IncidentForm";
@@ -91,7 +91,7 @@ const router = createBrowserRouter([
 				path: "numbers",
 				element: <Numbers />,
 			},
-			// Routes réservées aux membres connectés (bouchon US06 en place).
+			// Routes réservées aux membres connectés.
 			{
 				element: <PrivateRoute />,
 				children: [
@@ -99,15 +99,16 @@ const router = createBrowserRouter([
 						path: "incident/create",
 						element: <IncidentForm />,
 					},
+					{
+						path: "profile",
+						element: <Profile />,
+					},
 				],
 			},
+
 			{
 				path: "incident/:id",
 				element: <IncidentDetails />,
-			},
-			{
-				path: "profile",
-				element: <Profile />,
 			},
 			{
 				path: "login",

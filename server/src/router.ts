@@ -1,7 +1,9 @@
 import express from "express";
 import decodePhoto from "./middlewares/decodePhoto";
 import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
+import validateLoginInput from "./middlewares/validateLoginInput";
 import addressActions from "./modules/address/addressActions";
+import authActions from "./modules/auth/authActions";
 import commentActions from "./modules/comment/commentActions";
 import contributionActions from "./modules/contribution/contributionActions";
 import incidentActions from "./modules/incident/incidentActions";
@@ -14,6 +16,13 @@ import requireVerifiedEmail from "./services/requireVerifiedEmail";
 import verifyToken from "./services/verifyToken";
 
 const router = express.Router();
+
+/* ************************************************************************* */
+// Define Your API Routes Here
+/* ************************************************************************* */
+router.post("/api/auth/login", validateLoginInput, authActions.login);
+
+router.get("/api/auth/me", verifyToken, authActions.me);
 
 router.post(
 	"/api/incidents",
