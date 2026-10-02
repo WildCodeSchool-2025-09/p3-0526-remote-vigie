@@ -9,6 +9,7 @@ import incidentRepository from "../../src/modules/incident/incidentRepository";
 import incidentTypeRepository from "../../src/modules/incidentType/incidentTypeRepository";
 import alertService from "../../src/services/alertService";
 import geocodingService from "../../src/services/geocodingService";
+import { authHeader } from "../helpers/authHeader";
 
 afterEach(() => {
 	jest.restoreAllMocks();
@@ -95,7 +96,10 @@ describe("POST /api/incidents", () => {
 
 		// Empty body: typeIds is missing, incidentActions.add rejects it
 		// before touching anything else.
-		const response = await supertest(app).post("/api/incidents").send({});
+		const response = await supertest(app)
+			.post("/api/incidents")
+			.set(authHeader())
+			.send({});
 
 		expect(response.status).toBe(400);
 	});
@@ -176,6 +180,7 @@ describe("POST /api/incidents", () => {
 
 		const response = await supertest(app)
 			.post("/api/incidents")
+			.set(authHeader())
 			.send({
 				typeIds: [1],
 				latitude: 45.75,

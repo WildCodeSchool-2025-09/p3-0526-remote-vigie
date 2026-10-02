@@ -1,5 +1,5 @@
+import { apiFetch } from "@/services/apiClient";
 import type { LocationAddress } from "@/types/incidentForm";
-import { apiFetch } from "./apiClient";
 
 type ReverseGeocodeResult =
 	| { status: "ok"; locationAddress: LocationAddress }

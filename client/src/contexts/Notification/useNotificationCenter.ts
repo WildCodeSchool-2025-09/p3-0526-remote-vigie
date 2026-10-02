@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
-import notificationService from "../../services/notificationService";
-import type { Notification } from "../../types/notification";
-import { useNotifications } from "./NotificationContext";
+import { useNotifications } from "@/contexts/Notification/NotificationContext";
 import {
 	getNotificationKey,
 	getReadNotifications,
 	notificationCache,
 	readNotificationsKey,
-} from "./readNotifications";
+} from "@/contexts/Notification/readNotifications";
+import notificationService from "@/services/notificationService";
+import type { Notification } from "@/types/notification";
+import { useCallback, useEffect, useState } from "react";
 
 const MIN_LOADING_DURATION_MS = 1200;
 

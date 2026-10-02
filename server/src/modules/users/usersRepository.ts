@@ -141,6 +141,15 @@ class UsersRepository {
 		);
 		return result.affectedRows === 1;
 	}
+
+	async findByIdentifier(identifier: string) {
+		const normalized = identifier.toLowerCase();
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT id, pseudo, email, email_verified_at, password_hash FROM user WHERE email_normalized = ? OR pseudo_normalized = ?",
+			[normalized, normalized],
+		);
+		return rows[0] ?? null;
+	}
 }
 
 export default new UsersRepository();
