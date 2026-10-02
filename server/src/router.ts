@@ -10,9 +10,15 @@ import incidentActions from "./modules/incident/incidentActions";
 import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
 import photoActions from "./modules/photo/photoActions";
+import usersActions from "./modules/users/usersActions";
 import attachUserIfPresent from "./services/attachUserIfPresent";
+import checkAddressSearchRateLimit from "./services/checkAddressSearchRateLimit";
 import checkIncidentRateLimit from "./services/checkIncidentRateLimit";
+import checkRegisterRateLimit from "./services/checkRegisterRateLimit";
+import checkResendVerificationRateLimit from "./services/checkResendVerificationRateLimit";
+import checkUserUniqueness from "./services/checkUserUniqueness";
 import requireVerifiedEmail from "./services/requireVerifiedEmail";
+import validateRegisterInput from "./services/validateRegisterInput";
 import verifyToken from "./services/verifyToken";
 
 const router = express.Router();
@@ -70,5 +76,24 @@ router.put(
 );
 
 router.get("/api/addresses/reverse", verifyToken, addressActions.reverse);
+router.get(
+	"/api/addresses/search",
+	checkAddressSearchRateLimit,
+	addressActions.search,
+);
+router.post(
+	"/api/users",
+	validateRegisterInput,
+	checkRegisterRateLimit,
+	checkUserUniqueness,
+	authActions.hashPassword,
+	usersActions.add,
+);
+router.post("/api/users/verify-email", usersActions.verifyEmail);
+router.post(
+	"/api/users/resend-verification",
+	checkResendVerificationRateLimit,
+	usersActions.resendVerification,
+);
 
 export default router;

@@ -1,18 +1,19 @@
-import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNotVerifiedBanner";
-import { useAuth } from "@/contexts/auth/AuthContext";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 
-import bgHome from "@/assets/images/backgroud-home.jpg";
+import bgHome from "@/assets/images/background-home.jpg";
 import VigieLogo from "@/assets/images/vigie-ligne.svg?react";
+import EmailVerificationBanner from "@/components/EmailVerificationBanner/EmailVerificationBanner";
 import Icon from "@/components/Icon/Icon";
 import IncidentList from "@/components/IncidentList/IncidentList";
+import { useAuth } from "@/contexts/auth/AuthContext";
 import { getAllIncidents } from "@/services/incidentService";
 import type { IncidentListItem } from "@/types/incidentList";
 
 const INCIDENTS_LIST_LIMIT = 15;
 
 export default function Home() {
+	const { user } = useAuth();
 	const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
@@ -48,8 +49,7 @@ export default function Home() {
 	// l'US04 : la carte, une fois codée, deviendra l'élément qui chevauche le
 	// header, indépendamment de l'état de la liste en dessous.
 	const showsPlaceholder = isLoading || hasError || incidents.length === 0;
-	const { user } = useAuth();
-	const showsEmailBanner = user != null && !user.emailVerified;
+	const showsEmailVerificationBanner = user != null && !user.emailVerified;
 
 	return (
 		<div className="fixed inset-x-0 top-0 flex h-[calc(100dvh-var(--navigation-height))] flex-col bg-base-100 lg:left-24 lg:h-dvh">
@@ -69,10 +69,14 @@ export default function Home() {
 				</h1>
 			</header>
 
-			<EmailNotVerifiedBanner />
+			{showsEmailVerificationBanner && (
+				<div className="relative -mt-8 mb-4 px-4">
+					<EmailVerificationBanner email={user.email} />
+				</div>
+			)}
 
 			<div
-				className={`relative flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto px-4 pb-6 ${showsEmailBanner ? "mt-4" : showsPlaceholder ? "-mt-8" : ""}`}
+				className={`relative flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto px-4 pb-6 ${showsPlaceholder && !showsEmailVerificationBanner ? "-mt-8" : ""}`}
 			>
 				<IncidentList
 					incidents={incidents}

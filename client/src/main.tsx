@@ -13,6 +13,7 @@ import {
 import App from "@/App";
 import PrivateRoute from "@/components/Routing/PrivateRoute/PrivateRoute";
 import { AuthProvider } from "@/contexts/auth/AuthContext";
+import Cgu from "@/pages/Cgu/Cgu";
 import Home from "@/pages/Home/Home";
 import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
 import IncidentForm from "@/pages/IncidentForm/IncidentForm";
@@ -22,6 +23,7 @@ import NotificationCenter from "@/pages/Notification/NotificationCenter";
 import Numbers from "@/pages/Numbers/Numbers";
 import Profile from "@/pages/Profile/Profile";
 import Register from "@/pages/Register/Register";
+import VerifyEmail from "@/pages/VerifyEmail/VerifyEmail";
 
 // DEV ONLY — pas des pages de l'app, voir src/_dev/README.md
 // Le bloc `if (import.meta.env.DEV)` est tree-shaké par Vite dans un build de prod :
@@ -117,6 +119,14 @@ const router = createBrowserRouter([
 			{
 				path: "register",
 				element: <Register />,
+			},
+			{
+				path: "cgu",
+				element: <Cgu />,
+			},
+			{
+				path: "verify-email",
+				element: <VerifyEmail />,
 			},
 			{
 				path: "notifications",
