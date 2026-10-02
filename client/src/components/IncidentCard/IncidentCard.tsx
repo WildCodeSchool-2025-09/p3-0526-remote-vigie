@@ -122,7 +122,7 @@ export default function IncidentCard({
 				<Link
 					to={`/incident/${incident.id}`}
 					onClick={(event) => event.stopPropagation()}
-					className="btn btn-accent btn-sm shrink-0 rounded-full"
+					className="btn btn-accent btn-sm shrink-0 self-end rounded-full"
 				>
 					Voir le détail
 				</Link>
