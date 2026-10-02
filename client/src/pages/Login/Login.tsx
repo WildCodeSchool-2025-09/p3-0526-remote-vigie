@@ -106,8 +106,8 @@ export default function Login() {
 				{justRegistered && (
 					<p className="mb-5 rounded-2xl bg-(--bg-success) px-4 py-3 text-sm font-semibold text-primary">
 						Votre compte a bien été créé. Connectez-vous pour
-						continuer. Pensez à vérifier votre e-mail pour
-						débloquer toutes les fonctionnalités.
+						continuer. Pensez à vérifier votre e-mail pour débloquer
+						toutes les fonctionnalités.
 					</p>
 				)}
 				<form
