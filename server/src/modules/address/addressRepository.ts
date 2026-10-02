@@ -29,6 +29,19 @@ AND ST_Distance_Sphere(
 
 		return rows;
 	}
+
+	async findOldestInseeCode(userId: number): Promise<string | null> {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT insee_code
+FROM address
+WHERE user_id = ?
+ORDER BY created_at ASC, id ASC
+LIMIT 1`,
+			[userId],
+		);
+
+		return rows[0]?.insee_code ?? null;
+	}
 }
 
 export default new AddressRepository();
