@@ -77,7 +77,13 @@ export default function Home() {
 				</h1>
 			</header>
 
-			<div className="-mt-8 shrink-0 px-4">
+			<div className="relative -mt-8 shrink-0 px-4">
+				<a
+					href="#incident-list"
+					className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-6 focus:z-1100 focus:rounded-full focus:bg-accent focus:px-3 focus:py-1 focus:text-xs focus:font-bold focus:text-primary"
+				>
+					Aller à la liste des incidents
+				</a>
 				<IncidentMap
 					selectedIncidentId={selectedIncidentId}
 					onSelectIncident={setSelectedIncidentId}
@@ -86,7 +92,12 @@ export default function Home() {
 				/>
 			</div>
 
-			<div className="mt-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-6">
+			<section
+				id="incident-list"
+				tabIndex={-1}
+				aria-label="Liste des incidents"
+				className="mt-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-6 focus:outline-none"
+			>
 				<IncidentList
 					incidents={incidents}
 					isLoading={isLoading}
@@ -122,7 +133,7 @@ export default function Home() {
 						aria-hidden="true"
 					/>
 				</Link>
-			</div>
+			</section>
 		</div>
 	);
 }
