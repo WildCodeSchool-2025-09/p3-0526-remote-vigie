@@ -148,7 +148,9 @@ class IncidentRepository {
 			`SELECT t.code, t.label, t.icon, t.color, t.safety_instructions
 			FROM incident_incident_type AS iit
 			INNER JOIN incident_type AS t ON t.id = iit.incident_type_id
-			WHERE iit.incident_id = ?`,
+			INNER JOIN danger_level AS tdl ON tdl.id = t.danger_level_id
+			WHERE iit.incident_id = ?
+			ORDER BY tdl.weight DESC, t.id ASC`,
 			[id],
 		);
 
@@ -281,19 +283,32 @@ class IncidentRepository {
 		return row == null ? null : { userId: row.user_id, status: row.status };
 	}
 
+	async findPhotoUrl(id: number): Promise<string | null> {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT photo_url FROM incident WHERE id = ?",
+			[id],
+		);
+
+		return rows[0]?.photo_url ?? null;
+	}
+
 	async update(
 		id: number,
 		data: {
 			title: string;
 			description: string | null;
-			photoUrl: string | null;
+			// undefined : on garde la photo actuelle ; null : on la retire.
+			photoUrl?: string | null;
 		},
 	): Promise<void> {
+		const photoSet = data.photoUrl === undefined ? "" : ", photo_url = ?";
+		const photoParams = data.photoUrl === undefined ? [] : [data.photoUrl];
+
 		await databaseClient.query(
 			`UPDATE incident
-			SET title = ?, description = ?, photo_url = ?, edited_at = NOW()
+			SET title = ?, description = ?${photoSet}, edited_at = NOW()
 			WHERE id = ?`,
-			[data.title, data.description, data.photoUrl, id],
+			[data.title, data.description, ...photoParams, id],
 		);
 	}
 

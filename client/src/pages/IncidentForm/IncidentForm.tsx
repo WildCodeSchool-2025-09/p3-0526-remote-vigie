@@ -4,11 +4,11 @@ import EmailVerificationNotice from "@/components/Form/EmailVerificationNotice/E
 import IncidentCreatedNotice from "@/components/Form/IncidentCreatedNotice/IncidentCreatedNotice";
 import SubmitIncident from "@/components/Form/SubmitIncident/SubmitIncident";
 import Icon from "@/components/Icon/Icon";
+import DetailsStep from "@/pages/IncidentForm/DetailsStep";
+import IncidentFormSkeleton from "@/pages/IncidentForm/IncidentFormSkeleton";
+import IncidentTypeStep from "@/pages/IncidentForm/IncidentTypeStep";
+import useIncidentForm from "@/pages/IncidentForm/useIncidentForm";
 import { useNavigate } from "react-router";
-import DetailsStep from "./DetailsStep";
-import IncidentFormSkeleton from "./IncidentFormSkeleton";
-import IncidentTypeStep from "./IncidentTypeStep";
-import useIncidentForm from "./useIncidentForm";
 
 export default function IncidentForm() {
 	const navigate = useNavigate();
@@ -39,8 +39,10 @@ export default function IncidentForm() {
 		titlePlaceholder,
 		description,
 		onDescriptionChange,
-		photoUrl,
-		onPhotoUrlChange,
+		photo,
+		onPhotoChange,
+		photoProcessing,
+		onPhotoProcessingChange,
 		duplicateCandidate,
 		duplicateType,
 		duplicateDistance,
@@ -118,8 +120,9 @@ export default function IncidentForm() {
 						placeholder={titlePlaceholder}
 						description={description}
 						onDescriptionChange={onDescriptionChange}
-						photoUrl={photoUrl}
-						onPhotoUrlChange={onPhotoUrlChange}
+						photo={photo}
+						onPhotoChange={onPhotoChange}
+						onPhotoProcessingChange={onPhotoProcessingChange}
 					/>
 
 					{serverError && (
@@ -137,7 +140,9 @@ export default function IncidentForm() {
 							<p className="text-sm text-error">{serverError}</p>
 						</div>
 					)}
-					<SubmitIncident submitting={submitting} />
+					<SubmitIncident
+						submitting={submitting || photoProcessing}
+					/>
 				</form>
 			)}
 		</div>

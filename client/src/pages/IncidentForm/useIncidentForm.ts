@@ -1,12 +1,12 @@
-import { useAuth } from "@/contexts/AuthContext";
-import withPreposition from "@/utils/title";
+import { useAuth } from "@/contexts/auth/AuthContext";
+import useDuplicateDetection from "@/pages/IncidentForm/useDuplicateDetection";
+import useGeolocation from "@/pages/IncidentForm/useGeolocation";
+import useIncidentSubmit from "@/pages/IncidentForm/useIncidentSubmit";
+import useIncidentTypeSelection from "@/pages/IncidentForm/useIncidentTypeSelection";
+import useIncidentTypes from "@/pages/IncidentForm/useIncidentTypes";
+import useResolvedAddress from "@/pages/IncidentForm/useResolvedAddress";
 import isFeminine from "@/utils/typeGender";
-import useDuplicateDetection from "./useDuplicateDetection";
-import useGeolocation from "./useGeolocation";
-import useIncidentSubmit from "./useIncidentSubmit";
-import useIncidentTypeSelection from "./useIncidentTypeSelection";
-import useIncidentTypes from "./useIncidentTypes";
-import useResolvedAddress from "./useResolvedAddress";
+import withPreposition from "@/utils/withPreposition";
 
 export default function useIncidentForm() {
 	const { user } = useAuth();
@@ -60,8 +60,10 @@ export default function useIncidentForm() {
 		onTitleChange,
 		description,
 		onDescriptionChange,
-		photoUrl,
-		onPhotoUrlChange,
+		photo,
+		onPhotoChange,
+		photoProcessing,
+		onPhotoProcessingChange,
 		submitting,
 		serverError,
 		confirmation,
@@ -101,8 +103,10 @@ export default function useIncidentForm() {
 		titlePlaceholder,
 		description,
 		onDescriptionChange,
-		photoUrl,
-		onPhotoUrlChange,
+		photo,
+		onPhotoChange,
+		photoProcessing,
+		onPhotoProcessingChange,
 		duplicateCandidate,
 		duplicateType,
 		duplicateDistance,

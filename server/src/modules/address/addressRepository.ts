@@ -20,6 +20,7 @@ class AddressRepository {
 FROM address
 INNER JOIN user ON user.id = address.user_id
 WHERE address.user_id != ?
+AND address.is_approximate = 0
 AND ST_Distance_Sphere(
 	POINT(address.longitude, address.latitude),
 	POINT(?, ?)
@@ -41,6 +42,14 @@ LIMIT 1`,
 		);
 
 		return rows[0]?.insee_code ?? null;
+	}
+
+	async findByUserId(userId: number) {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT id, latitude, longitude, is_primary, created_at, label, street_line, postal_code, city FROM address WHERE user_id = ?",
+			[userId],
+		);
+		return rows;
 	}
 }
 

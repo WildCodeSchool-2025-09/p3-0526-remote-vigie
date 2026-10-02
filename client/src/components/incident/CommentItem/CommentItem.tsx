@@ -1,5 +1,5 @@
 import Icon from "@/components/Icon/Icon";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth/AuthContext";
 import type { Comment } from "@/types/comment";
 import type { IncidentStatus } from "@/types/incidentDetails";
 import { formatDateTime } from "@/utils/formatDate";
