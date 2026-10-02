@@ -1,5 +1,12 @@
 import L from "leaflet";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+	type CSSProperties,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
 	MapContainer,
@@ -13,11 +20,13 @@ import { Link } from "react-router";
 import "leaflet/dist/leaflet.css";
 
 import { type IconName, icons } from "@/assets/icons";
+import UsefulPlaceMarker from "@/components/UsefulPlaceMarker/UsefulPlaceMarker";
 import { useAuth } from "@/contexts/AuthContext";
 import { getIncidentsInBounds } from "@/services/incidentService";
 import { getUsefulPlaces } from "@/services/usefulPlaceService";
 import type { Bounds } from "@/types/bounds";
 import type { IncidentListItem } from "@/types/incidentList";
+import type { UsefulPlace } from "@/types/usefulPlace";
 import { getDefaultMapCenter } from "@/utils/getDefaultMapCenter";
 
 // [sud-ouest, nord-est]
@@ -28,6 +37,8 @@ const FRANCE_BOUNDS: [[number, number], [number, number]] = [
 const DEFAULT_ZOOM = 6;
 const MIN_ZOOM = 5;
 const SELECTION_ZOOM = 15;
+// Sous ce zoom, les lieux utiles ne sont ni chargés ni affichés.
+const USEFUL_PLACES_MIN_ZOOM = 14;
 const SELECTION_TRANSITION_DURATION_SECONDS = 1;
 const MAP_TRANSITION_FADE_MS = 900;
 const BOUNDS_FETCH_DEBOUNCE_MS = 400;
@@ -57,51 +68,29 @@ function createIncidentDivIcon(
 ) {
 	const SvgIcon = icons[iconName];
 	const size = isSelected ? 44 : 36;
-	const iconSize = isSelected ? 24 : 20;
+	const sizeClass = isSelected ? "size-[44px]" : "size-[36px]";
+	const iconSizeClass = isSelected ? "size-[24px]" : "size-[20px]";
+	const frameClass = isSelected
+		? "border-[3px] shadow-[0_0_0_3px_color-mix(in_srgb,var(--marker-color)_35%,transparent)]"
+		: "border-2 shadow-[0_1px_4px_rgba(0,0,0,0.3)]";
 
+	// La couleur du type n'est connue qu'à l'exécution : passée en variable CSS.
 	const html = renderToStaticMarkup(
 		<div
-			className="animate-pop"
-			style={{
-				position: "relative",
-				width: size,
-				height: size,
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
-			}}
+			className={`animate-pop relative flex items-center justify-center ${sizeClass}`}
+			style={{ "--marker-color": color } as CSSProperties}
 		>
 			{isSelected && (
 				<span
 					aria-hidden="true"
-					className="animate-marker-pulse"
-					style={{
-						position: "absolute",
-						inset: 0,
-						borderRadius: "50%",
-						backgroundColor: color,
-						pointerEvents: "none",
-					}}
+					className="animate-marker-pulse pointer-events-none absolute inset-0 rounded-full bg-(--marker-color)"
 				/>
 			)}
 			<div
-				style={{
-					position: "relative",
-					width: size,
-					height: size,
-					borderRadius: "50%",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					background: "white",
-					border: `${isSelected ? 3 : 2}px solid ${color}`,
-					boxShadow: isSelected
-						? `0 0 0 3px color-mix(in srgb, ${color} 35%, transparent)`
-						: "0 1px 4px rgba(0, 0, 0, 0.3)",
-				}}
+				className={`relative flex items-center justify-center rounded-full border-(--marker-color) bg-white ${sizeClass} ${frameClass}`}
 			>
 				<SvgIcon
-					style={{ width: iconSize, height: iconSize, fill: color }}
+					className={`fill-(--marker-color) ${iconSizeClass}`}
 					aria-hidden="true"
 				/>
 			</div>
@@ -117,19 +106,23 @@ function createIncidentDivIcon(
 }
 
 // Composant sans rendu : seuls les enfants de <MapContainer> accèdent à
-// l'instance Leaflet (hooks react-leaflet). Signale la zone visible au parent.
+// l'instance Leaflet (hooks react-leaflet). Signale la zone visible et le zoom au parent.
 function MapViewportWatcher({
 	onViewportChange,
 }: {
-	onViewportChange: (bounds: Bounds) => void;
+	onViewportChange: (bounds: Bounds, zoom: number) => void;
 }) {
 	const map = useMapEvents({
-		moveend: () => onViewportChange(leafletBoundsToBounds(map.getBounds())),
+		moveend: () =>
+			onViewportChange(
+				leafletBoundsToBounds(map.getBounds()),
+				map.getZoom(),
+			),
 	});
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: montage uniquement (`map` est stable, `onViewportChange` mémoïsée).
 	useEffect(() => {
-		onViewportChange(leafletBoundsToBounds(map.getBounds()));
+		onViewportChange(leafletBoundsToBounds(map.getBounds()), map.getZoom());
 	}, []);
 
 	return null;
@@ -188,18 +181,23 @@ function IncidentMarker({
 		<Marker
 			position={[Number(incident.latitude), Number(incident.longitude)]}
 			icon={icon}
+			title={`${incident.type?.label ?? "Incident"} : ${incident.title}${
+				incident.city ? `, ${incident.city}` : ""
+			}`}
 			eventHandlers={{ click: () => onSelect(incident, map) }}
 		>
 			<Popup>
 				<p className="font-title text-sm font-bold text-primary">
 					{incident.title}
 				</p>
-				<Link
-					to={`/incident/${incident.id}`}
-					className="btn btn-accent btn-xs mt-2 rounded-full"
-				>
-					Voir les détails
-				</Link>
+				<div className="mt-2 flex justify-center">
+					<Link
+						to={`/incident/${incident.id}`}
+						className="btn btn-accent btn-xs rounded-full"
+					>
+						Voir les détails
+					</Link>
+				</div>
 			</Popup>
 		</Marker>
 	);
@@ -226,9 +224,10 @@ export default function IncidentMap({
 	const [mapIncidentsLoading, setMapIncidentsLoading] = useState(true);
 	const [mapError, setMapError] = useState(false);
 
-	// Lieux utiles : récupérés mais pas encore affichés en marqueurs.
-	const [, setUsefulPlacesLoading] = useState(true);
-	const [, setUsefulPlacesError] = useState(false);
+	const [usefulPlaces, setUsefulPlaces] = useState<UsefulPlace[]>([]);
+	const [usefulPlacesLoading, setUsefulPlacesLoading] = useState(false);
+	const [usefulPlacesError, setUsefulPlacesError] = useState(false);
+	const [isBelowPlacesZoom, setIsBelowPlacesZoom] = useState(true);
 
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const lastBoundsRef = useRef<Bounds | null>(null);
@@ -249,9 +248,7 @@ export default function IncidentMap({
 		}, MAP_TRANSITION_FADE_MS);
 	}, []);
 
-	const loadMapData = useCallback((bounds: Bounds) => {
-		lastBoundsRef.current = bounds;
-
+	const loadMapIncidents = useCallback((bounds: Bounds) => {
 		setMapIncidentsLoading(true);
 		setMapError(false);
 		getIncidentsInBounds(bounds).then((result) => {
@@ -263,23 +260,50 @@ export default function IncidentMap({
 			}
 			setMapIncidentsLoading(false);
 		});
+	}, []);
 
+	// Relance uniquement les signalements, sur la dernière zone demandée.
+	const retryMapIncidents = useCallback(() => {
+		if (lastBoundsRef.current) loadMapIncidents(lastBoundsRef.current);
+	}, [loadMapIncidents]);
+
+	const loadUsefulPlaces = useCallback((bounds: Bounds, zoom: number) => {
+		if (zoom < USEFUL_PLACES_MIN_ZOOM) {
+			setIsBelowPlacesZoom(true);
+			setUsefulPlaces([]);
+			setUsefulPlacesLoading(false);
+			setUsefulPlacesError(false);
+			return;
+		}
+
+		setIsBelowPlacesZoom(false);
 		setUsefulPlacesLoading(true);
 		setUsefulPlacesError(false);
 		getUsefulPlaces(bounds).then((result) => {
 			if (lastBoundsRef.current !== bounds) return;
-			if (result.status !== "ok") {
+			if (result.status === "ok") {
+				setUsefulPlaces(result.usefulPlaces);
+			} else {
 				setUsefulPlacesError(true);
 			}
 			setUsefulPlacesLoading(false);
 		});
 	}, []);
 
+	const loadMapData = useCallback(
+		(bounds: Bounds, zoom: number) => {
+			lastBoundsRef.current = bounds;
+			loadMapIncidents(bounds);
+			loadUsefulPlaces(bounds, zoom);
+		},
+		[loadMapIncidents, loadUsefulPlaces],
+	);
+
 	const handleViewportChange = useCallback(
-		(bounds: Bounds) => {
+		(bounds: Bounds, zoom: number) => {
 			if (debounceRef.current) clearTimeout(debounceRef.current);
 			debounceRef.current = setTimeout(() => {
-				loadMapData(bounds);
+				loadMapData(bounds, zoom);
 			}, BOUNDS_FETCH_DEBOUNCE_MS);
 		},
 		[loadMapData],
@@ -295,6 +319,10 @@ export default function IncidentMap({
 	}, []);
 
 	const initialCenter = useMemo(() => getDefaultMapCenter(user), [user]);
+
+	// Vrai quand la zone ne contient aucun signalement (les lieux utiles ne comptent pas).
+	const isZoneEmpty =
+		!mapIncidentsLoading && !mapError && mapIncidents.length === 0;
 
 	// Sélectionne l'incident et recentre la carte dessus.
 	const handleSelectIncident = useCallback(
@@ -329,11 +357,48 @@ export default function IncidentMap({
 			{mapError && (
 				<div
 					role="alert"
-					className="absolute top-2 right-2 left-2 z-1000 rounded-2xl bg-(--bg-error) px-3 py-2 text-center text-sm text-error"
+					className="absolute top-2 right-2 left-2 z-1000 flex items-center justify-center gap-3 rounded-2xl bg-(--bg-error) px-3 py-2 text-sm text-(--error-text)"
 				>
-					Impossible de charger les signalements sur la carte.
+					<span>
+						Impossible de charger les signalements sur la carte.
+					</span>
+					<button
+						type="button"
+						onClick={retryMapIncidents}
+						className="btn btn-sm shrink-0 rounded-full border-none bg-error px-4 font-bold text-white"
+					>
+						Réessayer
+					</button>
 				</div>
 			)}
+			<div className="pointer-events-none absolute right-2 bottom-6 left-2 z-1000 flex flex-col items-center gap-1">
+				{isZoneEmpty && (
+					<output
+						aria-live="polite"
+						className="rounded-full bg-base-100/90 px-3 py-1 text-xs font-bold text-primary shadow"
+					>
+						Rien à signaler autour de vous.
+					</output>
+				)}
+				{(isBelowPlacesZoom || usefulPlacesLoading) && (
+					<output
+						aria-live="polite"
+						className="rounded-full bg-base-100/90 px-3 py-1 text-xs font-bold text-primary shadow"
+					>
+						{isBelowPlacesZoom
+							? "Zoomez pour voir les lieux utiles"
+							: "Chargement des lieux utiles…"}
+					</output>
+				)}
+				{usefulPlacesError && (
+					<div
+						role="alert"
+						className="rounded-full bg-(--bg-error) px-3 py-1 text-xs font-bold text-(--error-text) shadow"
+					>
+						Lieux utiles indisponibles.
+					</div>
+				)}
+			</div>
 			{/* Voile de fondu : MapContainer ne met pas à jour son className après le montage. */}
 			<div
 				aria-hidden="true"
@@ -365,6 +430,9 @@ export default function IncidentMap({
 						isSelected={incident.id === selectedIncidentId}
 						onSelect={handleSelectIncident}
 					/>
+				))}
+				{usefulPlaces.map((place) => (
+					<UsefulPlaceMarker key={place.id} place={place} />
 				))}
 			</MapContainer>
 		</div>
