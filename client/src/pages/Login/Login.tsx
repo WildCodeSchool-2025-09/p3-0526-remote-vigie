@@ -26,6 +26,10 @@ export default function Login() {
 	const [submitting, setSubmitting] = useState(false);
 	const [serverError, setServerError] = useState<string | null>(null);
 
+	const justRegistered =
+		(location.state as { justRegistered?: boolean })?.justRegistered ===
+		true;
+
 	useEffect(() => {
 		if (!loading && user != null) {
 			const from =
@@ -99,6 +103,13 @@ export default function Login() {
 			</header>
 
 			<div className="relative mx-4 -mt-8 rounded-3xl bg-base-200 px-5 pt-6 pb-8">
+				{justRegistered && (
+					<p className="mb-5 rounded-2xl bg-(--bg-success) px-4 py-3 text-sm font-semibold text-primary">
+						Votre compte a bien été créé. Connectez-vous pour
+						continuer. Pensez à vérifier votre e-mail pour
+						débloquer toutes les fonctionnalités.
+					</p>
+				)}
 				<form
 					onSubmit={handleSubmit}
 					noValidate

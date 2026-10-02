@@ -139,7 +139,7 @@ export default function useRegisterSubmit({
 		setSubmitting(false);
 
 		if (result.status === "ok") {
-			navigate("/");
+			navigate("/login", { state: { justRegistered: true } });
 			return;
 		}
 		if (result.status === "invalid") {
