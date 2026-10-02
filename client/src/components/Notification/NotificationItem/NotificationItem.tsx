@@ -1,8 +1,8 @@
+import type { IconName } from "@/assets/icons";
+import Icon from "@/components/Icon/Icon";
+import type { Notification } from "@/types/notification";
+import { formatDate } from "@/utils/formatDate";
 import { useNavigate } from "react-router";
-import type { IconName } from "../../../assets/icons";
-import type { Notification } from "../../../types/notification";
-import { formatDate } from "../../../utils/formatDate";
-import Icon from "../../Icon/Icon";
 
 type IncidentTypeConfig = {
 	icon: IconName;

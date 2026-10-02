@@ -12,7 +12,8 @@ import {
 
 import App from "@/App";
 import PrivateRoute from "@/components/Routing/PrivateRoute/PrivateRoute";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider } from "@/contexts/auth/AuthContext";
+import Cgu from "@/pages/Cgu/Cgu";
 import Home from "@/pages/Home/Home";
 import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
 import IncidentForm from "@/pages/IncidentForm/IncidentForm";
@@ -22,6 +23,7 @@ import NotificationCenter from "@/pages/Notification/NotificationCenter";
 import Numbers from "@/pages/Numbers/Numbers";
 import Profile from "@/pages/Profile/Profile";
 import Register from "@/pages/Register/Register";
+import VerifyEmail from "@/pages/VerifyEmail/VerifyEmail";
 
 // DEV ONLY — pas des pages de l'app, voir src/_dev/README.md
 // Le bloc `if (import.meta.env.DEV)` est tree-shaké par Vite dans un build de prod :
@@ -91,7 +93,7 @@ const router = createBrowserRouter([
 				path: "numbers",
 				element: <Numbers />,
 			},
-			// Routes réservées aux membres connectés (bouchon US06 en place).
+			// Routes réservées aux membres connectés.
 			{
 				element: <PrivateRoute />,
 				children: [
@@ -99,15 +101,16 @@ const router = createBrowserRouter([
 						path: "incident/create",
 						element: <IncidentForm />,
 					},
+					{
+						path: "profile",
+						element: <Profile />,
+					},
 				],
 			},
+
 			{
 				path: "incident/:id",
 				element: <IncidentDetails />,
-			},
-			{
-				path: "profile",
-				element: <Profile />,
 			},
 			{
 				path: "login",
@@ -116,6 +119,14 @@ const router = createBrowserRouter([
 			{
 				path: "register",
 				element: <Register />,
+			},
+			{
+				path: "cgu",
+				element: <Cgu />,
+			},
+			{
+				path: "verify-email",
+				element: <VerifyEmail />,
 			},
 			{
 				path: "notifications",

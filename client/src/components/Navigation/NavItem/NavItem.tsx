@@ -1,7 +1,7 @@
+import Icon from "@/components/Icon/Icon";
+import NotificationBadge from "@/components/Notification/NotificationBadge/NotificationBadge";
+import type { NavItemConfig } from "@/types/navItems";
 import { NavLink, useLocation } from "react-router";
-import type { NavItemConfig } from "../../../types/navItems";
-import Icon from "../../Icon/Icon";
-import NotificationBadge from "../../Notification/NotificationBadge/NotificationBadge";
 
 const baseClassName =
 	"relative flex flex-col items-center justify-center gap-0.5 text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent) focus-visible:rounded-sm";
