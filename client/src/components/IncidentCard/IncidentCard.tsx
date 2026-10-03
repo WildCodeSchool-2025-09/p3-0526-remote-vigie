@@ -28,30 +28,13 @@ export default function IncidentCard({
 	const relativeTime = formatRelativeTime(incident.createdAt);
 	const cityLabel = incident.city ?? "position non précisée";
 
-	const ariaLabel = `${incident.title} — ${type?.label ?? "Incident"}, ${dangerLevel.label}, ${cityLabel}, ${relativeTime}${
-		isSelected ? ", sélectionné" : ""
-	}`;
-
 	function handleActivate() {
 		onSelect?.(incident);
 	}
 
-	function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-		if (event.key === "Enter" || event.key === " ") {
-			event.preventDefault();
-			handleActivate();
-		}
-	}
-
 	return (
-		// biome-ignore lint/a11y/useSemanticElements: un <button> ne peut pas contenir le <Link> "Voir le détail".
 		<div
-			role="button"
-			tabIndex={0}
-			aria-label={ariaLabel}
-			onClick={handleActivate}
-			onKeyDown={handleKeyDown}
-			className={`flex cursor-pointer items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 ${
+			className={`relative flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 has-[button:focus-visible]:outline-2 has-[button:focus-visible]:outline-offset-2 has-[button:focus-visible]:outline-primary ${
 				isSelected ? "ring-2 ring-accent ring-offset-2" : ""
 			}`}
 			style={{ borderLeftColor: typeColorVar }}
@@ -110,8 +93,15 @@ export default function IncidentCard({
 						</span>
 					)}
 				</div>
-				<h2 className="mt-1.5 line-clamp-2 font-title text-lg font-bold text-primary">
-					{incident.title}
+				<h2 className="mt-1.5 font-title text-lg font-bold text-primary">
+					<button
+						type="button"
+						onClick={handleActivate}
+						aria-current={isSelected ? "true" : undefined}
+						className="line-clamp-2 cursor-pointer text-left focus:outline-none after:absolute after:inset-0"
+					>
+						{incident.title}
+					</button>
 				</h2>
 				<p className="mt-1 text-xs text-primary/50">
 					{cityLabel} · {relativeTime}
@@ -121,8 +111,7 @@ export default function IncidentCard({
 			{isSelected ? (
 				<Link
 					to={`/incident/${incident.id}`}
-					onClick={(event) => event.stopPropagation()}
-					className="btn btn-accent btn-sm shrink-0 self-end rounded-full"
+					className="btn btn-accent btn-sm relative z-10 shrink-0 self-end rounded-full"
 				>
 					Voir le détail
 				</Link>
