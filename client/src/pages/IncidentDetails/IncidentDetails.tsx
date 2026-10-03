@@ -79,7 +79,7 @@ export default function IncidentDetails() {
 
 	if (state.status === "notFound") {
 		return (
-			<div className="flex min-h-dvh flex-col items-center justify-center bg-base-100 p-4">
+			<div className="flex min-h-full flex-col items-center justify-center bg-base-100 p-4">
 				<div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl bg-base-300 p-4 text-center">
 					<span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--bg-warning)">
 						<Icon
@@ -111,7 +111,7 @@ export default function IncidentDetails() {
 
 	if (state.status === "error") {
 		return (
-			<div className="flex min-h-dvh flex-col items-center justify-center bg-base-100 p-4">
+			<div className="flex min-h-full flex-col items-center justify-center bg-base-100 p-4">
 				<div className="flex w-full max-w-sm flex-col gap-4 rounded-3xl bg-(--bg-error) p-4">
 					<div className="flex items-start gap-3">
 						<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
