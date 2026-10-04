@@ -35,26 +35,26 @@ export type UsefulPlaceUpsertRow = {
 	osmId: number;
 };
 
-class UsefulPlaceRepository {
-	// Without `bounds`, returns the whole table (~35,000 rows once synced).
-	async readAll(
-		bounds: Bounds | null = null,
-	): Promise<UsefulPlaceListItem[]> {
-		const whereClause = bounds
-			? "WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?"
-			: "";
-		const whereParams = bounds
-			? [bounds.south, bounds.north, bounds.west, bounds.east]
-			: [];
+const MAX_USEFUL_PLACES = 1000;
 
+class UsefulPlaceRepository {
+	// La carte ne demande que la zone visible ; la limite protège la réponse.
+	async readAll(bounds: Bounds): Promise<UsefulPlaceListItem[]> {
 		const [rows] = await databaseClient.query<Rows>(
 			`SELECT
 				id, name, category, latitude, longitude,
 				street_line, city, phone_number
 			FROM useful_place
-			${whereClause}
-			ORDER BY id ASC`,
-			whereParams,
+			WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?
+			ORDER BY id ASC
+			LIMIT ?`,
+			[
+				bounds.south,
+				bounds.north,
+				bounds.west,
+				bounds.east,
+				MAX_USEFUL_PLACES,
+			],
 		);
 
 		return rows.map((row) => ({

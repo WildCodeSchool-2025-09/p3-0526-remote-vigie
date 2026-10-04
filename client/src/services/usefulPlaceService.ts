@@ -6,21 +6,18 @@ type GetUsefulPlacesResult =
 	| { status: "ok"; usefulPlaces: UsefulPlace[] }
 	| { status: "error" };
 
-// Without `bounds`, returns every useful place; the map passes its visible zone.
 export async function getUsefulPlaces(
-	bounds?: Bounds,
+	bounds: Bounds,
 ): Promise<GetUsefulPlacesResult> {
 	try {
-		const path = bounds
-			? `/api/useful-places?${new URLSearchParams({
-					north: String(bounds.north),
-					south: String(bounds.south),
-					east: String(bounds.east),
-					west: String(bounds.west),
-				}).toString()}`
-			: "/api/useful-places";
+		const params = new URLSearchParams({
+			north: String(bounds.north),
+			south: String(bounds.south),
+			east: String(bounds.east),
+			west: String(bounds.west),
+		});
 
-		const res = await apiFetch(path);
+		const res = await apiFetch(`/api/useful-places?${params.toString()}`);
 
 		if (!res.ok) return { status: "error" };
 

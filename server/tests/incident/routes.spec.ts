@@ -96,6 +96,40 @@ describe("GET /api/incidents", () => {
 			west: -5.5,
 		});
 	});
+
+	// Bornes facultatives, mais refusées si elles sont fournies et fausses :
+	// jamais de repli silencieux sur « pas de filtre ».
+	it.each([
+		{
+			label: "empty bounds",
+			query: "?north=&south=&east=&west=",
+		},
+		{
+			label: "incomplete bounds (west missing)",
+			query: "?north=51.5&south=41&east=9.8",
+		},
+		{
+			label: "an unreadable bound",
+			query: "?north=abc&south=41&east=9.8&west=-5.5",
+		},
+		{
+			label: "inverted longitudes (west above east)",
+			query: "?north=51.5&south=41&east=-5.5&west=9.8",
+		},
+	])(
+		"should reject $label with 400 and never query the database",
+		async ({ query }) => {
+			const readAllForList = jest
+				.spyOn(incidentRepository, "readAllForList")
+				.mockResolvedValue([]);
+
+			const response = await supertest(app).get(`/api/incidents${query}`);
+
+			expect(response.status).toBe(400);
+			expect(response.body.error).toBe("invalid_bounds");
+			expect(readAllForList).not.toHaveBeenCalled();
+		},
+	);
 });
 
 // Test suite for the POST /api/incidents route

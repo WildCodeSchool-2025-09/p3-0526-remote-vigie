@@ -21,7 +21,18 @@ const MAX_MAP_LIMIT = 300;
 
 const browse: RequestHandler = async (req, res, next) => {
 	try {
-		const bounds = parseBounds(req.query);
+		const parsed = parseBounds(req.query);
+
+		if (parsed.status === "invalid") {
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_bounds",
+				message:
+					"Zone invalide : north, south, east et west doivent être fournis ensemble, avec des valeurs cohérentes.",
+			});
+			return;
+		}
+
+		const bounds = parsed.status === "ok" ? parsed.bounds : null;
 		const requested =
 			Number.parseInt(req.query.limit as string, 10) ||
 			DEFAULT_LIST_LIMIT;
