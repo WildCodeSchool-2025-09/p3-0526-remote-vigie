@@ -50,11 +50,13 @@ function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Interroge Overpass pour une catégorie, avec réessai ; renvoie [] si tout échoue.
+// Interroge Overpass pour une catégorie, avec réessai ; lève une erreur si tout
+// échoue. Une réponse partielle (`remark`) ou vide compte comme un échec.
 async function fetchElements(
 	category: UsefulPlaceCategory,
 ): Promise<OverpassElement[]> {
 	const query = buildQuery(category);
+	let lastMessage = "";
 
 	for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
 		try {
@@ -75,12 +77,25 @@ async function fetchElements(
 
 			const result = (await res.json()) as {
 				elements?: OverpassElement[];
+				remark?: string;
 			};
-			return result.elements ?? [];
+			if (result.remark) {
+				throw new Error(
+					`Réponse partielle d'Overpass : ${result.remark}`,
+				);
+			}
+
+			const elements = result.elements ?? [];
+			if (elements.length === 0) {
+				throw new Error("Aucun élément renvoyé");
+			}
+			return elements;
 		} catch (error) {
+			lastMessage =
+				error instanceof Error ? error.message : String(error);
 			console.error(
 				`Échec de la requête Overpass pour "${category}" (tentative ${attempt}/${MAX_ATTEMPTS})`,
-				error instanceof Error ? error.message : error,
+				lastMessage,
 			);
 			if (attempt < MAX_ATTEMPTS) {
 				await sleep(RETRY_DELAY_MS);
@@ -88,11 +103,25 @@ async function fetchElements(
 		}
 	}
 
-	return [];
+	throw new Error(
+		`Overpass : échec pour "${category}" après ${MAX_ATTEMPTS} tentatives (${lastMessage})`,
+	);
 }
 
-// Taille de la colonne `phone_number`.
+// Tailles des colonnes de `useful_place` (voir schema.sql).
+const NAME_MAX_LENGTH = 150;
+const STREET_MAX_LENGTH = 255;
+const CITY_MAX_LENGTH = 100;
 const PHONE_MAX_LENGTH = 20;
+
+// Compte en caractères, comme MySQL (et non en unités UTF-16) : ne coupe pas un
+// emoji en deux.
+function truncate(value: string, maxLength: number): string {
+	const characters = Array.from(value);
+	return characters.length <= maxLength
+		? value
+		: characters.slice(0, maxLength).join("");
+}
 
 // Préfixes OSM marquant un lieu fermé.
 const CLOSED_TAG_PREFIXES = ["disused:", "was:", "abandoned:"];
@@ -123,13 +152,18 @@ function resolveAddress(tags: Record<string, string>): {
 	const street = tags["addr:street"] ?? tags["contact:street"];
 	const city = tags["addr:city"] ?? tags["contact:city"] ?? null;
 
-	if (street == null) {
-		return { streetLine: null, city };
-	}
-
 	const streetLine =
-		houseNumber != null ? `${houseNumber} ${street}` : street;
-	return { streetLine, city };
+		street == null
+			? null
+			: houseNumber != null
+				? `${houseNumber} ${street}`
+				: street;
+
+	return {
+		streetLine:
+			streetLine == null ? null : truncate(streetLine, STREET_MAX_LENGTH),
+		city: city == null ? null : truncate(city, CITY_MAX_LENGTH),
+	};
 }
 
 function resolvePhone(tags: Record<string, string>): string | null {
@@ -137,7 +171,7 @@ function resolvePhone(tags: Record<string, string>): string | null {
 	if (raw == null) return null;
 
 	const firstNumber = raw.split(";")[0].trim();
-	return firstNumber.slice(0, PHONE_MAX_LENGTH);
+	return truncate(firstNumber, PHONE_MAX_LENGTH);
 }
 
 // Transforme un élément Overpass en ligne `useful_place`, ou `null` s'il faut
@@ -165,7 +199,7 @@ function transformElement(
 	const { streetLine, city } = resolveAddress(tags);
 
 	return {
-		name,
+		name: truncate(name, NAME_MAX_LENGTH),
 		category,
 		latitude: coordinates.latitude,
 		longitude: coordinates.longitude,
@@ -180,33 +214,112 @@ function transformElement(
 // Pause entre deux catégories (courtoisie envers Overpass).
 const CATEGORY_PAUSE_MS = 2000;
 
+// Au-delà de cette part de la catégorie, le retrait est refusé : un résultat
+// partiel d'Overpass ne doit pas vider la carte.
+const MAX_PURGE_RATIO = 0.5;
+
 const CATEGORIES = Object.keys(CATEGORY_OVERPASS_TAGS) as UsefulPlaceCategory[];
 
-// Synchronise les catégories une par une : récupère, transforme et enregistre
-// chacune avant de passer à la suivante.
-async function run(): Promise<void> {
-	for (const [index, category] of CATEGORIES.entries()) {
+function toKey(osmType: string, osmId: number): string {
+	return `${osmType}/${osmId}`;
+}
+
+// Retire les lieux importés qui ne figurent plus dans la réponse d'Overpass
+// (lieu fermé ou supprimé d'OpenStreetMap depuis la dernière synchro).
+async function removeStalePlaces(
+	category: UsefulPlaceCategory,
+	keptRows: UsefulPlaceUpsertRow[],
+): Promise<number> {
+	const existing = await usefulPlaceRepository.readSyncKeys(category);
+	const keptKeys = new Set(
+		keptRows.map((row) => toKey(row.osmType, row.osmId)),
+	);
+	const staleIds = existing
+		.filter(({ osmType, osmId }) => !keptKeys.has(toKey(osmType, osmId)))
+		.map(({ id }) => id);
+
+	if (staleIds.length === 0) return 0;
+
+	if (staleIds.length > existing.length * MAX_PURGE_RATIO) {
+		throw new Error(
+			`retrait refusé : ${staleIds.length} lieux sur ${existing.length} seraient supprimés`,
+		);
+	}
+
+	await usefulPlaceRepository.deleteByIds(staleIds);
+	return staleIds.length;
+}
+
+async function syncCategory(category: UsefulPlaceCategory): Promise<void> {
+	const elements = await fetchElements(category);
+	const rows = elements
+		.map((element) => transformElement(element, category))
+		.filter((row): row is UsefulPlaceUpsertRow => row != null);
+
+	await usefulPlaceRepository.upsertMany(rows);
+	const removedCount = await removeStalePlaces(category, rows);
+
+	console.info(
+		`[usefulPlaceSyncService] ${category} : ${rows.length}/${elements.length} lieux importés (${elements.length - rows.length} ignorés), ${removedCount} retirés.`,
+	);
+}
+
+// Synchronise les catégories une par une. Une catégorie en échec n'empêche pas
+// les suivantes ; la synchro se termine alors par une erreur qui les nomme.
+async function run(
+	categories: UsefulPlaceCategory[] = CATEGORIES,
+): Promise<void> {
+	const failedCategories: UsefulPlaceCategory[] = [];
+
+	for (const [index, category] of categories.entries()) {
 		console.info(
 			`[usefulPlaceSyncService] ${category} : interrogation d'Overpass…`,
 		);
 
-		const elements = await fetchElements(category);
-		const rows = elements
-			.map((element) => transformElement(element, category))
-			.filter((row): row is UsefulPlaceUpsertRow => row != null);
+		try {
+			await syncCategory(category);
+		} catch (error) {
+			failedCategories.push(category);
+			console.error(
+				`[usefulPlaceSyncService] ${category} : échec`,
+				error instanceof Error ? error.message : error,
+			);
+		}
 
-		await usefulPlaceRepository.upsertMany(rows);
-
-		console.info(
-			`[usefulPlaceSyncService] ${category} : ${rows.length}/${elements.length} lieux importés (${elements.length - rows.length} ignorés).`,
-		);
-
-		const isLastCategory = index === CATEGORIES.length - 1;
+		const isLastCategory = index === categories.length - 1;
 		if (!isLastCategory) {
 			await sleep(CATEGORY_PAUSE_MS);
 		}
 	}
+
+	if (failedCategories.length > 0) {
+		throw new Error(
+			`Synchronisation incomplète, catégories en échec : ${failedCategories.join(", ")}. Pour les relancer : npm run sync:places -- ${failedCategories.join(" ")}`,
+		);
+	}
 }
 
-export default { transformElement, buildQuery, fetchElements, run };
+// Catégories demandées en ligne de commande ; aucune = toutes.
+function parseCategories(args: string[]): UsefulPlaceCategory[] {
+	if (args.length === 0) return CATEGORIES;
+
+	const unknown = args.filter(
+		(arg) => !CATEGORIES.includes(arg as UsefulPlaceCategory),
+	);
+	if (unknown.length > 0) {
+		throw new Error(
+			`Catégorie inconnue : ${unknown.join(", ")}. Valeurs possibles : ${CATEGORIES.join(", ")}`,
+		);
+	}
+
+	return CATEGORIES.filter((category) => args.includes(category));
+}
+
+export default {
+	transformElement,
+	buildQuery,
+	fetchElements,
+	run,
+	parseCategories,
+};
 export type { OverpassElement };
