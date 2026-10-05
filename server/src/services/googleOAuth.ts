@@ -24,12 +24,14 @@ export async function getGoogleProfile(
 	code: string,
 ): Promise<GoogleProfile | null> {
 	const { tokens } = await client.getToken(code);
+
 	if (tokens.id_token == null) return null;
 
 	const ticket = await client.verifyIdToken({
 		idToken: tokens.id_token,
 		audience: process.env.GOOGLE_CLIENT_ID,
 	});
+
 	const payload = ticket.getPayload();
 	if (payload?.email == null) return null;
 

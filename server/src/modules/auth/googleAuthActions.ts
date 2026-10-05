@@ -60,6 +60,7 @@ const handleGoogleCallback: RequestHandler = async (req, res) => {
 		}
 
 		const profile = await getGoogleProfile(code);
+
 		if (profile == null) {
 			redirectToClient(res, "/login?oauth=error");
 			return;
@@ -102,6 +103,9 @@ const handleGoogleCallback: RequestHandler = async (req, res) => {
 			redirectToClient(res, `/register/google#${params}`);
 			return;
 		}
+
+		const token = signAuthToken(user.id);
+		redirectToClient(res, `/auth/google/callback#token=${token}`);
 	} catch (err) {
 		// Google injoignable, code expiré… : on revient sur le front avec un
 		// message, plutôt qu'une page d'erreur JSON.
@@ -193,7 +197,6 @@ const completeGoogleSignup: RequestHandler = async (req, res, next) => {
 			address,
 			reclaimUserIds,
 		});
-
 		res.status(StatusCodes.CREATED).json({ token: signAuthToken(userId) });
 	} catch (err) {
 		next(err);
