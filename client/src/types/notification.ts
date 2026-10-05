@@ -17,7 +17,8 @@ export type IncidentTypeCode =
 	| "tornado"
 	| "rockfall"
 	| "animal"
-	| "tree";
+	| "tree"
+	| "danger";
 
 export type Notification = {
 	type: NotificationType;

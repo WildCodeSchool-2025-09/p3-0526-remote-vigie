@@ -71,6 +71,11 @@ const incidentTypeConfig: Record<string, IncidentTypeConfig> = {
 		style: "bg-[var(--bg-tree)] text-[var(--tree)]",
 		border: "border-l-[var(--tree)]",
 	},
+	danger: {
+		icon: "danger",
+		style: "bg-[var(--bg-danger)] text-[var(--danger)]",
+		border: "border-l-[var(--danger)]",
+	},
 };
 
 type NotificationTypeConfig = {
@@ -144,10 +149,15 @@ function NotificationItem({
 		: (typeConfig?.iconStyle ?? notificationTypeConfig.mention.iconStyle);
 	const isBadge = notification.type === "badge";
 	const showsBadgeImage = isBadge && Boolean(notification.badge_icon);
+	const isDangerAlert =
+		notification.type === "incident" &&
+		notification.incident_type === "danger";
 	const title =
 		isBadge && notification.badge_label
 			? `Vous avez obtenu le badge ${notification.badge_label}`
-			: (typeConfig?.title ?? "Nouvelle notification");
+			: isDangerAlert
+				? "Une personne est en danger près de chez vous"
+				: (typeConfig?.title ?? "Nouvelle notification");
 	const isUnread = notification.is_read === false;
 	const iconStyle = isUnread ? typeIconStyle : readIconStyle;
 	const typeBorder = isIncidentType

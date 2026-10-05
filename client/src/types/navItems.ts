@@ -15,4 +15,5 @@ export type NavItemConfig = {
 	showNotificationBadge?: boolean;
 	loggedOutTo?: string;
 	loggedOutLabel?: string;
+	action?: "danger";
 };

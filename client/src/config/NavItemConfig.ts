@@ -12,8 +12,7 @@ export const navItems: NavItemConfig[] = [
 	},
 	{
 		key: "danger",
-		to: "/incident?source=danger",
-		end: true,
+		action: "danger",
 		label: "Danger",
 		icon: "danger",
 		emphasized: true,
