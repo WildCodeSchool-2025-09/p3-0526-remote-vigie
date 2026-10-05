@@ -75,7 +75,7 @@ export default function useRegisterSubmit({
 		if (result.status === "ok") {
 			try {
 				await loginWithToken(result.token);
-				navigate("/", { replace: true });
+				navigate("/", { replace: true, state: { welcome: true } });
 			} catch {
 				setSubmitting(false);
 				setServerError(

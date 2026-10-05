@@ -27,7 +27,9 @@ export default function GoogleCallback() {
 		}
 
 		loginWithToken(token)
-			.then(() => navigate("/", { replace: true }))
+			.then(() =>
+				navigate("/", { replace: true, state: { welcome: true } }),
+			)
 			.catch(() => navigate("/login?oauth=error", { replace: true }));
 	}, [loginWithToken, navigate]);
 
