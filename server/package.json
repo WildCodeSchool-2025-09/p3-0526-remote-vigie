@@ -13,6 +13,7 @@
 	},
 	"dependencies": {
 		"argon2": "^0.45.1",
+		"cookie-parser": "^1.4.7",
 		"cors": "^2.8.5",
 		"dotenv": "^16.4.7",
 		"express": "^4.21.2",
@@ -26,6 +27,7 @@
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^9.6.0",
+		"@types/cookie-parser": "^1.4.10",
 		"@types/cors": "^2.8.17",
 		"@types/express": "^5.0.1",
 		"@types/jest": "^29.5.14",
