@@ -40,6 +40,7 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 						<Icon
 							name={type.code as IconName}
 							className="h-7 w-7"
+							style={{ color: typeColorVar }}
 							aria-hidden="true"
 						/>
 					)}
