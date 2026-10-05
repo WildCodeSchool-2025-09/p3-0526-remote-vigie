@@ -41,7 +41,7 @@ const login: RequestHandler = async (req, res, next) => {
 			});
 		};
 
-		if (user == null) {
+		if (user == null || user.password_hash == null) {
 			invalidCredentials();
 			return;
 		}
