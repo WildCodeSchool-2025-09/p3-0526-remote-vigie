@@ -113,8 +113,9 @@ Reproduit d'après les cadres **MCD**, **MLD** et **MPD** du Miro. Implémentati
 référence : `server/database/schema.sql` (MySQL 8, `utf8mb4_unicode_ci`).
 
 Le modèle a été volontairement **borné au périmètre discuté** : `badge`,
-`oauth_account`, `push_subscription` et l'auto-citation des commentaires sont écartés pour
-l'instant et seront ajoutés au moment de développer les US concernées (voir §4.4).
+`push_subscription` et l'auto-citation des commentaires sont écartés pour l'instant et
+seront ajoutés au moment de développer les US concernées (voir §4.4). `oauth_account`
+a été ajoutée avec l'US22 (connexion Google).
 
 ### 4.1 MCD — modèle conceptuel
 
@@ -133,6 +134,7 @@ erDiagram
     INCIDENT }|--o{ INCIDENT_TYPE : "CONCERN (1,N)/(0,N)"
     USER ||--o{ CONTRIBUTION : "émet (0,N)"
     INCIDENT ||--o{ CONTRIBUTION : "reçoit (0,N)"
+    USER ||--o{ OAUTH_ACCOUNT : "LINKED_TO (0,N)/(1,1)"
 
     USER {
         int id
@@ -144,6 +146,12 @@ erDiagram
         datetime email_verified_at
         string cgu_version
         datetime cgu_accepted_at
+    }
+    OAUTH_ACCOUNT {
+        int id
+        string provider
+        string provider_user_id
+        datetime created_at
     }
     ADDRESS {
         int id
@@ -250,6 +258,7 @@ erDiagram
     INCIDENT_TYPE ||--o{ INCIDENT_INCIDENT_TYPE : "FK"
     DANGER_LEVEL ||--o{ INCIDENT : "FK"
     DANGER_LEVEL ||--o{ INCIDENT_TYPE : "FK"
+    USER ||--o{ OAUTH_ACCOUNT : "FK"
 
     USER {
         int id PK
@@ -263,6 +272,13 @@ erDiagram
         datetime cgu_accepted_at
         datetime created_at
         datetime updated_at
+    }
+    OAUTH_ACCOUNT {
+        int id PK
+        int user_id FK
+        string provider
+        string provider_user_id
+        datetime created_at
     }
     ADDRESS {
         int id PK
@@ -394,6 +410,7 @@ erDiagram
     INCIDENT_TYPE ||--o{ INCIDENT_INCIDENT_TYPE : "FK"
     DANGER_LEVEL ||--o{ INCIDENT : "FK"
     DANGER_LEVEL ||--o{ INCIDENT_TYPE : "FK"
+    USER ||--o{ OAUTH_ACCOUNT : "FK"
 
     USER {
         INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
@@ -401,12 +418,19 @@ erDiagram
         VARCHAR_255 email "NOT NULL"
         VARCHAR_30 pseudo_normalized "NOT NULL, UNIQUE"
         VARCHAR_255 email_normalized "NOT NULL, UNIQUE"
-        CHAR_60 password_hash "NOT NULL"
+        VARCHAR_255 password_hash "NULL (compte créé avec Google)"
         TIMESTAMP email_verified_at "NULL"
         VARCHAR_10 cgu_version "NOT NULL"
         TIMESTAMP cgu_accepted_at "NOT NULL"
         TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
         TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+    }
+    OAUTH_ACCOUNT {
+        INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
+        INT_UNSIGNED user_id FK "NOT NULL, UNIQUE avec provider"
+        VARCHAR_20 provider "NOT NULL"
+        VARCHAR_255 provider_user_id "NOT NULL, UNIQUE avec provider"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
     }
     ADDRESS {
         INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
@@ -526,6 +550,7 @@ erDiagram
 |---------------|-------|-------------|
 | `address.user_id` | `user` | `CASCADE` |
 | `user_location.user_id` | `user` | `CASCADE` |
+| `oauth_account.user_id` | `user` | `CASCADE` |
 | `contribution.incident_id` | `incident` | `CASCADE` |
 | `contribution.user_id` | `user` | `CASCADE` |
 | `incident_type.danger_level_id` | `danger_level` | `RESTRICT` |
@@ -548,8 +573,6 @@ correspondante, pas avant) :
 - **`badge`** + relation `earned_at` (US20) — la relation N-N est aujourd'hui sans
   attribut ; or `counter_type` / `counter_param` / `threshold` impliquent une
   progression (« 7 signalements sur 10 ») et une date d'obtention à stocker.
-- **`oauth_account`** (US22) — pour l'instant, `email` + `password_hash` restent sur
-  `user` ; on ajoutera la table au moment de brancher un fournisseur tiers.
 - **`push_subscription`** (US21) — idem, ajoutée avec le Web Push.
 - **Auto-citation des commentaires** (US08) — la relation réflexive sur `comment`
   n'est posée que si la fonctionnalité de citation est développée.
