@@ -20,6 +20,8 @@ DROP TABLE IF EXISTS `user_location`;
 
 DROP TABLE IF EXISTS `address`;
 
+DROP TABLE IF EXISTS `oauth_account`;
+
 DROP TABLE IF EXISTS `user`;
 
 CREATE TABLE `user` (
@@ -28,7 +30,7 @@ CREATE TABLE `user` (
     `email` VARCHAR(255) NOT NULL,
     `pseudo_normalized` VARCHAR(30) NOT NULL,
     `email_normalized` VARCHAR(255) NOT NULL,
-    `password_hash` VARCHAR(255) NOT NULL,
+    `password_hash` VARCHAR(255) NULL DEFAULT NULL,
     `email_verified_at` TIMESTAMP NULL DEFAULT NULL,
     `email_verification_token_hash` VARCHAR(255) NULL,
     `email_verification_expires_at` DATETIME NULL,
@@ -40,6 +42,18 @@ CREATE TABLE `user` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `uq_user_pseudo_normalized` (`pseudo_normalized`),
     UNIQUE KEY `uq_user_email_normalized` (`email_normalized`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `oauth_account` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT UNSIGNED NOT NULL,
+    `provider` VARCHAR(20) NOT NULL,
+    `provider_user_id` VARCHAR(255) NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_oauth_account_provider_user` (`provider`, `provider_user_id`),
+    UNIQUE KEY `uq_oauth_account_user_provider` (`user_id`, `provider`),
+    CONSTRAINT `fk_oauth_account_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `address` (
