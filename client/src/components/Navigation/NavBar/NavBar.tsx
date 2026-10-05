@@ -53,10 +53,7 @@ function NavBar() {
 						},
 					)}
 			</nav>
-			<DangerModal
-				dialogRef={dangerModalRef}
-				onConfirm={() => dangerModalRef.current?.close()}
-			/>
+			<DangerModal dialogRef={dangerModalRef} />
 		</>
 	);
 }
