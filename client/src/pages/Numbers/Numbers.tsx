@@ -29,7 +29,7 @@ export default function Numbers() {
 
 	return (
 		<div className="NUMBERS-PAGE bg-base-100">
-			<header className="relative isolate flex h-44 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
+			<header className="relative isolate flex h-36 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
 				<div className="flex items-start gap-3">
 					<button
 						type="button"

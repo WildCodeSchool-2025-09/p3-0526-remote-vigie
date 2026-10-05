@@ -4,7 +4,7 @@ import Icon from "@/components/Icon/Icon";
 export default function EmailVerificationNotice() {
 	return (
 		<div className="INCIDENT-FORM-PAGE min-h-full bg-base-100">
-			<header className="relative isolate flex h-44 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
+			<header className="relative isolate flex h-36 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
 				<img
 					src={bgIncident}
 					alt=""

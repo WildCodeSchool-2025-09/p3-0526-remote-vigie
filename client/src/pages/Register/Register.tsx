@@ -47,7 +47,7 @@ export default function Register() {
 
 	return (
 		<div className="min-h-screen bg-base-100">
-			<header className="relative isolate flex h-44 flex-col shrink-0 justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
+			<header className="relative isolate flex h-36 flex-col shrink-0 justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
 				<img
 					src={bgHome}
 					alt=""
