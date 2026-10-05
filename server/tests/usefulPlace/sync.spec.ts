@@ -326,7 +326,7 @@ describe("usefulPlaceSyncService.fetchElements", () => {
 				ok: true,
 				json: () => Promise.resolve({ elements: fakeElements }),
 			} as Response);
-		const warnSpy = jest
+		const errorSpy = jest
 			.spyOn(console, "error")
 			.mockImplementation(() => {});
 
@@ -336,7 +336,7 @@ describe("usefulPlaceSyncService.fetchElements", () => {
 
 		expect(elements).toStrictEqual(fakeElements);
 		expect(fetchSpy).toHaveBeenCalledTimes(2);
-		expect(warnSpy).toHaveBeenCalledTimes(1);
+		expect(errorSpy).toHaveBeenCalledTimes(1);
 
 		jest.useRealTimers();
 	});

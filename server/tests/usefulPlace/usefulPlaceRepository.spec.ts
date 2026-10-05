@@ -20,6 +20,62 @@ function makeRow(osmId: number): UsefulPlaceUpsertRow {
 	};
 }
 
+describe("usefulPlaceRepository.readAll", () => {
+	const bounds = { south: 48.8, north: 48.9, west: 2.2, east: 2.4 };
+
+	it("should filter by position and pass the values in SQL order", async () => {
+		const query = jest
+			.spyOn(databaseClient, "query")
+			.mockResolvedValue([[]] as never);
+
+		await usefulPlaceRepository.readAll(bounds);
+
+		const [sql, params] = query.mock.calls[0] as unknown as [
+			string,
+			unknown[],
+		];
+		expect(sql).toContain(
+			"WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?",
+		);
+		expect(sql).toContain("ORDER BY id ASC");
+		expect(sql).toContain("LIMIT ?");
+		// latitude (south, north), longitude (west, east), then the 1000 cap.
+		expect(params).toStrictEqual([48.8, 48.9, 2.2, 2.4, 1000]);
+	});
+
+	it("should map the columns to camelCase", async () => {
+		jest.spyOn(databaseClient, "query").mockResolvedValue([
+			[
+				{
+					id: 7,
+					name: "Pharmacie du Centre",
+					category: "pharmacy",
+					latitude: "48.850000",
+					longitude: "2.350000",
+					street_line: "1 rue de Paris",
+					city: "Paris",
+					phone_number: null,
+				},
+			],
+		] as never);
+
+		const places = await usefulPlaceRepository.readAll(bounds);
+
+		expect(places).toStrictEqual([
+			{
+				id: 7,
+				name: "Pharmacie du Centre",
+				category: "pharmacy",
+				latitude: "48.850000",
+				longitude: "2.350000",
+				streetLine: "1 rue de Paris",
+				city: "Paris",
+				phoneNumber: null,
+			},
+		]);
+	});
+});
+
 describe("usefulPlaceRepository.upsertMany", () => {
 	it("should not query the database for an empty list", async () => {
 		const query = jest.spyOn(databaseClient, "query");

@@ -66,7 +66,7 @@ async function fetchElements(
 				headers: {
 					"Content-Type": "text/plain",
 					"User-Agent":
-						"Vigie/1.0 (projet étudiant Wild Code School)",
+						"Vigie/1.0 (projet étudiant Wild Code School; https://github.com/WildCodeSchool-2025-09/p3-0526-remote-vigie)",
 				},
 				body: query,
 				signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
