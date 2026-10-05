@@ -50,6 +50,7 @@ Il est pré-configuré avec un ensemble d'outils pour aider les étudiants à pr
     - [Commandes de Base](#commandes-de-base)
     - [Structure des Dossiers](#structure-des-dossiers)
     - [Mettre en place la base de données](#mettre-en-place-la-base-de-données)
+    - [Remplir les lieux utiles de la carte](#remplir-les-lieux-utiles-de-la-carte)
     - [Développer la partie back-end](#développer-la-partie-back-end)
     - [REST](#rest)
     - [Autres Bonnes Pratiques](#autres-bonnes-pratiques)
@@ -78,6 +79,7 @@ Il est pré-configuré avec un ensemble d'outils pour aider les étudiants à pr
 |------------------------|-----------------------------------------------------------------------------|
 | `npm install`          | Installe les dépendances pour le client et le serveur                       |
 | `npm run db:migrate`   | Met à jour la base de données à partir d'un schéma défini                   |
+| `npm run sync:places --workspace=server` | Remplit les lieux utiles de la carte depuis OpenStreetMap (voir [Remplir les lieux utiles](#remplir-les-lieux-utiles-de-la-carte)) |
 | `npm run dev`          | Démarre les deux serveurs (client et serveur) dans un seul terminal         |
 | `npm run check`        | Exécute les outils de validation (linting et formatage)                     |
 | `npm run test`         | Exécute les tests unitaires et d'intégration                                |
@@ -167,6 +169,39 @@ INSERT INTO item (title, user_id) VALUES
 ```sh
 npm run db:migrate
 ```
+
+### Remplir les lieux utiles de la carte
+
+La carte affiche des lieux utiles (pompiers, vétérinaires, hôpitaux, pharmacies, police)
+stockés dans la table `useful_place`. Ni `db:migrate` ni `db:seed` ne la remplissent : elle
+se remplit **à la main** depuis OpenStreetMap (API Overpass), avec le script `sync:places`.
+
+À faire une première fois, puis à chaque `npm run db:migrate` (la migration vide la base,
+`useful_place` comprise) :
+
+```sh
+# toutes les catégories
+npm run sync:places --workspace=server
+
+# seulement certaines catégories
+npm run sync:places --workspace=server -- fire_station veterinary
+```
+
+Catégories : `fire_station`, `veterinary`, `hospital`, `pharmacy`, `police`.
+
+- Le serveur de la base doit tourner et le `.env` de `server` être rempli. Une connexion à
+  Internet est nécessaire.
+- L'API Overpass est publique et parfois indisponible ou surchargée : le script réessaie une
+  fois par catégorie, et une catégorie en échec n'empêche pas les suivantes. En fin de
+  script, il liste les catégories en échec et affiche la commande pour les relancer seules.
+- Le script peut être relancé sans risque : les lieux sont mis à jour, pas dupliqués, et
+  ceux qui ont disparu d'OpenStreetMap sont retirés (sauf si plus de la moitié d'une
+  catégorie serait supprimée : le script refuse alors la suppression).
+- Vérifier le résultat :
+
+  ```sql
+  SELECT category, COUNT(*) FROM useful_place GROUP BY category;
+  ```
 
 ### Développer la partie back-end
 
