@@ -18,7 +18,7 @@ describe("GET /api/incidents/:id/comments", () => {
 				id: 1,
 				content: "La route est dégagée.",
 				createdAt: new Date("2026-09-20T10:00:00.000Z"),
-				author: { pseudo: "yann_30" },
+				author: { id: 7, pseudo: "yann_30" },
 				quotedComment: null,
 			},
 		];
@@ -30,10 +30,12 @@ describe("GET /api/incidents/:id/comments", () => {
 		const response = await supertest(app).get("/api/incidents/1/comments");
 
 		expect(response.status).toBe(200);
+		// Sans token (visiteur), l'auteur n'a aucun badge : liste vide.
 		expect(response.body).toStrictEqual(
 			fakeComments.map((comment) => ({
 				...comment,
 				createdAt: comment.createdAt.toISOString(),
+				author: { ...comment.author, badges: [] },
 			})),
 		);
 	});
