@@ -102,6 +102,7 @@ const add: RequestHandler = async (req, res, next) => {
 					createdAt: incident.createdAt,
 					radiusMeters: dangerType.alert_radius_meters,
 					authorUserId: Number(req.auth.sub),
+					isDanger: true,
 				})
 				.catch((err) => {
 					console.error(
