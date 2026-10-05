@@ -689,6 +689,34 @@ saisie d'URL côté US07.
 - Comparaisons pseudo / e-mail sur formes **normalisées** ; messages d'erreur neutres
   (anti-énumération de comptes).
 
+### Carte et lieux utiles (US04)
+
+- **Import manuel, pas de tâche planifiée** : la table `useful_place` est remplie par
+  `npm run sync:places` (script `server/bin/syncUsefulPlaces.ts`), depuis l'API Overpass
+  d'OpenStreetMap, sur la France, pour les cinq catégories de l'enum. Sans argument toutes les
+  catégories, sinon celles indiquées : `npm run sync:places --workspace=server -- hospital`.
+  À relancer après chaque `db:migrate` (qui vide la base). Voir le README.
+- **Idempotent** : un lieu = un objet OSM (`osm_type` + `osm_id`, clé unique), mis à jour au
+  lieu d'être dupliqué ; écriture par lots de 1 000 lignes. Les lieux fermés
+  (préfixes OSM `disused:`, `abandoned:`…) sont ignorés.
+- **Overpass est public donc faillible** (2026-10-05) : deux tentatives par catégorie, avec
+  pause ; une réponse vide ou partielle (`remark`) compte comme un échec et n'est jamais
+  importée. Une catégorie en échec n'empêche pas les suivantes : le script finit en erreur
+  (code de sortie 1) en nommant les catégories à relancer.
+- **Purge sans `last_seen_at`** (2026-10-05) : après import, les lieux de la catégorie absents
+  de la réponse sont supprimés, en comparant les clés OSM, sans nouvelle colonne
+  (le schéma ne change pas). Garde-fou : si plus de 50 % de la catégorie serait supprimée, la
+  suppression est refusée.
+- **Lecture publique par zone** : `GET /api/useful-places?north&south&east&west`. Les quatre
+  bornes sont obligatoires, numériques, dans les limites du globe et ordonnées
+  (`south < north`, `west < east`) ; l'étendue ne dépasse pas 1°. Sinon `400 invalid_bounds`.
+  Réponse limitée à 1 000 lieux. Les incidents acceptent des bornes facultatives
+  (`GET /api/incidents`), avec une limite de 300 quand elles sont fournies ; des bornes
+  invalides donnent aussi `400`.
+- **Limites connues** : pas de limitation de débit sur ces routes publiques (à décider au
+  déploiement, avec `trust proxy` et la compression) ; pas d'`AbortController` côté carte
+  (les réponses périmées sont ignorées) ; pas de test automatisé côté client.
+
 ### Limites & garde-fous (issus du Miro)
 
 **5 signalements maximum par utilisateur et par heure** (`checkIncidentRateLimit`, US01,
@@ -774,7 +802,7 @@ Toujours proxifiées par le back (« API Vigie ») — jamais d'appel direct dep
 | Auto-complétion et géocodage d'adresses (US05, US24) | Base Adresse Nationale — `https://data.geopf.fr/geocodage/search/` |
 | Contours de communes / géocodage inverse | API Carto (IGN) — `https://apicarto.ign.fr` (doc `cartes.gouv.fr`) |
 | Numéros des mairies (`scope = municipal`) | Annuaire de l'administration — `https://api-lannuaire.service-public.gouv.fr/api/explore/v2.1` |
-| Lieux utiles : pompiers, vétérinaires, hôpitaux, pharmacies, police (US04) | OpenStreetMap / Nominatim (d'où `useful_place.osm_type` + `osm_id`) |
+| Lieux utiles : pompiers, vétérinaires, hôpitaux, pharmacies, police (US04) | OpenStreetMap via l'API Overpass (d'où `useful_place.osm_type` + `osm_id`), importés par `npm run sync:places` (voir §5 « Carte et lieux utiles ») |
 | Vigilance météo par département (US11) | API Vigilance Météo-France |
 | Fond de carte (US04) | Tuiles OpenStreetMap via Leaflet |
 
