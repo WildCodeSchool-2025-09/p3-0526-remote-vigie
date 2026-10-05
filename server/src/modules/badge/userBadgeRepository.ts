@@ -8,7 +8,7 @@ export type EarnedBadge = {
 	earnedAt: Date;
 };
 
-// Badge affiché en petit format sous le pseudo d'un auteur (infobulle : intitulé + description).
+// Small-format badge under an author's pseudo
 export type RecentBadge = {
 	code: string;
 	label: string;
@@ -17,11 +17,9 @@ export type RecentBadge = {
 	earnedAt: Date;
 };
 
-// Nombre de badges affichés sous un pseudo.
 const RECENT_BADGES_LIMIT = 5;
 
 class UserBadgeRepository {
-	// Badges acquis par l'utilisateur, avec leur date d'obtention.
 	async readByUser(userId: number): Promise<EarnedBadge[]> {
 		const [rows] = await databaseClient.query<Rows>(
 			"SELECT badge_id, earned_at FROM user_badge WHERE user_id = ?",
@@ -34,9 +32,7 @@ class UserBadgeRepository {
 		}));
 	}
 
-	// Les badges les plus récemment obtenus par l'utilisateur. Plusieurs badges
-	// peuvent être attribués dans la même seconde (première connexion) : l'id du
-	// badge départage, pour un résultat stable d'un appel à l'autre.
+	// The badge id breaks ties between badges earned in the same second
 	async readRecentByUser(userId: number): Promise<RecentBadge[]> {
 		const [rows] = await databaseClient.query<Rows>(
 			`SELECT b.code, b.label, b.description, b.icon, ub.earned_at
@@ -57,10 +53,7 @@ class UserBadgeRepository {
 		}));
 	}
 
-	// Attribue les badges à l'utilisateur, en ignorant ceux déjà acquis : la clé
-	// primaire (user_id, badge_id) élimine les doublons et laisse intacte la date
-	// d'obtention d'origine (`earned_at`). Renvoie le nombre de badges réellement
-	// nouveaux.
+	// INSERT IGNORE: an already earned badge is skipped, its date is unchanged
 	async grantMany(userId: number, badgeIds: number[]): Promise<number> {
 		if (badgeIds.length === 0) return 0;
 

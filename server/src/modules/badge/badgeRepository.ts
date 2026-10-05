@@ -3,7 +3,7 @@ import type { Rows } from "../../../database/client";
 
 // Only CRUD here (Create, Read, Update, Delete)
 
-// Doit rester synchronisé avec l'ENUM `badge.counter_type` du schema.sql.
+// Kept in sync with the badge.counter_type ENUM
 export type BadgeCounterType =
 	| "incident_by_type"
 	| "incident_total"
@@ -46,8 +46,6 @@ class BadgeRepository {
 		}));
 	}
 
-	// Un compteur par badge, indexé par le code du badge. Ces compteurs servent à
-	// l'attribution (comparaison au seuil) et à la progression « N/seuil » du profil.
 	async countActivityByUser(
 		userId: number,
 		badges: Badge[],
@@ -93,8 +91,7 @@ class BadgeRepository {
 		);
 	}
 
-	// COUNT(DISTINCT) : un incident portant plusieurs des types demandés n'est
-	// compté qu'une fois.
+	// COUNT(DISTINCT): an incident with several types is counted once
 	private async countIncidentsByTypes(
 		userId: number,
 		typeCodes: string[],
@@ -125,9 +122,7 @@ class BadgeRepository {
 		);
 	}
 
-	// Signalements de l'utilisateur confirmés par au moins `minConfirmations`
-	// autres utilisateurs (la clé primaire de `contribution` garantit des votants
-	// distincts, et l'auteur ne peut pas voter sur son propre signalement).
+	// Incidents confirmed by at least N neighbors
 	private async countConfirmedIncidents(
 		userId: number,
 		minConfirmations: number,
@@ -149,9 +144,7 @@ class BadgeRepository {
 		);
 	}
 
-	// Signalements de l'utilisateur portant tous les types sélectionnables. La
-	// clé primaire de `incident_incident_type` garantit un type une seule fois
-	// par signalement ; le total à atteindre est recalculé, jamais figé.
+	// Incidents carrying every selectable type
 	private async countAllTypesIncidents(userId: number): Promise<number> {
 		return this.count(
 			`SELECT COUNT(*) AS total FROM (
@@ -170,13 +163,7 @@ class BadgeRepository {
 		);
 	}
 
-	// Signalements de l'utilisateur créés « là où rien n'était encore signalé » : aucun
-	// signalement antérieur, encore dans sa durée de vie de base, ayant un type en
-	// commun, à une distance inférieure à la somme des deux rayons d'alerte. Même
-	// règle de doublon qu'à la création (incidentActions.browseNearby), recalculée
-	// a posteriori : rien n'est stocké au moment de la création. Les signalements
-	// de l'utilisateur lui-même comptent comme précédents ; à égalité de date,
-	// l'id départage.
+	// Incidents with no duplicate at creation (same rule as US01)
 	private async countFirstOnSpotIncidents(userId: number): Promise<number> {
 		return this.count(
 			`SELECT COUNT(*) AS total
@@ -211,7 +198,6 @@ class BadgeRepository {
 	}
 }
 
-// « storm,hail,tornado » → ["storm", "hail", "tornado"]
 function parseCounterParam(counterParam: string | null): string[] {
 	return (counterParam ?? "")
 		.split(",")

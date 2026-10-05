@@ -3,8 +3,7 @@ import badgeService from "./badgeService";
 
 // Only BREAD here (Browse, Read, Edit, Add, Delete)
 
-// Collection de badges de l'utilisateur connecté (route protégée par verifyToken).
-// Aucun identifiant en paramètre : on ne consulte jamais que ses propres badges.
+// Collection of the logged-in user
 const browse: RequestHandler = async (req, res, next) => {
 	try {
 		const userId = Number(req.auth?.sub);

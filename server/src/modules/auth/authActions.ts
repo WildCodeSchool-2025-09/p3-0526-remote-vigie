@@ -68,7 +68,7 @@ const login: RequestHandler = async (req, res, next) => {
 			},
 		});
 
-		// Hors de la réponse : un échec du recalcul ne doit jamais empêcher la connexion.
+		// Badge recalculation, outside the response
 		badgeService.evaluate(user.id).catch((err) => {
 			console.error(
 				`Échec du recalcul des badges de l'utilisateur ${user.id}`,

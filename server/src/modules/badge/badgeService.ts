@@ -9,16 +9,11 @@ export type BadgeCollectionItem = {
 	description: string;
 	icon: string;
 	threshold: number;
-	// Date d'obtention : null tant que le badge n'est pas acquis.
 	earnedAt: Date | null;
-	// Progression : renseignée seulement pour un badge non acquis.
 	progress: { current: number; target: number } | null;
 };
 
-// Assemble la collection d'un utilisateur : tout le référentiel, avec l'état
-// acquis ou non. Pour un badge non acquis, `current` est plafonné au seuil
-// (un compteur qui vient de l'atteindre sans que le badge soit encore attribué
-// n'affiche pas « 7/5 »). Fonction pure.
+// Profile collection: progress capped at the threshold
 function buildCollection(
 	badges: Badge[],
 	earnedAtByBadgeId: Map<number, Date>,
@@ -48,8 +43,6 @@ function buildCollection(
 	});
 }
 
-// Collection de badges de l'utilisateur pour le profil. Les compteurs ne sont
-// calculés que pour les badges non acquis : les autres n'affichent pas de progression.
 async function readCollection(userId: number): Promise<BadgeCollectionItem[]> {
 	const badges = await badgeRepository.readAll();
 	const earned = await userBadgeRepository.readByUser(userId);
@@ -65,8 +58,7 @@ async function readCollection(userId: number): Promise<BadgeCollectionItem[]> {
 	return buildCollection(badges, earnedAtByBadgeId, counts);
 }
 
-// Badges les plus récents de plusieurs utilisateurs (les auteurs d'une page) :
-// une seule lecture par utilisateur distinct, jamais une par commentaire.
+// Recent badges of authors, one read per distinct author
 async function readRecentBadgesByUsers(
 	userIds: number[],
 ): Promise<Map<number, RecentBadge[]>> {
@@ -81,8 +73,7 @@ async function readRecentBadgesByUsers(
 	return new Map(entries);
 }
 
-// Badges dont le compteur atteint le seuil (fonction pure : testable sans base).
-// Un compteur absent vaut 0.
+// Badges whose counter reaches the threshold
 function findReachedBadges(
 	badges: Badge[],
 	counts: Record<string, number>,
@@ -92,9 +83,7 @@ function findReachedBadges(
 	);
 }
 
-// Recalcule l'activité de l'utilisateur, attribue les badges dont le seuil est
-// atteint (ceux déjà acquis sont ignorés) et renvoie ces badges. Ne retire jamais
-// un badge : « acquis » reste acquis.
+// Grants the reached badges; an earned badge is never removed
 async function evaluate(userId: number): Promise<Badge[]> {
 	const badges = await badgeRepository.readAll();
 	const counts = await badgeRepository.countActivityByUser(userId, badges);

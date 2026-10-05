@@ -9,8 +9,7 @@ import type { RecentBadge } from "../badge/userBadgeRepository";
 
 // Only BREAD here (Browse, Read, Edit, Add, Delete)
 
-// Ajoute à l'auteur ses badges les plus récents (liste vide s'il n'en a pas, ou
-// pour un visiteur : les auteurs ne lui sont pas identifiés).
+// Adds the author's badges
 function withAuthorBadges<T extends { author: { id: number } }>(
 	comment: T,
 	badgesByAuthor: Map<number, RecentBadge[]>,
@@ -124,8 +123,6 @@ const add: RequestHandler = async (req, res, next) => {
 
 		const comment = await commentRepository.read(id);
 
-		// L'auteur est l'utilisateur connecté : sans ses badges, un commentaire
-		// tout juste publié s'afficherait sans eux jusqu'au rechargement.
 		const badgesByAuthor =
 			comment != null
 				? await badgeService.readRecentBadgesByUsers([

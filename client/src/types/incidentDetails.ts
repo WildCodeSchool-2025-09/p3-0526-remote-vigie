@@ -11,7 +11,6 @@ export type IncidentDangerLevel = {
 export type IncidentAuthor = {
 	id: number;
 	pseudo: string;
-	// Liste vide pour un visiteur ou un auteur sans badge.
 	badges: AuthorBadge[];
 };
 

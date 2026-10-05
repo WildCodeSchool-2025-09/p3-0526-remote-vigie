@@ -47,8 +47,6 @@ const read: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		// Les badges de l'auteur ne sont présentés qu'aux utilisateurs connectés :
-		// les auteurs ne sont pas identifiés aux visiteurs.
 		const badges =
 			userId != null
 				? await userBadgeRepository.readRecentByUser(incident.author.id)

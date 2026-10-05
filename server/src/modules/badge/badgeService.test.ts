@@ -26,7 +26,7 @@ afterEach(() => {
 	jest.restoreAllMocks();
 });
 
-// Mocke la lecture du référentiel et les compteurs de l'utilisateur.
+// Mocks for the referential and the counters
 function mockActivity(counts: Record<string, number>) {
 	jest.spyOn(badgeRepository, "readAll").mockResolvedValue(referential);
 	return jest
@@ -71,15 +71,12 @@ describe("badgeService.evaluate", () => {
 
 	test("badge déjà acquis : evaluate le transmet à grantMany, qui l'ignore, sans rien lire de user_badge", async () => {
 		mockActivity({ vigie: 12, pyromane: 0 });
-		// L'utilisateur possède déjà « vigie » : grantMany répond qu'aucune ligne n'est nouvelle.
 		const grantMany = jest
 			.spyOn(userBadgeRepository, "grantMany")
 			.mockResolvedValue(0);
 
 		const reached = await badgeService.evaluate(userId);
 
-		// La déduplication est portée par la clé primaire (user_id, badge_id),
-		// pas par le service : il se contente de transmettre les badges atteints.
 		expect(reached).toEqual([vigie]);
 		expect(grantMany).toHaveBeenCalledTimes(1);
 		expect(grantMany).toHaveBeenCalledWith(userId, [1]);
@@ -92,12 +89,9 @@ describe("badgeService.evaluate", () => {
 		await badgeService.evaluate(userId);
 		expect(grantMany).toHaveBeenLastCalledWith(userId, [1]);
 
-		// L'activité qui avait déclenché « vigie » diminue (signalements supprimés).
 		countActivityByUser.mockResolvedValue({ vigie: 2, pyromane: 0 });
 		const reached = await badgeService.evaluate(userId);
 
-		// Rien d'attribué ; evaluate n'a aucun moyen de retirer un badge acquis :
-		// seule grantMany est appelée, jamais une suppression.
 		expect(reached).toEqual([]);
 		expect(grantMany).toHaveBeenLastCalledWith(userId, []);
 		expect(grantMany).toHaveBeenCalledTimes(2);

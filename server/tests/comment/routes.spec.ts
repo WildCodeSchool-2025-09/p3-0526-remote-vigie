@@ -30,7 +30,6 @@ describe("GET /api/incidents/:id/comments", () => {
 		const response = await supertest(app).get("/api/incidents/1/comments");
 
 		expect(response.status).toBe(200);
-		// Sans token (visiteur), l'auteur n'a aucun badge : liste vide.
 		expect(response.body).toStrictEqual(
 			fakeComments.map((comment) => ({
 				...comment,
