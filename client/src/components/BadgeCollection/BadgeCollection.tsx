@@ -37,7 +37,7 @@ function ProgressRing({
 					strokeWidth="4"
 					strokeLinecap="round"
 					strokeDasharray={`${ratio * RING_CIRCUMFERENCE} ${RING_CIRCUMFERENCE}`}
-					className="stroke-secondary"
+					className="stroke-accent"
 				/>
 			)}
 		</svg>
