@@ -3,7 +3,7 @@ import GoogleButton from "@/components/GoogleButton/GoogleButton";
 import Icon from "@/components/Icon/Icon";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 
 type FieldErrors = {
 	identifier?: string;
@@ -15,10 +15,22 @@ const fieldBase =
 const fieldNeutral = "border-primary/60 bg-base-300";
 const fieldError = "border-error bg-error/10";
 
+// Retours de la connexion Google (US22) : le serveur renvoie sur
+// /login?oauth=… quand quelque chose n'a pas abouti.
+const oauthMessages: Record<string, string> = {
+	cancelled:
+		"Connexion avec Google annulée. Vous pouvez réessayer, ou utiliser votre mot de passe.",
+	error: "La connexion avec Google a échoué. Réessayez dans un instant, ou utilisez votre mot de passe.",
+	email_unverified:
+		"Votre adresse Google n'est pas vérifiée : elle ne peut pas servir à vous connecter.",
+};
+
 export default function Login() {
 	const { user, loading, login } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
+	const [searchParams] = useSearchParams();
+	const oauthMessage = oauthMessages[searchParams.get("oauth") ?? ""];
 
 	const [identifier, setIdentifier] = useState("");
 	const [password, setPassword] = useState("");
@@ -111,6 +123,12 @@ export default function Login() {
 						toutes les fonctionnalités.
 					</p>
 				)}
+				{oauthMessage && (
+					<p className="mb-5 rounded-2xl bg-(--bg-error) px-4 py-3 text-sm font-semibold text-primary">
+						{oauthMessage}
+					</p>
+				)}
+
 				<form
 					onSubmit={handleSubmit}
 					noValidate
