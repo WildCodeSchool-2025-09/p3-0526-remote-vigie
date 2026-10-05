@@ -1,4 +1,5 @@
 import backgroundIncident from "@/assets/images/background-incident.jpg";
+import GoogleButton from "@/components/GoogleButton/GoogleButton";
 import Icon from "@/components/Icon/Icon";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { useEffect, useState } from "react";
@@ -223,6 +224,18 @@ export default function Login() {
 						{submitting ? "Connexion..." : "Se connecter"}
 					</button>
 				</form>
+				<div className="my-5 flex items-center gap-3 text-sm text-primary/80">
+					<span
+						className="h-px flex-1 bg-primary/20"
+						aria-hidden="true"
+					/>
+					ou
+					<span
+						className="h-px flex-1 bg-primary/20"
+						aria-hidden="true"
+					/>
+				</div>
+				<GoogleButton />
 
 				<p className="mt-6 text-center text-sm text-primary/80">
 					Pas encore de compte ?{" "}

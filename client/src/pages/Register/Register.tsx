@@ -1,4 +1,5 @@
 import bgHome from "@/assets/images/background-home.jpg";
+import GoogleButton from "@/components/GoogleButton/GoogleButton";
 import Icon from "@/components/Icon/Icon";
 import AddressField from "@/components/Register/AddressField/AddressField";
 import PasswordStrengthMeter from "@/components/Register/PasswordStrengthMeter/PasswordStrengthMeter";
@@ -297,6 +298,19 @@ export default function Register() {
 						)}
 					</div>
 					<SubmitRegister submitting={submitting} />
+					<div className="my-5 flex items-center gap-3 text-sm text-primary/80">
+						<span
+							className="h-px flex-1 bg-primary/20"
+							aria-hidden="true"
+						/>
+						ou
+						<span
+							className="h-px flex-1 bg-primary/20"
+							aria-hidden="true"
+						/>
+					</div>
+					<GoogleButton />
+
 					<p className="mt-3 text-sm text-primary">
 						Déjà inscrit ?{" "}
 						<Link to="/login" className="font-bold underline">
