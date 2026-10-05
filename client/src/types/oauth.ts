@@ -16,3 +16,9 @@ export type GoogleSignupResult =
 	| { status: "conflict"; field: "email" | "pseudo" | null; message: string }
 	| { status: "expired"; message: string }
 	| { status: "error" };
+// Infos d'inscription Google reçues après le # de l'adresse.
+export type GoogleSignupParams = {
+	pendingToken: string;
+	email: string;
+	name: string;
+};

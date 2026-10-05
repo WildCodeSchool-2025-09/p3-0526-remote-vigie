@@ -4,6 +4,8 @@ import Icon from "@/components/Icon/Icon";
 import AddressField from "@/components/Register/AddressField/AddressField";
 import PasswordStrengthMeter from "@/components/Register/PasswordStrengthMeter/PasswordStrengthMeter";
 import SubmitRegister from "@/components/Register/SubmitRegister/SubmitRegister";
+import { readGoogleSignupParams } from "@/utils/readGoogleSignupParams";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import useAddressSearch from "./useAddressSearch";
 import usePasswordStrength from "./usePasswordStrength";
@@ -11,6 +13,16 @@ import useRegisterSubmit from "./useRegisterSubmit";
 
 export default function Register() {
 	const navigate = useNavigate();
+
+	// Mode Google (US22) : on arrive de Google avec #pending=…&email=…&name=…
+	const [google] = useState(readGoogleSignupParams);
+
+	// Une fois lu, le jeton est effacé de la barre d'adresse.
+	useEffect(() => {
+		if (google != null) {
+			window.history.replaceState(null, "", window.location.pathname);
+		}
+	}, [google]);
 
 	const addressSearch = useAddressSearch();
 	const {
@@ -42,6 +54,7 @@ export default function Register() {
 		manualMode,
 		city,
 		postalCode,
+		pendingToken: google?.pendingToken,
 	});
 
 	const { score, label } = usePasswordStrength(password);
@@ -69,7 +82,9 @@ export default function Register() {
 						/>
 					</button>
 					<h1 className="font-title text-2xl font-bold text-accent">
-						Créer mon compte
+						{google
+							? "Finaliser mon inscription"
+							: "Créer mon compte"}
 					</h1>
 				</div>
 				<p className="mt-1 text-sm text-center text-white/85">
@@ -94,6 +109,7 @@ export default function Register() {
 							<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
 								<input
 									id="register-pseudo"
+									defaultValue={google?.name.slice(0, 30)}
 									ref={pseudoRef}
 									type="text"
 									placeholder="Votre pseudo"
@@ -127,6 +143,8 @@ export default function Register() {
 							<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
 								<input
 									id="register-email"
+									defaultValue={google?.email}
+									readOnly={google != null}
 									ref={emailRef}
 									type="text"
 									placeholder="marion.c@exemple.fr"
@@ -147,102 +165,118 @@ export default function Register() {
 								</p>
 							)}
 						</div>
-						<div className="flex flex-col gap-1.5">
-							<label
-								htmlFor="register-password"
-								className="text-primary"
-							>
-								Mot de passe
-							</label>
-							<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
-								<div className="flex items-center justify-between gap-2">
-									<input
-										id="register-password"
-										type={
-											showPassword ? "text" : "password"
-										}
-										value={password}
-										onChange={(e) =>
-											setPassword(e.target.value)
-										}
-										placeholder="..."
-										className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-										aria-describedby={
-											fieldErrors.password
-												? "register-password-error"
-												: undefined
-										}
-									/>
-									<button
-										type="button"
-										onClick={() =>
-											setShowPassword((prev) => !prev)
-										}
-										className="shrink-0 text-sm font-bold text-primary underline"
+						{google == null && (
+							<>
+								<div className="flex flex-col gap-1.5">
+									<label
+										htmlFor="register-password"
+										className="text-primary"
 									>
-										{showPassword ? "Masquer" : "Afficher"}
-									</button>
-								</div>
-							</section>
-							{password.length > 0 && (
-								<PasswordStrengthMeter
-									score={score}
-									label={label}
-								/>
-							)}
-							{fieldErrors.password && (
-								<p
-									id="register-password-error"
-									className="text-xs font-semibold text-error"
-								>
-									{fieldErrors.password}
-								</p>
-							)}
-						</div>
-						<div className="flex flex-col gap-1.5">
-							<label
-								htmlFor="register-confirm-password"
-								className="text-primary"
-							>
-								Confirmer le mot de passe
-							</label>
-							<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
-								<div className="flex items-center justify-between gap-2">
-									<input
-										id="register-confirm-password"
-										type={
-											showPassword ? "text" : "password"
-										}
-										value={confirmPassword}
-										onChange={(e) =>
-											setConfirmPassword(e.target.value)
-										}
-										placeholder="..."
-										className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-										aria-describedby={
-											fieldErrors.password
-												? "register-password-error"
-												: undefined
-										}
-									/>
-									{confirmPassword.length > 0 && (
-										<Icon
-											name={
-												password === confirmPassword
-													? "check"
-													: "crossSmall"
-											}
-											className={`h-4 w-4 shrink-0 ${
-												password === confirmPassword
-													? "fill-success"
-													: "fill-error"
-											}`}
-											aria-hidden="true"
+										Mot de passe
+									</label>
+									<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
+										<div className="flex items-center justify-between gap-2">
+											<input
+												id="register-password"
+												type={
+													showPassword
+														? "text"
+														: "password"
+												}
+												value={password}
+												onChange={(e) =>
+													setPassword(e.target.value)
+												}
+												placeholder="..."
+												className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+												aria-describedby={
+													fieldErrors.password
+														? "register-password-error"
+														: undefined
+												}
+											/>
+											<button
+												type="button"
+												onClick={() =>
+													setShowPassword(
+														(prev) => !prev,
+													)
+												}
+												className="shrink-0 text-sm font-bold text-primary underline"
+											>
+												{showPassword
+													? "Masquer"
+													: "Afficher"}
+											</button>
+										</div>
+									</section>
+									{password.length > 0 && (
+										<PasswordStrengthMeter
+											score={score}
+											label={label}
 										/>
 									)}
+									{fieldErrors.password && (
+										<p
+											id="register-password-error"
+											className="text-xs font-semibold text-error"
+										>
+											{fieldErrors.password}
+										</p>
+									)}
 								</div>
-							</section>
-						</div>
+								<div className="flex flex-col gap-1.5">
+									<label
+										htmlFor="register-confirm-password"
+										className="text-primary"
+									>
+										Confirmer le mot de passe
+									</label>
+									<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
+										<div className="flex items-center justify-between gap-2">
+											<input
+												id="register-confirm-password"
+												type={
+													showPassword
+														? "text"
+														: "password"
+												}
+												value={confirmPassword}
+												onChange={(e) =>
+													setConfirmPassword(
+														e.target.value,
+													)
+												}
+												placeholder="..."
+												className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+												aria-describedby={
+													fieldErrors.password
+														? "register-password-error"
+														: undefined
+												}
+											/>
+											{confirmPassword.length > 0 && (
+												<Icon
+													name={
+														password ===
+														confirmPassword
+															? "check"
+															: "crossSmall"
+													}
+													className={`h-4 w-4 shrink-0 ${
+														password ===
+														confirmPassword
+															? "fill-success"
+															: "fill-error"
+													}`}
+													aria-hidden="true"
+												/>
+											)}
+										</div>
+									</section>
+								</div>
+							</>
+						)}
 						<AddressField
 							addressSearch={addressSearch}
 							error={fieldErrors.address}
@@ -298,19 +332,22 @@ export default function Register() {
 						)}
 					</div>
 					<SubmitRegister submitting={submitting} />
-					<div className="my-5 flex items-center gap-3 text-sm text-primary/80">
-						<span
-							className="h-px flex-1 bg-primary/20"
-							aria-hidden="true"
-						/>
-						ou
-						<span
-							className="h-px flex-1 bg-primary/20"
-							aria-hidden="true"
-						/>
-					</div>
-					<GoogleButton />
-
+					{google == null && (
+						<>
+							<div className="my-5 flex items-center gap-3 text-sm text-primary/80">
+								<span
+									className="h-px flex-1 bg-primary/20"
+									aria-hidden="true"
+								/>
+								ou
+								<span
+									className="h-px flex-1 bg-primary/20"
+									aria-hidden="true"
+								/>
+							</div>
+							<GoogleButton />
+						</>
+					)}
 					<p className="mt-3 text-sm text-primary">
 						Déjà inscrit ?{" "}
 						<Link to="/login" className="font-bold underline">

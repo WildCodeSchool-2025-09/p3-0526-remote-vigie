@@ -126,6 +126,10 @@ const router = createBrowserRouter([
 				element: <Register />,
 			},
 			{
+				path: "register/google",
+				element: <Register />,
+			},
+			{
 				path: "cgu",
 				element: <Cgu />,
 			},
