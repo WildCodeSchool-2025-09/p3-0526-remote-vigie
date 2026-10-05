@@ -22,19 +22,21 @@ import "leaflet/dist/leaflet.css";
 import { type IconName, icons } from "@/assets/icons";
 import UsefulPlaceMarker from "@/components/UsefulPlaceMarker/UsefulPlaceMarker";
 import { useAuth } from "@/contexts/auth/AuthContext";
-import { getIncidentsInBounds } from "@/services/incidentService";
-import { getUsefulPlaces } from "@/services/usefulPlaceService";
+import {
+	MAP_INCIDENTS_LIMIT,
+	getIncidentsInBounds,
+} from "@/services/incidentService";
+import {
+	USEFUL_PLACES_LIMIT,
+	getUsefulPlaces,
+} from "@/services/usefulPlaceService";
 import type { Bounds } from "@/types/bounds";
 import type { IncidentListItem } from "@/types/incidentList";
 import type { UsefulPlace } from "@/types/usefulPlace";
+import { FRANCE_BOUNDS } from "@/utils/franceBounds";
 import { getDefaultMapCenter } from "@/utils/getDefaultMapCenter";
 import { useDelayedFlag } from "./useDelayedFlag";
 
-// [sud-ouest, nord-est]
-const FRANCE_BOUNDS: [[number, number], [number, number]] = [
-	[41.0, -5.5],
-	[51.5, 9.8],
-];
 const DEFAULT_ZOOM = 6;
 const MIN_ZOOM = 5;
 const SELECTION_ZOOM = 15;
@@ -341,6 +343,16 @@ export default function IncidentMap({
 	const isZoneEmpty =
 		!mapIncidentsLoading && !mapError && mapIncidents.length === 0;
 
+	// Le serveur plafonne les réponses : à la limite, des éléments sont masqués.
+	const isIncidentLimitReached =
+		!mapIncidentsLoading &&
+		!mapError &&
+		mapIncidents.length >= MAP_INCIDENTS_LIMIT;
+	const isPlacesLimitReached =
+		!usefulPlacesLoading &&
+		!usefulPlacesError &&
+		usefulPlaces.length >= USEFUL_PLACES_LIMIT;
+
 	// Sélectionne l'incident et recentre la carte dessus.
 	const handleSelectIncident = useCallback(
 		(incident: IncidentListItem, map: L.Map) => {
@@ -395,6 +407,23 @@ export default function IncidentMap({
 						className="rounded-full bg-base-100/90 px-3 py-1 text-xs font-bold text-primary shadow"
 					>
 						Rien à signaler autour de vous.
+					</output>
+				)}
+				{isIncidentLimitReached && (
+					<output
+						aria-live="polite"
+						className="rounded-full bg-base-100/90 px-3 py-1 text-xs font-bold text-primary shadow"
+					>
+						Seuls les {MAP_INCIDENTS_LIMIT} incidents les plus
+						récents sont affichés : zoomez pour affiner.
+					</output>
+				)}
+				{isPlacesLimitReached && (
+					<output
+						aria-live="polite"
+						className="rounded-full bg-base-100/90 px-3 py-1 text-xs font-bold text-primary shadow"
+					>
+						Zoomez pour voir tous les lieux utiles.
 					</output>
 				)}
 				{(showsZoomHint || showUsefulPlacesLoading) && (

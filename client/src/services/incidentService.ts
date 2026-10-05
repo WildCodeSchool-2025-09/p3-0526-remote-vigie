@@ -25,10 +25,13 @@ export async function getAllIncidents(
 	}
 }
 
+// Même plafond que MAX_MAP_LIMIT côté serveur (incidentActions.ts).
+export const MAP_INCIDENTS_LIMIT = 300;
+
 // Incidents in the map's visible zone (separate call from getAllIncidents).
 export async function getIncidentsInBounds(
 	bounds: Bounds,
-	limit = 300,
+	limit = MAP_INCIDENTS_LIMIT,
 ): Promise<GetAllIncidentsResult> {
 	try {
 		const params = new URLSearchParams({

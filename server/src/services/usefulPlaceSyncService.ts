@@ -26,7 +26,8 @@ const CATEGORY_OVERPASS_TAGS: Record<
 	police: { key: "amenity", value: "police" },
 };
 
-// Mêmes valeurs que FRANCE_BOUNDS dans IncidentMap.tsx (à garder synchronisées).
+// Mêmes valeurs que FRANCE_BOUNDS dans client/src/utils/franceBounds.ts (à garder
+// synchronisées).
 const FRANCE_BOUNDS = { south: 41.0, west: -5.5, north: 51.5, east: 9.8 };
 
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";

@@ -6,6 +6,9 @@ type GetUsefulPlacesResult =
 	| { status: "ok"; usefulPlaces: UsefulPlace[] }
 	| { status: "error" };
 
+// Même valeur que MAX_USEFUL_PLACES côté serveur (usefulPlaceRepository.ts).
+export const USEFUL_PLACES_LIMIT = 1000;
+
 export async function getUsefulPlaces(
 	bounds: Bounds,
 ): Promise<GetUsefulPlacesResult> {

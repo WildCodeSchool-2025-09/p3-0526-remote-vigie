@@ -1,6 +1,8 @@
 import type { AuthUser } from "@/types/auth";
+import { isInsideFranceBounds } from "@/utils/franceBounds";
 
-// Fallback when there is no connected user with a primary address.
+// Repli : pas d'utilisateur connecté, pas d'adresse principale, ou adresse hors
+// de la zone de la carte (DOM-TOM).
 const PARIS_CENTER: [number, number] = [48.8566, 2.3522];
 
 export function getDefaultMapCenter(user: AuthUser | null): [number, number] {
@@ -9,7 +11,12 @@ export function getDefaultMapCenter(user: AuthUser | null): [number, number] {
 	);
 
 	if (primaryAddress) {
-		return [primaryAddress.latitude, primaryAddress.longitude];
+		const latitude = Number(primaryAddress.latitude);
+		const longitude = Number(primaryAddress.longitude);
+
+		if (isInsideFranceBounds(latitude, longitude)) {
+			return [latitude, longitude];
+		}
 	}
 
 	return PARIS_CENTER;
