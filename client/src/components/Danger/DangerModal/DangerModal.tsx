@@ -1,9 +1,11 @@
 import MapLocationPicker from "@/components/Form/MapLocationPicker/MapLocationPicker";
 import NumberRow from "@/components/numbers/NumberRow/NumberRow";
 import { useAuth } from "@/contexts/auth/AuthContext";
+import { createDangerIncident } from "@/services/incidentService";
 import type { Position } from "@/types/incidentForm";
 import type { EmergencyNumber } from "@/types/numbers";
 import { type RefObject, useState } from "react";
+import { useNavigate } from "react-router";
 import useDangerLocation from "./useDangerLocation";
 
 type Props = {
@@ -31,13 +33,22 @@ const DANGER_NUMBERS: EmergencyNumber[] = [
 	},
 ];
 
+const EMERGENCY_HINT = "Appelez directement les secours : 112, 15 ou 18.";
+
 export default function DangerModal({ dialogRef }: Props) {
-	const { status, position, error, locate, onPositionChange } =
+	const navigate = useNavigate();
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [submitError, setSubmitError] = useState<string | null>(null);
+
+	const { status, position, error, reset, locate, onPositionChange } =
 		useDangerLocation();
 	const isLocating = status === "locating";
+	const isBusy = isLocating || isSubmitting;
 	const needsManualPosition = status === "error";
 	const canConfirm =
-		!isLocating && (!needsManualPosition || position !== null);
+		!isLocating &&
+		!isSubmitting &&
+		(!needsManualPosition || position !== null);
 	const { user } = useAuth();
 	const primaryAddress = user?.addresses.find(
 		(address) => address.is_primary,
@@ -47,17 +58,59 @@ export default function DangerModal({ dialogRef }: Props) {
 		: { lat: 46.6034, lng: 1.8883 };
 	const [hasTileError, setHasTileError] = useState(false);
 
-	function handleConfirm() {
-		if (needsManualPosition) {
-			//TODO envoyer l'alerte avec la position choisie sur la carte
+	async function submit(target: Position) {
+		setIsSubmitting(true);
+		setSubmitError(null);
+
+		const result = await createDangerIncident({
+			latitude: target.lat,
+			longitude: target.lng,
+		});
+
+		setIsSubmitting(false);
+
+		if (result.status === "ok") {
+			dialogRef.current?.close();
+			navigate("/numbers");
 			return;
 		}
-		locate();
+		if (result.status === "unauthorized") {
+			dialogRef.current?.close();
+			navigate("/login");
+			return;
+		}
+		if (
+			result.status === "invalid" ||
+			result.status === "tooManyRequests" ||
+			result.status === "duplicate"
+		) {
+			setSubmitError(result.message);
+			return;
+		}
+		if (result.status === "networkError") {
+			setSubmitError(
+				`Connexion impossible : l'alerte Vigie n'a pas été envoyée. ${EMERGENCY_HINT}`,
+			);
+			return;
+		}
+		setSubmitError(
+			`L'alerte Vigie n'a pas pu être créée. ${EMERGENCY_HINT}`,
+		);
+	}
+
+	async function handleConfirm() {
+		const target = position ?? (await locate());
+		if (target) await submit(target);
+	}
+	function handleClose() {
+		reset();
+		setSubmitError(null);
 	}
 
 	return (
 		<dialog
 			ref={dialogRef}
+			onClose={handleClose}
 			className="modal modal-bottom sm:modal-middle"
 			aria-labelledby="danger-title"
 			aria-describedby="danger-desc"
@@ -86,6 +139,7 @@ export default function DangerModal({ dialogRef }: Props) {
 				</ul>
 				<output className="sr-only">
 					{isLocating && "Localisation en cours..."}
+					{isSubmitting && "Envoi de l'alerte en cours..."}
 				</output>
 				{error && (
 					<p
@@ -93,6 +147,14 @@ export default function DangerModal({ dialogRef }: Props) {
 						className="mt-4 text-sm font-bold text-error"
 					>
 						{error}
+					</p>
+				)}
+				{submitError && (
+					<p
+						role="alert"
+						className="mt-4 text-sm font-bold text-error"
+					>
+						{submitError}
 					</p>
 				)}
 				{status === "error" && (
@@ -109,7 +171,7 @@ export default function DangerModal({ dialogRef }: Props) {
 					<button
 						type="button"
 						onClick={() => dialogRef.current?.close()}
-						disabled={isLocating}
+						disabled={isBusy}
 						className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10"
 					>
 						Annuler
@@ -122,9 +184,13 @@ export default function DangerModal({ dialogRef }: Props) {
 					>
 						{isLocating
 							? "Localisation en cours..."
-							: needsManualPosition
-								? "Confirmer cette position"
-								: "Confirmer l'alerte"}
+							: isSubmitting
+								? "Envoi en cours..."
+								: needsManualPosition
+									? "Confirmer cette position"
+									: submitError
+										? "Réessayer"
+										: "Confirmer l'alerte"}
 					</button>
 				</div>
 			</div>

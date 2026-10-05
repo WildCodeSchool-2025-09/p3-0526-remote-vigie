@@ -96,6 +96,7 @@ export default function IncidentHeader({
 								<Icon
 									name={iconName}
 									className="h-3.5 w-3.5"
+									style={{ color: `var(--${type.code})` }}
 									aria-hidden="true"
 								/>
 							)}
