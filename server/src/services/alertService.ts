@@ -20,6 +20,7 @@ function emailTemplate({
 	date,
 	address,
 	link,
+	isDanger,
 }: {
 	type: string[];
 	city: string | null;
@@ -29,6 +30,7 @@ function emailTemplate({
 	date: Date;
 	address: string;
 	link: string;
+	isDanger: boolean;
 }) {
 	const place = city
 		? `${withPreposition(city)}${postalCode ? ` (${postalCode})` : ""}`
@@ -39,16 +41,27 @@ function emailTemplate({
 		{ hour: "2-digit", minute: "2-digit" },
 	)}`;
 
-	const subject = `Nouveau signalement : ${type.join(", ")} ${place}`;
+	const subject = isDanger
+		? `Alerte : une personne est en danger ${place}`
+		: `Nouveau signalement : ${type.join(", ")} ${place}`;
+
+	const heading = isDanger
+		? "Une personne est en danger près de chez vous"
+		: "Vigie vous alerte";
+
+	const intro = isDanger
+		? `<p>Une personne a signalé être en danger ${escapeHtml(place)}, le ${formattedDate}.</p>
+		<p>Vigie prévient les voisins mais ne contacte pas les secours. En cas de danger de mort, appelez le 112, le 15 ou le 18.</p>`
+		: `<p>Un signalement de type ${type.map(escapeHtml).join(", ")} a été fait ${escapeHtml(place)}, le ${formattedDate}.</p>`;
 
 	const html = `
 <div style="font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; max-width: 480px; margin: 0 auto; background: #f6f5e9;">
 	<div style="background-color:#0b4619; background-image:url('${process.env.CLIENT_URL}/background-incident.jpg'); background-size:cover; background-position:center; background-blend-mode:multiply; padding: 24px; text-align: center;">
 		<img src="${process.env.CLIENT_URL}/vigie-favicon-accent.svg" width="40" height="25" alt="Vigie" style="display:block; margin: 0 auto 8px;">
-		<h1 style="font-family: 'Playfair Display', ui-serif, Georgia, serif; color: #ffcc1d; margin: 0; font-size: 20px;">Vigie vous alerte</h1>
+		<h1 style="font-family: 'Playfair Display', ui-serif, Georgia, serif; color: #ffcc1d; margin: 0; font-size: 20px;">${heading}</h1>
 	</div>
 	<div style="padding: 24px; color: #0b4619;">
-		<p>Un signalement de type ${type.map(escapeHtml).join(", ")} a été fait ${escapeHtml(place)}, le ${formattedDate}.</p>
+		${intro}
 		<p style="background: #f6f5e9; border-left: 4px solid #ffcc1d; padding: 12px;">
 			Adresse concernée : <strong>${escapeHtml(address)}</strong>
 		</p>
@@ -74,6 +87,7 @@ async function dispatch({
 	createdAt,
 	radiusMeters,
 	authorUserId,
+	isDanger = false,
 }: {
 	incidentId: number;
 	types: string[];
@@ -84,6 +98,7 @@ async function dispatch({
 	createdAt: Date;
 	radiusMeters: number;
 	authorUserId: number;
+	isDanger?: boolean;
 }) {
 	const recipients = await addressRepository.findAddressesInRadius(
 		Number(longitude),
@@ -109,6 +124,7 @@ async function dispatch({
 			date: createdAt,
 			address,
 			link,
+			isDanger,
 		});
 
 		try {

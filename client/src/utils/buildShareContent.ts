@@ -16,9 +16,14 @@ export default function buildShareContent(incident: ShareableIncident) {
 					incident.longitude,
 				).toFixed(5)})`;
 
+	const text =
+		primaryType.code === "danger"
+			? `Une personne est en danger ${location} — alerte Vigie.`
+			: `${primaryType.label} ${location} — signalé sur Vigie.`;
+
 	return {
 		title: "Alerte Vigie",
-		text: `${primaryType.label} ${location} — signalé sur Vigie.`,
+		text,
 		url: `${import.meta.env.VITE_PUBLIC_URL}/incident/${incident.id}`,
 	};
 }

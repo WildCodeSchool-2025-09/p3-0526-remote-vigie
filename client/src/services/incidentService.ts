@@ -252,3 +252,47 @@ export async function createContribution(
 		return { status: "error" };
 	}
 }
+type CreateDangerPayload = {
+	latitude: number;
+	longitude: number;
+};
+
+type CreateDangerResult =
+	| { status: "ok"; incident: Incident }
+	| { status: "invalid"; message: string }
+	| { status: "unauthorized" }
+	| { status: "tooManyRequests"; message: string }
+	| { status: "duplicate"; message: string }
+	| { status: "networkError" }
+	| { status: "error" };
+
+export async function createDangerIncident(
+	payload: CreateDangerPayload,
+): Promise<CreateDangerResult> {
+	try {
+		const res = await apiFetch("/api/incidents/danger", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(payload),
+		});
+
+		if (res.status === 400) {
+			const body = (await res.json()) as { message: string };
+			return { status: "invalid", message: body.message };
+		}
+		if (res.status === 401) return { status: "unauthorized" };
+		if (res.status === 429) {
+			const body = (await res.json()) as { message: string };
+			return { status: "tooManyRequests", message: body.message };
+		}
+		if (res.status === 409) {
+			const body = (await res.json()) as { message: string };
+			return { status: "duplicate", message: body.message };
+		}
+		if (!res.ok) return { status: "error" };
+
+		return { status: "ok", incident: (await res.json()) as Incident };
+	} catch {
+		return { status: "networkError" };
+	}
+}

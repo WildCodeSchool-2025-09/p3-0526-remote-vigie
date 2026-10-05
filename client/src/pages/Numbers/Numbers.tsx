@@ -3,12 +3,17 @@ import NumberRow from "@/components/numbers/NumberRow/NumberRow";
 import { getEmergencyNumbers } from "@/services/numberService";
 import type { EmergencyCategory } from "@/types/numbers";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 
 type Status = "loading" | "error" | "success";
 
 export default function Numbers() {
 	const navigate = useNavigate();
+	const location = useLocation();
+	// Posé par DangerModal après un 201 : sert à confirmer la création de l'alerte.
+	const dangerIncidentId = (
+		location.state as { dangerIncidentId?: number } | null
+	)?.dangerIncidentId;
 	const [status, setStatus] = useState<Status>("loading");
 	const [categories, setCategories] = useState<EmergencyCategory[]>([]);
 
@@ -57,6 +62,27 @@ export default function Numbers() {
 			</header>
 
 			<div className="relative -mt-8 space-y-4 px-4 pb-6">
+				{dangerIncidentId != null && (
+					<section
+						aria-live="polite"
+						className="flex flex-col gap-2 rounded-3xl bg-(--bg-success) p-4"
+					>
+						<h2 className="font-title text-lg font-bold text-success">
+							Votre alerte a été créée
+						</h2>
+						<p className="text-sm text-primary">
+							Vigie prévient les voisins concernés. Une fois en
+							sécurité, vous pourrez compléter votre alerte.
+						</p>
+						<Link
+							to={`/incident/${dangerIncidentId}`}
+							className="btn btn-accent btn-sm mt-1 self-center rounded-full border-none px-5 font-bold"
+						>
+							Voir mon alerte
+						</Link>
+					</section>
+				)}
+
 				{status === "loading" && (
 					<p className="py-8 text-center text-sm text-primary/50">
 						Chargement des numéros utiles…
