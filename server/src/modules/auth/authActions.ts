@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 import { signAuthToken } from "../../services/jwt";
 import addressRepository from "../address/addressRepository";
+import badgeService from "../badge/badgeService";
 import usersRepository from "../users/usersRepository";
 
 const hashingOptions: HashOptions = {
@@ -65,6 +66,14 @@ const login: RequestHandler = async (req, res, next) => {
 				email: user.email,
 				emailVerified: user.email_verified_at != null,
 			},
+		});
+
+		// Hors de la réponse : un échec du recalcul ne doit jamais empêcher la connexion.
+		badgeService.evaluate(user.id).catch((err) => {
+			console.error(
+				`Échec du recalcul des badges de l'utilisateur ${user.id}`,
+				err,
+			);
 		});
 	} catch (err) {
 		next(err);
