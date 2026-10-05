@@ -143,6 +143,7 @@ function NotificationItem({
 		? incidentType.style
 		: (typeConfig?.iconStyle ?? notificationTypeConfig.mention.iconStyle);
 	const isBadge = notification.type === "badge";
+	const showsBadgeImage = isBadge && Boolean(notification.badge_icon);
 	const title =
 		isBadge && notification.badge_label
 			? `Vous avez obtenu le badge ${notification.badge_label}`
@@ -184,13 +185,15 @@ function NotificationItem({
 			className={`flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 ${borderColor}`}
 		>
 			<div
-				className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ${iconStyle}`}
+				className={`relative flex h-14 w-14 shrink-0 items-center justify-center ${
+					showsBadgeImage ? "" : `rounded-xl ${iconStyle}`
+				}`}
 			>
 				{isBadge && notification.badge_icon ? (
 					<img
 						src={`/badges-png/${notification.badge_icon}`}
 						alt=""
-						className={`size-12 object-contain ${
+						className={`size-14 object-contain ${
 							isUnread ? "" : "grayscale opacity-60"
 						}`}
 					/>
