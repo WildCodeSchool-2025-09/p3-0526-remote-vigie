@@ -1,5 +1,6 @@
 import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
+import type { NewGoogleUser } from "../../types/oauth";
 
 class UsersRepository {
 	async read(userId: number) {
@@ -102,6 +103,67 @@ class UsersRepository {
 
 			await connection.commit();
 
+			return userId;
+		} catch (err) {
+			await connection.rollback();
+			throw err;
+		} finally {
+			connection.release();
+		}
+	}
+	// Inscription via Google (US22) : utilisateur sans mot de passe, e-mail déjà
+	// vérifié par Google, adresse principale et lien Google créés ensemble.
+	async createWithGoogle(data: NewGoogleUser): Promise<number> {
+		const connection = await databaseClient.getConnection();
+		try {
+			await connection.beginTransaction();
+
+			if (data.reclaimUserIds.length > 0) {
+				await connection.query(
+					"DELETE FROM user WHERE id IN (?) AND email_verified_at IS NULL",
+					[data.reclaimUserIds],
+				);
+			}
+
+			const [result] = await connection.query<Result>(
+				`INSERT INTO user
+					(pseudo, email, pseudo_normalized, email_normalized,
+					email_verified_at, cgu_version, cgu_accepted_at)
+				VALUES (?, ?, ?, ?, NOW(), ?, ?)`,
+				[
+					data.pseudo,
+					data.email,
+					data.pseudoNormalized,
+					data.emailNormalized,
+					data.cguVersion,
+					data.cguAcceptedAt,
+				],
+			);
+			const userId = result.insertId;
+
+			await connection.query(
+				`INSERT INTO address
+					(user_id, postal_code, city, insee_code, street_line,
+					latitude, longitude, is_approximate, is_primary)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+				[
+					userId,
+					data.address.postalCode,
+					data.address.city,
+					data.address.inseeCode,
+					data.address.streetLine,
+					data.address.latitude,
+					data.address.longitude,
+					data.address.isApproximate,
+				],
+			);
+
+			await connection.query(
+				"INSERT INTO oauth_account (user_id, provider, provider_user_id) VALUES (?, 'google', ?)",
+				[userId, data.googleId],
+			);
+
+			await connection.commit();
 			return userId;
 		} catch (err) {
 			await connection.rollback();

@@ -47,7 +47,6 @@ const add: RequestHandler = async (req, res, next) => {
 			cguAcceptedAt: new Date(),
 			...address,
 			reclaimUserIds: body.reclaimUserIds,
-
 		});
 
 		await verificationEmailService.sendVerificationEmail(
