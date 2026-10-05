@@ -105,7 +105,7 @@ export default function ProfileBadges() {
 									<h2 className="font-title text-lg font-bold text-(--error-text)">
 										Impossible d'afficher vos badges
 									</h2>
-									<p className="mt-1 text-sm text-secondary/70">
+									<p className="mt-1 text-sm text-primary/80">
 										La connexion au serveur a échoué.
 										Réessayez dans un instant.
 									</p>

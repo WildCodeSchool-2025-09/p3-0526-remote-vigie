@@ -15,7 +15,7 @@ function formatAddress(address: Address | undefined) {
 function AccountField({ label, value }: { label: string; value: string }) {
 	return (
 		<div className="border-b border-dashed border-primary/15 py-3">
-			<dt className="text-xs uppercase tracking-widest text-primary/50">
+			<dt className="text-xs uppercase tracking-widest text-primary/75">
 				{label}
 			</dt>
 			<dd className="mt-1 wrap-break-word text-base font-bold text-primary">
@@ -58,7 +58,7 @@ export default function Profile() {
 				<section aria-labelledby="account-title">
 					<h2
 						id="account-title"
-						className="text-xs font-bold uppercase tracking-widest text-primary/50"
+						className="text-xs font-bold uppercase tracking-widest text-primary/75"
 					>
 						Compte
 					</h2>
