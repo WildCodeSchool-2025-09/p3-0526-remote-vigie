@@ -18,6 +18,8 @@ import CrossSmall from "@/assets/icons/interface/cross-small.svg?react";
 import DiamondExclamation from "@/assets/icons/interface/diamond-exclamation.svg?react";
 import Envelope from "@/assets/icons/interface/envelope.svg?react";
 import Exclamation from "@/assets/icons/interface/exclamation.svg?react";
+import FireStation from "@/assets/icons/interface/fire-station.svg?react";
+import Hospital from "@/assets/icons/interface/hospital.svg?react";
 import Info from "@/assets/icons/interface/info.svg?react";
 import LandLocation from "@/assets/icons/interface/land-location.svg?react";
 import Lock from "@/assets/icons/interface/lock.svg?react";
@@ -25,12 +27,15 @@ import Marker from "@/assets/icons/interface/marker.svg?react";
 import MenuDotsVertical from "@/assets/icons/interface/menu-dots-vertical.svg?react";
 import PaperPlane from "@/assets/icons/interface/paper-plane.svg?react";
 import Pencil from "@/assets/icons/interface/pencil.svg?react";
+import Pharmacy from "@/assets/icons/interface/pharmacy.svg?react";
 import PhoneFlip from "@/assets/icons/interface/phone-flip.svg?react";
 import PlusSmall from "@/assets/icons/interface/plus-small.svg?react";
+import PoliceStation from "@/assets/icons/interface/police-station.svg?react";
 import QuoteRight from "@/assets/icons/interface/quote-right.svg?react";
 import RotateRight from "@/assets/icons/interface/rotate-right.svg?react";
 import Share from "@/assets/icons/interface/share.svg?react";
 import Shield from "@/assets/icons/interface/shield.svg?react";
+import Veterinary from "@/assets/icons/interface/veterinary.svg?react";
 import Alert from "@/assets/icons/nav/alert.svg?react";
 import Danger from "@/assets/icons/nav/danger.svg?react";
 import MapIcon from "@/assets/icons/nav/map.svg?react";
@@ -85,6 +90,8 @@ export const icons = {
 	diamondExclamation: DiamondExclamation,
 	envelope: Envelope,
 	exclamation: Exclamation,
+	fireStation: FireStation,
+	hospital: Hospital,
 	info: Info,
 	landLocation: LandLocation,
 	lock: Lock,
@@ -92,12 +99,15 @@ export const icons = {
 	menuDotsVertical: MenuDotsVertical,
 	paperPlane: PaperPlane,
 	pencil: Pencil,
+	pharmacy: Pharmacy,
 	phoneFlip: PhoneFlip,
 	plusSmall: PlusSmall,
+	policeStation: PoliceStation,
 	quoteRight: QuoteRight,
 	rotateRight: RotateRight,
 	share: Share,
 	shield: Shield,
+	veterinary: Veterinary,
 } as const;
 
 export type IconName = keyof typeof icons;

@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 import Icon from "@/components/Icon/Icon";
 import IncidentCard from "@/components/IncidentCard/IncidentCard";
 import type { IncidentListItem } from "@/types/incidentList";
@@ -8,6 +10,8 @@ type IncidentListProps = {
 	hasError: boolean;
 	onRetry: () => void;
 	limit: number;
+	selectedIncidentId?: number | null;
+	onSelectIncident?: (incident: IncidentListItem) => void;
 };
 
 function IncidentCardSkeleton() {
@@ -31,7 +35,19 @@ export default function IncidentList({
 	hasError,
 	onRetry,
 	limit,
+	selectedIncidentId = null,
+	onSelectIncident,
 }: IncidentListProps) {
+	// Élément <li> de chaque incident, pour faire défiler jusqu'à l'incident sélectionné.
+	const itemRefs = useRef(new Map<number, HTMLLIElement>());
+
+	useEffect(() => {
+		if (selectedIncidentId == null) return;
+
+		const element = itemRefs.current.get(selectedIncidentId);
+		element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+	}, [selectedIncidentId]);
+
 	if (isLoading) {
 		return (
 			<output aria-live="polite" className="flex flex-col gap-3">
@@ -109,22 +125,42 @@ export default function IncidentList({
 		);
 	}
 
+	// À la limite, d'autres incidents existent peut-être : "Au moins" plutôt qu'un total.
+	const incidentWord = incidents.length > 1 ? "incidents" : "incident";
+	const countLabel =
+		incidents.length === limit
+			? `Au moins ${incidents.length} ${incidentWord}`
+			: `Il y a ${incidents.length} ${incidentWord}`;
+
 	return (
 		<div className="flex flex-col gap-3">
 			<h2 className="font-title text-lg font-bold text-primary">
-				Incidents · {incidents.length}
+				{countLabel} dans cette zone
 			</h2>
 
 			<ul className="flex flex-col gap-3">
 				{incidents.map((incident) => (
-					<li key={incident.id}>
-						<IncidentCard incident={incident} />
+					<li
+						key={incident.id}
+						ref={(element) => {
+							if (element) {
+								itemRefs.current.set(incident.id, element);
+							} else {
+								itemRefs.current.delete(incident.id);
+							}
+						}}
+					>
+						<IncidentCard
+							incident={incident}
+							isSelected={incident.id === selectedIncidentId}
+							onSelect={onSelectIncident}
+						/>
 					</li>
 				))}
 			</ul>
 
 			{incidents.length === limit && (
-				<p className="text-xs text-primary/50">
+				<p className="text-center text-xs text-primary/50">
 					Seuls les {limit} incidents les plus récents sont affichés.
 				</p>
 			)}
