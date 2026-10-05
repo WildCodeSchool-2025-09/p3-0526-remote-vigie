@@ -56,6 +56,22 @@ describe("POST /api/incidents/danger", () => {
 			label: "non-numeric latitude",
 			body: { latitude: "abc", longitude: 2 },
 		},
+		// Number(...) de ces valeurs donne 0 : elles ne doivent pas passer pour
+		// des coordonnées valides.
+		{ label: "null latitude", body: { latitude: null, longitude: 2 } },
+		{
+			label: "empty-string latitude",
+			body: { latitude: "", longitude: 2 },
+		},
+		{
+			label: "boolean longitude",
+			body: { latitude: 48, longitude: false },
+		},
+		{ label: "array longitude", body: { latitude: 48, longitude: [] } },
+		{
+			label: "numeric strings instead of numbers",
+			body: { latitude: "48.85", longitude: "2.35" },
+		},
 	])("should respond 400 with $label", async ({ body }) => {
 		jest.spyOn(incidentRepository, "countRecentByUser").mockResolvedValue(
 			0,

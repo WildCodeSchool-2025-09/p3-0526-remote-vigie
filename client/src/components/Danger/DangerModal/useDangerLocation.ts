@@ -1,5 +1,5 @@
 import type { Position } from "@/types/incidentForm";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 type Status = "idle" | "locating" | "success" | "error";
 
@@ -7,14 +7,31 @@ export default function useDangerLocation() {
 	const [status, setStatus] = useState<Status>("idle");
 	const [position, setPosition] = useState<Position | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	// Numéro de la tentative en cours : reset() l'incrémente, ce qui périme
+	// toute localisation encore en attente (modale fermée entre-temps).
+	const attemptRef = useRef(0);
 
 	function locate(): Promise<Position | null> {
+		if (!("geolocation" in navigator)) {
+			setError(
+				"Votre appareil ne permet pas de vous localiser. Indiquez où vous êtes sur la carte.",
+			);
+			setStatus("error");
+			return Promise.resolve(null);
+		}
+
+		attemptRef.current += 1;
+		const attempt = attemptRef.current;
 		setStatus("locating");
 		setError(null);
 
 		return new Promise((resolve) => {
 			navigator.geolocation.getCurrentPosition(
 				(geoPosition) => {
+					if (attempt !== attemptRef.current) {
+						resolve(null);
+						return;
+					}
 					const found = {
 						lat: geoPosition.coords.latitude,
 						lng: geoPosition.coords.longitude,
@@ -24,6 +41,10 @@ export default function useDangerLocation() {
 					resolve(found);
 				},
 				(geoError) => {
+					if (attempt !== attemptRef.current) {
+						resolve(null);
+						return;
+					}
 					switch (geoError.code) {
 						case geoError.PERMISSION_DENIED:
 							setError(
@@ -49,6 +70,7 @@ export default function useDangerLocation() {
 		});
 	}
 	function reset() {
+		attemptRef.current += 1;
 		setStatus("idle");
 		setPosition(null);
 		setError(null);

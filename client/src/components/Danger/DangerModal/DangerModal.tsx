@@ -71,7 +71,9 @@ export default function DangerModal({ dialogRef }: Props) {
 
 		if (result.status === "ok") {
 			dialogRef.current?.close();
-			navigate("/numbers");
+			navigate("/numbers", {
+				state: { dangerIncidentId: result.incident.id },
+			});
 			return;
 		}
 		if (result.status === "unauthorized") {
@@ -89,12 +91,12 @@ export default function DangerModal({ dialogRef }: Props) {
 		}
 		if (result.status === "networkError") {
 			setSubmitError(
-				`Connexion impossible : l'alerte Vigie n'a pas été envoyée. ${EMERGENCY_HINT}`,
+				`Impossible de confirmer que l'alerte Vigie a été envoyée. ${EMERGENCY_HINT}`,
 			);
 			return;
 		}
 		setSubmitError(
-			`L'alerte Vigie n'a pas pu être créée. ${EMERGENCY_HINT}`,
+			`Impossible de confirmer la création de l'alerte Vigie. ${EMERGENCY_HINT}`,
 		);
 	}
 
@@ -111,6 +113,11 @@ export default function DangerModal({ dialogRef }: Props) {
 		<dialog
 			ref={dialogRef}
 			onClose={handleClose}
+			onCancel={(event) => {
+				// Échap pendant l'envoi : la requête est déjà partie, on ne
+				// laisse pas croire à une annulation.
+				if (isSubmitting) event.preventDefault();
+			}}
 			className="modal modal-bottom sm:modal-middle"
 			aria-labelledby="danger-title"
 			aria-describedby="danger-desc"
@@ -194,9 +201,11 @@ export default function DangerModal({ dialogRef }: Props) {
 					</button>
 				</div>
 			</div>
-			<form method="dialog" className="modal-backdrop">
-				<button type="submit">Fermer</button>
-			</form>
+			{!isSubmitting && (
+				<form method="dialog" className="modal-backdrop">
+					<button type="submit">Fermer</button>
+				</form>
+			)}
 		</dialog>
 	);
 }

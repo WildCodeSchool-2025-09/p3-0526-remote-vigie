@@ -23,9 +23,13 @@ const add: RequestHandler = async (req, res, next) => {
 			res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
 			return;
 		}
-		const lat = Number(body.latitude);
-		const lng = Number(body.longitude);
+		// Pas de Number() : Number(null), Number(""), Number(false) et Number([])
+		// valent tous 0, qui passerait les bornes et créerait l'alerte à (0, 0).
+		const lat = body.latitude;
+		const lng = body.longitude;
 		if (
+			typeof lat !== "number" ||
+			typeof lng !== "number" ||
 			!Number.isFinite(lat) ||
 			!Number.isFinite(lng) ||
 			lat < -90 ||
