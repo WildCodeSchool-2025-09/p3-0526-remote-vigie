@@ -1,7 +1,7 @@
 import backgroundIncident from "@/assets/images/background-incident.jpg";
 import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNotVerifiedBanner";
 import { useAuth } from "@/contexts/auth/AuthContext";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 export default function Profile() {
 	const { user, logout } = useAuth();
@@ -15,7 +15,7 @@ export default function Profile() {
 
 	return (
 		<main className="min-h-full bg-base-100 pb-10">
-			<header className="relative isolate overflow-hidden bg-primary px-4 pt-8 pb-14">
+			<header className="relative isolate flex h-44 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
 				<img
 					src={backgroundIncident}
 					alt=""
@@ -33,6 +33,12 @@ export default function Profile() {
 				<p className="text-primary">
 					Connecté en tant que <strong>{user?.pseudo}</strong>
 				</p>
+				<Link
+					to="/profile/badges"
+					className="btn btn-md w-full rounded-full border-2 border-primary/15 bg-transparent font-bold text-primary shadow-none hover:bg-primary/10"
+				>
+					Mes badges
+				</Link>
 				<button
 					type="button"
 					onClick={handleLogout}

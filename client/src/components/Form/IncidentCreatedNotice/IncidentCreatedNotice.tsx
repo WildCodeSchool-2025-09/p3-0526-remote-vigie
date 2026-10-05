@@ -14,7 +14,7 @@ export default function IncidentCreatedNotice({
 
 	return (
 		<div className="INCIDENT-FORM-PAGE min-h-full bg-base-100">
-			<header className="relative isolate flex h-44 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
+			<header className="relative isolate flex h-44 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
 				<img
 					src={bgIncident}
 					alt=""
