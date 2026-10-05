@@ -6,6 +6,7 @@ import {
 	useCallback,
 	useContext,
 	useEffect,
+	useLayoutEffect,
 	useState,
 } from "react";
 import type { ReactNode } from "react";
@@ -23,6 +24,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const [user, setUser] = useState<AuthUser | null>(null);
 	const [loading, setLoading] = useState(true);
 
+	// Layout effects run before every child's useEffect: pages that fetch on
+	// mount must already send the token, or the server treats them as visitors
+	useLayoutEffect(() => {
+		setAuthToken(localStorage.getItem("vigie_token"));
+	}, []);
+
 	useEffect(() => {
 		const token = localStorage.getItem("vigie_token");
 		if (token == null) {
@@ -30,7 +37,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			return;
 		}
 
-		setAuthToken(token);
 		meRequest()
 			.then((fetchedUser) => {
 				if (fetchedUser == null) {
