@@ -61,7 +61,7 @@ export default function IncidentForm() {
 	}
 
 	return (
-		<div className="min-h-screen bg-base-100">
+		<div className="min-h-full bg-base-100">
 			<header className="relative isolate flex h-44 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
 				<img
 					src={bgIncident}

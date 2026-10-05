@@ -11,6 +11,7 @@ import incidentActions from "./modules/incident/incidentActions";
 import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
 import photoActions from "./modules/photo/photoActions";
+import usefulPlaceActions from "./modules/usefulPlace/usefulPlaceActions";
 import usersActions from "./modules/users/usersActions";
 import attachUserIfPresent from "./services/attachUserIfPresent";
 import checkAddressSearchRateLimit from "./services/checkAddressSearchRateLimit";
@@ -68,6 +69,9 @@ router.post(
 
 router.get("/api/incidents/:id/comments", commentActions.browse);
 router.post("/api/incidents/:id/comments", verifyToken, commentActions.add);
+
+router.get("/api/useful-places", usefulPlaceActions.browse);
+
 router.get("/api/notifications", verifyToken, notificationsActions.browse);
 
 router.get(
