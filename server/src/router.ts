@@ -6,6 +6,7 @@ import addressActions from "./modules/address/addressActions";
 import authActions from "./modules/auth/authActions";
 import commentActions from "./modules/comment/commentActions";
 import contributionActions from "./modules/contribution/contributionActions";
+import dangerActions from "./modules/danger/dangerActions";
 import incidentActions from "./modules/incident/incidentActions";
 import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
@@ -37,6 +38,12 @@ router.post(
 	checkIncidentRateLimit,
 	decodePhoto,
 	incidentActions.add,
+);
+router.post(
+	"/api/incidents/danger",
+	verifyToken,
+	checkIncidentRateLimit,
+	dangerActions.add,
 );
 
 router.get("/uploads/:filename", photoActions.read);

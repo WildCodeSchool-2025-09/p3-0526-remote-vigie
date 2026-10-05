@@ -269,7 +269,7 @@ VALUES (
     ),
     (
         'danger',
-        'Danger',
+        'Personne en danger',
         5,
         1000,
         4,
