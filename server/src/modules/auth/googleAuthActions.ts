@@ -1,8 +1,15 @@
 import crypto from "node:crypto";
 import type { RequestHandler, Response } from "express";
+import { StatusCodes } from "http-status-codes";
 import { getGoogleAuthUrl, getGoogleProfile } from "../../services/googleOAuth";
-import { signAuthToken, signGoogleSignupToken } from "../../services/jwt";
-import { normalizeEmail } from "../../services/normalize";
+import {
+	signAuthToken,
+	signGoogleSignupToken,
+	verifyGoogleSignupToken,
+} from "../../services/jwt";
+import { normalizeEmail, normalizePseudo } from "../../services/normalize";
+import { resolveAddress } from "../../services/resolveAddress";
+import type { AddressInput, ResolvedAddress } from "../../types/address";
 import oauthAccountRepository from "../oauthAccount/oauthAccountRepository";
 import usersRepository from "../users/usersRepository";
 
@@ -103,4 +110,94 @@ const handleGoogleCallback: RequestHandler = async (req, res) => {
 	}
 };
 
-export default { redirectToGoogle, handleGoogleCallback };
+const completeGoogleSignup: RequestHandler = async (req, res, next) => {
+	try {
+		const body = req.body as {
+			pendingToken: string;
+			pseudo: string;
+			address: AddressInput;
+		};
+
+		// Le jeton signé prouve que Google a vérifié cette personne.
+		const signup = verifyGoogleSignupToken(body.pendingToken);
+		if (signup == null) {
+			res.status(StatusCodes.UNAUTHORIZED).json({
+				error: "signup_expired",
+				message:
+					"Votre inscription avec Google a expiré. Recommencez avec « Continuer avec Google ».",
+			});
+			return;
+		}
+
+		const pseudo = body.pseudo.trim();
+		const emailNormalized = normalizeEmail(signup.email);
+		const pseudoNormalized = normalizePseudo(pseudo);
+		const reclaimUserIds: number[] = [];
+
+		// Un compte vérifié avec cet e-mail existe déjà : refus. Un compte jamais
+		// vérifié est récupérable, puisque Google prouve la possession de l'e-mail.
+		const existingByEmail =
+			await usersRepository.findByEmailNormalized(emailNormalized);
+		if (existingByEmail != null) {
+			if (existingByEmail.email_verified_at != null) {
+				res.status(StatusCodes.CONFLICT).json({
+					error: "email_already_used",
+					message:
+						"Un compte existe déjà avec cet e-mail. Connectez-vous depuis la page de connexion.",
+				});
+				return;
+			}
+			reclaimUserIds.push(existingByEmail.id);
+		}
+
+		const existingByPseudo =
+			await usersRepository.findByPseudoNormalized(pseudoNormalized);
+		if (
+			existingByPseudo != null &&
+			!reclaimUserIds.includes(existingByPseudo.id)
+		) {
+			res.status(StatusCodes.CONFLICT).json({
+				error: "pseudo_already_used",
+				message: "Ce pseudo est déjà pris.",
+			});
+			return;
+		}
+
+		let address: ResolvedAddress | null;
+		try {
+			address = await resolveAddress(body.address);
+		} catch {
+			res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
+				error: "address_service_unavailable",
+				message:
+					"Le service d'adresse est momentanément indisponible. Veuillez réessayer.",
+			});
+			return;
+		}
+		if (address == null) {
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_address",
+				message: "Adresse introuvable.",
+			});
+			return;
+		}
+
+		const userId = await usersRepository.createWithGoogle({
+			googleId: signup.googleId,
+			pseudo,
+			email: signup.email,
+			pseudoNormalized,
+			emailNormalized,
+			cguVersion: "1",
+			cguAcceptedAt: new Date(),
+			address,
+			reclaimUserIds,
+		});
+
+		res.status(StatusCodes.CREATED).json({ token: signAuthToken(userId) });
+	} catch (err) {
+		next(err);
+	}
+};
+
+export default { redirectToGoogle, handleGoogleCallback, completeGoogleSignup };
