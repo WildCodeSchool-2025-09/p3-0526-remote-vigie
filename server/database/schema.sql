@@ -1,5 +1,7 @@
 SET NAMES utf8mb4;
 
+DROP TABLE IF EXISTS `badge`;
+
 DROP TABLE IF EXISTS `useful_place`;
 
 DROP TABLE IF EXISTS `useful_number`;
@@ -176,6 +178,29 @@ CREATE TABLE `comment` (
     CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_comment_incident` FOREIGN KEY (`incident_id`) REFERENCES `incident` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_comment_quoted` FOREIGN KEY (`quoted_comment_id`) REFERENCES `comment` (`id`) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `badge` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(30) NOT NULL,
+    `label` VARCHAR(60) NOT NULL,
+    `description` VARCHAR(255) NOT NULL,
+    `icon` VARCHAR(80) NOT NULL,
+    `counter_type` ENUM(
+        'incident_by_type',
+        'incident_total',
+        'comment_total',
+        'contribution_total',
+        'confirmed_incident',
+        'first_on_spot',
+        'all_types'
+    ) NOT NULL,
+    `counter_param` VARCHAR(255) NULL DEFAULT NULL,
+    `threshold` SMALLINT UNSIGNED NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_badge_code` (`code`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `useful_number` (
