@@ -1,5 +1,4 @@
 // Ancienneté lisible : "il y a 12 min", "il y a 1 h", "il y a 3 j".
-// Fonction pure et réutilisable (liste US03, fiche US02, carte US04…).
 
 const rtf = new Intl.RelativeTimeFormat("fr", {
 	numeric: "always",

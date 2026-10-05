@@ -6,6 +6,7 @@ import type { DecodedPhoto } from "../../middlewares/decodePhoto";
 import alertService from "../../services/alertService";
 import { distanceInMeters } from "../../services/distance";
 import isFeminine from "../../services/incidentTypeGender";
+import parseBounds from "../../services/parseBounds";
 import { deletePhotoFile, savePhoto } from "../../services/photoStorage";
 import withPreposition from "../../services/title";
 import userBadgeRepository from "../badge/userBadgeRepository";
@@ -16,15 +17,33 @@ import incidentRepository from "./incidentRepository";
 
 const DEFAULT_LIST_LIMIT = 15;
 const MAX_LIST_LIMIT = 100;
+// Higher ceiling when a zone is given (map).
+const MAX_MAP_LIMIT = 300;
 
 const browse: RequestHandler = async (req, res, next) => {
 	try {
+		const parsed = parseBounds(req.query);
+
+		if (parsed.status === "invalid") {
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_bounds",
+				message:
+					"Zone invalide : north, south, east et west doivent être fournis ensemble, avec des valeurs cohérentes.",
+			});
+			return;
+		}
+
+		const bounds = parsed.status === "ok" ? parsed.bounds : null;
 		const requested =
 			Number.parseInt(req.query.limit as string, 10) ||
 			DEFAULT_LIST_LIMIT;
-		const limit = Math.max(1, Math.min(requested, MAX_LIST_LIMIT));
+		const maxLimit = bounds ? MAX_MAP_LIMIT : MAX_LIST_LIMIT;
+		const limit = Math.max(1, Math.min(requested, maxLimit));
 
-		const incidents = await incidentRepository.readAllForList(limit);
+		const incidents = await incidentRepository.readAllForList(
+			limit,
+			bounds,
+		);
 		res.status(StatusCodes.OK).json(incidents);
 	} catch (err) {
 		next(err);
