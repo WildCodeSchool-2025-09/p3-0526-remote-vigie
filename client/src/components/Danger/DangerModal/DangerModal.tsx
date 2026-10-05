@@ -35,6 +35,9 @@ export default function DangerModal({ dialogRef }: Props) {
 	const { status, position, error, locate, onPositionChange } =
 		useDangerLocation();
 	const isLocating = status === "locating";
+	const needsManualPosition = status === "error";
+	const canConfirm =
+		!isLocating && (!needsManualPosition || position !== null);
 	const { user } = useAuth();
 	const primaryAddress = user?.addresses.find(
 		(address) => address.is_primary,
@@ -43,6 +46,14 @@ export default function DangerModal({ dialogRef }: Props) {
 		? { lat: primaryAddress.latitude, lng: primaryAddress.longitude }
 		: { lat: 46.6034, lng: 1.8883 };
 	const [hasTileError, setHasTileError] = useState(false);
+
+	function handleConfirm() {
+		if (needsManualPosition) {
+			//TODO envoyer l'alerte avec la position choisie sur la carte
+			return;
+		}
+		locate();
+	}
 
 	return (
 		<dialog
@@ -105,13 +116,15 @@ export default function DangerModal({ dialogRef }: Props) {
 					</button>
 					<button
 						type="button"
-						onClick={locate}
-						disabled={isLocating}
+						onClick={handleConfirm}
+						disabled={!canConfirm}
 						className="btn btn-error btn-md basis-2/3 grow rounded-full border-none font-bold"
 					>
 						{isLocating
 							? "Localisation en cours..."
-							: "Confirmer l'alerte"}
+							: needsManualPosition
+								? "Confirmer cette position"
+								: "Confirmer l'alerte"}
 					</button>
 				</div>
 			</div>
