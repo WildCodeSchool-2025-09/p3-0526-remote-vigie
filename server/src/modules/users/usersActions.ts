@@ -1,9 +1,10 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
-import geocodingService from "../../services/geocodingService";
 import { normalizeEmail } from "../../services/normalize";
+import { resolveAddress } from "../../services/resolveAddress";
 import verificationEmailService from "../../services/verificationEmailService";
 import { hashToken } from "../../services/verificationToken";
+import type { AddressInput, ResolvedAddress } from "../../types/address";
 import usersRepository from "./usersRepository";
 
 const add: RequestHandler = async (req, res, next) => {
@@ -15,49 +16,26 @@ const add: RequestHandler = async (req, res, next) => {
 			emailNormalized: string;
 			pseudoNormalized: string;
 			reclaimUserIds: number[];
-			address: {
-				city: string;
-				postalCode: string;
-				inseeCode?: string;
-				latitude?: number;
-				longitude?: number;
-				streetLine?: string;
-				isApproximate?: boolean;
-			};
+			address: AddressInput;
 		};
-		let { latitude, longitude, inseeCode, streetLine } = body.address;
-		let isApproximate = body.address.isApproximate ?? true;
+		let address: ResolvedAddress | null;
+		try {
+			address = await resolveAddress(body.address);
+		} catch {
+			res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
+				error: "address_service_unavailable",
+				message:
+					"Le service d'adresse est momentanément indisponible. Veuillez réessayer.",
+			});
+			return;
+		}
 
-		if (latitude == null || longitude == null || inseeCode == null) {
-			let centroid: Awaited<
-				ReturnType<typeof geocodingService.geocodeCentroid>
-			>;
-
-			try {
-				centroid = await geocodingService.geocodeCentroid(
-					body.address.city,
-					body.address.postalCode,
-				);
-			} catch {
-				res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
-					error: "address_service_unavailable",
-					message:
-						"Le service d'adresse est momentanément indisponible. Veuillez réessayer.",
-				});
-				return;
-			}
-
-			if (!centroid) {
-				res.status(StatusCodes.BAD_REQUEST).json({
-					error: "invalid_address",
-					message: "Adresse introuvable.",
-				});
-				return;
-			}
-			latitude = centroid.latitude;
-			longitude = centroid.longitude;
-			inseeCode = centroid.inseeCode;
-			isApproximate = true;
+		if (address == null) {
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_address",
+				message: "Adresse introuvable.",
+			});
+			return;
 		}
 		const userId = await usersRepository.create({
 			pseudo: body.pseudo,
@@ -67,14 +45,9 @@ const add: RequestHandler = async (req, res, next) => {
 			passwordHash: body.password_hash,
 			cguVersion: "1",
 			cguAcceptedAt: new Date(),
-			city: body.address.city,
-			postalCode: body.address.postalCode,
-			inseeCode,
-			streetLine: streetLine ?? null,
-			latitude,
-			longitude,
-			isApproximate,
+			...address,
 			reclaimUserIds: body.reclaimUserIds,
+
 		});
 
 		await verificationEmailService.sendVerificationEmail(

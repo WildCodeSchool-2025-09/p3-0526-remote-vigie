@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import type { GoogleProfile, GoogleSignupData } from "../types/oauth";
 
-
 export function signAuthToken(userId: number): string {
 	return jwt.sign(
 		{ sub: String(userId), isAdmin: false },
@@ -31,7 +30,11 @@ const googleSignupSecret = () => `${process.env.APP_SECRET}:google-signup`;
 
 export function signGoogleSignupToken(profile: GoogleProfile): string {
 	return jwt.sign(
-		{ googleId: profile.googleId, email: profile.email, name: profile.name },
+		{
+			googleId: profile.googleId,
+			email: profile.email,
+			name: profile.name,
+		},
 		googleSignupSecret(),
 		{ expiresIn: "15m" },
 	);
