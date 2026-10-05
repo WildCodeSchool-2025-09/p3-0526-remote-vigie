@@ -6,7 +6,7 @@ import InputFields from "@/components/Form/InputFields/InputFields";
 import MapLocationPicker from "@/components/Form/MapLocationPicker/MapLocationPicker";
 import PhotoField from "@/components/Form/PhotoField/PhotoField";
 import Icon from "@/components/Icon/Icon";
-import type { Address } from "@/contexts/AuthContext";
+import type { Address } from "@/types/auth";
 import type { LocationAddress, Position } from "@/types/incidentForm";
 import { useEffect, useId, useState } from "react";
 

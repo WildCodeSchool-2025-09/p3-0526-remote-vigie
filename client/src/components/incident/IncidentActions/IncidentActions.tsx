@@ -1,7 +1,7 @@
 import Icon from "@/components/Icon/Icon";
 import ContributionActions from "@/components/incident/ContributionActions/ContributionActions";
 import ShareButton from "@/components/incident/ShareButton/ShareButton";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth/AuthContext";
 import type {
 	Incident,
 	IncidentCounts,

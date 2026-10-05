@@ -1,5 +1,5 @@
-import type { Notification, UnreadCountResponse } from "../types/notification";
-import { apiFetch } from "./apiClient";
+import { apiFetch } from "@/services/apiClient";
+import type { Notification, UnreadCountResponse } from "@/types/notification";
 
 async function getNotifications(page = 1, limit = 20): Promise<Notification[]> {
 	const response = await apiFetch(

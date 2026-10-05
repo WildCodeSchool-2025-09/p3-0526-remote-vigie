@@ -26,6 +26,23 @@ const reverse: RequestHandler = async (req, res, next) => {
 	}
 };
 
+const search: RequestHandler = async (req, res) => {
+	try {
+		const query = req.query.q;
+		if (typeof query !== "string" || query.trim().length === 0) {
+			res.sendStatus(StatusCodes.BAD_REQUEST);
+			return;
+		}
+
+		const results = await geocodingService.search(query);
+
+		res.json(results);
+	} catch (err) {
+		res.sendStatus(StatusCodes.SERVICE_UNAVAILABLE);
+	}
+};
+
 export default {
 	reverse,
+	search,
 };

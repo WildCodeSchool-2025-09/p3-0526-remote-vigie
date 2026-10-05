@@ -1,10 +1,12 @@
+import backgroundIncident from "@/assets/images/background-incident.jpg";
+import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNotVerifiedBanner";
+import Icon from "@/components/Icon/Icon";
+import NotificationItem from "@/components/Notification/NotificationItem/NotificationItem";
+import { useNotificationCenter } from "@/contexts/Notification/useNotificationCenter";
+import { useAuth } from "@/contexts/auth/AuthContext";
+import NotificationsSkeleton from "@/pages/Notification/NotificationsSkeleton";
+import type { Notification } from "@/types/notification";
 import { useNavigate } from "react-router";
-import backgroundIncident from "../../assets/images/background-incident.jpg";
-import Icon from "../../components/Icon/Icon";
-import NotificationItem from "../../components/Notification/NotificationItem/NotificationItem";
-import { useNotificationCenter } from "../../contexts/Notification/useNotificationCenter";
-import type { Notification } from "../../types/notification";
-import NotificationsSkeleton from "./NotificationsSkeleton";
 
 function getDateGroupLabel(date: string) {
 	const value = new Date(date);
@@ -69,6 +71,8 @@ function NotificationCenter() {
 		markOneAsRead,
 	} = useNotificationCenter();
 	const state = getViewState(isLoading, error, notifications);
+	const { user } = useAuth();
+	const showsEmailBanner = user != null && !user.emailVerified;
 
 	return (
 		<main className="min-h-full bg-base-100">
@@ -84,8 +88,10 @@ function NotificationCenter() {
 				</h1>
 			</header>
 
+			<EmailNotVerifiedBanner />
+
 			<section
-				className="mx-auto w-full max-w-4xl px-4 pb-24 sm:px-8 sm:pb-28"
+				className={`mx-auto w-full max-w-4xl px-4 pb-24 sm:px-8 sm:pb-28 ${showsEmailBanner ? "pt-12" : ""}`}
 				aria-live="polite"
 			>
 				{state.status === "loading" && <NotificationsSkeleton />}
