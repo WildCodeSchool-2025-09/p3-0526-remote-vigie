@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import type { RequestHandler, Response } from "express";
 import { getGoogleAuthUrl, getGoogleProfile } from "../../services/googleOAuth";
-import { signAuthToken } from "../../services/jwt";
+import { signAuthToken, signGoogleSignupToken } from "../../services/jwt";
 import { normalizeEmail } from "../../services/normalize";
 import oauthAccountRepository from "../oauthAccount/oauthAccountRepository";
 import usersRepository from "../users/usersRepository";
@@ -80,14 +80,21 @@ const handleGoogleCallback: RequestHandler = async (req, res) => {
 			}
 		}
 
-		// 3. Nouveau venu : écran CGU (étape 9).
+		// 3. Nouveau venu : il complète son inscription (pseudo, adresse, CGU).
+		// On n'accepte qu'un e-mail confirmé par Google.
 		if (user == null) {
-			redirectToClient(res, "/login?oauth=signup");
+			if (!profile.emailVerified) {
+				redirectToClient(res, "/login?oauth=email_unverified");
+				return;
+			}
+			const params = new URLSearchParams({
+				pending: signGoogleSignupToken(profile),
+				email: profile.email,
+				name: profile.name ?? "",
+			});
+			redirectToClient(res, `/register/google#${params}`);
 			return;
 		}
-
-		const token = signAuthToken(user.id);
-		redirectToClient(res, `/auth/google/callback#token=${token}`);
 	} catch (err) {
 		// Google injoignable, code expiré… : on revient sur le front avec un
 		// message, plutôt qu'une page d'erreur JSON.

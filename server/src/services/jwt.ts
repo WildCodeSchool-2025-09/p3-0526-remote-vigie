@@ -1,4 +1,6 @@
 import jwt from "jsonwebtoken";
+import type { GoogleProfile, GoogleSignupData } from "../types/oauth";
+
 
 export function signAuthToken(userId: number): string {
 	return jwt.sign(
@@ -18,6 +20,28 @@ export function verifyAuthToken(
 			sub: string;
 			isAdmin: boolean;
 		};
+	} catch {
+		return null;
+	}
+}
+// Jeton temporaire d'inscription Google (US22) : il transporte l'identité
+// Google jusqu'au formulaire d'inscription. Signé avec un secret dérivé, il ne
+// peut pas servir de token de connexion, et inversement.
+const googleSignupSecret = () => `${process.env.APP_SECRET}:google-signup`;
+
+export function signGoogleSignupToken(profile: GoogleProfile): string {
+	return jwt.sign(
+		{ googleId: profile.googleId, email: profile.email, name: profile.name },
+		googleSignupSecret(),
+		{ expiresIn: "15m" },
+	);
+}
+
+export function verifyGoogleSignupToken(
+	token: string,
+): GoogleSignupData | null {
+	try {
+		return jwt.verify(token, googleSignupSecret()) as GoogleSignupData;
 	} catch {
 		return null;
 	}
