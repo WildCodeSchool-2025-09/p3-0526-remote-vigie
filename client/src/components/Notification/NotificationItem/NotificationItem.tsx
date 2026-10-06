@@ -217,7 +217,7 @@ function NotificationItem({
 				{notification.type === "incident_resolved" && (
 					<Icon
 						name="checkCircle"
-						className="absolute -right-1 -top-1 size-4 rounded-full bg-base-300 text-(--error) sm:size-5"
+						className="absolute -right-1 -top-1 size-4 rounded-full bg-base-300 text-(--success) sm:size-5"
 						aria-hidden="true"
 					/>
 				)}
