@@ -14,6 +14,7 @@ import App from "@/App";
 import PrivateRoute from "@/components/Routing/PrivateRoute/PrivateRoute";
 import { AuthProvider } from "@/contexts/auth/AuthContext";
 import Cgu from "@/pages/Cgu/Cgu";
+import GoogleCallback from "@/pages/GoogleCallback/GoogleCallback";
 import Home from "@/pages/Home/Home";
 import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
 import IncidentForm from "@/pages/IncidentForm/IncidentForm";
@@ -122,7 +123,15 @@ const router = createBrowserRouter([
 				element: <Login />,
 			},
 			{
+				path: "auth/google/callback",
+				element: <GoogleCallback />,
+			},
+			{
 				path: "register",
+				element: <Register />,
+			},
+			{
+				path: "register/google",
 				element: <Register />,
 			},
 			{

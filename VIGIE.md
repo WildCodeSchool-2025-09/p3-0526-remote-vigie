@@ -46,6 +46,7 @@ pas les secours.* Le service accepte des signalements de danger sans garantir au
 
 Deux versions. La **V1** est le socle livrable ; la **V2** regroupe les évolutions.
 Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trello).
+Responsables : état du Trello au 2026-10-05.
 
 ### V1
 
@@ -57,18 +58,18 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 | US03 | Accéder à la liste de tous les incidents | 2 | Guillaume Galinanes | `feat/US03-incident-list` |
 | US04 | Carte interactive (incidents + lieux utiles) | 2 | Guillaume Galinanes | `feat/US04-interactive-map` |
 | US05 | S'inscrire (avec adresse géolocalisée + vérification e-mail) | 2 | Laurent Koehler | `feat/US05-register` |
-| US06 | Se connecter (JWT en en-tête `Authorization: Bearer`) | 2 | Laurent Koehler | `feat/US06-login` |
+| US06 | Se connecter (JWT en en-tête `Authorization: Bearer`) | 2 | Julien Roussel | `feat/US06-login` |
 | US07 | Corriger le contenu descriptif de son incident | 2 | Frédéric Briand | `feat/US07-incident-edit` |
 | US08 | Consulter et commenter un incident (fil plat, citations) | 2 | Frédéric Briand | `feat/US08-incident-comments` |
 | US09 | Centre de notifications in-app (pastille non lues) | 2 | Julien Roussel | `feat/US09-notification-center` |
 | US10 | Rechercher et trier les incidents (+ inclure les résolus) | 2 | Guillaume Galinanes | `feat/US10-search-sort` |
-| US11 | Bandeau de vigilance météo (Météo-France) selon l'adresse | 3 | Guillaume Galinanes | `feat/US11-weather-vigilance` |
-| US12 | Clôture automatique des incidents expirés (tâche planifiée) | 3 | Julien Roussel | `feat/US12-incident-expiry` |
+| US11 | Bandeau de vigilance météo (Météo-France) selon l'adresse | 3 | Ivona Galikova | `feat/US11-weather-vigilance` |
+| US12 | Clôture automatique des incidents expirés (tâche planifiée) | 3 | Frédéric Briand | `feat/US12-incident-expiry` |
 | US13 | Liste des numéros utiles (bouton sur la Home) | 3 | Ivona Galikova | `feat/US13-emergency-numbers` |
 | US14 | Confirmer / infirmer un incident (pilote la durée de vie) | 3 | Frédéric Briand | `feat/US14-incident-contributions` |
 | US15 | Partager un incident (menu natif / copie de lien) | 3 | Frédéric Briand | `feat/US15-incident-share` |
 | US16 | Barre de navigation fixe + gabarit commun des pages | 3 | Julien Roussel | `feat/US16-navigation` |
-| US27 | Ajouter une photo à son signalement depuis son téléphone (vrai upload) | 3 | À affecter | `feat/US27-photo-upload` |
+| US27 | Ajouter une photo à son signalement depuis son téléphone (vrai upload) | 3 | Frédéric Briand | `feat/US27-photo-upload` |
 
 > **US27 est transverse** : elle remplace, pour US01 (création) et US07 (édition), le repli actuel
 > — un simple champ URL — par un vrai import de fichier (redimensionnement, EXIF, stockage,
@@ -81,8 +82,8 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 
 | US | Intitulé | Prio | Responsable(s) | Branche |
 |----|----------|------|----------------|---------|
-| US17 | Bouton « Je suis en danger » / SOS (alerte gravité maximale) | 1 | Laurent Koehler, Julien Roussel | `feat/US17-emergency-alert` |
-| US18 | Accéder à son profil et modifier son pseudo | 1 | Ivona Galikova, Laurent Koehler | `feat/US18-user-profile` |
+| US17 | Bouton « Je suis en danger » / SOS (alerte gravité maximale) | 1 | Laurent Koehler | `feat/US17-emergency-alert` |
+| US18 | Accéder à son profil et modifier son pseudo | 1 | Laurent Koehler | `feat/US18-user-profile` |
 | US19 | Réinitialiser son mot de passe oublié (jeton à durée limitée) | 2 | Julien Roussel | `feat/US19-password-reset` |
 | US20 | Obtenir des badges (recalcul à la connexion, référentiel en base) | 2 | Frédéric Briand | `feat/US20-user-badges` |
 | US21 | Web Push + PWA installable (alertes navigateur fermé) | 3 | Frédéric Briand | `feat/US21-web-push` |
@@ -113,8 +114,9 @@ Reproduit d'après les cadres **MCD**, **MLD** et **MPD** du Miro. Implémentati
 référence : `server/database/schema.sql` (MySQL 8, `utf8mb4_unicode_ci`).
 
 Le modèle a été volontairement **borné au périmètre discuté** : `badge`,
-`oauth_account`, `push_subscription` et l'auto-citation des commentaires sont écartés pour
-l'instant et seront ajoutés au moment de développer les US concernées (voir §4.4).
+`push_subscription` et l'auto-citation des commentaires sont écartés pour l'instant et
+seront ajoutés au moment de développer les US concernées (voir §4.4). `oauth_account`
+a été ajoutée avec l'US22 (connexion Google).
 
 ### 4.1 MCD — modèle conceptuel
 
@@ -133,6 +135,7 @@ erDiagram
     INCIDENT }|--o{ INCIDENT_TYPE : "CONCERN (1,N)/(0,N)"
     USER ||--o{ CONTRIBUTION : "émet (0,N)"
     INCIDENT ||--o{ CONTRIBUTION : "reçoit (0,N)"
+    USER ||--o{ OAUTH_ACCOUNT : "LINKED_TO (0,N)/(1,1)"
 
     USER {
         int id
@@ -144,6 +147,12 @@ erDiagram
         datetime email_verified_at
         string cgu_version
         datetime cgu_accepted_at
+    }
+    OAUTH_ACCOUNT {
+        int id
+        string provider
+        string provider_user_id
+        datetime created_at
     }
     ADDRESS {
         int id
@@ -250,6 +259,7 @@ erDiagram
     INCIDENT_TYPE ||--o{ INCIDENT_INCIDENT_TYPE : "FK"
     DANGER_LEVEL ||--o{ INCIDENT : "FK"
     DANGER_LEVEL ||--o{ INCIDENT_TYPE : "FK"
+    USER ||--o{ OAUTH_ACCOUNT : "FK"
 
     USER {
         int id PK
@@ -263,6 +273,13 @@ erDiagram
         datetime cgu_accepted_at
         datetime created_at
         datetime updated_at
+    }
+    OAUTH_ACCOUNT {
+        int id PK
+        int user_id FK
+        string provider
+        string provider_user_id
+        datetime created_at
     }
     ADDRESS {
         int id PK
@@ -394,6 +411,7 @@ erDiagram
     INCIDENT_TYPE ||--o{ INCIDENT_INCIDENT_TYPE : "FK"
     DANGER_LEVEL ||--o{ INCIDENT : "FK"
     DANGER_LEVEL ||--o{ INCIDENT_TYPE : "FK"
+    USER ||--o{ OAUTH_ACCOUNT : "FK"
 
     USER {
         INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
@@ -401,12 +419,19 @@ erDiagram
         VARCHAR_255 email "NOT NULL"
         VARCHAR_30 pseudo_normalized "NOT NULL, UNIQUE"
         VARCHAR_255 email_normalized "NOT NULL, UNIQUE"
-        CHAR_60 password_hash "NOT NULL"
+        VARCHAR_255 password_hash "NULL (compte créé avec Google)"
         TIMESTAMP email_verified_at "NULL"
         VARCHAR_10 cgu_version "NOT NULL"
         TIMESTAMP cgu_accepted_at "NOT NULL"
         TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
         TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+    }
+    OAUTH_ACCOUNT {
+        INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
+        INT_UNSIGNED user_id FK "NOT NULL, UNIQUE avec provider"
+        VARCHAR_20 provider "NOT NULL"
+        VARCHAR_255 provider_user_id "NOT NULL, UNIQUE avec provider"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
     }
     ADDRESS {
         INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
@@ -526,6 +551,7 @@ erDiagram
 |---------------|-------|-------------|
 | `address.user_id` | `user` | `CASCADE` |
 | `user_location.user_id` | `user` | `CASCADE` |
+| `oauth_account.user_id` | `user` | `CASCADE` |
 | `contribution.incident_id` | `incident` | `CASCADE` |
 | `contribution.user_id` | `user` | `CASCADE` |
 | `incident_type.danger_level_id` | `danger_level` | `RESTRICT` |
@@ -548,8 +574,6 @@ correspondante, pas avant) :
 - **`badge`** + relation `earned_at` (US20) — la relation N-N est aujourd'hui sans
   attribut ; or `counter_type` / `counter_param` / `threshold` impliquent une
   progression (« 7 signalements sur 10 ») et une date d'obtention à stocker.
-- **`oauth_account`** (US22) — pour l'instant, `email` + `password_hash` restent sur
-  `user` ; on ajoutera la table au moment de brancher un fournisseur tiers.
 - **`push_subscription`** (US21) — idem, ajoutée avec le Web Push.
 - **Auto-citation des commentaires** (US08) — la relation réflexive sur `comment`
   n'est posée que si la fonctionnalité de citation est développée.

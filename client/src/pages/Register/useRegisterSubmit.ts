@@ -1,5 +1,8 @@
+import { useAuth } from "@/contexts/auth/AuthContext";
 import type { AddressSuggestion } from "@/services/addressService";
+import { googleSignup } from "@/services/googleAuthService";
 import { register } from "@/services/userService";
+import type { RegisterPayload } from "@/services/userService";
 import type { RegisterFieldError } from "@/types/register";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
@@ -10,6 +13,7 @@ type Params = {
 	manualMode: boolean;
 	city: string;
 	postalCode: string;
+	pendingToken?: string | null;
 };
 
 export default function useRegisterSubmit({
@@ -18,8 +22,11 @@ export default function useRegisterSubmit({
 	manualMode,
 	city,
 	postalCode,
+	pendingToken = null,
 }: Params) {
 	const navigate = useNavigate();
+
+	const { loginWithToken } = useAuth();
 
 	const pseudoRef = useRef<HTMLInputElement>(null);
 	const emailRef = useRef<HTMLInputElement>(null);
@@ -51,6 +58,53 @@ export default function useRegisterSubmit({
 		document.getElementById(id)?.focus();
 	}, [fieldErrors, manualMode]);
 
+	// Mode Google (US22) : pas de mot de passe, le compte est créé déjà vérifié
+	// et l'utilisateur est connecté directement.
+	async function submitGoogleSignup(
+		token: string,
+		pseudo: string,
+		address: RegisterPayload["address"],
+	) {
+		const result = await googleSignup({
+			pendingToken: token,
+			pseudo,
+			cguAccepted,
+			address,
+		});
+
+		if (result.status === "ok") {
+			try {
+				await loginWithToken(result.token);
+				navigate("/", { replace: true, state: { welcome: true } });
+			} catch {
+				setSubmitting(false);
+				setServerError(
+					"Votre compte est créé, mais la connexion a échoué. Connectez-vous avec Google.",
+				);
+			}
+			return;
+		}
+
+		setSubmitting(false);
+		if (result.status === "invalid") {
+			setFieldErrors(result.errors);
+			return;
+		}
+		if (result.status === "conflict") {
+			if (result.field) {
+				setFieldErrors({ [result.field]: result.message });
+			} else {
+				setServerError(result.message);
+			}
+			return;
+		}
+		setServerError(
+			result.status === "expired"
+				? result.message
+				: "Une erreur est survenue. Veuillez réessayer plus tard.",
+		);
+	}
+
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		setServerError(null);
@@ -66,29 +120,31 @@ export default function useRegisterSubmit({
 			errors.pseudo = "Votre pseudo ne peut pas contenir de @";
 		}
 
-		if (email === "") {
-			errors.email = "Vous devez saisir une adresse email";
-		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-			errors.email = "Vous devez saisir une adresse email valide";
-		}
+		if (pendingToken == null) {
+			if (email === "") {
+				errors.email = "Vous devez saisir une adresse email";
+			} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+				errors.email = "Vous devez saisir une adresse email valide";
+			}
 
-		if (password === "") {
-			errors.password = "Vous devez saisir un mot de passe";
-		} else if (password.length < 8) {
-			errors.password =
-				"Votre mot de passe doit faire au moins 8 caractères";
-		} else if (password.length > 128) {
-			errors.password =
-				"Votre mot de passe ne peut pas dépasser 128 caractères";
-		} else if (
-			!/[A-Z]/.test(password) ||
-			!/[0-9]/.test(password) ||
-			!/[^A-Za-z0-9]/.test(password)
-		) {
-			errors.password =
-				"Le mot de passe doit contenir au moins une majuscule, un chiffre et un caractère spécial";
-		} else if (password !== confirmPassword) {
-			errors.password = "Les deux mots de passe doivent correspondre";
+			if (password === "") {
+				errors.password = "Vous devez saisir un mot de passe";
+			} else if (password.length < 8) {
+				errors.password =
+					"Votre mot de passe doit faire au moins 8 caractères";
+			} else if (password.length > 128) {
+				errors.password =
+					"Votre mot de passe ne peut pas dépasser 128 caractères";
+			} else if (
+				!/[A-Z]/.test(password) ||
+				!/[0-9]/.test(password) ||
+				!/[^A-Za-z0-9]/.test(password)
+			) {
+				errors.password =
+					"Le mot de passe doit contenir au moins une majuscule, un chiffre et un caractère spécial";
+			} else if (password !== confirmPassword) {
+				errors.password = "Les deux mots de passe doivent correspondre";
+			}
 		}
 
 		if (cguAccepted === false) {
@@ -129,6 +185,11 @@ export default function useRegisterSubmit({
 				: { city: city.trim(), postalCode: postalCode.trim() };
 
 		setSubmitting(true);
+		if (pendingToken != null) {
+			await submitGoogleSignup(pendingToken, pseudo, address);
+			return;
+		}
+
 		const result = await register({
 			pseudo,
 			email,
