@@ -82,3 +82,36 @@ self.addEventListener("push", (event) => {
 		})(),
 	);
 });
+
+// Focuses an open Vigie window and sends it to the link, else opens a new one
+async function openTarget(url) {
+	const target = new URL(url, self.location.origin).href;
+	const windows = await self.clients.matchAll({
+		type: "window",
+		includeUncontrolled: true,
+	});
+	const client =
+		windows.find((w) => w.visibilityState === "visible") ?? windows[0];
+
+	if (client) {
+		try {
+			await client.focus();
+			if (new URL(client.url).href !== target) {
+				// null: the window is not controlled by this worker, it cannot navigate
+				if ((await client.navigate(target)) == null) {
+					throw new Error("navigation refused");
+				}
+			}
+			return;
+		} catch {
+			// Fall back to a new window: the user still lands on the right page
+		}
+	}
+
+	await self.clients.openWindow(target);
+}
+
+self.addEventListener("notificationclick", (event) => {
+	event.notification.close();
+	event.waitUntil(openTarget(safeUrl(event.notification.data?.url)));
+});
