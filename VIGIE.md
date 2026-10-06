@@ -724,7 +724,8 @@ saisie d'URL côté US07.
 2026-09-21) · protection anti-double-soumission : un signalement quasi identique (au moins un
 type en commun, position à moins de 50 m) du même utilisateur dans les 10 secondes précédentes
 est rejeté (`409`) · âge minimum 15 ans · gravité par défaut par type · pas de suppression
-d'incident (archive) ni de commentaire.
+d'incident (archive) ni de commentaire. Exception de test : `admin1` et `admin2` (seed) ne sont
+pas limités hors production — voir §7, « Comptes de test ».
 
 ## 6. Référentiels (données de seed)
 
@@ -793,6 +794,20 @@ git-hooks (`.git-hooks`, `core.hooksPath`).
 
 **Déploiement** — Docker / Docker Compose ; cible Traefik `https://${PROJECT_NAME}.<sous-domaine>.wilders.dev/`
 (pas d'underscore dans le nom de projet).
+
+**Comptes de test (seed) — à nettoyer avant la mise en prod** — le seeder crée quatre
+comptes `admin1` à `admin4` (mot de passe `1234`, connexion par pseudo ou `adminN@vigie.test`).
+Ce sont des users ordinaires, sans rôle admin : ils servent uniquement à tester sans recréer de
+comptes. Chacun reçoit une adresse et une position ; elle se règle par admin dans `server/.env`
+(`SEED_ADMIN_<n>_LATITUDE` / `SEED_ADMIN_<n>_LONGITUDE`, défaut Westhalten), puis `npm run db:seed`.
+
+Avant le déploiement :
+- **ne jamais lancer `db:seed` sur la base de prod** (les comptes `admin*` y seraient créés avec `1234`) ;
+- **retirer l'exemption de limite** : `admin1` et `admin2` ne sont pas soumis aux 5 signalements
+  par heure (bloc `EXEMPT_PSEUDOS` dans `server/src/services/checkIncidentRateLimit.ts`). L'exemption
+  est désactivée quand `NODE_ENV=production`, mais le pseudo n'est pas réservé à l'inscription :
+  si l'hébergeur ne définit pas `NODE_ENV`, quelqu'un pourrait s'inscrire en `admin1` et contourner
+  la limite. Supprimer le bloc, ou vérifier `NODE_ENV=production`.
 
 ## 8. Intégrations externes
 
