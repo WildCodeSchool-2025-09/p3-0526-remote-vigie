@@ -11,6 +11,7 @@ import {
 import { normalizeEmail, normalizePseudo } from "../../services/normalize";
 import { resolveAddress } from "../../services/resolveAddress";
 import type { AddressInput, ResolvedAddress } from "../../types/address";
+import badgeService from "../badge/badgeService";
 import oauthAccountRepository from "../oauthAccount/oauthAccountRepository";
 import usersRepository from "../users/usersRepository";
 
@@ -106,6 +107,13 @@ const handleGoogleCallback: RequestHandler = async (req, res) => {
 
 		const token = signAuthToken(user.id);
 		redirectToClient(res, `/auth/google/callback#token=${token}`);
+		// Badge recalculation, outside the response (same as password login, US20)
+		badgeService.evaluate(user.id).catch((err) => {
+			console.error(
+				`Échec du recalcul des badges de l'utilisateur ${user.id}`,
+				err,
+			);
+		});
 	} catch (err) {
 		// Google injoignable, code expiré… : on revient sur le front avec un
 		// message, plutôt qu'une page d'erreur JSON.
