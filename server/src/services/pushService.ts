@@ -29,6 +29,19 @@ function relayName(endpoint: string): string {
 	}
 }
 
+// 404 and 410: the relay no longer knows this device (app removed, permission
+// revoked). Other failures are temporary, so the subscription is kept.
+const GONE_STATUS_CODES = [404, 410];
+
+async function removeIfGone(endpoint: string, statusCode: number | null) {
+	if (statusCode == null || !GONE_STATUS_CODES.includes(statusCode)) return;
+	try {
+		await pushSubscriptionRepository.deleteByEndpoint(endpoint);
+	} catch {
+		console.error("Push : suppression de l'abonnement impossible");
+	}
+}
+
 async function sendToDevice(
 	webpush: WebPush,
 	target: PushSubscriptionTarget,
@@ -52,6 +65,7 @@ async function sendToDevice(
 		console.error(
 			`Push non envoyé (${relayName(target.endpoint)}, statut ${statusCode ?? "aucun"})`,
 		);
+		await removeIfGone(target.endpoint, statusCode);
 		return { endpoint: target.endpoint, ok: false, statusCode };
 	}
 }
