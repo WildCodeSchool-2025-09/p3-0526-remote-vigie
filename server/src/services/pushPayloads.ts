@@ -100,19 +100,3 @@ export function mentionPayload({
 		incidentUrl(incidentId),
 	);
 }
-
-// The icon is the badge image itself (already in /badges-png)
-export function badgePayload({
-	label,
-	icon,
-}: {
-	label: string;
-	icon: string;
-}): PushPayload {
-	return build(
-		`Vous avez obtenu le badge ${label}`,
-		"",
-		`/badges-png/${icon}`,
-		"/profile/badges",
-	);
-}
