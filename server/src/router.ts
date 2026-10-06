@@ -38,8 +38,10 @@ router.get("/api/auth/google/callback", googleAuthActions.handleGoogleCallback);
 router.post(
 	"/api/auth/google/signup",
 	validateGoogleSignupInput,
+	checkRegisterRateLimit,
 	googleAuthActions.completeGoogleSignup,
 );
+
 
 router.get("/api/auth/me", verifyToken, authActions.me);
 
