@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
+import { CURRENT_CGU_VERSION } from "../../services/cgu";
 import { normalizeEmail } from "../../services/normalize";
 import { resolveAddress } from "../../services/resolveAddress";
 import verificationEmailService from "../../services/verificationEmailService";
@@ -43,7 +44,7 @@ const add: RequestHandler = async (req, res, next) => {
 			pseudoNormalized: body.pseudoNormalized,
 			emailNormalized: body.emailNormalized,
 			passwordHash: body.password_hash,
-			cguVersion: "1",
+			cguVersion: CURRENT_CGU_VERSION,
 			cguAcceptedAt: new Date(),
 			...address,
 			reclaimUserIds: body.reclaimUserIds,

@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import type { RequestHandler, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import { CURRENT_CGU_VERSION } from "../../services/cgu";
 import { getGoogleAuthUrl, getGoogleProfile } from "../../services/googleOAuth";
 import {
 	signAuthToken,
@@ -15,8 +16,8 @@ import usersRepository from "../users/usersRepository";
 
 // Cookie temporaire qui garde le `state` dans le navigateur, pour vérifier au
 // retour de Google que c'est bien lui qui a lancé la connexion (anti-CSRF).
-export const OAUTH_STATE_COOKIE = "vigie_oauth_state";
-
+const OAUTH_STATE_COOKIE = "vigie_oauth_state";
+const GOOGLE = "google";
 const redirectToGoogle: RequestHandler = (_req, res) => {
 	const state = crypto.randomBytes(16).toString("hex");
 
@@ -30,7 +31,6 @@ const redirectToGoogle: RequestHandler = (_req, res) => {
 
 	res.redirect(getGoogleAuthUrl(state));
 };
-const GOOGLE = "google";
 
 // Renvoie le navigateur vers une page du front.
 function redirectToClient(res: Response, path: string) {
@@ -192,7 +192,7 @@ const completeGoogleSignup: RequestHandler = async (req, res, next) => {
 			email: signup.email,
 			pseudoNormalized,
 			emailNormalized,
-			cguVersion: "1",
+			cguVersion: CURRENT_CGU_VERSION,
 			cguAcceptedAt: new Date(),
 			address,
 			reclaimUserIds,

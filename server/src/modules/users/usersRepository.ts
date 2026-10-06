@@ -120,6 +120,9 @@ class UsersRepository {
 
 			if (data.reclaimUserIds.length > 0) {
 				await connection.query(
+					// Un compte jamais vérifié avec cet e-mail : personne n'a prouvé
+					// posséder l'adresse. Google vient de le prouver, on peut donc le
+					// supprimer sans risque (même règle que l'inscription classique).
 					"DELETE FROM user WHERE id IN (?) AND email_verified_at IS NULL",
 					[data.reclaimUserIds],
 				);
