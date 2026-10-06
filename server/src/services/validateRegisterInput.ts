@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 
-function isValidAddress(address: unknown): boolean {
+export function isValidAddress(address: unknown): boolean {
 	if (typeof address !== "object" || address === null) {
 		return false;
 	}

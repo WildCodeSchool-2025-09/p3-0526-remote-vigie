@@ -4,6 +4,7 @@ import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
 import validateLoginInput from "./middlewares/validateLoginInput";
 import addressActions from "./modules/address/addressActions";
 import authActions from "./modules/auth/authActions";
+import googleAuthActions from "./modules/auth/googleAuthActions";
 import badgeActions from "./modules/badge/badgeActions";
 import commentActions from "./modules/comment/commentActions";
 import contributionActions from "./modules/contribution/contributionActions";
@@ -21,6 +22,7 @@ import checkRegisterRateLimit from "./services/checkRegisterRateLimit";
 import checkResendVerificationRateLimit from "./services/checkResendVerificationRateLimit";
 import checkUserUniqueness from "./services/checkUserUniqueness";
 import requireVerifiedEmail from "./services/requireVerifiedEmail";
+import validateGoogleSignupInput from "./services/validateGoogleSignupInput";
 import validateRegisterInput from "./services/validateRegisterInput";
 import verifyToken from "./services/verifyToken";
 
@@ -30,6 +32,17 @@ const router = express.Router();
 // Define Your API Routes Here
 /* ************************************************************************* */
 router.post("/api/auth/login", validateLoginInput, authActions.login);
+
+router.get("/api/auth/google", googleAuthActions.redirectToGoogle);
+
+router.get("/api/auth/google/callback", googleAuthActions.handleGoogleCallback);
+
+router.post(
+	"/api/auth/google/signup",
+	validateGoogleSignupInput,
+	checkRegisterRateLimit,
+	googleAuthActions.completeGoogleSignup,
+);
 
 router.get("/api/auth/me", verifyToken, authActions.me);
 

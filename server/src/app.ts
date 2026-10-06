@@ -1,5 +1,6 @@
 // Load the express module to create a web application
 
+import cookieParser from "cookie-parser";
 import express from "express";
 
 const app = express();
@@ -63,6 +64,7 @@ app.post("/api/incidents", express.json({ limit: "7mb" }));
 app.put("/api/incidents/:id", express.json({ limit: "7mb" }));
 
 app.use(express.json());
+app.use(cookieParser());
 // app.use(express.urlencoded());
 // app.use(express.text());
 // app.use(express.raw());

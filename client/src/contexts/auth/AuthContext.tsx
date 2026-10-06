@@ -16,6 +16,7 @@ type AuthContextValue = {
 	loading: boolean;
 	login: (identifier: string, password: string) => Promise<void>;
 	logout: () => void;
+	loginWithToken: (token: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -52,12 +53,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			.finally(() => setLoading(false));
 	}, []);
 
-	const login = async (identifier: string, password: string) => {
-		const { token } = await loginRequest(identifier, password);
+	const loginWithToken = async (token: string) => {
 		localStorage.setItem("vigie_token", token);
 		setAuthToken(token);
-		const fetchedUser = await meRequest();
-		setUser(fetchedUser);
+		try {
+			const fetchedUser = await meRequest();
+			if (fetchedUser == null) {
+				throw new Error("Session invalide.");
+			}
+			setUser(fetchedUser);
+		} catch (err) {
+			// Token refusé, serveur en erreur ou réseau coupé : on ne garde pas
+			// un token qu'on n'a pas pu valider.
+			logout();
+			throw err;
+		}
+	};
+
+	const login = async (identifier: string, password: string) => {
+		const { token } = await loginRequest(identifier, password);
+		await loginWithToken(token);
 	};
 
 	const logout = useCallback(() => {
@@ -72,7 +87,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	}, [logout]);
 
 	return (
-		<AuthContext.Provider value={{ user, loading, login, logout }}>
+		<AuthContext.Provider
+			value={{ user, loading, login, loginWithToken, logout }}
+		>
 			{children}
 		</AuthContext.Provider>
 	);

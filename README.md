@@ -52,6 +52,7 @@ Il est pré-configuré avec un ensemble d'outils pour aider les étudiants à pr
     - [Mettre en place la base de données](#mettre-en-place-la-base-de-données)
     - [Remplir les lieux utiles de la carte](#remplir-les-lieux-utiles-de-la-carte)
     - [Simuler une progression de badges](#simuler-une-progression-de-badges)
+    - [Activer la connexion Google](#activer-la-connexion-google)
     - [Développer la partie back-end](#développer-la-partie-back-end)
     - [REST](#rest)
     - [Autres Bonnes Pratiques](#autres-bonnes-pratiques)
@@ -223,6 +224,32 @@ npm run simulate:badges -- <pseudo> reset
 - Les badges atteints ne sont attribués qu'à la **connexion** : après le script, il faut se
   reconnecter. Le script affiche la progression de chaque badge.
 - `reset` supprime **tous** les votes de l'utilisateur, y compris les vrais, et ses badges.
+
+### Activer la connexion Google
+
+Le bouton « Continuer avec Google » (pages de connexion et d'inscription) a besoin de
+3 variables dans le `.env` de `server`. Sans elles, le bouton redirige vers Google, qui
+refuse la connexion.
+
+```sh
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REDIRECT_URI=http://localhost:3310/api/auth/google/callback
+```
+
+- **Les valeurs** : elles viennent du projet « Vigie » de la console Google Cloud. Les
+  demander à Julien en **message privé**. Le secret ne doit jamais être commité ni posté
+  dans un canal de groupe.
+- **Compte de test** : tant que l'application est en mode test chez Google, seuls les
+  comptes ajoutés comme *utilisateurs test* peuvent se connecter. Toute l'équipe y est
+  ajoutée ; pour un nouveau compte, demander à Julien.
+- **Base de données** : la connexion Google utilise la table `oauth_account`. Après avoir
+  récupéré la branche, relancer `npm run db:migrate` puis `npm run db:seed`.
+- **En production** : l'adresse de retour devient
+  `https://<domaine>/api/auth/google/callback`. Elle doit être ajoutée aux *URI de
+  redirection autorisés* du client OAuth dans la console Google, et reportée dans
+  `GOOGLE_REDIRECT_URI`. `CLIENT_URL` doit pointer vers l'adresse publique du front :
+  c'est là que le serveur renvoie l'utilisateur après Google.
 
 ### Développer la partie back-end
 
