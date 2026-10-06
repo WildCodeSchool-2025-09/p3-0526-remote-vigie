@@ -15,7 +15,9 @@ export function verifyAuthToken(
 	token: string,
 ): { sub: string; isAdmin: boolean } | null {
 	try {
-		return jwt.verify(token, process.env.APP_SECRET as string) as {
+		return jwt.verify(token, process.env.APP_SECRET as string, {
+			algorithms: ["HS256"],
+		}) as {
 			sub: string;
 			isAdmin: boolean;
 		};
@@ -44,7 +46,9 @@ export function verifyGoogleSignupToken(
 	token: string,
 ): GoogleSignupData | null {
 	try {
-		return jwt.verify(token, googleSignupSecret()) as GoogleSignupData;
+		return jwt.verify(token, googleSignupSecret(), {
+			algorithms: ["HS256"],
+		}) as GoogleSignupData;
 	} catch {
 		return null;
 	}
