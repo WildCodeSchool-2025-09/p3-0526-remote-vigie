@@ -1,18 +1,27 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import bgHome from "@/assets/images/background-home.jpg";
 import VigieLogo from "@/assets/images/vigie-ligne.svg?react";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner/EmailVerificationBanner";
 import Icon from "@/components/Icon/Icon";
+import {
+	IncidentSearchField,
+	IncludeResolvedCheckbox,
+} from "@/components/IncidentList/IncidentFilters";
 import IncidentList from "@/components/IncidentList/IncidentList";
 import IncidentMap from "@/components/IncidentMap/IncidentMap";
 import WelcomeToast from "@/components/WelcomeToast/WelcomeToast";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { getAllIncidents } from "@/services/incidentService";
-import type { IncidentListItem } from "@/types/incidentList";
+import type { IncidentListItem, IncidentSort } from "@/types/incidentList";
+import { useDebouncedValue } from "./useDebouncedValue";
 
 const INCIDENTS_LIST_LIMIT = 15;
+// Même plafond que MAX_LIST_LIMIT côté serveur : une recherche, ou les résolus
+// inclus, listent tous les résultats au lieu de la page par défaut.
+const EXTENDED_LIST_LIMIT = 100;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export default function Home() {
 	const { user } = useAuth();
@@ -20,6 +29,17 @@ export default function Home() {
 	const [isTruncated, setIsTruncated] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
+	const [searchTerm, setSearchTerm] = useState("");
+	const [sortBy, setSortBy] = useState<IncidentSort>("date");
+	const [includeResolved, setIncludeResolved] = useState(false);
+	// Recherche appliquée : attend une pause de frappe, sans espaces aux extrémités.
+	const search = useDebouncedValue(searchTerm, SEARCH_DEBOUNCE_MS).trim();
+	const listLimit =
+		search === "" && !includeResolved
+			? INCIDENTS_LIST_LIMIT
+			: EXTENDED_LIST_LIMIT;
+	// Seule la réponse à la dernière requête est retenue.
+	const latestRequestRef = useRef(0);
 	// Incident sélectionné, partagé entre la carte et la liste.
 	const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(
 		null,
@@ -39,13 +59,18 @@ export default function Home() {
 	}, []);
 
 	const loadIncidents = useCallback(() => {
+		latestRequestRef.current += 1;
+		const requestId = latestRequestRef.current;
 		setIsLoading(true);
 		setHasError(false);
 
-		let cancelled = false;
-
-		getAllIncidents(INCIDENTS_LIST_LIMIT).then((result) => {
-			if (cancelled) return;
+		getAllIncidents({
+			limit: listLimit,
+			search,
+			sort: sortBy,
+			includeResolved,
+		}).then((result) => {
+			if (requestId !== latestRequestRef.current) return; // réponse périmée
 
 			if (result.status === "ok") {
 				setIncidents(result.incidents);
@@ -55,14 +80,10 @@ export default function Home() {
 			}
 			setIsLoading(false);
 		});
-
-		return () => {
-			cancelled = true;
-		};
-	}, []);
+	}, [listLimit, search, sortBy, includeResolved]);
 
 	useEffect(() => {
-		return loadIncidents();
+		loadIncidents();
 	}, [loadIncidents]);
 
 	const showsEmailVerificationBanner = user != null && !user.emailVerified;
@@ -105,8 +126,24 @@ export default function Home() {
 					selectedIncidentId={selectedIncidentId}
 					onSelectIncident={setSelectedIncidentId}
 					panRequest={mapPanRequest}
+					includeResolved={includeResolved}
 					className="h-[38vh] w-full overflow-hidden rounded-2xl"
 				/>
+				{/* Au-dessus des commandes de Leaflet (z-index 1000). */}
+				<div className="pointer-events-none absolute top-2 right-6 left-6 z-1100 flex items-start justify-between gap-2">
+					<div className="pointer-events-auto min-w-0 flex-1">
+						<IncidentSearchField
+							value={searchTerm}
+							onChange={setSearchTerm}
+						/>
+					</div>
+					<div className="pointer-events-auto shrink-0">
+						<IncludeResolvedCheckbox
+							checked={includeResolved}
+							onChange={setIncludeResolved}
+						/>
+					</div>
+				</div>
 			</div>
 
 			<section
@@ -121,7 +158,11 @@ export default function Home() {
 					hasError={hasError}
 					onRetry={loadIncidents}
 					isTruncated={isTruncated}
-					limit={INCIDENTS_LIST_LIMIT}
+					limit={listLimit}
+					search={search}
+					includeResolved={includeResolved}
+					sortBy={sortBy}
+					onSortChange={setSortBy}
 					selectedIncidentId={selectedIncidentId}
 					onSelectIncident={handleSelectFromList}
 				/>

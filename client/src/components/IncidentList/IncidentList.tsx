@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 
 import Icon from "@/components/Icon/Icon";
 import IncidentCard from "@/components/IncidentCard/IncidentCard";
-import type { IncidentListItem } from "@/types/incidentList";
+import IncidentSortMenu from "@/components/IncidentList/IncidentSortMenu";
+import type { IncidentListItem, IncidentSort } from "@/types/incidentList";
 
 type IncidentListProps = {
 	incidents: IncidentListItem[];
@@ -11,6 +12,11 @@ type IncidentListProps = {
 	onRetry: () => void;
 	isTruncated: boolean;
 	limit: number;
+	// Recherche appliquée à la liste affichée (vide : aucune).
+	search: string;
+	includeResolved: boolean;
+	sortBy: IncidentSort;
+	onSortChange: (value: IncidentSort) => void;
 	selectedIncidentId?: number | null;
 	onSelectIncident?: (incident: IncidentListItem) => void;
 };
@@ -30,6 +36,33 @@ function IncidentCardSkeleton() {
 	);
 }
 
+// Complète « Seuls les N incidents … sont affichés ».
+const TRUNCATION_ORDER: Record<IncidentSort, string> = {
+	date: "les plus récents",
+	date_asc: "les plus anciens",
+	severity: "les plus graves",
+	severity_asc: "les moins graves",
+};
+
+// Réponse tronquée : d'autres incidents existent, "Au moins" plutôt qu'un total.
+function buildCountLabel(
+	count: number,
+	isTruncated: boolean,
+	includeResolved: boolean,
+	search: string,
+): string {
+	const prefix = isTruncated ? "Au moins" : "Il y a";
+	const noun = count > 1 ? "incidents" : "incident";
+
+	if (search !== "") {
+		const resolved = includeResolved ? " (résolus inclus)" : "";
+		return `${prefix} ${count} ${noun}${resolved} correspondant à « ${search} »`;
+	}
+
+	const scope = includeResolved ? " (résolus inclus)" : " en cours";
+	return `${prefix} ${count} ${noun}${scope} dans cette zone`;
+}
+
 export default function IncidentList({
 	incidents,
 	isLoading,
@@ -37,6 +70,10 @@ export default function IncidentList({
 	onRetry,
 	isTruncated,
 	limit,
+	search,
+	includeResolved,
+	sortBy,
+	onSortChange,
 	selectedIncidentId = null,
 	onSelectIncident,
 }: IncidentListProps) {
@@ -50,121 +87,175 @@ export default function IncidentList({
 		element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
 	}, [selectedIncidentId]);
 
-	if (isLoading) {
-		return (
-			<output aria-live="polite" className="flex flex-col gap-3">
-				<span className="sr-only">Chargement des incidents…</span>
-				{Array.from({ length: 5 }, (_, index) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey:"squelettes statiques, jamais réordonnés".
-					<IncidentCardSkeleton key={index} />
-				))}
-			</output>
-		);
-	}
+	const hasResults = !isLoading && !hasError && incidents.length > 0;
+	const isEmpty = !isLoading && !hasError && incidents.length === 0;
+	const emptyTitle =
+		search !== ""
+			? `Aucun résultat pour « ${search} »`
+			: "Rien à signaler autour de vous";
+	const countLabel = buildCountLabel(
+		incidents.length,
+		isTruncated,
+		includeResolved,
+		search,
+	);
 
-	if (hasError) {
-		return (
-			<div className="flex flex-1 flex-col items-center justify-start">
-				<div
-					role="alert"
-					aria-live="assertive"
-					className="flex w-full max-w-sm flex-col gap-4 rounded-3xl bg-(--bg-error) p-4"
-				>
-					<div className="flex items-start gap-3">
-						<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
+	// Annonce vide pendant le chargement : seul le résultat final est lu.
+	let liveMessage = "";
+	if (hasResults) liveMessage = countLabel;
+	if (isEmpty) liveMessage = emptyTitle;
+
+	function renderBody() {
+		if (isLoading) {
+			return (
+				<output aria-live="polite" className="flex flex-col gap-3">
+					<span className="sr-only">Chargement des incidents…</span>
+					{Array.from({ length: 5 }, (_, index) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey:"squelettes statiques, jamais réordonnés".
+						<IncidentCardSkeleton key={index} />
+					))}
+				</output>
+			);
+		}
+
+		if (hasError) {
+			return (
+				<div className="flex flex-1 flex-col items-center justify-start">
+					<div
+						role="alert"
+						aria-live="assertive"
+						className="flex w-full max-w-sm flex-col gap-4 rounded-3xl bg-(--bg-error) p-4"
+					>
+						<div className="flex items-start gap-3">
+							<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
+								<Icon
+									name="exclamation"
+									className="h-3.5 w-3.5 fill-white"
+									aria-hidden="true"
+								/>
+							</span>
+							<div>
+								<h2 className="font-title text-lg font-bold text-error">
+									Impossible de charger les incidents
+								</h2>
+								<p className="mt-1 text-sm text-black">
+									La connexion au serveur a échoué. Vos
+									alertes ne sont pas affectées : elles
+									arriveront normalement.
+								</p>
+							</div>
+						</div>
+						<button
+							type="button"
+							onClick={onRetry}
+							className="btn btn-md rounded-full border-none bg-error px-5 font-bold text-white"
+						>
+							Réessayer
+						</button>
+					</div>
+				</div>
+			);
+		}
+
+		if (incidents.length === 0) {
+			// Annoncé par la zone aria-live persistante, pas par ce bloc.
+			return (
+				<div className="flex flex-1 flex-col items-center justify-start">
+					<div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl bg-base-300 p-4 text-center">
+						<span
+							className={`flex h-16 w-16 items-center justify-center rounded-full ${
+								search !== ""
+									? "bg-(--bg-info)"
+									: "bg-(--bg-success)"
+							}`}
+						>
 							<Icon
-								name="exclamation"
-								className="h-3.5 w-3.5 fill-white"
+								name={search !== "" ? "info" : "check"}
+								className={`h-8 w-8 ${
+									search !== ""
+										? "fill-primary"
+										: "fill-success"
+								}`}
 								aria-hidden="true"
 							/>
 						</span>
 						<div>
-							<h2 className="font-title text-lg font-bold text-error">
-								Impossible de charger les incidents
+							<h2 className="font-title text-lg font-bold text-primary">
+								{emptyTitle}
 							</h2>
-							<p className="mt-1 text-sm text-black">
-								La connexion au serveur a échoué. Vos alertes ne
-								sont pas affectées : elles arriveront
-								normalement.
+							<p className="mt-2 text-sm text-black">
+								{search !== ""
+									? `Modifiez votre recherche${
+											includeResolved
+												? "."
+												: " ou cochez « Inclure les incidents résolus »."
+										}`
+									: "Aucun incident dans votre zone. Vous serez alerté dès qu'un voisin signale quelque chose près d'une de vos adresses."}
 							</p>
 						</div>
 					</div>
-					<button
-						type="button"
-						onClick={onRetry}
-						className="btn btn-md rounded-full border-none bg-error px-5 font-bold text-white"
-					>
-						Réessayer
-					</button>
 				</div>
-			</div>
-		);
-	}
+			);
+		}
 
-	if (incidents.length === 0) {
 		return (
-			<div className="flex flex-1 flex-col items-center justify-start">
-				<output className="flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl bg-base-300 p-4 text-center">
-					<span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--bg-success)">
-						<Icon
-							name="check"
-							className="h-8 w-8 fill-success"
-							aria-hidden="true"
-						/>
-					</span>
-					<div>
-						<h2 className="font-title text-lg font-bold text-primary">
-							Rien à signaler autour de vous
-						</h2>
-						<p className="mt-2 text-sm text-black">
-							Aucun incident dans votre zone. Vous serez alerté
-							dès qu'un voisin signale quelque chose près d'une de
-							vos adresses.
-						</p>
-					</div>
-				</output>
+			<div className="flex flex-col gap-3">
+				<ul className="flex flex-col gap-3">
+					{incidents.map((incident) => (
+						<li
+							key={incident.id}
+							ref={(element) => {
+								if (element) {
+									itemRefs.current.set(incident.id, element);
+								} else {
+									itemRefs.current.delete(incident.id);
+								}
+							}}
+						>
+							<IncidentCard
+								incident={incident}
+								isSelected={incident.id === selectedIncidentId}
+								onSelect={onSelectIncident}
+							/>
+						</li>
+					))}
+				</ul>
+
+				{isTruncated && (
+					<p className="text-center text-xs text-primary/50">
+						Seuls les {limit} incidents {TRUNCATION_ORDER[sortBy]}{" "}
+						sont affichés
+						{search !== "" ? " : précisez votre recherche." : "."}
+					</p>
+				)}
 			</div>
 		);
 	}
-
-	// Réponse tronquée : d'autres incidents existent, "Au moins" plutôt qu'un total.
-	const incidentWord = incidents.length > 1 ? "incidents" : "incident";
-	const countLabel = isTruncated
-		? `Au moins ${incidents.length} ${incidentWord}`
-		: `Il y a ${incidents.length} ${incidentWord}`;
 
 	return (
-		<div className="flex flex-col gap-3">
-			<h2 className="font-title text-lg font-bold text-primary">
-				{countLabel} dans cette zone
-			</h2>
-
-			<ul className="flex flex-col gap-3">
-				{incidents.map((incident) => (
-					<li
-						key={incident.id}
-						ref={(element) => {
-							if (element) {
-								itemRefs.current.set(incident.id, element);
-							} else {
-								itemRefs.current.delete(incident.id);
-							}
-						}}
-					>
-						<IncidentCard
-							incident={incident}
-							isSelected={incident.id === selectedIncidentId}
-							onSelect={onSelectIncident}
+		<>
+			{/* Reste montée pour que chaque changement de résultat soit annoncé. */}
+			<output aria-live="polite" className="sr-only">
+				{liveMessage}
+			</output>
+			{/* En-tête permanent : le tri garde le focus pendant le rechargement. */}
+			<div className="flex items-start justify-between gap-3">
+				<div className="min-w-0 flex-1">
+					{hasResults && (
+						<h2 className="font-title text-lg font-bold text-primary">
+							{countLabel}
+						</h2>
+					)}
+					{isLoading && (
+						<div
+							aria-hidden="true"
+							className="skeleton mt-1 h-5 w-2/3 rounded-full"
 						/>
-					</li>
-				))}
-			</ul>
-
-			{isTruncated && (
-				<p className="text-center text-xs text-primary/50">
-					Seuls les {limit} incidents les plus récents sont affichés.
-				</p>
-			)}
-		</div>
+					)}
+				</div>
+				<IncidentSortMenu value={sortBy} onChange={onSortChange} />
+			</div>
+			{renderBody()}
+		</>
 	);
 }

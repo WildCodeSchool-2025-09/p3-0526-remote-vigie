@@ -31,3 +31,7 @@ export type IncidentListResponse = {
 	incidents: IncidentListItem[];
 	truncated: boolean;
 };
+
+// Sort criteria accepted by GET /api/incidents (`sort`).
+// `date` et `severity` : les plus récents / les plus graves d'abord.
+export type IncidentSort = "date" | "date_asc" | "severity" | "severity_asc";

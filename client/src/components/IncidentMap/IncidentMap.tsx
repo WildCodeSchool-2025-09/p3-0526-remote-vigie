@@ -13,6 +13,7 @@ import {
 	Marker,
 	Popup,
 	TileLayer,
+	ZoomControl,
 	useMap,
 	useMapEvents,
 } from "react-leaflet";
@@ -67,20 +68,36 @@ function leafletBoundsToBounds(bounds: L.LatLngBounds): Bounds {
 	};
 }
 
+// Gris neutre des incidents résolus : 5,3:1 sur blanc, sans rapport avec la couleur d'un type.
+const RESOLVED_MARKER_COLOR = "#6b6b6b";
+
 // Icône du marqueur : pastille blanche cerclée de la couleur du type. Quand
-// `isSelected`, elle grossit et un anneau pulse autour.
+// `isSelected`, elle grossit et un anneau pulse autour. Un incident résolu est
+// grisé, plus petit, en pointillés, avec une coche : le gris seul ne suffirait pas.
 function createIncidentDivIcon(
 	iconName: IconName,
 	color: string,
 	isSelected: boolean,
+	isResolved: boolean,
 ) {
 	const SvgIcon = icons[iconName];
-	const size = isSelected ? 44 : 36;
-	const sizeClass = isSelected ? "size-[44px]" : "size-[36px]";
-	const iconSizeClass = isSelected ? "size-[24px]" : "size-[20px]";
+	const CheckIcon = icons.check;
+	let size = 36;
+	let sizeClass = "size-[36px]";
+	let iconSizeClass = "size-[20px]";
+	if (isSelected) {
+		size = 44;
+		sizeClass = "size-[44px]";
+		iconSizeClass = "size-[24px]";
+	} else if (isResolved) {
+		size = 32;
+		sizeClass = "size-[32px]";
+		iconSizeClass = "size-[18px]";
+	}
 	const frameClass = isSelected
 		? "border-[3px] shadow-[0_0_0_3px_color-mix(in_srgb,var(--marker-color)_35%,transparent)]"
 		: "border-2 shadow-[0_1px_4px_rgba(0,0,0,0.3)]";
+	const resolvedClass = isResolved ? "border-dashed bg-gray-200" : "bg-white";
 
 	// La couleur du type n'est connue qu'à l'exécution : passée en variable CSS.
 	const html = renderToStaticMarkup(
@@ -95,13 +112,24 @@ function createIncidentDivIcon(
 				/>
 			)}
 			<div
-				className={`relative flex items-center justify-center rounded-full border-(--marker-color) bg-white ${sizeClass} ${frameClass}`}
+				className={`relative flex items-center justify-center rounded-full border-(--marker-color) ${resolvedClass} ${sizeClass} ${frameClass}`}
 			>
 				<SvgIcon
 					className={`fill-(--marker-color) ${iconSizeClass}`}
 					aria-hidden="true"
 				/>
 			</div>
+			{isResolved && (
+				<span
+					aria-hidden="true"
+					className="absolute -right-1 -bottom-1 flex size-[16px] items-center justify-center rounded-full border border-white bg-(--marker-color)"
+				>
+					<CheckIcon
+						className="size-[10px] fill-white"
+						aria-hidden="true"
+					/>
+				</span>
+			)}
 		</div>,
 	);
 
@@ -178,11 +206,14 @@ function IncidentMarker({
 		incident.type && incident.type.icon in icons
 			? (incident.type.icon as IconName)
 			: "marker";
-	const color = incident.type?.color ?? "var(--primary)";
+	const isResolved = incident.status === "resolved";
+	const color = isResolved
+		? RESOLVED_MARKER_COLOR
+		: (incident.type?.color ?? "var(--primary)");
 
 	const icon = useMemo(
-		() => createIncidentDivIcon(iconName, color, isSelected),
-		[iconName, color, isSelected],
+		() => createIncidentDivIcon(iconName, color, isSelected, isResolved),
+		[iconName, color, isSelected, isResolved],
 	);
 
 	return (
@@ -191,13 +222,18 @@ function IncidentMarker({
 			icon={icon}
 			title={`${incident.type?.label ?? "Incident"} : ${incident.title}${
 				incident.city ? `, ${incident.city}` : ""
-			}`}
+			}${isResolved ? " (résolu)" : ""}`}
 			eventHandlers={{ click: () => onSelect(incident, map) }}
 		>
 			<Popup>
 				<p className="font-title text-sm font-bold text-primary">
 					{incident.title}
 				</p>
+				{isResolved && (
+					<p className="mt-1 text-xs font-bold text-primary/70">
+						Incident résolu
+					</p>
+				)}
 				<div className="mt-2 flex justify-center">
 					<Link
 						to={`/incident/${incident.id}`}
@@ -216,6 +252,8 @@ type IncidentMapProps = {
 	onSelectIncident: (id: number) => void;
 	// Demande de recentrage venue de la liste.
 	panRequest?: { lat: number; lng: number } | null;
+	// Montre aussi les incidents résolus (sinon : seulement ceux en cours).
+	includeResolved?: boolean;
 	className?: string;
 };
 
@@ -223,6 +261,7 @@ export default function IncidentMap({
 	selectedIncidentId,
 	onSelectIncident,
 	panRequest = null,
+	includeResolved = false,
 	className = "h-[38vh] w-full",
 }: IncidentMapProps) {
 	const { user } = useAuth();
@@ -240,6 +279,10 @@ export default function IncidentMap({
 
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const lastBoundsRef = useRef<Bounds | null>(null);
+	// Lu au moment de la requête : un anti-rebond en attente ne doit pas utiliser un filtre périmé.
+	const includeResolvedRef = useRef(includeResolved);
+	// Seule la réponse à la dernière requête de signalements est retenue.
+	const incidentsRequestRef = useRef(0);
 
 	// Voile affiché pendant le déplacement, le temps que les tuiles se chargent.
 	const [isTransitioning, setIsTransitioning] = useState(false);
@@ -258,18 +301,22 @@ export default function IncidentMap({
 	}, []);
 
 	const loadMapIncidents = useCallback((bounds: Bounds) => {
+		incidentsRequestRef.current += 1;
+		const requestId = incidentsRequestRef.current;
 		setMapIncidentsLoading(true);
 		setMapError(false);
-		getIncidentsInBounds(bounds).then((result) => {
-			if (lastBoundsRef.current !== bounds) return; // réponse périmée
-			if (result.status === "ok") {
-				setMapIncidents(result.incidents);
-				setMapIncidentsTruncated(result.truncated);
-			} else {
-				setMapError(true);
-			}
-			setMapIncidentsLoading(false);
-		});
+		getIncidentsInBounds(bounds, includeResolvedRef.current).then(
+			(result) => {
+				if (requestId !== incidentsRequestRef.current) return; // réponse périmée
+				if (result.status === "ok") {
+					setMapIncidents(result.incidents);
+					setMapIncidentsTruncated(result.truncated);
+				} else {
+					setMapError(true);
+				}
+				setMapIncidentsLoading(false);
+			},
+		);
 	}, []);
 
 	// Relance uniquement les signalements, sur la dernière zone demandée.
@@ -318,6 +365,12 @@ export default function IncidentMap({
 		},
 		[loadMapData],
 	);
+
+	// Au changement du filtre, recharge sur la dernière zone connue (aucune au montage).
+	useEffect(() => {
+		includeResolvedRef.current = includeResolved;
+		if (lastBoundsRef.current) loadMapIncidents(lastBoundsRef.current);
+	}, [includeResolved, loadMapIncidents]);
 
 	useEffect(() => {
 		return () => {
@@ -372,11 +425,13 @@ export default function IncidentMap({
 	);
 
 	return (
-		<div className={`relative ${className}`}>
+		<div
+			className={`relative ${className} [&_.leaflet-top.leaflet-right]:mt-14`}
+		>
 			{showMapIncidentsLoading && (
 				<output
 					aria-live="polite"
-					className="absolute top-2 right-2 left-2 z-1000 flex justify-center"
+					className="absolute top-14 right-2 left-2 z-1000 flex justify-center"
 				>
 					<span className="rounded-full bg-base-100/90 px-3 py-1 text-xs font-bold text-primary shadow">
 						Chargement…
@@ -386,7 +441,7 @@ export default function IncidentMap({
 			{mapError && (
 				<div
 					role="alert"
-					className="absolute top-2 right-2 left-2 z-1000 flex items-center justify-center gap-3 rounded-2xl bg-(--bg-error) px-3 py-2 text-sm text-(--error-text)"
+					className="absolute top-14 right-2 left-2 z-1000 flex items-center justify-center gap-3 rounded-2xl bg-(--bg-error) px-3 py-2 text-sm text-(--error-text)"
 				>
 					<span>
 						Impossible de charger les signalements sur la carte.
@@ -455,11 +510,13 @@ export default function IncidentMap({
 			<MapContainer
 				center={initialCenter}
 				zoom={DEFAULT_ZOOM}
+				zoomControl={false}
 				minZoom={MIN_ZOOM}
 				maxBounds={FRANCE_BOUNDS}
 				maxBoundsViscosity={1}
 				className="h-full w-full"
 			>
+				<ZoomControl position="topright" />
 				<MapViewportWatcher onViewportChange={handleViewportChange} />
 				<MapPanRequestWatcher
 					request={panRequest}
