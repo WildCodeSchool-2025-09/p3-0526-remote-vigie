@@ -50,11 +50,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const loginWithToken = async (token: string) => {
 		localStorage.setItem("vigie_token", token);
 		setAuthToken(token);
-		const fetchedUser = await meRequest();
-		if (fetchedUser == null) {
-			throw new Error("Session invalide.");
+		try {
+			const fetchedUser = await meRequest();
+			if (fetchedUser == null) {
+				throw new Error("Session invalide.");
+			}
+			setUser(fetchedUser);
+		} catch (err) {
+			// Token refusé, serveur en erreur ou réseau coupé : on ne garde pas
+			// un token qu'on n'a pas pu valider.
+			logout();
+			throw err;
 		}
-		setUser(fetchedUser);
 	};
 
 	const login = async (identifier: string, password: string) => {
