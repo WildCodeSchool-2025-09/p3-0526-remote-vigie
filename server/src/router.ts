@@ -11,6 +11,7 @@ import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
 import photoActions from "./modules/photo/photoActions";
 import usersActions from "./modules/users/usersActions";
+import vigilanceActions from "./modules/vigilance/vigilanceActions";
 import attachUserIfPresent from "./services/attachUserIfPresent";
 import checkAddressSearchRateLimit from "./services/checkAddressSearchRateLimit";
 import checkIncidentRateLimit from "./services/checkIncidentRateLimit";
@@ -95,5 +96,7 @@ router.post(
 	checkResendVerificationRateLimit,
 	usersActions.resendVerification,
 );
+
+router.get("/api/weather-vigilance", verifyToken, vigilanceActions.read);
 
 export default router;
