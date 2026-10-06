@@ -199,8 +199,22 @@ const completeGoogleSignup: RequestHandler = async (req, res, next) => {
 		});
 		res.status(StatusCodes.CREATED).json({ token: signAuthToken(userId) });
 	} catch (err) {
+		// Deux envois simultanés : le second se heurte à une règle d'unicité
+		// de la base. On répond 409 plutôt qu'une erreur serveur.
+		if (
+			err &&
+			typeof err === "object" &&
+			"code" in err &&
+			err.code === "ER_DUP_ENTRY"
+		) {
+			res.status(StatusCodes.CONFLICT).json({
+				error: "already_used",
+				message:
+					"Ce compte vient d'être créé. Connectez-vous avec « Continuer avec Google ».",
+			});
+			return;
+		}
 		next(err);
 	}
 };
-
 export default { redirectToGoogle, handleGoogleCallback, completeGoogleSignup };
