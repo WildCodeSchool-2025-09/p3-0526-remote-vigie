@@ -8,6 +8,7 @@ export default function PushSettings() {
 	if (!state.needsInstall && state.permission === "unsupported") return null;
 
 	const denied = state.permission === "denied";
+	const blocked = denied && !state.subscribed;
 
 	return (
 		<section
@@ -32,7 +33,7 @@ export default function PushSettings() {
 							</span>
 							<span
 								id="push-settings-state"
-								className="block text-sm text-primary/70"
+								className="block text-sm text-primary/75"
 							>
 								{state.subscribed
 									? "Activées : vous êtes alerté même quand Vigie est fermé."
@@ -43,16 +44,27 @@ export default function PushSettings() {
 							type="checkbox"
 							role="switch"
 							aria-checked={state.subscribed}
-							className="toggle toggle-accent shrink-0"
+							className="toggle shrink-0 text-primary/60 checked:text-success aria-disabled:opacity-30"
 							checked={state.subscribed}
-							disabled={busy || (denied && !state.subscribed)}
-							onChange={() => void toggle()}
-							aria-describedby="push-settings-state"
+							// aria-disabled, not disabled: a disabled input drops keyboard focus
+							aria-disabled={busy || blocked}
+							aria-busy={busy}
+							onChange={() => {
+								if (!busy && !blocked) void toggle();
+							}}
+							aria-describedby={
+								blocked
+									? "push-settings-state push-settings-blocked"
+									: "push-settings-state"
+							}
 						/>
 					</label>
 
-					{denied && !state.subscribed && (
-						<p className="mt-3 rounded-2xl bg-(--bg-warning) p-3 text-sm text-primary">
+					{blocked && (
+						<p
+							id="push-settings-blocked"
+							className="mt-3 rounded-2xl bg-(--bg-warning) p-3 text-sm text-primary"
+						>
 							<strong>Les notifications sont bloquées</strong> par
 							votre navigateur. Pour les rétablir, autorisez-les
 							pour Vigie dans ses réglages (sur Chrome : le
