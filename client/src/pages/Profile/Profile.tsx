@@ -1,6 +1,7 @@
 import backgroundIncident from "@/assets/images/background-incident.jpg";
 import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNotVerifiedBanner";
 import Icon from "@/components/Icon/Icon";
+import PushSettings from "@/components/PushSettings/PushSettings";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import type { Address } from "@/types/auth";
 import { Link, useNavigate } from "react-router";
@@ -77,6 +78,8 @@ export default function Profile() {
 						/>
 					</dl>
 				</section>
+
+				<PushSettings />
 
 				<nav aria-label="Profil">
 					<Link
