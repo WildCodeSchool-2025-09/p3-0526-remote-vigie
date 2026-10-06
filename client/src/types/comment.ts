@@ -1,9 +1,17 @@
+import type { AuthorBadge } from "@/types/badge";
+
 export type CommentAuthor = {
+	id: number;
+	pseudo: string;
+	badges: AuthorBadge[];
+};
+
+export type QuotedCommentAuthor = {
 	pseudo: string;
 };
 
 export type QuotedComment = {
-	author: CommentAuthor;
+	author: QuotedCommentAuthor;
 	content: string;
 };
 

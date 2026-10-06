@@ -1,5 +1,9 @@
 SET NAMES utf8mb4;
 
+DROP TABLE IF EXISTS `user_badge`;
+
+DROP TABLE IF EXISTS `badge`;
+
 DROP TABLE IF EXISTS `useful_place`;
 
 DROP TABLE IF EXISTS `useful_number`;
@@ -20,6 +24,8 @@ DROP TABLE IF EXISTS `user_location`;
 
 DROP TABLE IF EXISTS `address`;
 
+DROP TABLE IF EXISTS `oauth_account`;
+
 DROP TABLE IF EXISTS `user`;
 
 CREATE TABLE `user` (
@@ -28,7 +34,7 @@ CREATE TABLE `user` (
     `email` VARCHAR(255) NOT NULL,
     `pseudo_normalized` VARCHAR(30) NOT NULL,
     `email_normalized` VARCHAR(255) NOT NULL,
-    `password_hash` VARCHAR(255) NOT NULL,
+    `password_hash` VARCHAR(255) NULL DEFAULT NULL,
     `email_verified_at` TIMESTAMP NULL DEFAULT NULL,
     `email_verification_token_hash` VARCHAR(255) NULL,
     `email_verification_expires_at` DATETIME NULL,
@@ -40,6 +46,18 @@ CREATE TABLE `user` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `uq_user_pseudo_normalized` (`pseudo_normalized`),
     UNIQUE KEY `uq_user_email_normalized` (`email_normalized`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `oauth_account` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT UNSIGNED NOT NULL,
+    `provider` VARCHAR(20) NOT NULL,
+    `provider_user_id` VARCHAR(255) NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_oauth_account_provider_user` (`provider`, `provider_user_id`),
+    UNIQUE KEY `uq_oauth_account_user_provider` (`user_id`, `provider`),
+    CONSTRAINT `fk_oauth_account_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `address` (
@@ -176,6 +194,40 @@ CREATE TABLE `comment` (
     CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_comment_incident` FOREIGN KEY (`incident_id`) REFERENCES `incident` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_comment_quoted` FOREIGN KEY (`quoted_comment_id`) REFERENCES `comment` (`id`) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `badge` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(30) NOT NULL,
+    `label` VARCHAR(60) NOT NULL,
+    `description` VARCHAR(255) NOT NULL,
+    `icon` VARCHAR(80) NOT NULL,
+    `counter_type` ENUM(
+        'incident_by_type',
+        'incident_total',
+        'comment_total',
+        'contribution_total',
+        'confirmed_incident',
+        'first_on_spot',
+        'all_types'
+    ) NOT NULL,
+    `counter_param` VARCHAR(255) NULL DEFAULT NULL,
+    `threshold` SMALLINT UNSIGNED NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_badge_code` (`code`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `user_badge` (
+    `user_id` INT UNSIGNED NOT NULL,
+    `badge_id` INT UNSIGNED NOT NULL,
+    `earned_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`user_id`, `badge_id`),
+    KEY `idx_user_badge_badge` (`badge_id`),
+    KEY `idx_user_badge_user_earned` (`user_id`, `earned_at`),
+    CONSTRAINT `fk_user_badge_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_user_badge_badge` FOREIGN KEY (`badge_id`) REFERENCES `badge` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `useful_number` (
@@ -398,6 +450,125 @@ VALUES (
         '#5E4A63',
         1,
         'N''effrayez pas l''animal et ne le poursuivez pas. Signalez-le à son propriétaire ou à la mairie si vous ne pouvez pas le recueillir en sécurité.'
+    );
+
+INSERT INTO
+    `badge` (
+        `code`,
+        `label`,
+        `description`,
+        `icon`,
+        `counter_type`,
+        `counter_param`,
+        `threshold`
+    )
+VALUES (
+        'livre_de_la_jungle',
+        'Livre de la jungle',
+        '5 signalements d''animaux sauvages',
+        '01-livre-de-la-jungle.png',
+        'incident_by_type',
+        'wild',
+        5
+    ),
+    (
+        'pot_de_miel',
+        'Pot de miel',
+        '5 signalements de nids d''insectes',
+        '02-pot-de-miel.png',
+        'incident_by_type',
+        'insect',
+        5
+    ),
+    (
+        'trempe',
+        'Trempé',
+        '5 signalements d''inondation',
+        '03-trempe.png',
+        'incident_by_type',
+        'flood',
+        5
+    ),
+    (
+        'pyromane',
+        'Pyromane',
+        '5 signalements de feu',
+        '04-pyromane.png',
+        'incident_by_type',
+        'fire',
+        5
+    ),
+    (
+        'tete_en_l_air',
+        'Tête en l''air',
+        '5 signalements de tempête, grêle ou tornade',
+        '05-tete-en-l-air.png',
+        'incident_by_type',
+        'storm,hail,tornado',
+        5
+    ),
+    (
+        'chemin_barre',
+        'Chemin barré',
+        '5 signalements de chute d''arbre ou éboulement',
+        '06-chemin-barre.png',
+        'incident_by_type',
+        'tree,rockfall',
+        5
+    ),
+    (
+        'vigie',
+        'Vigie',
+        '10 signalements, tous types confondus',
+        '08-vigie.png',
+        'incident_total',
+        NULL,
+        10
+    ),
+    (
+        'bonne_langue',
+        'Bonne langue',
+        '20 commentaires publiés',
+        '09-bonne-langue.png',
+        'comment_total',
+        NULL,
+        20
+    ),
+    (
+        'bon_voisin',
+        'Bon voisin',
+        '25 contributions (confirmations ou infirmations)',
+        '10-bon-voisin.png',
+        'contribution_total',
+        NULL,
+        25
+    ),
+    (
+        'oeil_de_lynx',
+        'Œil de lynx',
+        '5 de ses signalements confirmés par au moins 3 voisins',
+        '11-oeil-de-lynx.png',
+        'confirmed_incident',
+        '3',
+        5
+    ),
+    (
+        'premier_sur_place',
+        'Premier sur place',
+        '3 signalements créés là où rien n''était encore signalé',
+        '12-premier-sur-place.png',
+        'first_on_spot',
+        NULL,
+        3
+    ),
+    (
+        'apocalypse',
+        'Apocalypse',
+        '1 signalement créé avec tous les types d''incident',
+        '07-apocalypse.png',
+        'all_types',
+        NULL,
+        1
     );
 
 INSERT INTO

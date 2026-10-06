@@ -1,5 +1,5 @@
 import AbstractSeeder from "./AbstractSeeder";
-import UserSeeder from "./UserSeeder";
+import UserSeeder, { SEED_ADMIN_COUNT, getAdminPosition } from "./UserSeeder";
 
 class UserLocationSeeder extends AbstractSeeder {
 	constructor() {
@@ -14,6 +14,15 @@ class UserLocationSeeder extends AbstractSeeder {
 	// The run method - Populate the 'user_location' table with fake data
 
 	run() {
+		for (let i = 1; i <= SEED_ADMIN_COUNT; i += 1) {
+			const admin = {
+				user_id: this.getRef(`admin_${i}`).insertId,
+				is_enabled: 1,
+				...getAdminPosition(i),
+			};
+			this.insert(admin);
+		}
+
 		// Generate and insert fake data into the 'user_location' table
 		for (let i = 0; i < 10; i += 1) {
 			// Generate fake location data matching the `user_location` table columns

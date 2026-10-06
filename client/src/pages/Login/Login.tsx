@@ -1,8 +1,9 @@
 import backgroundIncident from "@/assets/images/background-incident.jpg";
+import GoogleButton from "@/components/GoogleButton/GoogleButton";
 import Icon from "@/components/Icon/Icon";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 
 type FieldErrors = {
 	identifier?: string;
@@ -14,10 +15,24 @@ const fieldBase =
 const fieldNeutral = "border-primary/60 bg-base-300";
 const fieldError = "border-error bg-error/10";
 
+// Retours de la connexion Google (US22) : le serveur renvoie sur
+// /login?oauth=… quand quelque chose n'a pas abouti.
+const oauthMessages: Record<string, string> = {
+	cancelled:
+		"Connexion avec Google annulée. Vous pouvez réessayer, ou utiliser votre mot de passe.",
+	error: "La connexion avec Google a échoué. Réessayez dans un instant, ou utilisez votre mot de passe.",
+	email_unverified:
+		"Votre adresse Google n'est pas vérifiée : elle ne peut pas servir à vous connecter.",
+	interrupted:
+		"Votre inscription avec Google a été interrompue. Recommencez avec « Continuer avec Google ».",
+};
+
 export default function Login() {
 	const { user, loading, login } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
+	const [searchParams] = useSearchParams();
+	const oauthMessage = oauthMessages[searchParams.get("oauth") ?? ""];
 
 	const [identifier, setIdentifier] = useState("");
 	const [password, setPassword] = useState("");
@@ -73,7 +88,7 @@ export default function Login() {
 
 	return (
 		<main className="min-h-full bg-base-100 pb-10">
-			<header className="relative isolate overflow-hidden bg-primary px-4 pt-8 pb-14">
+			<header className="relative isolate flex h-36 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
 				<img
 					src={backgroundIncident}
 					alt=""
@@ -110,6 +125,12 @@ export default function Login() {
 						toutes les fonctionnalités.
 					</p>
 				)}
+				{oauthMessage && (
+					<p className="mb-5 rounded-2xl bg-(--bg-error) px-4 py-3 text-sm font-semibold text-primary">
+						{oauthMessage}
+					</p>
+				)}
+
 				<form
 					onSubmit={handleSubmit}
 					noValidate
@@ -223,6 +244,18 @@ export default function Login() {
 						{submitting ? "Connexion..." : "Se connecter"}
 					</button>
 				</form>
+				<div className="my-5 flex items-center gap-3 text-sm text-primary/80">
+					<span
+						className="h-px flex-1 bg-primary/20"
+						aria-hidden="true"
+					/>
+					ou
+					<span
+						className="h-px flex-1 bg-primary/20"
+						aria-hidden="true"
+					/>
+				</div>
+				<GoogleButton />
 
 				<p className="mt-6 text-center text-sm text-primary/80">
 					Pas encore de compte ?{" "}

@@ -9,6 +9,7 @@ import isFeminine from "../../services/incidentTypeGender";
 import parseBounds from "../../services/parseBounds";
 import { deletePhotoFile, savePhoto } from "../../services/photoStorage";
 import withPreposition from "../../services/title";
+import userBadgeRepository from "../badge/userBadgeRepository";
 import incidentTypeRepository from "../incidentType/incidentTypeRepository";
 import incidentRepository from "./incidentRepository";
 
@@ -65,7 +66,12 @@ const read: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		res.json(incident);
+		const badges =
+			userId != null
+				? await userBadgeRepository.readRecentByUser(incident.author.id)
+				: [];
+
+		res.json({ ...incident, author: { ...incident.author, badges } });
 	} catch (err) {
 		next(err);
 	}

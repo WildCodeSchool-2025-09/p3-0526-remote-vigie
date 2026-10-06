@@ -1,10 +1,27 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 
+import badgeService from "../badge/badgeService";
 import incidentRepository from "../incident/incidentRepository";
 import commentRepository from "./commentRepository";
 
+import type { RecentBadge } from "../badge/userBadgeRepository";
+
 // Only BREAD here (Browse, Read, Edit, Add, Delete)
+
+// Adds the author's badges
+function withAuthorBadges<T extends { author: { id: number } }>(
+	comment: T,
+	badgesByAuthor: Map<number, RecentBadge[]>,
+) {
+	return {
+		...comment,
+		author: {
+			...comment.author,
+			badges: badgesByAuthor.get(comment.author.id) ?? [],
+		},
+	};
+}
 
 const browse: RequestHandler = async (req, res, next) => {
 	try {
@@ -17,7 +34,18 @@ const browse: RequestHandler = async (req, res, next) => {
 
 		const comments = await commentRepository.readByIncident(incidentId);
 
-		res.json(comments);
+		const badgesByAuthor =
+			req.auth != null
+				? await badgeService.readRecentBadgesByUsers(
+						comments.map((comment) => comment.author.id),
+					)
+				: new Map<number, RecentBadge[]>();
+
+		res.json(
+			comments.map((comment) =>
+				withAuthorBadges(comment, badgesByAuthor),
+			),
+		);
 	} catch (err) {
 		next(err);
 	}
@@ -95,7 +123,16 @@ const add: RequestHandler = async (req, res, next) => {
 
 		const comment = await commentRepository.read(id);
 
-		res.status(StatusCodes.CREATED).json(comment);
+		const badgesByAuthor =
+			comment != null
+				? await badgeService.readRecentBadgesByUsers([
+						comment.author.id,
+					])
+				: new Map<number, RecentBadge[]>();
+
+		res.status(StatusCodes.CREATED).json(
+			comment && withAuthorBadges(comment, badgesByAuthor),
+		);
 	} catch (err) {
 		next(err);
 	}

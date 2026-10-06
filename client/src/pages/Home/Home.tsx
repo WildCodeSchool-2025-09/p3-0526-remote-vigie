@@ -7,6 +7,7 @@ import EmailVerificationBanner from "@/components/EmailVerificationBanner/EmailV
 import Icon from "@/components/Icon/Icon";
 import IncidentList from "@/components/IncidentList/IncidentList";
 import IncidentMap from "@/components/IncidentMap/IncidentMap";
+import WelcomeToast from "@/components/WelcomeToast/WelcomeToast";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { getAllIncidents } from "@/services/incidentService";
 import type { IncidentListItem } from "@/types/incidentList";
@@ -66,7 +67,8 @@ export default function Home() {
 
 	return (
 		<div className="flex h-full flex-col bg-base-100">
-			<header className="relative isolate flex h-44 shrink-0 flex-col justify-start overflow-hidden bg-primary px-4 pt-18">
+			<WelcomeToast />
+			<header className="relative isolate flex h-36 shrink-0 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
 				<img
 					src={bgHome}
 					alt=""
