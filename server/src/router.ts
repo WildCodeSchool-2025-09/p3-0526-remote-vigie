@@ -111,6 +111,16 @@ router.get(
 	"/api/push-subscriptions/public-key",
 	pushSubscriptionActions.readPublicKey,
 );
+router.post(
+	"/api/push-subscriptions",
+	verifyToken,
+	pushSubscriptionActions.add,
+);
+router.delete(
+	"/api/push-subscriptions",
+	verifyToken,
+	pushSubscriptionActions.destroy,
+);
 
 router.get("/api/addresses/reverse", verifyToken, addressActions.reverse);
 router.get(
