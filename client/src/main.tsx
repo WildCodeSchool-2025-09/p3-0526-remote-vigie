@@ -172,3 +172,14 @@ createRoot(rootElement).render(
 		<RouterProvider router={router} />
 	</AuthProvider>,
 );
+
+// Service worker (US21) : enregistré en production seulement, un worker resté
+// actif en développement pourrait servir de vieux fichiers. Sans effet sur un
+// navigateur qui ne le prend pas en charge.
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+	window.addEventListener("load", () => {
+		navigator.serviceWorker.register("/sw.js").catch((err) => {
+			console.error("Enregistrement du service worker impossible", err);
+		});
+	});
+}
