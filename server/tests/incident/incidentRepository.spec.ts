@@ -15,16 +15,17 @@ describe("incidentRepository.readAllForList", () => {
 			.spyOn(databaseClient, "query")
 			.mockResolvedValue([[]] as never);
 
-		const incidents = await incidentRepository.readAllForList(15);
+		const page = await incidentRepository.readAllForList(15);
 
-		expect(incidents).toStrictEqual([]);
+		expect(page).toStrictEqual({ incidents: [], truncated: false });
 		expect(query).toHaveBeenCalledTimes(1);
 		const [sql, params] = query.mock.calls[0] as unknown as [
 			string,
 			unknown[],
 		];
 		expect(sql).not.toContain("BETWEEN");
-		expect(params).toStrictEqual([15]);
+		// One more row than the limit is requested, to detect a truncation.
+		expect(params).toStrictEqual([16]);
 	});
 
 	it("should filter by position and pass the values in SQL order with bounds", async () => {
@@ -42,8 +43,8 @@ describe("incidentRepository.readAllForList", () => {
 			"WHERE i.latitude BETWEEN ? AND ? AND i.longitude BETWEEN ? AND ?",
 		);
 		expect(sql).toContain("LIMIT ?");
-		// latitude (south, north), longitude (west, east), then the limit.
-		expect(params).toStrictEqual([48.8, 48.9, 2.2, 2.4, 300]);
+		// latitude (south, north), longitude (west, east), then the limit + 1.
+		expect(params).toStrictEqual([48.8, 48.9, 2.2, 2.4, 301]);
 	});
 
 	it("should skip the types query when no incident is in the zone", async () => {
@@ -109,7 +110,10 @@ describe("incidentRepository.readAllForList", () => {
 				],
 			] as never);
 
-		const incidents = await incidentRepository.readAllForList(300, bounds);
+		const { incidents } = await incidentRepository.readAllForList(
+			300,
+			bounds,
+		);
 
 		expect(query.mock.calls[1][1]).toStrictEqual([[2, 1]]);
 		expect(incidents.map((incident) => incident.id)).toStrictEqual([2, 1]);
@@ -126,4 +130,54 @@ describe("incidentRepository.readAllForList", () => {
 		});
 		expect(incidents[1].type).toBeNull();
 	});
+
+	it("should not flag a truncation when exactly `limit` rows come back", async () => {
+		const query = jest
+			.spyOn(databaseClient, "query")
+			.mockResolvedValueOnce([[incidentRow(2), incidentRow(1)]] as never)
+			.mockResolvedValueOnce([[]] as never);
+
+		const page = await incidentRepository.readAllForList(2);
+
+		expect(page.truncated).toBe(false);
+		expect(page.incidents.map((incident) => incident.id)).toStrictEqual([
+			2, 1,
+		]);
+		expect(query.mock.calls[0][1]).toStrictEqual([3]);
+	});
+
+	it("should flag a truncation and drop the extra row when `limit` + 1 rows come back", async () => {
+		const query = jest
+			.spyOn(databaseClient, "query")
+			.mockResolvedValueOnce([
+				[incidentRow(3), incidentRow(2), incidentRow(1)],
+			] as never)
+			.mockResolvedValueOnce([[]] as never);
+
+		const page = await incidentRepository.readAllForList(2);
+
+		expect(page.truncated).toBe(true);
+		expect(page.incidents.map((incident) => incident.id)).toStrictEqual([
+			3, 2,
+		]);
+		// The extra row must not reach the types query.
+		expect(query.mock.calls[1][1]).toStrictEqual([[3, 2]]);
+	});
 });
+
+// A row as returned by the main query of readAllForList.
+function incidentRow(id: number) {
+	return {
+		id,
+		title: `Incident ${id}`,
+		city: "Paris",
+		latitude: "48.850000",
+		longitude: "2.350000",
+		status: "in_progress",
+		created_at: new Date("2026-10-05T10:00:00Z"),
+		expires_at: new Date("2026-10-06T10:00:00Z"),
+		danger_level_label: "Faible",
+		danger_level_color: "#00ff00",
+		danger_level_weight: 1,
+	};
+}

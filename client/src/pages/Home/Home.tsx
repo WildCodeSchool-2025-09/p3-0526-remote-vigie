@@ -17,6 +17,7 @@ const INCIDENTS_LIST_LIMIT = 15;
 export default function Home() {
 	const { user } = useAuth();
 	const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
+	const [isTruncated, setIsTruncated] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
 	// Incident sélectionné, partagé entre la carte et la liste.
@@ -48,6 +49,7 @@ export default function Home() {
 
 			if (result.status === "ok") {
 				setIncidents(result.incidents);
+				setIsTruncated(result.truncated);
 			} else {
 				setHasError(true);
 			}
@@ -118,6 +120,7 @@ export default function Home() {
 					isLoading={isLoading}
 					hasError={hasError}
 					onRetry={loadIncidents}
+					isTruncated={isTruncated}
 					limit={INCIDENTS_LIST_LIMIT}
 					selectedIncidentId={selectedIncidentId}
 					onSelectIncident={handleSelectFromList}

@@ -41,9 +41,10 @@ describe("GET /api/incidents", () => {
 		];
 
 		// Mock the repository so no real database call happens
-		jest.spyOn(incidentRepository, "readAllForList").mockResolvedValue(
-			fakeIncidents,
-		);
+		jest.spyOn(incidentRepository, "readAllForList").mockResolvedValue({
+			incidents: fakeIncidents,
+			truncated: false,
+		});
 
 		// Send a GET request to the /api/incidents endpoint
 		const response = await supertest(app).get("/api/incidents");
@@ -51,13 +52,26 @@ describe("GET /api/incidents", () => {
 		// Assertions: status code and response shape (dates become ISO
 		// strings once serialized to JSON by Express)
 		expect(response.status).toBe(200);
-		expect(response.body).toStrictEqual(
-			fakeIncidents.map((incident) => ({
+		expect(response.body).toStrictEqual({
+			incidents: fakeIncidents.map((incident) => ({
 				...incident,
 				createdAt: incident.createdAt.toISOString(),
 				expiresAt: incident.expiresAt.toISOString(),
 			})),
-		);
+			truncated: false,
+		});
+	});
+
+	it("should forward the truncated flag from the repository", async () => {
+		jest.spyOn(incidentRepository, "readAllForList").mockResolvedValue({
+			incidents: [],
+			truncated: true,
+		});
+
+		const response = await supertest(app).get("/api/incidents");
+
+		expect(response.status).toBe(200);
+		expect(response.body).toStrictEqual({ incidents: [], truncated: true });
 	});
 
 	// Valeurs limites de `limit` : absent, au-dessus du plafond, négatif.
@@ -70,7 +84,7 @@ describe("GET /api/incidents", () => {
 		async ({ query, expectedLimit }) => {
 			const readAllForList = jest
 				.spyOn(incidentRepository, "readAllForList")
-				.mockResolvedValue([]);
+				.mockResolvedValue({ incidents: [], truncated: false });
 
 			const response = await supertest(app).get(`/api/incidents${query}`);
 
@@ -82,7 +96,7 @@ describe("GET /api/incidents", () => {
 	it("should parse north/south/east/west into bounds and raise the limit cap to 300", async () => {
 		const readAllForList = jest
 			.spyOn(incidentRepository, "readAllForList")
-			.mockResolvedValue([]);
+			.mockResolvedValue({ incidents: [], truncated: false });
 
 		const response = await supertest(app).get(
 			"/api/incidents?limit=500&north=51.5&south=41&east=9.8&west=-5.5",
@@ -121,7 +135,7 @@ describe("GET /api/incidents", () => {
 		async ({ query }) => {
 			const readAllForList = jest
 				.spyOn(incidentRepository, "readAllForList")
-				.mockResolvedValue([]);
+				.mockResolvedValue({ incidents: [], truncated: false });
 
 			const response = await supertest(app).get(`/api/incidents${query}`);
 

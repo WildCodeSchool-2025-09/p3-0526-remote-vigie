@@ -2,10 +2,10 @@ import { apiFetch } from "@/services/apiClient";
 import type { Bounds } from "@/types/bounds";
 import type { Incident, IncidentCounts } from "@/types/incidentDetails";
 import type { NearbyIncident } from "@/types/incidentForm";
-import type { IncidentListItem } from "@/types/incidentList";
+import type { IncidentListResponse } from "@/types/incidentList";
 
 type GetAllIncidentsResult =
-	| { status: "ok"; incidents: IncidentListItem[] }
+	| ({ status: "ok" } & IncidentListResponse)
 	| { status: "error" };
 
 export async function getAllIncidents(
@@ -18,7 +18,7 @@ export async function getAllIncidents(
 
 		return {
 			status: "ok",
-			incidents: (await res.json()) as IncidentListItem[],
+			...((await res.json()) as IncidentListResponse),
 		};
 	} catch {
 		return { status: "error" }; // réseau, CORS, JSON illisible
@@ -48,7 +48,7 @@ export async function getIncidentsInBounds(
 
 		return {
 			status: "ok",
-			incidents: (await res.json()) as IncidentListItem[],
+			...((await res.json()) as IncidentListResponse),
 		};
 	} catch {
 		return { status: "error" };

@@ -46,6 +46,11 @@ type IncidentDetails = {
 	myContribution: "confirm" | "deny" | null;
 };
 
+type IncidentListPage = {
+	incidents: IncidentListItem[];
+	truncated: boolean;
+};
+
 type NearbyIncident = {
 	id: number;
 	typeIds: number[];
@@ -61,7 +66,7 @@ class IncidentRepository {
 	async readAllForList(
 		limit: number,
 		bounds: Bounds | null = null,
-	): Promise<IncidentListItem[]> {
+	): Promise<IncidentListPage> {
 		const whereClause = bounds
 			? "WHERE i.latitude BETWEEN ? AND ? AND i.longitude BETWEEN ? AND ?"
 			: "";
@@ -81,14 +86,18 @@ class IncidentRepository {
 			${whereClause}
 			ORDER BY i.created_at DESC, i.id DESC
 			LIMIT ?`,
-			[...whereParams, limit],
+			[...whereParams, limit + 1],
 		);
 
-		if (incidentRows.length === 0) {
-			return [];
+		// The extra row only tells that more incidents exist: it is not returned.
+		const truncated = incidentRows.length > limit;
+		const pageRows = incidentRows.slice(0, limit);
+
+		if (pageRows.length === 0) {
+			return { incidents: [], truncated: false };
 		}
 
-		const ids = incidentRows.map((row) => row.id as number);
+		const ids = pageRows.map((row) => row.id as number);
 
 		const [typeRows] = await databaseClient.query<Rows>(
 			`SELECT
@@ -117,7 +126,7 @@ class IncidentRepository {
 			}
 		}
 
-		return incidentRows.map((row) => ({
+		const incidents = pageRows.map((row) => ({
 			id: row.id,
 			title: row.title,
 			city: row.city,
@@ -133,6 +142,8 @@ class IncidentRepository {
 			},
 			type: principalTypeByIncident.get(row.id) ?? null,
 		}));
+
+		return { incidents, truncated };
 	}
 
 	async read(

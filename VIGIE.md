@@ -713,7 +713,9 @@ saisie d'URL côté US07.
   (`south < north`, `west < east`) ; l'étendue ne dépasse pas 1°. Sinon `400 invalid_bounds`.
   Réponse limitée à 1 000 lieux. Les incidents acceptent des bornes facultatives
   (`GET /api/incidents`), avec une limite de 300 quand elles sont fournies ; des bornes
-  invalides donnent aussi `400`.
+  invalides donnent aussi `400`. La réponse est `{ incidents, truncated }` : le serveur
+  demande `limite + 1` lignes, en renvoie au plus `limite` et passe `truncated` à `true`
+  s'il en a reçu davantage (aucune requête de comptage).
 - **Limites connues** : pas de limitation de débit sur ces routes publiques (à décider au
   déploiement, avec `trust proxy` et la compression) ; pas d'`AbortController` côté carte
   (les réponses périmées sont ignorées) ; pas de test automatisé côté client.

@@ -229,6 +229,7 @@ export default function IncidentMap({
 
 	// Données propres à la carte, indépendantes de la liste (zone visible).
 	const [mapIncidents, setMapIncidents] = useState<IncidentListItem[]>([]);
+	const [mapIncidentsTruncated, setMapIncidentsTruncated] = useState(false);
 	const [mapIncidentsLoading, setMapIncidentsLoading] = useState(true);
 	const [mapError, setMapError] = useState(false);
 
@@ -263,6 +264,7 @@ export default function IncidentMap({
 			if (lastBoundsRef.current !== bounds) return; // réponse périmée
 			if (result.status === "ok") {
 				setMapIncidents(result.incidents);
+				setMapIncidentsTruncated(result.truncated);
 			} else {
 				setMapError(true);
 			}
@@ -345,9 +347,7 @@ export default function IncidentMap({
 
 	// Le serveur plafonne les réponses : à la limite, des éléments sont masqués.
 	const isIncidentLimitReached =
-		!mapIncidentsLoading &&
-		!mapError &&
-		mapIncidents.length >= MAP_INCIDENTS_LIMIT;
+		!mapIncidentsLoading && !mapError && mapIncidentsTruncated;
 	const isPlacesLimitReached =
 		!usefulPlacesLoading &&
 		!usefulPlacesError &&

@@ -40,11 +40,8 @@ const browse: RequestHandler = async (req, res, next) => {
 		const maxLimit = bounds ? MAX_MAP_LIMIT : MAX_LIST_LIMIT;
 		const limit = Math.max(1, Math.min(requested, maxLimit));
 
-		const incidents = await incidentRepository.readAllForList(
-			limit,
-			bounds,
-		);
-		res.status(StatusCodes.OK).json(incidents);
+		const page = await incidentRepository.readAllForList(limit, bounds);
+		res.status(StatusCodes.OK).json(page);
 	} catch (err) {
 		next(err);
 	}

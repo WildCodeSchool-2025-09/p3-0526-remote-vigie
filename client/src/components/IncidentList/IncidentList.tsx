@@ -9,6 +9,7 @@ type IncidentListProps = {
 	isLoading: boolean;
 	hasError: boolean;
 	onRetry: () => void;
+	isTruncated: boolean;
 	limit: number;
 	selectedIncidentId?: number | null;
 	onSelectIncident?: (incident: IncidentListItem) => void;
@@ -34,6 +35,7 @@ export default function IncidentList({
 	isLoading,
 	hasError,
 	onRetry,
+	isTruncated,
 	limit,
 	selectedIncidentId = null,
 	onSelectIncident,
@@ -125,12 +127,11 @@ export default function IncidentList({
 		);
 	}
 
-	// À la limite, d'autres incidents existent peut-être : "Au moins" plutôt qu'un total.
+	// Réponse tronquée : d'autres incidents existent, "Au moins" plutôt qu'un total.
 	const incidentWord = incidents.length > 1 ? "incidents" : "incident";
-	const countLabel =
-		incidents.length === limit
-			? `Au moins ${incidents.length} ${incidentWord}`
-			: `Il y a ${incidents.length} ${incidentWord}`;
+	const countLabel = isTruncated
+		? `Au moins ${incidents.length} ${incidentWord}`
+		: `Il y a ${incidents.length} ${incidentWord}`;
 
 	return (
 		<div className="flex flex-col gap-3">
@@ -159,7 +160,7 @@ export default function IncidentList({
 				))}
 			</ul>
 
-			{incidents.length === limit && (
+			{isTruncated && (
 				<p className="text-center text-xs text-primary/50">
 					Seuls les {limit} incidents les plus récents sont affichés.
 				</p>

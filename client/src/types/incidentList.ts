@@ -25,3 +25,9 @@ export type IncidentListItem = {
 	dangerLevel: IncidentListDangerLevel;
 	type: IncidentListType | null;
 };
+
+// Body of GET /api/incidents; `truncated` is true when more incidents exist than returned.
+export type IncidentListResponse = {
+	incidents: IncidentListItem[];
+	truncated: boolean;
+};
