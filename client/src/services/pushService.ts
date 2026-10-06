@@ -37,6 +37,51 @@ function urlBase64ToBytes(base64Url: string): Uint8Array<ArrayBuffer> {
 	return bytes;
 }
 
+// Sur iOS, le push n'existe que pour un site ajouté à l'écran d'accueil, et à
+// partir d'iOS 16.4. Tant qu'il ne l'est pas, Safari n'expose même pas
+// PushManager : isPushSupported() répond non, et l'utilisateur ne saurait pas
+// qu'une solution existe.
+function isIosDevice(): boolean {
+	if (typeof navigator === "undefined") return false;
+	const ua = navigator.userAgent;
+	// Depuis iPadOS 13, l'iPad se présente comme un Mac (avec un écran tactile).
+	return (
+		/iPhone|iPad|iPod/.test(ua) ||
+		(ua.includes("Macintosh") && navigator.maxTouchPoints > 1)
+	);
+}
+
+// Vigie lancé depuis l'écran d'accueil, sans l'interface du navigateur.
+function isInstalledApp(): boolean {
+	if (typeof navigator === "undefined") return false;
+	const { standalone } = navigator as Navigator & { standalone?: boolean };
+	return (
+		standalone === true ||
+		(typeof window !== "undefined" &&
+			typeof window.matchMedia === "function" &&
+			window.matchMedia("(display-mode: standalone)").matches)
+	);
+}
+
+// Version d'iOS quand le navigateur la donne. L'iPad en mode « Mac » ne la
+// donne pas : on renvoie null et on ne conclut rien.
+function getIosVersion(): [number, number] | null {
+	const match = /(?:iPhone|iPad|iPod).*? OS (\d+)[_.](\d+)/.exec(
+		navigator.userAgent,
+	);
+	return match ? [Number(match[1]), Number(match[2])] : null;
+}
+
+// Appareil iOS où installer Vigie permettrait d'activer le push : pas encore
+// installé, et pas trop ancien pour que l'installation serve à quelque chose.
+function needsInstallToPush(): boolean {
+	if (!isIosDevice() || isInstalledApp()) return false;
+	const version = getIosVersion();
+	if (version == null) return true;
+	const [major, minor] = version;
+	return major > 16 || (major === 16 && minor >= 4);
+}
+
 async function getCurrentSubscription(): Promise<PushSubscription | null> {
 	if (!isPushSupported()) return null;
 	const registration = await navigator.serviceWorker.ready;
@@ -129,6 +174,7 @@ async function unsubscribe(): Promise<void> {
 
 export default {
 	isPushSupported,
+	needsInstallToPush,
 	getPermission,
 	isSubscribed,
 	subscribe,

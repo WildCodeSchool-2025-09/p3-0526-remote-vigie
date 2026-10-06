@@ -1,20 +1,25 @@
 import Icon from "@/components/Icon/Icon";
+import type { PushOptInMode } from "@/components/PushOptInBanner/usePushOptIn";
 
 type PushOptInBannerProps = {
+	mode: PushOptInMode;
 	accepting: boolean;
 	error: string | null;
 	onAccept: () => void;
 	onDismiss: () => void;
 };
 
-// Encart d'invitation à activer les notifications push (US21). Il ne décide
-// pas de son affichage : voir usePushOptIn, utilisé par les pages qui le posent.
+// Encart d'invitation aux notifications push (US21). Il ne décide pas de son
+// affichage : voir usePushOptIn, utilisé par les pages qui le posent.
 export default function PushOptInBanner({
+	mode,
 	accepting,
 	error,
 	onAccept,
 	onDismiss,
 }: PushOptInBannerProps) {
+	const isInstall = mode === "install";
+
 	return (
 		<section
 			aria-labelledby="push-opt-in-title"
@@ -33,32 +38,74 @@ export default function PushOptInBanner({
 						id="push-opt-in-title"
 						className="font-title text-lg font-bold text-primary"
 					>
-						Soyez alerté à temps
+						{isInstall
+							? "Installez Vigie pour être alerté"
+							: "Soyez alerté à temps"}
 					</h2>
-					<p className="mt-1 text-sm text-primary/70">
-						Recevez une notification sur cet appareil quand un
-						incident survient près de chez vous, même si Vigie est
-						fermé.
-					</p>
+					{isInstall ? (
+						<>
+							<p className="mt-1 text-sm text-primary/70">
+								Sur iPhone et iPad, les notifications ne
+								fonctionnent que si Vigie est ajouté à l'écran
+								d'accueil :
+							</p>
+							<ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-primary/70">
+								<li>
+									Touchez le bouton <strong>Partager</strong>{" "}
+									(le carré avec une flèche vers le haut).
+								</li>
+								<li>
+									Choisissez{" "}
+									<strong>« Sur l'écran d'accueil »</strong>.
+								</li>
+								<li>
+									Touchez <strong>Ajouter</strong>, puis
+									ouvrez Vigie depuis sa nouvelle icône.
+								</li>
+							</ol>
+							<p className="mt-2 text-sm text-primary/70">
+								Vous devrez vous reconnecter dans l'application
+								installée, puis activer les notifications.
+							</p>
+						</>
+					) : (
+						<p className="mt-1 text-sm text-primary/70">
+							Recevez une notification sur cet appareil quand un
+							incident survient près de chez vous, même si Vigie
+							est fermé.
+						</p>
+					)}
 				</div>
 			</div>
 			<div className="flex flex-wrap gap-2">
-				<button
-					type="button"
-					onClick={onAccept}
-					disabled={accepting}
-					className="btn btn-accent btn-sm rounded-full border-none px-5 font-bold"
-				>
-					Activer les notifications
-				</button>
-				<button
-					type="button"
-					onClick={onDismiss}
-					disabled={accepting}
-					className="btn btn-sm rounded-full border-2 border-primary bg-transparent px-5 text-primary shadow-none hover:bg-primary/10 disabled:border-primary/20 disabled:text-primary/40"
-				>
-					Plus tard
-				</button>
+				{isInstall ? (
+					<button
+						type="button"
+						onClick={onDismiss}
+						className="btn btn-accent btn-sm rounded-full border-none px-5 font-bold"
+					>
+						J'ai compris
+					</button>
+				) : (
+					<>
+						<button
+							type="button"
+							onClick={onAccept}
+							disabled={accepting}
+							className="btn btn-accent btn-sm rounded-full border-none px-5 font-bold"
+						>
+							Activer les notifications
+						</button>
+						<button
+							type="button"
+							onClick={onDismiss}
+							disabled={accepting}
+							className="btn btn-sm rounded-full border-2 border-primary bg-transparent px-5 text-primary shadow-none hover:bg-primary/10 disabled:border-primary/20 disabled:text-primary/40"
+						>
+							Plus tard
+						</button>
+					</>
+				)}
 			</div>
 			{error && (
 				<p role="alert" className="text-xs font-semibold text-error">

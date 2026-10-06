@@ -94,11 +94,12 @@ export default function Home() {
 				</div>
 			)}
 
-			{pushOptIn.visible && (
+			{pushOptIn.mode != null && (
 				<div
 					className={`relative mb-4 px-4 ${showsEmailVerificationBanner ? "" : "-mt-8"}`}
 				>
 					<PushOptInBanner
+						mode={pushOptIn.mode}
 						accepting={pushOptIn.accepting}
 						error={pushOptIn.error}
 						onAccept={pushOptIn.accept}

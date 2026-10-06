@@ -94,11 +94,12 @@ function NotificationCenter() {
 
 			<EmailNotVerifiedBanner />
 
-			{pushOptIn.visible && (
+			{pushOptIn.mode != null && (
 				<div
 					className={`relative mx-auto w-full max-w-4xl px-4 sm:px-8 ${showsEmailBanner ? "mt-3" : "-mt-8"}`}
 				>
 					<PushOptInBanner
+						mode={pushOptIn.mode}
 						accepting={pushOptIn.accepting}
 						error={pushOptIn.error}
 						onAccept={pushOptIn.accept}
