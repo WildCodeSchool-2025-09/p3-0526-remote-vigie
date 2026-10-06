@@ -116,7 +116,7 @@ async function dispatch({
 	// Started first and not awaited yet: the push must not wait for the e-mails
 	const pushDone = pushService.sendToUsers(
 		recipients.map((recipient) => Number(recipient.user_id)),
-		newIncidentPayload({ incidentId, types, city, isDanger }),
+		newIncidentPayload({ incidentId, city, isDanger }),
 	);
 
 	for (const recipient of recipients) {

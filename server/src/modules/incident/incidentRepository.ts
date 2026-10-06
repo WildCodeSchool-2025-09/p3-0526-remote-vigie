@@ -288,16 +288,20 @@ class IncidentRepository {
 		}));
 	}
 
-	async findOwnerAndStatus(
-		id: number,
-	): Promise<{ userId: number; status: "in_progress" | "resolved" } | null> {
+	async findOwnerAndStatus(id: number): Promise<{
+		userId: number;
+		status: "in_progress" | "resolved";
+		city: string | null;
+	} | null> {
 		const [rows] = await databaseClient.query<Rows>(
-			"SELECT user_id, status FROM incident WHERE id = ?",
+			"SELECT user_id, status, city FROM incident WHERE id = ?",
 			[id],
 		);
 
 		const row = rows[0];
-		return row == null ? null : { userId: row.user_id, status: row.status };
+		return row == null
+			? null
+			: { userId: row.user_id, status: row.status, city: row.city };
 	}
 
 	async findPhotoUrl(id: number): Promise<string | null> {
