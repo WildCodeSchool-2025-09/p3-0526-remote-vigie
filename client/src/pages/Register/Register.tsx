@@ -6,13 +6,14 @@ import PasswordStrengthMeter from "@/components/Register/PasswordStrengthMeter/P
 import SubmitRegister from "@/components/Register/SubmitRegister/SubmitRegister";
 import { readGoogleSignupParams } from "@/utils/readGoogleSignupParams";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import useAddressSearch from "./useAddressSearch";
 import usePasswordStrength from "./usePasswordStrength";
 import useRegisterSubmit from "./useRegisterSubmit";
 
 export default function Register() {
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	// Mode Google (US22) : on arrive de Google avec #pending=…&email=…&name=…
 	const [google] = useState(readGoogleSignupParams);
@@ -58,6 +59,11 @@ export default function Register() {
 	});
 
 	const { score, label } = usePasswordStrength(password);
+	// Arrivée sur /register/google sans les infos de Google (page rechargée,
+	// lien copié) : le jeton a disparu, on renvoie vers la connexion.
+	if (google == null && location.pathname === "/register/google") {
+		return <Navigate to="/login?oauth=interrupted" replace />;
+	}
 
 	return (
 		<div className="min-h-screen bg-base-100">

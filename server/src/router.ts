@@ -42,7 +42,6 @@ router.post(
 	googleAuthActions.completeGoogleSignup,
 );
 
-
 router.get("/api/auth/me", verifyToken, authActions.me);
 
 router.post(

@@ -23,6 +23,8 @@ const oauthMessages: Record<string, string> = {
 	error: "La connexion avec Google a échoué. Réessayez dans un instant, ou utilisez votre mot de passe.",
 	email_unverified:
 		"Votre adresse Google n'est pas vérifiée : elle ne peut pas servir à vous connecter.",
+	interrupted:
+		"Votre inscription avec Google a été interrompue. Recommencez avec « Continuer avec Google ».",
 };
 
 export default function Login() {
