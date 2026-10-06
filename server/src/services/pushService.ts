@@ -92,4 +92,22 @@ async function send(
 	}
 }
 
-export default { send };
+// Bounded concurrency: a dense area must not open hundreds of connections at once
+const BATCH_SIZE = 10;
+
+// Same payload for several users, each user once, in batches
+async function sendToUsers(
+	userIds: number[],
+	payload: PushPayload,
+): Promise<void> {
+	const unique = [...new Set(userIds)];
+	for (let i = 0; i < unique.length; i += BATCH_SIZE) {
+		await Promise.all(
+			unique
+				.slice(i, i + BATCH_SIZE)
+				.map((userId) => send(userId, payload)),
+		);
+	}
+}
+
+export default { send, sendToUsers };

@@ -1,5 +1,7 @@
 import addressRepository from "../modules/address/addressRepository";
 import mailService from "./mailService";
+import { newIncidentPayload } from "./pushPayloads";
+import pushService from "./pushService";
 import withPreposition from "./title";
 
 function escapeHtml(value: string): string {
@@ -111,6 +113,12 @@ async function dispatch({
 
 	const link = `${process.env.CLIENT_URL}/incident/${incidentId}`;
 
+	// Started first and not awaited yet: the push must not wait for the e-mails
+	const pushDone = pushService.sendToUsers(
+		recipients.map((recipient) => Number(recipient.user_id)),
+		newIncidentPayload({ incidentId, types, city, isDanger }),
+	);
+
 	for (const recipient of recipients) {
 		const address =
 			recipient.label ?? recipient.street_line ?? "votre adresse";
@@ -145,6 +153,8 @@ async function dispatch({
 			);
 		}
 	}
+
+	await pushDone;
 }
 
 export default { dispatch };
