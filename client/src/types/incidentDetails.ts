@@ -1,3 +1,5 @@
+import type { AuthorBadge } from "@/types/badge";
+
 export type IncidentStatus = "in_progress" | "resolved";
 
 export type IncidentDangerLevel = {
@@ -9,6 +11,7 @@ export type IncidentDangerLevel = {
 export type IncidentAuthor = {
 	id: number;
 	pseudo: string;
+	badges: AuthorBadge[];
 };
 
 export type IncidentType = {

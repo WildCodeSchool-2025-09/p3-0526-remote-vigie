@@ -66,7 +66,7 @@ export default function Home() {
 
 	return (
 		<div className="flex h-full flex-col bg-base-100">
-			<header className="relative isolate flex h-44 shrink-0 flex-col justify-start overflow-hidden bg-primary px-4 pt-18">
+			<header className="relative isolate flex h-36 shrink-0 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
 				<img
 					src={bgHome}
 					alt=""

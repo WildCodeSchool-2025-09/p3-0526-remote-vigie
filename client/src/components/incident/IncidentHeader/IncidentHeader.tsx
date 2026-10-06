@@ -1,5 +1,6 @@
 import { type IconName, icons } from "@/assets/icons";
 import Icon from "@/components/Icon/Icon";
+import UserBadges from "@/components/UserBadges/UserBadges";
 import type {
 	IncidentAuthor,
 	IncidentDangerLevel,
@@ -115,6 +116,7 @@ export default function IncidentHeader({
 					Par{" "}
 					<strong className="text-primary">{author.pseudo}</strong>
 				</p>
+				<UserBadges badges={author.badges} className="mt-2" />
 			</div>
 		</header>
 	);

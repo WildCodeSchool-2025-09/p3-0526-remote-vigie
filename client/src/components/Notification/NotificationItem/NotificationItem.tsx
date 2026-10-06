@@ -101,10 +101,10 @@ const notificationTypeConfig: Record<string, NotificationTypeConfig> = {
 		title: "Incident résolu",
 	},
 	badge: {
-		title: "Vous avez obtenu un badge",
+		title: "Vous avez obtenu un nouveau badge !",
 		icon: "diamondExclamation",
-		iconStyle: "bg-[var(--bg-warning)] text-[var(--warning)]",
-		border: "border-l-[var(--warning)]",
+		iconStyle: "bg-base-100",
+		border: "border-l-[var(--accent)]",
 	},
 	mention: {
 		title: "Vous êtes cité dans un commentaire",
@@ -147,12 +147,17 @@ function NotificationItem({
 	const typeIconStyle = isIncidentType
 		? incidentType.style
 		: (typeConfig?.iconStyle ?? notificationTypeConfig.mention.iconStyle);
+	const isBadge = notification.type === "badge";
+	const showsBadgeImage = isBadge && Boolean(notification.badge_icon);
 	const isDangerAlert =
 		notification.type === "incident" &&
 		notification.incident_type === "danger";
-	const title = isDangerAlert
-		? "Une personne est en danger près de chez vous"
-		: (typeConfig?.title ?? "Nouvelle notification");
+	const title =
+		isBadge && notification.badge_label
+			? `Vous avez obtenu le badge ${notification.badge_label}`
+			: isDangerAlert
+				? "Une personne est en danger près de chez vous"
+				: (typeConfig?.title ?? "Nouvelle notification");
 	const isUnread = notification.is_read === false;
 	const iconStyle = isUnread ? typeIconStyle : readIconStyle;
 	const typeBorder = isIncidentType
@@ -175,8 +180,8 @@ function NotificationItem({
 	const handleClick = () => {
 		onRead(notification);
 
-		if (notification.type === "badge") {
-			navigate("/profile");
+		if (isBadge) {
+			navigate("/profile/badges");
 			return;
 		}
 
@@ -190,9 +195,25 @@ function NotificationItem({
 			className={`flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 ${borderColor}`}
 		>
 			<div
-				className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ${iconStyle}`}
+				className={`relative flex h-14 w-14 shrink-0 items-center justify-center ${
+					showsBadgeImage ? "" : `rounded-xl ${iconStyle}`
+				}`}
 			>
-				<Icon name={iconName} className="h-7 w-7" aria-hidden="true" />
+				{isBadge && notification.badge_icon ? (
+					<img
+						src={`/badges-png/${notification.badge_icon}`}
+						alt=""
+						className={`size-14 object-contain ${
+							isUnread ? "" : "grayscale opacity-60"
+						}`}
+					/>
+				) : (
+					<Icon
+						name={iconName}
+						className="h-7 w-7"
+						aria-hidden="true"
+					/>
+				)}
 				{notification.type === "incident_resolved" && (
 					<Icon
 						name="checkCircle"
@@ -218,7 +239,8 @@ function NotificationItem({
 					{title}
 				</h2>
 				<p className="mt-1 text-left text-xs text-primary/50">
-					{meta} · {formatDate(notification.created_at)}
+					{meta ? `${meta} · ` : ""}
+					{formatDate(notification.created_at)}
 				</p>
 			</div>
 

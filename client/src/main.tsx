@@ -22,6 +22,7 @@ import NotFound from "@/pages/NotFound/NotFound";
 import NotificationCenter from "@/pages/Notification/NotificationCenter";
 import Numbers from "@/pages/Numbers/Numbers";
 import Profile from "@/pages/Profile/Profile";
+import ProfileBadges from "@/pages/Profile/ProfileBadges";
 import Register from "@/pages/Register/Register";
 import VerifyEmail from "@/pages/VerifyEmail/VerifyEmail";
 
@@ -104,6 +105,10 @@ const router = createBrowserRouter([
 					{
 						path: "profile",
 						element: <Profile />,
+					},
+					{
+						path: "profile/badges",
+						element: <ProfileBadges />,
 					},
 				],
 			},

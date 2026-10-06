@@ -4,6 +4,7 @@ import requireIncidentAuthor from "./middlewares/requireIncidentAuthor";
 import validateLoginInput from "./middlewares/validateLoginInput";
 import addressActions from "./modules/address/addressActions";
 import authActions from "./modules/auth/authActions";
+import badgeActions from "./modules/badge/badgeActions";
 import commentActions from "./modules/comment/commentActions";
 import contributionActions from "./modules/contribution/contributionActions";
 import dangerActions from "./modules/danger/dangerActions";
@@ -31,6 +32,8 @@ const router = express.Router();
 router.post("/api/auth/login", validateLoginInput, authActions.login);
 
 router.get("/api/auth/me", verifyToken, authActions.me);
+
+router.get("/api/badges/me", verifyToken, badgeActions.browse);
 
 router.post(
 	"/api/incidents",
@@ -67,7 +70,11 @@ router.post(
 	contributionActions.add,
 );
 
-router.get("/api/incidents/:id/comments", commentActions.browse);
+router.get(
+	"/api/incidents/:id/comments",
+	attachUserIfPresent,
+	commentActions.browse,
+);
 router.post("/api/incidents/:id/comments", verifyToken, commentActions.add);
 
 router.get("/api/useful-places", usefulPlaceActions.browse);
