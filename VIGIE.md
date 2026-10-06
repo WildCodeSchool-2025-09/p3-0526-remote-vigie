@@ -46,30 +46,30 @@ pas les secours.* Le service accepte des signalements de danger sans garantir au
 
 Deux versions. La **V1** est le socle livrable ; la **V2** regroupe les évolutions.
 Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trello).
-Statut et responsables : état du Trello au 2026-10-05 (listes Terminé / Pull request / En développement / Dans le sprint / Backlog).
+Responsables : état du Trello au 2026-10-05.
 
 ### V1
 
-| US | Intitulé | Prio | Statut | Responsable(s) | Branche |
-|----|----------|------|--------|----------------|---------|
-| US00 | Initialisation du projet (stack, alias, routing, thème, layout) | — | Terminé | Équipe | `feat/US00-init` |
-| US01 | Signaler un incident → alerter les voisins concernés | 1 | Terminé | Laurent Koehler | `feat/US01-incident-form` |
-| US02 | Consulter le détail d'un incident | 1 | Terminé | Frédéric Briand | `feat/US02-incident-details` |
-| US03 | Accéder à la liste de tous les incidents | 2 | Terminé | Guillaume Galinanes | `feat/US03-incident-list` |
-| US04 | Carte interactive (incidents + lieux utiles) | 2 | Terminé | Guillaume Galinanes | `feat/US04-interactive-map` |
-| US05 | S'inscrire (avec adresse géolocalisée + vérification e-mail) | 2 | Terminé | Laurent Koehler | `feat/US05-register` |
-| US06 | Se connecter (JWT en en-tête `Authorization: Bearer`) | 2 | Terminé | Julien Roussel | `feat/US06-login` |
-| US07 | Corriger le contenu descriptif de son incident | 2 | Terminé | Frédéric Briand | `feat/US07-incident-edit` |
-| US08 | Consulter et commenter un incident (fil plat, citations) | 2 | Terminé | Frédéric Briand | `feat/US08-incident-comments` |
-| US09 | Centre de notifications in-app (pastille non lues) | 2 | Terminé | Julien Roussel | `feat/US09-notification-center` |
-| US10 | Rechercher et trier les incidents (+ inclure les résolus) | 2 | En développement | Guillaume Galinanes | `feat/US10-search-sort` |
-| US11 | Bandeau de vigilance météo (Météo-France) selon l'adresse | 3 | En développement | Ivona Galikova | `feat/US11-weather-vigilance` |
-| US12 | Clôture automatique des incidents expirés (tâche planifiée) | 3 | Terminé | Frédéric Briand | `feat/US12-incident-expiry` |
-| US13 | Liste des numéros utiles (bouton sur la Home) | 3 | Terminé | Ivona Galikova | `feat/US13-emergency-numbers` |
-| US14 | Confirmer / infirmer un incident (pilote la durée de vie) | 3 | Terminé | Frédéric Briand | `feat/US14-incident-contributions` |
-| US15 | Partager un incident (menu natif / copie de lien) | 3 | Terminé | Frédéric Briand | `feat/US15-incident-share` |
-| US16 | Barre de navigation fixe + gabarit commun des pages | 3 | Terminé | Julien Roussel | `feat/US16-navigation` |
-| US27 | Ajouter une photo à son signalement depuis son téléphone (vrai upload) | 3 | Terminé | Frédéric Briand | `feat/US27-photo-upload` |
+| US | Intitulé | Prio | Responsable(s) | Branche |
+|----|----------|------|----------------|---------|
+| US00 | Initialisation du projet (stack, alias, routing, thème, layout) | — | Équipe | `feat/US00-init` |
+| US01 | Signaler un incident → alerter les voisins concernés | 1 | Laurent Koehler | `feat/US01-incident-form` |
+| US02 | Consulter le détail d'un incident | 1 | Frédéric Briand | `feat/US02-incident-details` |
+| US03 | Accéder à la liste de tous les incidents | 2 | Guillaume Galinanes | `feat/US03-incident-list` |
+| US04 | Carte interactive (incidents + lieux utiles) | 2 | Guillaume Galinanes | `feat/US04-interactive-map` |
+| US05 | S'inscrire (avec adresse géolocalisée + vérification e-mail) | 2 | Laurent Koehler | `feat/US05-register` |
+| US06 | Se connecter (JWT en en-tête `Authorization: Bearer`) | 2 | Julien Roussel | `feat/US06-login` |
+| US07 | Corriger le contenu descriptif de son incident | 2 | Frédéric Briand | `feat/US07-incident-edit` |
+| US08 | Consulter et commenter un incident (fil plat, citations) | 2 | Frédéric Briand | `feat/US08-incident-comments` |
+| US09 | Centre de notifications in-app (pastille non lues) | 2 | Julien Roussel | `feat/US09-notification-center` |
+| US10 | Rechercher et trier les incidents (+ inclure les résolus) | 2 | Guillaume Galinanes | `feat/US10-search-sort` |
+| US11 | Bandeau de vigilance météo (Météo-France) selon l'adresse | 3 | Ivona Galikova | `feat/US11-weather-vigilance` |
+| US12 | Clôture automatique des incidents expirés (tâche planifiée) | 3 | Frédéric Briand | `feat/US12-incident-expiry` |
+| US13 | Liste des numéros utiles (bouton sur la Home) | 3 | Ivona Galikova | `feat/US13-emergency-numbers` |
+| US14 | Confirmer / infirmer un incident (pilote la durée de vie) | 3 | Frédéric Briand | `feat/US14-incident-contributions` |
+| US15 | Partager un incident (menu natif / copie de lien) | 3 | Frédéric Briand | `feat/US15-incident-share` |
+| US16 | Barre de navigation fixe + gabarit commun des pages | 3 | Julien Roussel | `feat/US16-navigation` |
+| US27 | Ajouter une photo à son signalement depuis son téléphone (vrai upload) | 3 | Frédéric Briand | `feat/US27-photo-upload` |
 
 > **US27 est transverse** : elle remplace, pour US01 (création) et US07 (édition), le repli actuel
 > — un simple champ URL — par un vrai import de fichier (redimensionnement, EXIF, stockage,
@@ -80,18 +80,18 @@ Statut et responsables : état du Trello au 2026-10-05 (listes Terminé / Pull r
 
 ### V2
 
-| US | Intitulé | Prio | Statut | Responsable(s) | Branche |
-|----|----------|------|--------|----------------|---------|
-| US17 | Bouton « Je suis en danger » / SOS (alerte gravité maximale) | 1 | Pull request | Laurent Koehler | `feat/US17-emergency-alert` |
-| US18 | Accéder à son profil et modifier son pseudo | 1 | En développement | Laurent Koehler | `feat/US18-user-profile` |
-| US19 | Réinitialiser son mot de passe oublié (jeton à durée limitée) | 2 | Backlog | Julien Roussel | `feat/US19-password-reset` |
-| US20 | Obtenir des badges (recalcul à la connexion, référentiel en base) | 2 | En développement | Frédéric Briand | `feat/US20-user-badges` |
-| US21 | Web Push + PWA installable (alertes navigateur fermé) | 3 | Dans le sprint | Frédéric Briand | `feat/US21-web-push` |
-| US22 | S'inscrire / se connecter avec un compte tiers (Google…) | 3 | Pull request | Julien Roussel | `feat/US22-oauth-login` |
-| US23 | Alerter selon la position live partagée (opt-in) | 3 | Backlog | Laurent Koehler, Julien Roussel | `feat/US23-live-position-alert` |
-| US24 | Gérer plusieurs adresses depuis le profil | 3 | Backlog | Laurent Koehler | `feat/US24-manage-addresses` |
-| US25 | Pages légales publiques (mentions, confidentialité, CGU) | 3 | Backlog | À affecter | `feat/US25-legal-pages` |
-| US26 | Consulter la liste de ses propres signalements | — | Backlog | À affecter | `feat/US26-my-incidents` |
+| US | Intitulé | Prio | Responsable(s) | Branche |
+|----|----------|------|----------------|---------|
+| US17 | Bouton « Je suis en danger » / SOS (alerte gravité maximale) | 1 | Laurent Koehler | `feat/US17-emergency-alert` |
+| US18 | Accéder à son profil et modifier son pseudo | 1 | Laurent Koehler | `feat/US18-user-profile` |
+| US19 | Réinitialiser son mot de passe oublié (jeton à durée limitée) | 2 | Julien Roussel | `feat/US19-password-reset` |
+| US20 | Obtenir des badges (recalcul à la connexion, référentiel en base) | 2 | Frédéric Briand | `feat/US20-user-badges` |
+| US21 | Web Push + PWA installable (alertes navigateur fermé) | 3 | Frédéric Briand | `feat/US21-web-push` |
+| US22 | S'inscrire / se connecter avec un compte tiers (Google…) | 3 | Julien Roussel | `feat/US22-oauth-login` |
+| US23 | Alerter selon la position live partagée (opt-in) | 3 | Laurent Koehler, Julien Roussel | `feat/US23-live-position-alert` |
+| US24 | Gérer plusieurs adresses depuis le profil | 3 | Laurent Koehler | `feat/US24-manage-addresses` |
+| US25 | Pages légales publiques (mentions, confidentialité, CGU) | 3 | À affecter | `feat/US25-legal-pages` |
+| US26 | Consulter la liste de ses propres signalements | — | À affecter | `feat/US26-my-incidents` |
 
 > Chaque carte Trello porte le contexte complet, le parcours nominal et les parcours
 > alternatifs. Ce tableau est un index : se référer à la carte avant d'ouvrir une branche.
