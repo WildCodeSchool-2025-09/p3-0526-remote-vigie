@@ -1,5 +1,5 @@
 import AbstractSeeder from "./AbstractSeeder";
-import UserSeeder from "./UserSeeder";
+import UserSeeder, { SEED_ADMIN_COUNT, getAdminPosition } from "./UserSeeder";
 
 class AddressSeeder extends AbstractSeeder {
 	constructor() {
@@ -10,6 +10,21 @@ class AddressSeeder extends AbstractSeeder {
 	// The run method - Populate the 'address' table with fake data
 
 	run() {
+		for (let i = 1; i <= SEED_ADMIN_COUNT; i += 1) {
+			const admin = {
+				user_id: this.getRef(`admin_${i}`).insertId,
+				label: "Domicile",
+				street_line: "Adresse de test",
+				postal_code: "68250",
+				city: "Westhalten",
+				insee_code: "68364",
+				...getAdminPosition(i),
+				is_approximate: 0,
+				is_primary: 1,
+			};
+			this.insert(admin);
+		}
+
 		// Generate and insert fake data into the 'address' table
 		for (let i = 0; i < 10; i += 1) {
 			// Generate fake address data matching the `address` table columns
