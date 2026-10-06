@@ -7,6 +7,9 @@ import alertService from "../../services/alertService";
 import { distanceInMeters } from "../../services/distance";
 import isFeminine from "../../services/incidentTypeGender";
 import parseBounds from "../../services/parseBounds";
+import parseListFilters, {
+	MAX_SEARCH_LENGTH,
+} from "../../services/parseListFilters";
 import { deletePhotoFile, savePhoto } from "../../services/photoStorage";
 import withPreposition from "../../services/title";
 import userBadgeRepository from "../badge/userBadgeRepository";
@@ -33,14 +36,32 @@ const browse: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
+		const parsedFilters = parseListFilters(req.query);
+
+		if (parsedFilters.status === "invalid") {
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_search",
+				message: `La recherche doit être un texte de ${MAX_SEARCH_LENGTH} caractères au plus.`,
+			});
+			return;
+		}
+
 		const bounds = parsed.status === "ok" ? parsed.bounds : null;
+		const { filters } = parsedFilters;
+		// A search lists every match up to the ceiling, not just the default page.
+		const defaultLimit = filters.search
+			? MAX_LIST_LIMIT
+			: DEFAULT_LIST_LIMIT;
 		const requested =
-			Number.parseInt(req.query.limit as string, 10) ||
-			DEFAULT_LIST_LIMIT;
+			Number.parseInt(req.query.limit as string, 10) || defaultLimit;
 		const maxLimit = bounds ? MAX_MAP_LIMIT : MAX_LIST_LIMIT;
 		const limit = Math.max(1, Math.min(requested, maxLimit));
 
-		const page = await incidentRepository.readAllForList(limit, bounds);
+		const page = await incidentRepository.readAllForList(
+			limit,
+			bounds,
+			filters,
+		);
 		res.status(StatusCodes.OK).json(page);
 	} catch (err) {
 		next(err);

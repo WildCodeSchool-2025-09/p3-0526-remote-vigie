@@ -15,6 +15,13 @@ afterEach(() => {
 	jest.restoreAllMocks();
 });
 
+// Filters applied when the query carries none.
+const defaultFilters = {
+	includeResolved: false,
+	sort: "date",
+	search: null,
+};
+
 // Test suite for the GET /api/incidents route
 describe("GET /api/incidents", () => {
 	it("should fetch incidents successfully", async () => {
@@ -89,7 +96,11 @@ describe("GET /api/incidents", () => {
 			const response = await supertest(app).get(`/api/incidents${query}`);
 
 			expect(response.status).toBe(200);
-			expect(readAllForList).toHaveBeenCalledWith(expectedLimit, null);
+			expect(readAllForList).toHaveBeenCalledWith(
+				expectedLimit,
+				null,
+				defaultFilters,
+			);
 		},
 	);
 
@@ -103,13 +114,88 @@ describe("GET /api/incidents", () => {
 		);
 
 		expect(response.status).toBe(200);
-		expect(readAllForList).toHaveBeenCalledWith(300, {
-			north: 51.5,
-			south: 41,
-			east: 9.8,
-			west: -5.5,
-		});
+		expect(readAllForList).toHaveBeenCalledWith(
+			300,
+			{
+				north: 51.5,
+				south: 41,
+				east: 9.8,
+				west: -5.5,
+			},
+			defaultFilters,
+		);
 	});
+
+	// Sans recherche : filtre « en cours » et tri par date. Une valeur de tri
+	// inconnue retombe sur la date au lieu de produire une erreur.
+	it.each([
+		{
+			query: "?includeResolved=true",
+			filters: { includeResolved: true, sort: "date", search: null },
+		},
+		{
+			query: "?sort=severity",
+			filters: { includeResolved: false, sort: "severity", search: null },
+		},
+		{
+			query: "?sort=nonsense",
+			filters: { includeResolved: false, sort: "date", search: null },
+		},
+		{
+			query: "?search=%20feu%20&sort=severity&includeResolved=true",
+			filters: { includeResolved: true, sort: "severity", search: "feu" },
+		},
+	])(
+		"should pass the filters of GET /api/incidents$query",
+		async ({ query, filters }) => {
+			const readAllForList = jest
+				.spyOn(incidentRepository, "readAllForList")
+				.mockResolvedValue({ incidents: [], truncated: false });
+
+			const response = await supertest(app).get(`/api/incidents${query}`);
+
+			expect(response.status).toBe(200);
+			expect(readAllForList.mock.calls[0][2]).toStrictEqual(filters);
+		},
+	);
+
+	// Avec une recherche, la page par défaut (15) laisse la place au plafond (100).
+	it.each([
+		{ query: "?search=feu", expectedLimit: 100 },
+		{ query: "?search=feu&limit=20", expectedLimit: 20 },
+		{ query: "?search=feu&limit=500", expectedLimit: 100 },
+		{ query: "?search=%20%20", expectedLimit: 15 },
+	])(
+		"should resolve GET /api/incidents$query to limit=$expectedLimit",
+		async ({ query, expectedLimit }) => {
+			const readAllForList = jest
+				.spyOn(incidentRepository, "readAllForList")
+				.mockResolvedValue({ incidents: [], truncated: false });
+
+			const response = await supertest(app).get(`/api/incidents${query}`);
+
+			expect(response.status).toBe(200);
+			expect(readAllForList.mock.calls[0][0]).toBe(expectedLimit);
+		},
+	);
+
+	it.each([
+		{ label: "too long", query: `?search=${"a".repeat(101)}` },
+		{ label: "repeated", query: "?search=a&search=b" },
+	])(
+		"should reject a $label search with 400 and never query the database",
+		async ({ query }) => {
+			const readAllForList = jest
+				.spyOn(incidentRepository, "readAllForList")
+				.mockResolvedValue({ incidents: [], truncated: false });
+
+			const response = await supertest(app).get(`/api/incidents${query}`);
+
+			expect(response.status).toBe(400);
+			expect(response.body.error).toBe("invalid_search");
+			expect(readAllForList).not.toHaveBeenCalled();
+		},
+	);
 
 	// Bornes facultatives, mais refusées si elles sont fournies et fausses :
 	// jamais de repli silencieux sur « pas de filtre ».

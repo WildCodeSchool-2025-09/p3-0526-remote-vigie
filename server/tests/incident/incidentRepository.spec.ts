@@ -40,7 +40,7 @@ describe("incidentRepository.readAllForList", () => {
 			unknown[],
 		];
 		expect(sql).toContain(
-			"WHERE i.latitude BETWEEN ? AND ? AND i.longitude BETWEEN ? AND ?",
+			"i.latitude BETWEEN ? AND ? AND i.longitude BETWEEN ? AND ?",
 		);
 		expect(sql).toContain("LIMIT ?");
 		// latitude (south, north), longitude (west, east), then the limit + 1.
@@ -181,3 +181,152 @@ function incidentRow(id: number) {
 		danger_level_weight: 1,
 	};
 }
+
+// First query sent by readAllForList: the SQL text and its parameters.
+function mainQuery(query: jest.SpyInstance) {
+	return query.mock.calls[0] as unknown as [string, unknown[]];
+}
+
+describe("incidentRepository.readAllForList filters", () => {
+	const ongoing = "i.status = 'in_progress' AND i.expires_at > NOW()";
+
+	it("should keep only ongoing, not expired incidents by default", async () => {
+		const query = jest
+			.spyOn(databaseClient, "query")
+			.mockResolvedValue([[]] as never);
+
+		await incidentRepository.readAllForList(15);
+
+		const [sql, params] = mainQuery(query);
+		expect(sql).toContain(`WHERE ${ongoing}`);
+		expect(params).toStrictEqual([16]);
+	});
+
+	it("should drop the status and expiry condition with includeResolved", async () => {
+		const query = jest
+			.spyOn(databaseClient, "query")
+			.mockResolvedValue([[]] as never);
+
+		await incidentRepository.readAllForList(15, null, {
+			includeResolved: true,
+			sort: "date",
+			search: null,
+		});
+
+		const [sql, params] = mainQuery(query);
+		expect(sql).not.toContain("WHERE");
+		expect(sql).not.toContain("expires_at >");
+		expect(params).toStrictEqual([16]);
+	});
+
+	it.each([
+		{
+			sort: "date" as const,
+			orderBy: "ORDER BY i.created_at DESC, i.id DESC",
+		},
+		{
+			sort: "severity" as const,
+			orderBy: "ORDER BY d.weight DESC, i.created_at DESC, i.id DESC",
+		},
+	])("should order by $sort", async ({ sort, orderBy }) => {
+		const query = jest
+			.spyOn(databaseClient, "query")
+			.mockResolvedValue([[]] as never);
+
+		await incidentRepository.readAllForList(15, null, {
+			includeResolved: false,
+			sort,
+			search: null,
+		});
+
+		expect(mainQuery(query)[0]).toContain(orderBy);
+	});
+
+	it("should search title, description, city and type labels with four identical parameters", async () => {
+		const query = jest
+			.spyOn(databaseClient, "query")
+			.mockResolvedValue([[]] as never);
+
+		await incidentRepository.readAllForList(100, null, {
+			includeResolved: false,
+			sort: "date",
+			search: "feu",
+		});
+
+		const [sql, params] = mainQuery(query);
+		expect(sql).toContain("i.title LIKE ?");
+		expect(sql).toContain("i.description LIKE ?");
+		expect(sql).toContain("i.city LIKE ?");
+		expect(sql).toContain("st.label LIKE ?");
+		// Types are matched with EXISTS: no join, so no duplicated incident.
+		expect(sql).toContain("EXISTS");
+		// The text itself never reaches the SQL, only its parameters.
+		expect(sql).not.toContain("feu");
+		expect(params).toStrictEqual(["%feu%", "%feu%", "%feu%", "%feu%", 101]);
+	});
+
+	it("should escape the LIKE wildcards and the escape character of the search", async () => {
+		const query = jest
+			.spyOn(databaseClient, "query")
+			.mockResolvedValue([[]] as never);
+
+		await incidentRepository.readAllForList(100, null, {
+			includeResolved: false,
+			sort: "date",
+			search: "50%_a\\b",
+		});
+
+		// 50%_a\b becomes 50\%\_a\\b: each special character is prefixed by `\`.
+		const pattern = "%50\\%\\_a\\\\b%";
+		expect(mainQuery(query)[1]).toStrictEqual([
+			pattern,
+			pattern,
+			pattern,
+			pattern,
+			101,
+		]);
+	});
+
+	it("should pass bounds, then search values, then the limit, in SQL order", async () => {
+		const query = jest
+			.spyOn(databaseClient, "query")
+			.mockResolvedValue([[]] as never);
+
+		await incidentRepository.readAllForList(300, bounds, {
+			includeResolved: true,
+			sort: "severity",
+			search: "x",
+		});
+
+		const [sql, params] = mainQuery(query);
+		expect(sql.indexOf("BETWEEN")).toBeLessThan(sql.indexOf("LIKE"));
+		expect(params).toStrictEqual([
+			48.8,
+			48.9,
+			2.2,
+			2.4,
+			"%x%",
+			"%x%",
+			"%x%",
+			"%x%",
+			301,
+		]);
+	});
+
+	it("should combine every condition with AND", async () => {
+		const query = jest
+			.spyOn(databaseClient, "query")
+			.mockResolvedValue([[]] as never);
+
+		await incidentRepository.readAllForList(300, bounds, {
+			includeResolved: false,
+			sort: "date",
+			search: "x",
+		});
+
+		const [sql] = mainQuery(query);
+		expect(sql).toContain(
+			`WHERE ${ongoing} AND i.latitude BETWEEN ? AND ? AND i.longitude BETWEEN ? AND ? AND (i.title LIKE ?`,
+		);
+	});
+});
