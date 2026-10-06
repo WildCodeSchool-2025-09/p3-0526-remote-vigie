@@ -48,10 +48,12 @@ const browse: RequestHandler = async (req, res, next) => {
 
 		const bounds = parsed.status === "ok" ? parsed.bounds : null;
 		const { filters } = parsedFilters;
-		// A search lists every match up to the ceiling, not just the default page.
-		const defaultLimit = filters.search
-			? MAX_LIST_LIMIT
-			: DEFAULT_LIST_LIMIT;
+		// A search, or resolved incidents included, lists every match up to the
+		// ceiling, not just the default page.
+		const defaultLimit =
+			filters.search || filters.includeResolved
+				? MAX_LIST_LIMIT
+				: DEFAULT_LIST_LIMIT;
 		const requested =
 			Number.parseInt(req.query.limit as string, 10) || defaultLimit;
 		const maxLimit = bounds ? MAX_MAP_LIMIT : MAX_LIST_LIMIT;

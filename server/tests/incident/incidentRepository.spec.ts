@@ -225,8 +225,16 @@ describe("incidentRepository.readAllForList filters", () => {
 			orderBy: "ORDER BY i.created_at DESC, i.id DESC",
 		},
 		{
+			sort: "date_asc" as const,
+			orderBy: "ORDER BY i.created_at ASC, i.id ASC",
+		},
+		{
 			sort: "severity" as const,
 			orderBy: "ORDER BY d.weight DESC, i.created_at DESC, i.id DESC",
+		},
+		{
+			sort: "severity_asc" as const,
+			orderBy: "ORDER BY d.weight ASC, i.created_at DESC, i.id DESC",
 		},
 	])("should order by $sort", async ({ sort, orderBy }) => {
 		const query = jest

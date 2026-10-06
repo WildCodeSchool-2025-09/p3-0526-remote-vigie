@@ -1,4 +1,9 @@
-export const INCIDENT_SORTS = ["date", "severity"] as const;
+export const INCIDENT_SORTS = [
+	"date",
+	"date_asc",
+	"severity",
+	"severity_asc",
+] as const;
 export type IncidentSort = (typeof INCIDENT_SORTS)[number];
 
 export const MAX_SEARCH_LENGTH = 100;

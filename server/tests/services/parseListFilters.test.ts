@@ -12,7 +12,10 @@ describe("parseListFilters", () => {
 
 	test.each([
 		{ value: "date", expected: "date" },
+		{ value: "date_asc", expected: "date_asc" },
 		{ value: "severity", expected: "severity" },
+		{ value: "severity_asc", expected: "severity_asc" },
+		{ value: "asc", expected: "date" },
 		{ value: "gravité", expected: "date" },
 		{ value: "DATE", expected: "date" },
 		{ value: "created_at; DROP TABLE incident", expected: "date" },

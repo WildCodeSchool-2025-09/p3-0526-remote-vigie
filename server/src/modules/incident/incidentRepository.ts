@@ -74,7 +74,9 @@ const DEFAULT_LIST_FILTERS: ListFilters = {
 // Never built from user input: `sort` is whitelisted by parseListFilters.
 const SORT_CLAUSES: Record<IncidentSort, string> = {
 	date: "i.created_at DESC, i.id DESC",
+	date_asc: "i.created_at ASC, i.id ASC",
 	severity: "d.weight DESC, i.created_at DESC, i.id DESC",
+	severity_asc: "d.weight ASC, i.created_at DESC, i.id DESC",
 };
 
 // `\`, `%` and `_` are escape or wildcard characters in a LIKE pattern.

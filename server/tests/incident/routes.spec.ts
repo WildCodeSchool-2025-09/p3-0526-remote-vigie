@@ -138,6 +138,18 @@ describe("GET /api/incidents", () => {
 			filters: { includeResolved: false, sort: "severity", search: null },
 		},
 		{
+			query: "?sort=date_asc",
+			filters: { includeResolved: false, sort: "date_asc", search: null },
+		},
+		{
+			query: "?sort=severity_asc",
+			filters: {
+				includeResolved: false,
+				sort: "severity_asc",
+				search: null,
+			},
+		},
+		{
 			query: "?sort=nonsense",
 			filters: { includeResolved: false, sort: "date", search: null },
 		},
@@ -159,12 +171,17 @@ describe("GET /api/incidents", () => {
 		},
 	);
 
-	// Avec une recherche, la page par défaut (15) laisse la place au plafond (100).
+	// Avec une recherche ou les résolus inclus, la page par défaut (15) laisse la
+	// place au plafond (100).
 	it.each([
 		{ query: "?search=feu", expectedLimit: 100 },
 		{ query: "?search=feu&limit=20", expectedLimit: 20 },
 		{ query: "?search=feu&limit=500", expectedLimit: 100 },
 		{ query: "?search=%20%20", expectedLimit: 15 },
+		{ query: "?includeResolved=true", expectedLimit: 100 },
+		{ query: "?includeResolved=true&limit=20", expectedLimit: 20 },
+		{ query: "?includeResolved=true&limit=500", expectedLimit: 100 },
+		{ query: "?includeResolved=false", expectedLimit: 15 },
 	])(
 		"should resolve GET /api/incidents$query to limit=$expectedLimit",
 		async ({ query, expectedLimit }) => {
