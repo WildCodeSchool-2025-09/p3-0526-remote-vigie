@@ -1,10 +1,20 @@
 import googleLogo from "@/assets/images/google-logo.svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // Lien vers la connexion Google (US22). Il passe par le serveur Vigie, qui
 // redirige vers Google : le front ne contacte jamais Google directement.
 export default function GoogleButton() {
 	const [redirecting, setRedirecting] = useState(false);
+
+	// Retour arrière depuis Google : le navigateur peut réafficher la page
+	// depuis son cache, bouton encore en « Redirection… ». On le remet à zéro.
+	useEffect(() => {
+		const reset = (event: PageTransitionEvent) => {
+			if (event.persisted) setRedirecting(false);
+		};
+		window.addEventListener("pageshow", reset);
+		return () => window.removeEventListener("pageshow", reset);
+	}, []);
 
 	return (
 		<a
