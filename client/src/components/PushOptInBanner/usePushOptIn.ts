@@ -8,16 +8,9 @@ import { useAuth } from "@/contexts/auth/AuthContext";
 import pushService from "@/services/pushService";
 import { useCallback, useEffect, useState } from "react";
 
-// "activate" : proposer d'activer les notifications.
-// "install" : iPhone ou iPad où Vigie n'est pas installé, on explique comment
-// l'ajouter à l'écran d'accueil à la place.
+// "install": iOS device without the app installed, show how to add it instead
 export type PushOptInMode = "activate" | "install";
 
-// Logique de l'encart d'activation (US21). Il est proposé à un utilisateur
-// connecté qui n'a pas encore répondu sur cet appareil, si le navigateur prend
-// en charge le push, que l'autorisation n'est pas déjà refusée dans ses
-// réglages (on ne peut plus la redemander, le profil l'explique) et que
-// l'appareil n'est pas déjà abonné.
 export function usePushOptIn() {
 	const { user } = useAuth();
 	const userId = user?.id ?? null;
@@ -51,9 +44,7 @@ export function usePushOptIn() {
 		};
 	}, [userId]);
 
-	// Accepter, refuser dans la fenêtre du navigateur ou la fermer comptent
-	// toutes comme une réponse. Seule une panne technique n'en est pas une : on
-	// garde l'encart pour que l'utilisateur puisse réessayer.
+	// Only a technical failure is not an answer: keep the banner to retry
 	const accept = useCallback(async () => {
 		if (userId == null) return;
 		setAccepting(true);
@@ -69,7 +60,6 @@ export function usePushOptIn() {
 		}
 	}, [userId]);
 
-	// « Plus tard » (activation) ou « J'ai compris » (installation iOS).
 	const dismiss = useCallback(() => {
 		if (userId == null) return;
 		if (mode === "install") markInstallHintClosed(userId);

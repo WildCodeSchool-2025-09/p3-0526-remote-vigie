@@ -1,11 +1,9 @@
 import IosInstallSteps from "@/components/PushOptInBanner/IosInstallSteps";
 import { usePushSettings } from "@/components/PushSettings/usePushSettings";
 
-// Réglage des notifications push de l'appareil courant (US21), dans le profil.
 export default function PushSettings() {
 	const { state, busy, error, toggle } = usePushSettings();
 
-	// État inconnu, ou navigateur sans push : rien n'est proposé.
 	if (state == null) return null;
 	if (!state.needsInstall && state.permission === "unsupported") return null;
 

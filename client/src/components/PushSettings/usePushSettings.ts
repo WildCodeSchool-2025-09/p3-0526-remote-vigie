@@ -9,8 +9,6 @@ type PushSettingsState = {
 	needsInstall: boolean;
 };
 
-// Réglage des notifications push de l'appareil courant, dans le profil (US21).
-// `state` reste null tant que l'état de l'appareil n'est pas connu.
 export function usePushSettings() {
 	const { user } = useAuth();
 	const userId = user?.id ?? null;
@@ -35,8 +33,7 @@ export function usePushSettings() {
 		};
 		update();
 
-		// L'utilisateur peut rétablir l'autorisation dans les réglages du navigateur
-		// puis revenir : on se remet à jour sans qu'il ait à recharger la page.
+		// Refresh when the user comes back from the browser settings
 		window.addEventListener("focus", update);
 		let permissionStatus: PermissionStatus | null = null;
 		if (pushService.isPushSupported() && navigator.permissions?.query) {
@@ -67,8 +64,7 @@ export function usePushSettings() {
 			} else {
 				await pushService.subscribe();
 			}
-			// L'utilisateur a choisi depuis le profil : l'encart n'a plus à le
-			// solliciter, y compris s'il désactive ensuite.
+			// Answered from the profile: the banner must not come back after a disable
 			markPushPromptAnswered(userId);
 		} catch {
 			setError(

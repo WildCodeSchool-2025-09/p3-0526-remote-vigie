@@ -1,6 +1,3 @@
-// Marche à suivre pour ajouter Vigie à l'écran d'accueil d'un iPhone ou d'un
-// iPad (US21) : le push n'y existe que pour un site installé. Partagée par
-// l'encart d'activation et le réglage du profil.
 export default function IosInstallSteps() {
 	return (
 		<>

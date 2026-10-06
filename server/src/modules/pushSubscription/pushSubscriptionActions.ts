@@ -4,14 +4,11 @@ import pushSubscriptionRepository from "./pushSubscriptionRepository";
 
 // Only BREAD here (Browse, Read, Edit, Add, Delete)
 
-// Limites des colonnes de push_subscription.
 const MAX_ENDPOINT_LENGTH = 512;
 const MAX_KEY_LENGTH = 255;
 const MAX_USER_AGENT_LENGTH = 255;
 
-// Le serveur enverra plus tard une requête vers cette adresse : on n'accepte
-// qu'une URL https vers un nom de domaine public, jamais une adresse IP ni un
-// hôte local, pour qu'on ne puisse pas faire viser le réseau interne (SSRF).
+// Reject IPs and local hosts: the server will later call this URL (SSRF)
 function isAcceptableEndpoint(value: unknown): value is string {
 	if (
 		typeof value !== "string" ||
@@ -60,8 +57,6 @@ function getAuthenticatedUserId(req: Parameters<RequestHandler>[0]) {
 	return Number(sub);
 }
 
-// Clé publique VAPID : le navigateur en a besoin pour s'abonner (US21).
-// Elle n'est pas secrète, la route est donc publique.
 const readPublicKey: RequestHandler = (_req, res) => {
 	const publicKey = process.env.VAPID_PUBLIC_KEY;
 
@@ -76,8 +71,6 @@ const readPublicKey: RequestHandler = (_req, res) => {
 	res.json({ publicKey });
 };
 
-// Enregistre l'appareil courant. Le corps reprend la forme de l'abonnement du
-// navigateur : { endpoint, keys: { p256dh, auth } }.
 const add: RequestHandler = async (req, res, next) => {
 	try {
 		const { endpoint, keys } = req.body ?? {};
@@ -112,7 +105,6 @@ const add: RequestHandler = async (req, res, next) => {
 	}
 };
 
-// Retire l'appareil courant, seulement s'il appartient à l'utilisateur connecté.
 const destroy: RequestHandler = async (req, res, next) => {
 	try {
 		const endpoint = req.body?.endpoint;

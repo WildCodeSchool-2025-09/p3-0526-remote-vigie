@@ -10,8 +10,6 @@ type PushOptInBannerProps = {
 	onDismiss: () => void;
 };
 
-// Encart d'invitation aux notifications push (US21). Il ne décide pas de son
-// affichage : voir usePushOptIn, utilisé par les pages qui le posent.
 export default function PushOptInBanner({
 	mode,
 	accepting,

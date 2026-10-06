@@ -12,7 +12,6 @@ export type PushSubscriptionInput = {
 	userAgent: string | null;
 };
 
-// Ce dont l'envoi d'un push a besoin pour joindre un appareil.
 export type PushSubscriptionTarget = {
 	endpoint: string;
 	p256dh_key: string;
@@ -20,9 +19,7 @@ export type PushSubscriptionTarget = {
 };
 
 class PushSubscriptionRepository {
-	// Upsert sur l'adresse d'abonnement : un appareil n'est jamais dupliqué, et il
-	// appartient à un seul compte. Si l'adresse existe déjà, le dernier compte qui
-	// l'active la reprend. `created_at` garde la date de première inscription.
+	// Upsert on endpoint: the last account to activate a device takes it over
 	async create(
 		{
 			userId,
@@ -59,8 +56,6 @@ class PushSubscriptionRepository {
 		return rows as PushSubscriptionTarget[];
 	}
 
-	// Nettoyage automatique (relais qui répond 404 ou 410) : décidé par le
-	// système, pas de compte à vérifier.
 	async deleteByEndpoint(
 		endpoint: string,
 		executor: Executor = databaseClient,
@@ -71,9 +66,6 @@ class PushSubscriptionRepository {
 		);
 	}
 
-	// Désactivation depuis le profil : le user_id empêche de retirer l'appareil
-	// d'un autre compte en connaissant son adresse. Renvoie false si rien n'a été
-	// supprimé.
 	async deleteByUserAndEndpoint(
 		userId: number,
 		endpoint: string,

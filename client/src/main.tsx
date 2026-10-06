@@ -173,9 +173,7 @@ createRoot(rootElement).render(
 	</AuthProvider>,
 );
 
-// Service worker (US21) : enregistré en production seulement, un worker resté
-// actif en développement pourrait servir de vieux fichiers. Sans effet sur un
-// navigateur qui ne le prend pas en charge.
+// Service worker: production only, a stale one could serve old files in dev
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
 	window.addEventListener("load", () => {
 		navigator.serviceWorker.register("/sw.js").catch((err) => {
