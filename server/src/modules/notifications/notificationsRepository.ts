@@ -26,8 +26,10 @@ class NotificationsRepository {
             WHERE incident_incident_type.incident_id = incident.id
             ORDER BY danger_level.weight DESC, incident_type.code ASC
             LIMIT 1
-           ) AS incident_type
-
+           ) AS incident_type,
+           NULL AS badge_code,
+           NULL AS badge_label,
+           NULL AS badge_icon
          FROM incident
          WHERE incident.user_id != ?
            AND incident.status = 'in_progress'
@@ -53,7 +55,10 @@ class NotificationsRepository {
            incident.title AS incident_title,
            incident.city,
            incident.status,
-           NULL AS incident_type
+           NULL AS incident_type,
+           NULL AS badge_code,
+           NULL AS badge_label,
+           NULL AS badge_icon
          FROM comment
          JOIN incident ON incident.id = comment.incident_id
          WHERE incident.user_id = ?
@@ -78,7 +83,10 @@ class NotificationsRepository {
             WHERE incident_incident_type.incident_id = incident.id
             ORDER BY danger_level.weight DESC, incident_type.code ASC
             LIMIT 1
-           ) AS incident_type
+           ) AS incident_type,
+           NULL AS badge_code,
+           NULL AS badge_label,
+           NULL AS badge_icon
          FROM incident
          WHERE incident.user_id = ?
            AND incident.status = 'resolved'
@@ -102,8 +110,10 @@ class NotificationsRepository {
             WHERE incident_incident_type.incident_id = incident.id
             ORDER BY danger_level.weight DESC, incident_type.code ASC
             LIMIT 1
-           ) AS incident_type
-
+           ) AS incident_type,
+           NULL AS badge_code,
+           NULL AS badge_label,
+           NULL AS badge_icon
          FROM incident
          WHERE incident.user_id != ?
            AND incident.status = 'resolved'
@@ -128,7 +138,10 @@ class NotificationsRepository {
            incident.title AS incident_title,
            incident.city,
            incident.status,
-           NULL AS incident_type
+           NULL AS incident_type,
+           NULL AS badge_code,
+           NULL AS badge_label,
+           NULL AS badge_icon
          FROM comment AS c
          JOIN comment AS quoted ON quoted.id = c.quoted_comment_id
          JOIN incident ON incident.id = c.incident_id
@@ -136,6 +149,25 @@ class NotificationsRepository {
            AND c.user_id != ?
            AND incident.user_id != quoted.user_id
            AND (? IS NULL OR c.created_at > ?)
+       )
+       UNION ALL
+       (
+         SELECT
+           'badge' AS type,
+           badge.id AS source_id,
+           user_badge.earned_at AS created_at,
+           NULL AS incident_id,
+           NULL AS incident_title,
+           NULL AS city,
+           NULL AS status,
+           NULL AS incident_type,
+           badge.code AS badge_code,
+           badge.label AS badge_label,
+           badge.icon AS badge_icon
+         FROM user_badge
+         JOIN badge ON badge.id = user_badge.badge_id
+         WHERE user_badge.user_id = ?
+           AND (? IS NULL OR user_badge.earned_at > ?)
        )
        ORDER BY created_at DESC
        LIMIT ? OFFSET ?`,
@@ -156,6 +188,9 @@ class NotificationsRepository {
 				lastSeenAt,
 				userId,
 				userId,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
 				userId,
 				lastSeenAt,
 				lastSeenAt,
@@ -215,6 +250,10 @@ class NotificationsRepository {
            AND c.user_id != ?
            AND incident.user_id != quoted.user_id
            AND (? IS NULL OR c.created_at > ?)
+         UNION ALL
+         SELECT user_badge.badge_id FROM user_badge
+         WHERE user_badge.user_id = ?
+           AND (? IS NULL OR user_badge.earned_at > ?)
        ) AS events`,
 			[
 				userId,
@@ -233,6 +272,9 @@ class NotificationsRepository {
 				lastSeenAt,
 				userId,
 				userId,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
 				userId,
 				lastSeenAt,
 				lastSeenAt,

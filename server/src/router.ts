@@ -5,8 +5,10 @@ import validateLoginInput from "./middlewares/validateLoginInput";
 import addressActions from "./modules/address/addressActions";
 import authActions from "./modules/auth/authActions";
 import googleAuthActions from "./modules/auth/googleAuthActions";
+import badgeActions from "./modules/badge/badgeActions";
 import commentActions from "./modules/comment/commentActions";
 import contributionActions from "./modules/contribution/contributionActions";
+import dangerActions from "./modules/danger/dangerActions";
 import incidentActions from "./modules/incident/incidentActions";
 import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
@@ -44,6 +46,8 @@ router.post(
 
 router.get("/api/auth/me", verifyToken, authActions.me);
 
+router.get("/api/badges/me", verifyToken, badgeActions.browse);
+
 router.post(
 	"/api/incidents",
 	verifyToken,
@@ -51,6 +55,12 @@ router.post(
 	checkIncidentRateLimit,
 	decodePhoto,
 	incidentActions.add,
+);
+router.post(
+	"/api/incidents/danger",
+	verifyToken,
+	checkIncidentRateLimit,
+	dangerActions.add,
 );
 
 router.get("/uploads/:filename", photoActions.read);
@@ -73,7 +83,11 @@ router.post(
 	contributionActions.add,
 );
 
-router.get("/api/incidents/:id/comments", commentActions.browse);
+router.get(
+	"/api/incidents/:id/comments",
+	attachUserIfPresent,
+	commentActions.browse,
+);
 router.post("/api/incidents/:id/comments", verifyToken, commentActions.add);
 
 router.get("/api/useful-places", usefulPlaceActions.browse);

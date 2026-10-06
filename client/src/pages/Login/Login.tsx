@@ -88,7 +88,7 @@ export default function Login() {
 
 	return (
 		<main className="min-h-full bg-base-100 pb-10">
-			<header className="relative isolate overflow-hidden bg-primary px-4 pt-8 pb-14">
+			<header className="relative isolate flex h-36 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
 				<img
 					src={backgroundIncident}
 					alt=""

@@ -1,4 +1,5 @@
 import Icon from "@/components/Icon/Icon";
+import UserBadges from "@/components/UserBadges/UserBadges";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import type { Comment } from "@/types/comment";
 import type { IncidentStatus } from "@/types/incidentDetails";
@@ -41,6 +42,7 @@ export default function CommentItem({
 					{formatDateTime(comment.createdAt)}
 				</span>
 			</div>
+			<UserBadges badges={comment.author.badges} className="mt-1" />
 
 			{comment.quotedComment && isQuoteLong && (
 				<button

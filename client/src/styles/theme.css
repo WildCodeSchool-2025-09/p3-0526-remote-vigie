@@ -54,6 +54,8 @@
 	--bg-animal: #e1ddd6;
 	--tree: #2d8436; /* corrigé AA (était #2f8a38, 4.20:1 → 4.50:1) */
 	--bg-tree: #dae6d0;
+	--danger: #c1392b;
+	--bg-danger: #fdf1ef;
 
 	/* danger levels (1 → 5) */
 	--level-1: #36853b; /* faible — corrigé AA (était #3a8f3f, 3.97:1 → 4.50:1) */

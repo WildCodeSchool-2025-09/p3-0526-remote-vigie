@@ -34,5 +34,14 @@ export async function login(identifier: string, password: string) {
 export async function me() {
 	const response = await apiFetch("/api/auth/me");
 	if (!response.ok) return null;
-	return response.json() as Promise<AuthUser>;
+	const user = (await response.json()) as AuthUser;
+	return {
+		...user,
+		addresses: user.addresses.map((address) => ({
+			...address,
+			// mysql2 renvoie les DECIMAL en chaînes de caractères
+			latitude: Number(address.latitude),
+			longitude: Number(address.longitude),
+		})),
+	};
 }

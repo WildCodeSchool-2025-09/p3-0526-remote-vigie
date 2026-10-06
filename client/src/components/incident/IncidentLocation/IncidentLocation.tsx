@@ -32,7 +32,7 @@ function createIncidentDivIcon(iconName: IconName, color: string) {
 			}}
 		>
 			<SvgIcon
-				style={{ width: 22, height: 22, fill: color }}
+				style={{ width: 22, height: 22, fill: color, color }}
 				aria-hidden="true"
 			/>
 		</div>,
