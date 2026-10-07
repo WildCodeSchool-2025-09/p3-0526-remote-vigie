@@ -1,25 +1,25 @@
 {
-  "name": "Vigie",
-  "short_name": "Vigie",
-  "description": "Signalez et suivez les incidents près de chez vous, en temps réel.",
-  "lang": "fr",
-  "start_url": "/",
-  "scope": "/",
-  "display": "standalone",
-  "theme_color": "#0b4619",
-  "background_color": "#0b4619",
-  "icons": [
-    {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    }
-  ]
+	"name": "Vigie",
+	"short_name": "Vigie",
+	"description": "Signalez et suivez les incidents près de chez vous, en temps réel.",
+	"lang": "fr",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"theme_color": "#0b4619",
+	"background_color": "#0b4619",
+	"icons": [
+		{
+			"src": "/icons/icon-192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/icons/icon-512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any"
+		}
+	]
 }
