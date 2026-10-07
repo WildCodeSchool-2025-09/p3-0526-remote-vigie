@@ -5,6 +5,7 @@ import app from "../../src/app";
 
 // Import the repository whose SQL calls we mock: routes.spec.ts tests the
 // HTTP layer (route → action → status/JSON), not the SQL itself.
+import userBadgeRepository from "../../src/modules/badge/userBadgeRepository";
 import incidentRepository from "../../src/modules/incident/incidentRepository";
 import incidentTypeRepository from "../../src/modules/incidentType/incidentTypeRepository";
 import alertService from "../../src/services/alertService";
@@ -226,6 +227,9 @@ describe("POST /api/incidents", () => {
 		);
 		jest.spyOn(incidentRepository, "create").mockResolvedValue(42);
 		jest.spyOn(incidentRepository, "read").mockResolvedValue(fakeIncident);
+		jest.spyOn(userBadgeRepository, "readRecentByUser").mockResolvedValue(
+			[],
+		);
 		// Fire-and-forget after the response: mocked so no real e-mail is sent.
 		jest.spyOn(alertService, "dispatch").mockResolvedValue(undefined);
 
@@ -240,5 +244,60 @@ describe("POST /api/incidents", () => {
 			});
 
 		expect(response.status).toBe(201);
+		expect(response.body.author.badges).toStrictEqual([]);
+	});
+});
+
+describe("PUT /api/incidents/:id", () => {
+	it("should include the author badges in the response", async () => {
+		const fakeBadge = {
+			code: "jungle",
+			label: "Livre de la jungle",
+			description: "5 signalements Animal sauvage",
+			icon: "01-livre-de-la-jungle.png",
+			earnedAt: new Date("2026-09-24T10:00:00.000Z"),
+		};
+
+		const fakeIncident = {
+			id: 42,
+			title: "Incendie modifié",
+			description: null,
+			photoUrl: null,
+			latitude: "45.75",
+			longitude: "4.85",
+			city: "Lyon",
+			postalCode: "69000",
+			inseeCode: "69123",
+			status: "in_progress" as const,
+			createdAt: new Date("2026-09-24T10:00:00.000Z"),
+			editedAt: new Date("2026-09-24T11:00:00.000Z"),
+			expiresAt: new Date("2026-09-25T10:00:00.000Z"),
+			dangerLevel: { label: "Élevé", color: "#c1392b", weight: 4 },
+			author: { id: 1, pseudo: "test" },
+			types: [],
+			counts: { confirm: 0, deny: 0 },
+			myContribution: null,
+		};
+
+		// requireIncidentAuthor lets the author (user 1) through
+		jest.spyOn(incidentRepository, "findOwnerAndStatus").mockResolvedValue({
+			userId: 1,
+			status: "in_progress",
+		});
+		jest.spyOn(incidentRepository, "update").mockResolvedValue(undefined);
+		jest.spyOn(incidentRepository, "read").mockResolvedValue(fakeIncident);
+		jest.spyOn(userBadgeRepository, "readRecentByUser").mockResolvedValue([
+			fakeBadge,
+		]);
+
+		const response = await supertest(app)
+			.put("/api/incidents/42")
+			.set(authHeader())
+			.send({ title: "Incendie modifié" });
+
+		expect(response.status).toBe(200);
+		expect(response.body.author.badges).toStrictEqual([
+			{ ...fakeBadge, earnedAt: fakeBadge.earnedAt.toISOString() },
+		]);
 	});
 });
