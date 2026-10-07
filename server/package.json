@@ -8,6 +8,7 @@
 		"expire": "tsx ./bin/expire",
 		"sync:places": "tsx ./bin/syncUsefulPlaces",
 		"simulate:badges": "tsx ./bin/simulateBadges",
+		"push:test": "tsx ./bin/pushTest",
 		"build": "tsx ./bin/migrate",
 		"start": "tsx ./src/main",
 		"test": "jest --verbose",

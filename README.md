@@ -276,6 +276,11 @@ VAPID_SUBJECT=mailto:vous@exemple.fr
   `http://localhost:3310`. Le navigateur autorise le push sur `localhost` (Chrome, Firefox de
   bureau), sans HTTPS. Sur iPhone il faut le site en HTTPS **et** ajouté à l'écran d'accueil (iOS 16.4
   minimum).
+- **Envoyer un push de test** (depuis `/server`) : `npm run push:test -- <pseudo> [incident|danger|resolved|comment|mention] [ville]`.
+  Envoie à tous les appareils enregistrés de l'utilisateur le contenu réel du cas choisi, et
+  indique le résultat par appareil. Le lien ouvre le dernier incident de la base. Sur Chrome et
+  Firefox, rien ne s'affiche si une fenêtre de Vigie est visible : passer sur un autre onglet
+  avant d'envoyer.
 - **En production** : générer **une seule paire** et la conserver en lieu sûr. **Ne jamais la
   régénérer** : un abonnement est lié à la clé publique avec laquelle il a été créé, changer
   de clé rend tous les abonnements inutilisables (chaque utilisateur devrait se réabonner).

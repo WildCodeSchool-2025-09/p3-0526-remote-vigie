@@ -113,18 +113,26 @@ async function subscribe(): Promise<PushPermission> {
 		subscription = null;
 	}
 
+	const created = subscription == null;
 	subscription ??= await registration.pushManager.subscribe({
 		userVisibleOnly: true,
 		applicationServerKey: publicKey,
 	});
 
-	const response = await apiFetch("/api/push-subscriptions", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(subscription.toJSON()),
-	});
-	if (!response.ok) {
-		throw new Error("Impossible d'enregistrer cet appareil");
+	try {
+		const response = await apiFetch("/api/push-subscriptions", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(subscription.toJSON()),
+		});
+		if (!response.ok) {
+			throw new Error("Impossible d'enregistrer cet appareil");
+		}
+	} catch (err) {
+		// All or nothing: a subscription the server does not know would show
+		// "on" while no alert can ever arrive
+		if (created) await subscription.unsubscribe().catch(() => {});
+		throw err;
 	}
 
 	return permission;
