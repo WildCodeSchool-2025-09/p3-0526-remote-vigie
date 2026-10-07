@@ -1,8 +1,4 @@
-import { useEffect, useState } from "react";
-
 import Icon from "@/components/Icon/Icon";
-import { useAuth } from "@/contexts/auth/AuthContext";
-import { getWeatherVigilance } from "@/services/vigilanceService";
 import type { VigilanceLevel, WeatherVigilance } from "@/types/vigilance";
 import { formatTime } from "@/utils/formatDate";
 
@@ -40,31 +36,15 @@ const LEVEL_STYLES: Record<
 	},
 };
 
-export default function WeatherBanner() {
-	const { user } = useAuth();
-	const userId = user?.id;
-	const [isLoading, setIsLoading] = useState(true);
-	const [vigilance, setVigilance] = useState<WeatherVigilance | null>(null);
+type WeatherBannerProps = {
+	isLoading: boolean;
+	vigilance: WeatherVigilance | null;
+};
 
-	useEffect(() => {
-		if (userId == null) return;
-
-		let cancelled = false;
-		setIsLoading(true);
-
-		getWeatherVigilance().then((result) => {
-			if (cancelled) return;
-			setVigilance(result);
-			setIsLoading(false);
-		});
-
-		return () => {
-			cancelled = true;
-		};
-	}, [userId]);
-
-	if (userId == null) return null;
-
+export default function WeatherBanner({
+	isLoading,
+	vigilance,
+}: WeatherBannerProps) {
 	if (isLoading) {
 		return (
 			<div

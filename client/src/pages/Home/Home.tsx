@@ -6,14 +6,17 @@ import VigieLogo from "@/assets/images/vigie-ligne.svg?react";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner/EmailVerificationBanner";
 import Icon from "@/components/Icon/Icon";
 import IncidentList from "@/components/IncidentList/IncidentList";
+import WeatherBanner from "@/components/WeatherBanner/WeatherBanner";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { getAllIncidents } from "@/services/incidentService";
 import type { IncidentListItem } from "@/types/incidentList";
+import useWeatherVigilance from "./useWeatherVigilance";
 
 const INCIDENTS_LIST_LIMIT = 15;
 
 export default function Home() {
 	const { user } = useAuth();
+	const weather = useWeatherVigilance();
 	const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
@@ -49,7 +52,9 @@ export default function Home() {
 	// l'US04 : la carte, une fois codée, deviendra l'élément qui chevauche le
 	// header, indépendamment de l'état de la liste en dessous.
 	const showsPlaceholder = isLoading || hasError || incidents.length === 0;
+	const showsWeatherBanner = weather.isLoading || weather.vigilance != null;
 	const showsEmailVerificationBanner = user != null && !user.emailVerified;
+	const showsTopBanners = showsWeatherBanner || showsEmailVerificationBanner;
 
 	return (
 		<div className="fixed inset-x-0 top-0 flex h-[calc(100dvh-var(--navigation-height))] flex-col bg-base-100 lg:left-24 lg:h-dvh">
@@ -69,14 +74,22 @@ export default function Home() {
 				</h1>
 			</header>
 
-			{showsEmailVerificationBanner && (
-				<div className="relative -mt-8 mb-4 px-4">
-					<EmailVerificationBanner email={user.email} />
+			{showsTopBanners && (
+				<div className="relative -mt-8 mb-4 flex flex-col gap-3 px-4">
+					{showsWeatherBanner && (
+						<WeatherBanner
+							isLoading={weather.isLoading}
+							vigilance={weather.vigilance}
+						/>
+					)}
+					{showsEmailVerificationBanner && (
+						<EmailVerificationBanner email={user.email} />
+					)}
 				</div>
 			)}
 
 			<div
-				className={`relative flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto px-4 pb-6 ${showsPlaceholder && !showsEmailVerificationBanner ? "-mt-8" : ""}`}
+				className={`relative flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto px-4 pb-6 ${showsPlaceholder && !showsTopBanners ? "-mt-8" : ""}`}
 			>
 				<IncidentList
 					incidents={incidents}
