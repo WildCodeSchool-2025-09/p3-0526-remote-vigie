@@ -38,6 +38,14 @@ describe("PATCH /api/users/me/pseudo", () => {
 			label: "a pseudo over 30 characters",
 			body: { pseudo: "a".repeat(31) },
 		},
+		{
+			label: "the reserved deleted-account name",
+			body: { pseudo: "Utilisateur supprimé" },
+		},
+		{
+			label: "the reserved name with another case and no accent",
+			body: { pseudo: " UTILISATEUR SUPPRIME " },
+		},
 		{ label: "a missing pseudo", body: {} },
 		{ label: "a non-string pseudo", body: { pseudo: 42 } },
 	])("should respond 400 with $label", async ({ body }) => {

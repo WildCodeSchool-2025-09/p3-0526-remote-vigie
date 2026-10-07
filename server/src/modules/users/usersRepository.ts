@@ -1,5 +1,6 @@
 import databaseClient from "../../../database/client";
 import type { Executor, Result, Rows } from "../../../database/client";
+import { DELETED_USER_PSEUDO } from "../../services/deletedUser";
 import type { NewGoogleUser } from "../../types/oauth";
 
 class UsersRepository {
@@ -239,12 +240,13 @@ class UsersRepository {
 
 	// Suppression de compte (US18) : la ligne est conservée pour que les
 	// signalements et commentaires restent, mais plus rien n'identifie la
-	// personne. Le pseudo et l'e-mail sont remplacés par des valeurs uniques
-	// (dérivées de l'id), ce qui libère le pseudo d'origine.
+	// personne. Le pseudo affiché devient « Utilisateur supprimé » ; les
+	// colonnes uniques (pseudo_normalized, e-mail) reçoivent des valeurs
+	// dérivées de l'id, ce qui libère le pseudo d'origine.
 	async anonymize(userId: number, executor: Executor = databaseClient) {
 		await executor.query(
 			`UPDATE user
-			SET pseudo = CONCAT('supprime-', id),
+			SET pseudo = ?,
 				pseudo_normalized = CONCAT('supprime-', id),
 				email = CONCAT('supprime-', id, '@anonyme.invalid'),
 				email_normalized = CONCAT('supprime-', id, '@anonyme.invalid'),
@@ -253,7 +255,7 @@ class UsersRepository {
 				email_verification_expires_at = NULL,
 				anonymized_at = NOW()
 			WHERE id = ?`,
-			[userId],
+			[DELETED_USER_PSEUDO, userId],
 		);
 	}
 

@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
+import { isDeletedUserPseudo } from "./deletedUser";
 
 export function isValidAddress(address: unknown): boolean {
 	if (typeof address !== "object" || address === null) {
@@ -73,7 +74,9 @@ export function isValidPseudo(pseudo: unknown): pseudo is string {
 		typeof pseudo === "string" &&
 		pseudo.trim() !== "" &&
 		!pseudo.includes("@") &&
-		pseudo.length <= 30
+		pseudo.length <= 30 &&
+		// Réservé : ce nom s'affiche pour les comptes supprimés
+		!isDeletedUserPseudo(pseudo)
 	);
 }
 
