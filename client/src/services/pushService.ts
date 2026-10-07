@@ -155,6 +155,39 @@ async function unsubscribe(): Promise<void> {
 	await subscription.unsubscribe();
 }
 
+const RELEASE_TIMEOUT_MS = 4000;
+
+// On sign-out, this device must stop receiving the account's alerts. Best
+// effort and bounded, so signing out always works: if the server cannot be
+// reached, the browser-side unsubscribe still makes the next push fail with a
+// 410, which removes the row.
+async function release(): Promise<void> {
+	if (!isPushSupported()) return;
+
+	const work = (async () => {
+		const registration = await navigator.serviceWorker.getRegistration();
+		const subscription = await registration?.pushManager.getSubscription();
+		if (subscription == null) return;
+
+		try {
+			await apiFetch("/api/push-subscriptions", {
+				method: "DELETE",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ endpoint: subscription.endpoint }),
+			});
+		} catch {
+			// Offline or server down: handled by the browser-side unsubscribe
+		}
+
+		await subscription.unsubscribe().catch(() => {});
+	})().catch(() => {});
+
+	await Promise.race([
+		work,
+		new Promise<void>((resolve) => setTimeout(resolve, RELEASE_TIMEOUT_MS)),
+	]);
+}
+
 export default {
 	isPushSupported,
 	needsInstallToPush,
@@ -162,4 +195,5 @@ export default {
 	isSubscribed,
 	subscribe,
 	unsubscribe,
+	release,
 };

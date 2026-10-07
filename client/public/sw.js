@@ -4,11 +4,6 @@ const DEFAULT_TITLE = "Vigie";
 const DEFAULT_BODY = "Vous avez une nouvelle alerte";
 const NOTIFICATION_BADGE = "/push/badge.png";
 
-// Safari revokes the subscription after silent pushes: it must always show
-const isSafari =
-	/AppleWebKit/.test(navigator.userAgent) &&
-	!/Chrome|Chromium|CriOS|Edg|Firefox|FxiOS/.test(navigator.userAgent);
-
 self.addEventListener("install", () => {
 	self.skipWaiting();
 });
@@ -59,27 +54,16 @@ function toNotification(payload) {
 	};
 }
 
-async function hasVisibleWindow() {
-	const windows = await self.clients.matchAll({
-		type: "window",
-		includeUncontrolled: true,
-	});
-	return windows.some((client) => client.visibilityState === "visible");
-}
-
+// Always shown, even with Vigie open: the app has no live updates, and Safari
+// revokes the subscription after a push that shows nothing
 self.addEventListener("push", (event) => {
+	const { title, options } = toNotification(readPayload(event));
 	event.waitUntil(
-		(async () => {
-			// Vigie is on screen: the app already shows the alert
-			if (!isSafari && (await hasVisibleWindow())) return;
-
-			const { title, options } = toNotification(readPayload(event));
-			await self.registration.showNotification(title, {
-				...options,
-				badge: NOTIFICATION_BADGE,
-				lang: "fr",
-			});
-		})(),
+		self.registration.showNotification(title, {
+			...options,
+			badge: NOTIFICATION_BADGE,
+			lang: "fr",
+		}),
 	);
 });
 

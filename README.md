@@ -278,9 +278,12 @@ VAPID_SUBJECT=mailto:vous@exemple.fr
   minimum).
 - **Envoyer un push de test** (depuis `/server`) : `npm run push:test -- <pseudo> [incident|danger|resolved|comment|mention] [ville]`.
   Envoie à tous les appareils enregistrés de l'utilisateur le contenu réel du cas choisi, et
-  indique le résultat par appareil. Le lien ouvre le dernier incident de la base. Sur Chrome et
-  Firefox, rien ne s'affiche si une fenêtre de Vigie est visible : passer sur un autre onglet
-  avant d'envoyer.
+  indique le résultat par appareil. Le lien ouvre le dernier incident de la base. La
+  notification s'affiche même si Vigie est ouvert.
+- **Navigateurs acceptés** : le serveur n'enregistre une adresse d'abonnement que si elle
+  appartient à un service de push connu (Google, Mozilla, Apple, Windows), pour qu'on ne puisse
+  pas lui faire appeler une autre adresse. Un autre service serait refusé (400) : sa liste est
+  dans `server/src/modules/pushSubscription/pushSubscriptionActions.ts`.
 - **En production** : générer **une seule paire** et la conserver en lieu sûr. **Ne jamais la
   régénérer** : un abonnement est lié à la clé publique avec laquelle il a été créé, changer
   de clé rend tous les abonnements inutilisables (chaque utilisateur devrait se réabonner).
@@ -289,7 +292,9 @@ VAPID_SUBJECT=mailto:vous@exemple.fr
   prévenir le formateur. Après le déploiement, vérifier la ligne `Web Push activé` dans les
   [logs](#logs).
 - **Désactiver l'appareil courant** : depuis « Mon profil », réglage « Alertes sur cet
-  appareil ». Un appareil devenu injoignable est retiré automatiquement au premier envoi
+  appareil ». Se déconnecter depuis le profil retire aussi l'appareil du compte, pour que le
+  suivant sur le même navigateur ne reçoive pas ses alertes ; il faudra réactiver à la prochaine
+  connexion. Un appareil devenu injoignable est retiré automatiquement au premier envoi
   refusé par le service de push (réponse 404 ou 410).
 
 ### Développer la partie back-end

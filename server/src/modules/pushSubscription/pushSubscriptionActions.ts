@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
+import webPushClient from "../../services/webPushClient";
 import pushSubscriptionRepository from "./pushSubscriptionRepository";
 
 // Only BREAD here (Browse, Read, Edit, Add, Delete)
@@ -8,7 +9,23 @@ const MAX_ENDPOINT_LENGTH = 512;
 const MAX_KEY_LENGTH = 255;
 const MAX_USER_AGENT_LENGTH = 255;
 
-// Reject IPs and local hosts: the server will later call this URL (SSRF)
+// Only the known browser push services: the server will later call this URL, so
+// an allowlist is the only reliable guard against SSRF (a text filter on the
+// host misses "localhost." or a public name that resolves to a private address)
+const PUSH_HOSTS = [
+	"fcm.googleapis.com", // Chrome, Edge, Opera, Brave, Samsung Internet
+	"updates.push.services.mozilla.com", // Firefox
+	"web.push.apple.com", // Safari
+];
+const PUSH_HOST_SUFFIXES = [".notify.windows.com"]; // Windows push
+
+function isPushServiceHost(host: string): boolean {
+	return (
+		PUSH_HOSTS.includes(host) ||
+		PUSH_HOST_SUFFIXES.some((suffix) => host.endsWith(suffix))
+	);
+}
+
 function isAcceptableEndpoint(value: unknown): value is string {
 	if (
 		typeof value !== "string" ||
@@ -25,21 +42,12 @@ function isAcceptableEndpoint(value: unknown): value is string {
 		return false;
 	}
 
-	const host = url.hostname;
-	const isIpAddress = host.startsWith("[") || /^[0-9.]+$/.test(host);
-	const isLocalName =
-		!host.includes(".") ||
-		host === "localhost" ||
-		host.endsWith(".localhost") ||
-		host.endsWith(".local") ||
-		host.endsWith(".internal");
-
 	return (
 		url.protocol === "https:" &&
 		url.username === "" &&
 		url.password === "" &&
-		!isIpAddress &&
-		!isLocalName
+		url.port === "" &&
+		isPushServiceHost(url.hostname)
 	);
 }
 
@@ -58,7 +66,10 @@ function getAuthenticatedUserId(req: Parameters<RequestHandler>[0]) {
 }
 
 const readPublicKey: RequestHandler = (_req, res) => {
-	const publicKey = process.env.VAPID_PUBLIC_KEY;
+	// Only when the whole configuration is valid: a key handed out while push is
+	// disabled would show "on" with no alert ever sent
+	const publicKey =
+		webPushClient.getWebPush() && process.env.VAPID_PUBLIC_KEY;
 
 	if (!publicKey) {
 		res.status(StatusCodes.SERVICE_UNAVAILABLE).json({

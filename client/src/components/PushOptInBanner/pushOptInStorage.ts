@@ -17,6 +17,15 @@ function store(key: string) {
 	} catch {}
 }
 
+// After a sign-out the device no longer receives alerts: the next sign-in must
+// offer the activation again
+export const forgetPushPromptAnswer = (userId: number) => {
+	try {
+		localStorage.removeItem(answerKey(userId));
+	} catch {
+		// Storage unavailable: nothing to forget
+	}
+};
 export const hasAnsweredPushPrompt = (userId: number) =>
 	isStored(answerKey(userId));
 export const markPushPromptAnswered = (userId: number) =>
