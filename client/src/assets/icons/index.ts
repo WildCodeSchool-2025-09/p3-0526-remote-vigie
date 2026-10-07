@@ -35,6 +35,7 @@ import QuoteRight from "@/assets/icons/interface/quote-right.svg?react";
 import RotateRight from "@/assets/icons/interface/rotate-right.svg?react";
 import Share from "@/assets/icons/interface/share.svg?react";
 import Shield from "@/assets/icons/interface/shield.svg?react";
+import Trash from "@/assets/icons/interface/trash.svg?react";
 import Veterinary from "@/assets/icons/interface/veterinary.svg?react";
 import Alert from "@/assets/icons/nav/alert.svg?react";
 import Danger from "@/assets/icons/nav/danger.svg?react";
@@ -107,6 +108,7 @@ export const icons = {
 	rotateRight: RotateRight,
 	share: Share,
 	shield: Shield,
+	trash: Trash,
 	veterinary: Veterinary,
 } as const;
 

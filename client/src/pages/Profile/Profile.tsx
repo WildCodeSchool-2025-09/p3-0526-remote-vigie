@@ -113,6 +113,31 @@ export default function Profile() {
 					Se déconnecter
 				</button>
 			</div>
+			<section
+				aria-labelledby="delete-account-title"
+				className="mx-4 mt-6 rounded-3xl border border-error/40 bg-(--bg-error) px-5 py-5 text-(--error-text)"
+			>
+				<h2
+					id="delete-account-title"
+					className="text-xs font-bold uppercase tracking-widest"
+				>
+					Supprimer mon compte
+				</h2>
+				<p className="mt-2 text-sm">
+					Attention, cette action est irréversible !
+				</p>
+				<button
+					type="button"
+					className="btn btn-error btn-md mt-4 w-full rounded-full border-none px-5 font-bold text-(--on-error)"
+				>
+					<Icon
+						name="trash"
+						className="h-5 w-5 fill-(--on-error)"
+						aria-hidden="true"
+					/>
+					Supprimer mon compte
+				</button>
+			</section>
 		</main>
 	);
 }

@@ -19,6 +19,7 @@
 	--warning: var(--accent);
 	--error: #c1392b;
 	--error-text: #a32e22; /* texte sur --bg-error, AA (5.21:1 ; --error seul : 3.98:1) */
+	--on-error: #ffffff; /* texte sur --error plein (boutons), AA (5.4:1) */
 
 	--bg-dark: #e8e8cc; /* background in the behind */
 	--bg-default: #f6f5e9; /* background of frames */
