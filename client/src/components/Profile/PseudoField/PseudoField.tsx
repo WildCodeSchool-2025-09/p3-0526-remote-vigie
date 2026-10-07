@@ -93,7 +93,7 @@ export default function PseudoField({ pseudo }: PseudoFieldProps) {
 				</dt>
 				<dd className="mt-1 text-base font-bold text-primary">
 					<div className="flex items-center justify-between gap-2">
-						<span className="wrap-break-word">{pseudo}</span>
+						<span className="min-w-0 wrap-anywhere">{pseudo}</span>
 						<button
 							type="button"
 							ref={editButtonRef}

@@ -23,8 +23,8 @@ function AccountField({
 			<dt className="text-xs uppercase tracking-widest text-primary/75">
 				{label}
 			</dt>
-			<dd className="mt-1 flex items-center gap-2 wrap-break-word text-base font-bold text-primary">
-				{value}
+			<dd className="mt-1 flex items-center gap-2 text-base font-bold text-primary">
+				<span className="min-w-0 wrap-anywhere">{value}</span>
 				{verified && (
 					<>
 						<Icon
