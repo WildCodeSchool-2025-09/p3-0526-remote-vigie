@@ -14,6 +14,7 @@ import App from "@/App";
 import PrivateRoute from "@/components/Routing/PrivateRoute/PrivateRoute";
 import { AuthProvider } from "@/contexts/auth/AuthContext";
 import Cgu from "@/pages/Cgu/Cgu";
+import GoogleCallback from "@/pages/GoogleCallback/GoogleCallback";
 import Home from "@/pages/Home/Home";
 import IncidentDetails from "@/pages/IncidentDetails/IncidentDetails";
 import IncidentForm from "@/pages/IncidentForm/IncidentForm";
@@ -22,6 +23,7 @@ import NotFound from "@/pages/NotFound/NotFound";
 import NotificationCenter from "@/pages/Notification/NotificationCenter";
 import Numbers from "@/pages/Numbers/Numbers";
 import Profile from "@/pages/Profile/Profile";
+import ProfileBadges from "@/pages/Profile/ProfileBadges";
 import Register from "@/pages/Register/Register";
 import VerifyEmail from "@/pages/VerifyEmail/VerifyEmail";
 
@@ -105,6 +107,10 @@ const router = createBrowserRouter([
 						path: "profile",
 						element: <Profile />,
 					},
+					{
+						path: "profile/badges",
+						element: <ProfileBadges />,
+					},
 				],
 			},
 
@@ -117,7 +123,15 @@ const router = createBrowserRouter([
 				element: <Login />,
 			},
 			{
+				path: "auth/google/callback",
+				element: <GoogleCallback />,
+			},
+			{
 				path: "register",
+				element: <Register />,
+			},
+			{
+				path: "register/google",
 				element: <Register />,
 			},
 			{

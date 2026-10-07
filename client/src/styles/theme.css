@@ -18,6 +18,7 @@
 	--success: var(--secondary);
 	--warning: var(--accent);
 	--error: #c1392b;
+	--error-text: #a32e22; /* texte sur --bg-error, AA (5.21:1 ; --error seul : 3.98:1) */
 
 	--bg-dark: #e8e8cc; /* background in the behind */
 	--bg-default: #f6f5e9; /* background of frames */
@@ -53,6 +54,8 @@
 	--bg-animal: #e1ddd6;
 	--tree: #2d8436; /* corrigé AA (était #2f8a38, 4.20:1 → 4.50:1) */
 	--bg-tree: #dae6d0;
+	--danger: #c1392b;
+	--bg-danger: #fdf1ef;
 
 	/* danger levels (1 → 5) */
 	--level-1: #36853b; /* faible — corrigé AA (était #3a8f3f, 3.97:1 → 4.50:1) */
@@ -65,6 +68,13 @@
 	--bg-level-4: #f9f0e9;
 	--level-5: #c1392b; /* critique */
 	--bg-level-5: #fdf1ef;
+
+	/* useful places (contraste AA sur fond blanc) */
+	--place-fire-station: #b3261e;
+	--place-police: #1f4fa3;
+	--place-hospital: #0b6b6b;
+	--place-pharmacy: #1e7a34;
+	--place-veterinary: #7a3e9d;
 
 	/* spacings */
 	--spacer-small: 1rem;
@@ -98,6 +108,18 @@
 		100% {
 			opacity: 1;
 			translate: 0;
+		}
+	}
+
+	--animate-marker-pulse: marker-pulse 1.6s ease-out infinite;
+	@keyframes marker-pulse {
+		0% {
+			scale: 1;
+			opacity: 0.55;
+		}
+		100% {
+			scale: 2.4;
+			opacity: 0;
 		}
 	}
 }

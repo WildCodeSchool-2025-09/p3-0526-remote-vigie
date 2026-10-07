@@ -46,6 +46,7 @@ pas les secours.* Le service accepte des signalements de danger sans garantir au
 
 Deux versions. La **V1** est le socle livrable ; la **V2** regroupe les évolutions.
 Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trello).
+Responsables : état du Trello au 2026-10-05.
 
 ### V1
 
@@ -57,18 +58,18 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 | US03 | Accéder à la liste de tous les incidents | 2 | Guillaume Galinanes | `feat/US03-incident-list` |
 | US04 | Carte interactive (incidents + lieux utiles) | 2 | Guillaume Galinanes | `feat/US04-interactive-map` |
 | US05 | S'inscrire (avec adresse géolocalisée + vérification e-mail) | 2 | Laurent Koehler | `feat/US05-register` |
-| US06 | Se connecter (JWT en en-tête `Authorization: Bearer`) | 2 | Laurent Koehler | `feat/US06-login` |
+| US06 | Se connecter (JWT en en-tête `Authorization: Bearer`) | 2 | Julien Roussel | `feat/US06-login` |
 | US07 | Corriger le contenu descriptif de son incident | 2 | Frédéric Briand | `feat/US07-incident-edit` |
 | US08 | Consulter et commenter un incident (fil plat, citations) | 2 | Frédéric Briand | `feat/US08-incident-comments` |
 | US09 | Centre de notifications in-app (pastille non lues) | 2 | Julien Roussel | `feat/US09-notification-center` |
 | US10 | Rechercher et trier les incidents (+ inclure les résolus) | 2 | Guillaume Galinanes | `feat/US10-search-sort` |
-| US11 | Bandeau de vigilance météo (Météo-France) selon l'adresse | 3 | Guillaume Galinanes | `feat/US11-weather-vigilance` |
-| US12 | Clôture automatique des incidents expirés (tâche planifiée) | 3 | Julien Roussel | `feat/US12-incident-expiry` |
+| US11 | Bandeau de vigilance météo (Météo-France) selon l'adresse | 3 | Ivona Galikova | `feat/US11-weather-vigilance` |
+| US12 | Clôture automatique des incidents expirés (tâche planifiée) | 3 | Frédéric Briand | `feat/US12-incident-expiry` |
 | US13 | Liste des numéros utiles (bouton sur la Home) | 3 | Ivona Galikova | `feat/US13-emergency-numbers` |
 | US14 | Confirmer / infirmer un incident (pilote la durée de vie) | 3 | Frédéric Briand | `feat/US14-incident-contributions` |
 | US15 | Partager un incident (menu natif / copie de lien) | 3 | Frédéric Briand | `feat/US15-incident-share` |
 | US16 | Barre de navigation fixe + gabarit commun des pages | 3 | Julien Roussel | `feat/US16-navigation` |
-| US27 | Ajouter une photo à son signalement depuis son téléphone (vrai upload) | 3 | À affecter | `feat/US27-photo-upload` |
+| US27 | Ajouter une photo à son signalement depuis son téléphone (vrai upload) | 3 | Frédéric Briand | `feat/US27-photo-upload` |
 
 > **US27 est transverse** : elle remplace, pour US01 (création) et US07 (édition), le repli actuel
 > — un simple champ URL — par un vrai import de fichier (redimensionnement, EXIF, stockage,
@@ -81,8 +82,8 @@ Priorité : `1` = à faire d'abord, `3` = à faire en dernier (étiquettes Trell
 
 | US | Intitulé | Prio | Responsable(s) | Branche |
 |----|----------|------|----------------|---------|
-| US17 | Bouton « Je suis en danger » / SOS (alerte gravité maximale) | 1 | Laurent Koehler, Julien Roussel | `feat/US17-emergency-alert` |
-| US18 | Accéder à son profil et modifier son pseudo | 1 | Ivona Galikova, Laurent Koehler | `feat/US18-user-profile` |
+| US17 | Bouton « Je suis en danger » / SOS (alerte gravité maximale) | 1 | Laurent Koehler | `feat/US17-emergency-alert` |
+| US18 | Accéder à son profil et modifier son pseudo | 1 | Laurent Koehler | `feat/US18-user-profile` |
 | US19 | Réinitialiser son mot de passe oublié (jeton à durée limitée) | 2 | Julien Roussel | `feat/US19-password-reset` |
 | US20 | Obtenir des badges (recalcul à la connexion, référentiel en base) | 2 | Frédéric Briand | `feat/US20-user-badges` |
 | US21 | Web Push + PWA installable (alertes navigateur fermé) | 3 | Frédéric Briand | `feat/US21-web-push` |
@@ -113,8 +114,9 @@ Reproduit d'après les cadres **MCD**, **MLD** et **MPD** du Miro. Implémentati
 référence : `server/database/schema.sql` (MySQL 8, `utf8mb4_unicode_ci`).
 
 Le modèle a été volontairement **borné au périmètre discuté** : `badge`,
-`oauth_account`, `push_subscription` et l'auto-citation des commentaires sont écartés pour
-l'instant et seront ajoutés au moment de développer les US concernées (voir §4.4).
+`push_subscription` et l'auto-citation des commentaires sont écartés pour l'instant et
+seront ajoutés au moment de développer les US concernées (voir §4.4). `oauth_account`
+a été ajoutée avec l'US22 (connexion Google).
 
 ### 4.1 MCD — modèle conceptuel
 
@@ -133,6 +135,7 @@ erDiagram
     INCIDENT }|--o{ INCIDENT_TYPE : "CONCERN (1,N)/(0,N)"
     USER ||--o{ CONTRIBUTION : "émet (0,N)"
     INCIDENT ||--o{ CONTRIBUTION : "reçoit (0,N)"
+    USER ||--o{ OAUTH_ACCOUNT : "LINKED_TO (0,N)/(1,1)"
 
     USER {
         int id
@@ -144,6 +147,12 @@ erDiagram
         datetime email_verified_at
         string cgu_version
         datetime cgu_accepted_at
+    }
+    OAUTH_ACCOUNT {
+        int id
+        string provider
+        string provider_user_id
+        datetime created_at
     }
     ADDRESS {
         int id
@@ -250,6 +259,7 @@ erDiagram
     INCIDENT_TYPE ||--o{ INCIDENT_INCIDENT_TYPE : "FK"
     DANGER_LEVEL ||--o{ INCIDENT : "FK"
     DANGER_LEVEL ||--o{ INCIDENT_TYPE : "FK"
+    USER ||--o{ OAUTH_ACCOUNT : "FK"
 
     USER {
         int id PK
@@ -263,6 +273,13 @@ erDiagram
         datetime cgu_accepted_at
         datetime created_at
         datetime updated_at
+    }
+    OAUTH_ACCOUNT {
+        int id PK
+        int user_id FK
+        string provider
+        string provider_user_id
+        datetime created_at
     }
     ADDRESS {
         int id PK
@@ -394,6 +411,7 @@ erDiagram
     INCIDENT_TYPE ||--o{ INCIDENT_INCIDENT_TYPE : "FK"
     DANGER_LEVEL ||--o{ INCIDENT : "FK"
     DANGER_LEVEL ||--o{ INCIDENT_TYPE : "FK"
+    USER ||--o{ OAUTH_ACCOUNT : "FK"
 
     USER {
         INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
@@ -401,12 +419,19 @@ erDiagram
         VARCHAR_255 email "NOT NULL"
         VARCHAR_30 pseudo_normalized "NOT NULL, UNIQUE"
         VARCHAR_255 email_normalized "NOT NULL, UNIQUE"
-        CHAR_60 password_hash "NOT NULL"
+        VARCHAR_255 password_hash "NULL (compte créé avec Google)"
         TIMESTAMP email_verified_at "NULL"
         VARCHAR_10 cgu_version "NOT NULL"
         TIMESTAMP cgu_accepted_at "NOT NULL"
         TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
         TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+    }
+    OAUTH_ACCOUNT {
+        INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
+        INT_UNSIGNED user_id FK "NOT NULL, UNIQUE avec provider"
+        VARCHAR_20 provider "NOT NULL"
+        VARCHAR_255 provider_user_id "NOT NULL, UNIQUE avec provider"
+        TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
     }
     ADDRESS {
         INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
@@ -526,6 +551,7 @@ erDiagram
 |---------------|-------|-------------|
 | `address.user_id` | `user` | `CASCADE` |
 | `user_location.user_id` | `user` | `CASCADE` |
+| `oauth_account.user_id` | `user` | `CASCADE` |
 | `contribution.incident_id` | `incident` | `CASCADE` |
 | `contribution.user_id` | `user` | `CASCADE` |
 | `incident_type.danger_level_id` | `danger_level` | `RESTRICT` |
@@ -548,8 +574,6 @@ correspondante, pas avant) :
 - **`badge`** + relation `earned_at` (US20) — la relation N-N est aujourd'hui sans
   attribut ; or `counter_type` / `counter_param` / `threshold` impliquent une
   progression (« 7 signalements sur 10 ») et une date d'obtention à stocker.
-- **`oauth_account`** (US22) — pour l'instant, `email` + `password_hash` restent sur
-  `user` ; on ajoutera la table au moment de brancher un fournisseur tiers.
 - **`push_subscription`** (US21) — idem, ajoutée avec le Web Push.
 - **Auto-citation des commentaires** (US08) — la relation réflexive sur `comment`
   n'est posée que si la fonctionnalité de citation est développée.
@@ -666,13 +690,42 @@ saisie d'URL côté US07.
 - Comparaisons pseudo / e-mail sur formes **normalisées** ; messages d'erreur neutres
   (anti-énumération de comptes).
 
+### Carte et lieux utiles (US04)
+
+- **Import manuel, pas de tâche planifiée** : la table `useful_place` est remplie par
+  `npm run sync:places` (script `server/bin/syncUsefulPlaces.ts`), depuis l'API Overpass
+  d'OpenStreetMap, sur la France, pour les cinq catégories de l'enum. Sans argument toutes les
+  catégories, sinon celles indiquées : `npm run sync:places --workspace=server -- hospital`.
+  À relancer après chaque `db:migrate` (qui vide la base). Voir le README.
+- **Idempotent** : un lieu = un objet OSM (`osm_type` + `osm_id`, clé unique), mis à jour au
+  lieu d'être dupliqué ; écriture par lots de 1 000 lignes. Les lieux fermés
+  (préfixes OSM `disused:`, `abandoned:`…) sont ignorés.
+- **Overpass est public donc faillible** (2026-10-05) : deux tentatives par catégorie, avec
+  pause ; une réponse vide ou partielle (`remark`) compte comme un échec et n'est jamais
+  importée. Une catégorie en échec n'empêche pas les suivantes : le script finit en erreur
+  (code de sortie 1) en nommant les catégories à relancer.
+- **Purge sans `last_seen_at`** (2026-10-05) : après import, les lieux de la catégorie absents
+  de la réponse sont supprimés, en comparant les clés OSM, sans nouvelle colonne
+  (le schéma ne change pas). Garde-fou : si plus de 50 % de la catégorie serait supprimée, la
+  suppression est refusée.
+- **Lecture publique par zone** : `GET /api/useful-places?north&south&east&west`. Les quatre
+  bornes sont obligatoires, numériques, dans les limites du globe et ordonnées
+  (`south < north`, `west < east`) ; l'étendue ne dépasse pas 1°. Sinon `400 invalid_bounds`.
+  Réponse limitée à 1 000 lieux. Les incidents acceptent des bornes facultatives
+  (`GET /api/incidents`), avec une limite de 300 quand elles sont fournies ; des bornes
+  invalides donnent aussi `400`.
+- **Limites connues** : pas de limitation de débit sur ces routes publiques (à décider au
+  déploiement, avec `trust proxy` et la compression) ; pas d'`AbortController` côté carte
+  (les réponses périmées sont ignorées) ; pas de test automatisé côté client.
+
 ### Limites & garde-fous (issus du Miro)
 
 **5 signalements maximum par utilisateur et par heure** (`checkIncidentRateLimit`, US01,
 2026-09-21) · protection anti-double-soumission : un signalement quasi identique (au moins un
 type en commun, position à moins de 50 m) du même utilisateur dans les 10 secondes précédentes
 est rejeté (`409`) · âge minimum 15 ans · gravité par défaut par type · pas de suppression
-d'incident (archive) ni de commentaire.
+d'incident (archive) ni de commentaire. Exception de test : `admin1` et `admin2` (seed) ne sont
+pas limités hors production — voir §7, « Comptes de test ».
 
 ## 6. Référentiels (données de seed)
 
@@ -742,6 +795,20 @@ git-hooks (`.git-hooks`, `core.hooksPath`).
 **Déploiement** — Docker / Docker Compose ; cible Traefik `https://${PROJECT_NAME}.<sous-domaine>.wilders.dev/`
 (pas d'underscore dans le nom de projet).
 
+**Comptes de test (seed) — à nettoyer avant la mise en prod** — le seeder crée quatre
+comptes `admin1` à `admin4` (mot de passe `1234`, connexion par pseudo ou `adminN@vigie.test`).
+Ce sont des users ordinaires, sans rôle admin : ils servent uniquement à tester sans recréer de
+comptes. Chacun reçoit une adresse et une position ; elle se règle par admin dans `server/.env`
+(`SEED_ADMIN_<n>_LATITUDE` / `SEED_ADMIN_<n>_LONGITUDE`, défaut Westhalten), puis `npm run db:seed`.
+
+Avant le déploiement :
+- **ne jamais lancer `db:seed` sur la base de prod** (les comptes `admin*` y seraient créés avec `1234`) ;
+- **retirer l'exemption de limite** : `admin1` et `admin2` ne sont pas soumis aux 5 signalements
+  par heure (bloc `EXEMPT_PSEUDOS` dans `server/src/services/checkIncidentRateLimit.ts`). L'exemption
+  est désactivée quand `NODE_ENV=production`, mais le pseudo n'est pas réservé à l'inscription :
+  si l'hébergeur ne définit pas `NODE_ENV`, quelqu'un pourrait s'inscrire en `admin1` et contourner
+  la limite. Supprimer le bloc, ou vérifier `NODE_ENV=production`.
+
 ## 8. Intégrations externes
 
 Toujours proxifiées par le back (« API Vigie ») — jamais d'appel direct depuis le front.
@@ -751,7 +818,7 @@ Toujours proxifiées par le back (« API Vigie ») — jamais d'appel direct dep
 | Auto-complétion et géocodage d'adresses (US05, US24) | Base Adresse Nationale — `https://data.geopf.fr/geocodage/search/` |
 | Contours de communes / géocodage inverse | API Carto (IGN) — `https://apicarto.ign.fr` (doc `cartes.gouv.fr`) |
 | Numéros des mairies (`scope = municipal`) | Annuaire de l'administration — `https://api-lannuaire.service-public.gouv.fr/api/explore/v2.1` |
-| Lieux utiles : pompiers, vétérinaires, hôpitaux, pharmacies, police (US04) | OpenStreetMap / Nominatim (d'où `useful_place.osm_type` + `osm_id`) |
+| Lieux utiles : pompiers, vétérinaires, hôpitaux, pharmacies, police (US04) | OpenStreetMap via l'API Overpass (d'où `useful_place.osm_type` + `osm_id`), importés par `npm run sync:places` (voir §5 « Carte et lieux utiles ») |
 | Vigilance météo par département (US11) | API Vigilance Météo-France |
 | Fond de carte (US04) | Tuiles OpenStreetMap via Leaflet |
 

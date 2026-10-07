@@ -4,7 +4,11 @@ import type { NavItemConfig } from "@/types/navItems";
 import { NavLink, useLocation } from "react-router";
 
 const baseClassName =
-	"relative flex flex-col items-center justify-center gap-0.5 text-xs font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent) focus-visible:rounded-sm";
+	"relative flex flex-col items-center justify-center gap-0.5 text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent) focus-visible:rounded-sm";
+
+type Props = NavItemConfig & {
+	onClick?: () => void;
+};
 
 function NavItem({
 	to,
@@ -16,7 +20,8 @@ function NavItem({
 	disabled = false,
 	disabledTitle,
 	showNotificationBadge = false,
-}: NavItemConfig) {
+	onClick,
+}: Props) {
 	const location = useLocation();
 	const iconClassName = emphasized ? "size-10" : "size-7";
 	const emphasisClassName = emphasized
@@ -27,11 +32,11 @@ function NavItem({
 
 	const iconElement = showNotificationBadge ? (
 		<span className="relative">
-			<Icon name={icon} className={iconClassName} />
+			<Icon name={icon} className={iconClassName} aria-hidden="true" />
 			<NotificationBadge />
 		</span>
 	) : (
-		<Icon name={icon} className={iconClassName} />
+		<Icon name={icon} className={iconClassName} aria-hidden="true" />
 	);
 
 	if (disabled) {
@@ -42,6 +47,19 @@ function NavItem({
 				aria-disabled="true"
 				title={disabledTitle}
 				className={`${baseClassName} ${emphasisClassName} text-(--bg-light)/40 cursor-not-allowed`}
+			>
+				{iconElement}
+				<span>{label}</span>
+			</button>
+		);
+	}
+
+	if (onClick != null) {
+		return (
+			<button
+				type="button"
+				onClick={onClick}
+				className={`${baseClassName} ${emphasisClassName} ${alwaysAccent ? "text-(--accent)" : "text-(--bg-light)/75"}`}
 			>
 				{iconElement}
 				<span>{label}</span>

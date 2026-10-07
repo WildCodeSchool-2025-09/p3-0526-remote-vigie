@@ -7,6 +7,8 @@ import { formatRelativeTime } from "@/utils/formatRelativeTime";
 
 type IncidentCardProps = {
 	incident: IncidentListItem;
+	isSelected?: boolean;
+	onSelect?: (incident: IncidentListItem) => void;
 };
 
 const STATUS_LABEL: Record<IncidentListItem["status"], string> = {
@@ -14,7 +16,11 @@ const STATUS_LABEL: Record<IncidentListItem["status"], string> = {
 	resolved: "Résolu",
 };
 
-export default function IncidentCard({ incident }: IncidentCardProps) {
+export default function IncidentCard({
+	incident,
+	isSelected = false,
+	onSelect,
+}: IncidentCardProps) {
 	const { dangerLevel, type, status } = incident;
 
 	const typeColorVar = type ? `var(--${type.code})` : "var(--grey)";
@@ -22,13 +28,15 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 	const relativeTime = formatRelativeTime(incident.createdAt);
 	const cityLabel = incident.city ?? "position non précisée";
 
-	const ariaLabel = `${incident.title} — ${type?.label ?? "Incident"}, ${dangerLevel.label}, ${cityLabel}, ${relativeTime}`;
+	function handleActivate() {
+		onSelect?.(incident);
+	}
 
 	return (
-		<Link
-			to={`/incident/${incident.id}`}
-			aria-label={ariaLabel}
-			className="flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3"
+		<div
+			className={`relative flex items-center gap-3 rounded-2xl border border-l-8 border-primary/10 bg-base-300 p-3 has-[button:focus-visible]:outline-2 has-[button:focus-visible]:outline-offset-2 has-[button:focus-visible]:outline-primary ${
+				isSelected ? "ring-2 ring-accent ring-offset-2" : ""
+			}`}
 			style={{ borderLeftColor: typeColorVar }}
 		>
 			<div className="flex w-14 shrink-0 flex-col items-center gap-1">
@@ -40,6 +48,7 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 						<Icon
 							name={type.code as IconName}
 							className="h-7 w-7"
+							style={{ color: typeColorVar }}
 							aria-hidden="true"
 						/>
 					)}
@@ -85,19 +94,35 @@ export default function IncidentCard({ incident }: IncidentCardProps) {
 						</span>
 					)}
 				</div>
-				<h2 className="mt-1.5 line-clamp-2 font-title text-lg font-bold text-primary">
-					{incident.title}
+				<h2 className="mt-1.5 font-title text-lg font-bold text-primary">
+					<button
+						type="button"
+						onClick={handleActivate}
+						aria-current={isSelected ? "true" : undefined}
+						className="line-clamp-2 cursor-pointer text-left focus:outline-none after:absolute after:inset-0"
+					>
+						{incident.title}
+					</button>
 				</h2>
 				<p className="mt-1 text-xs text-primary/50">
 					{cityLabel} · {relativeTime}
 				</p>
 			</div>
 
-			<Icon
-				name="angleSmallRight"
-				className="h-4 w-4 shrink-0 fill-primary/30"
-				aria-hidden="true"
-			/>
-		</Link>
+			{isSelected ? (
+				<Link
+					to={`/incident/${incident.id}`}
+					className="btn btn-accent btn-sm relative z-10 shrink-0 self-end rounded-full"
+				>
+					Voir le détail
+				</Link>
+			) : (
+				<Icon
+					name="angleSmallRight"
+					className="h-4 w-4 shrink-0 fill-primary/30"
+					aria-hidden="true"
+				/>
+			)}
+		</div>
 	);
 }

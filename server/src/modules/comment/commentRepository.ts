@@ -8,13 +8,13 @@ type CommentRow = {
 	id: number;
 	content: string;
 	createdAt: Date;
-	author: { pseudo: string };
+	author: { id: number; pseudo: string };
 	quotedComment: { author: { pseudo: string }; content: string } | null;
 };
 
 const SELECT_COMMENT = `
 	SELECT
-		c.id, c.content, c.created_at, u.pseudo AS author_pseudo,
+		c.id, c.user_id, c.content, c.created_at, u.pseudo AS author_pseudo,
 		qc.content AS quoted_content, qu.pseudo AS quoted_author_pseudo
 	FROM comment AS c
 	INNER JOIN user AS u ON u.id = c.user_id
@@ -27,7 +27,7 @@ function mapRow(row: Rows[number]): CommentRow {
 		id: row.id,
 		content: row.content,
 		createdAt: row.created_at,
-		author: { pseudo: row.author_pseudo },
+		author: { id: row.user_id, pseudo: row.author_pseudo },
 		quotedComment:
 			row.quoted_content == null
 				? null

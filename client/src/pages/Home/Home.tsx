@@ -6,7 +6,9 @@ import VigieLogo from "@/assets/images/vigie-ligne.svg?react";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner/EmailVerificationBanner";
 import Icon from "@/components/Icon/Icon";
 import IncidentList from "@/components/IncidentList/IncidentList";
+import IncidentMap from "@/components/IncidentMap/IncidentMap";
 import WeatherBanner from "@/components/WeatherBanner/WeatherBanner";
+import WelcomeToast from "@/components/WelcomeToast/WelcomeToast";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { getAllIncidents } from "@/services/incidentService";
 import type { IncidentListItem } from "@/types/incidentList";
@@ -20,6 +22,23 @@ export default function Home() {
 	const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
+	// Incident sélectionné, partagé entre la carte et la liste.
+	const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(
+		null,
+	);
+	// Recentrage demandé à la carte quand la sélection vient de la liste.
+	const [mapPanRequest, setMapPanRequest] = useState<{
+		lat: number;
+		lng: number;
+	} | null>(null);
+
+	const handleSelectFromList = useCallback((incident: IncidentListItem) => {
+		setSelectedIncidentId(incident.id);
+		setMapPanRequest({
+			lat: Number(incident.latitude),
+			lng: Number(incident.longitude),
+		});
+	}, []);
 
 	const loadIncidents = useCallback(() => {
 		setIsLoading(true);
@@ -47,18 +66,14 @@ export default function Home() {
 		return loadIncidents();
 	}, [loadIncidents]);
 
-	// Chevauchement avec le header réservé aux états "placeholder" (chargement,
-	// erreur, vide) : la vraie liste de cartes n'en a pas besoin. À revoir avec
-	// l'US04 : la carte, une fois codée, deviendra l'élément qui chevauche le
-	// header, indépendamment de l'état de la liste en dessous.
-	const showsPlaceholder = isLoading || hasError || incidents.length === 0;
 	const showsWeatherBanner = weather.isLoading || weather.vigilance != null;
 	const showsEmailVerificationBanner = user != null && !user.emailVerified;
 	const showsTopBanners = showsWeatherBanner || showsEmailVerificationBanner;
 
 	return (
-		<div className="fixed inset-x-0 top-0 flex h-[calc(100dvh-var(--navigation-height))] flex-col bg-base-100 lg:left-24 lg:h-dvh">
-			<header className="relative isolate flex h-44 shrink-0 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-12">
+		<div className="flex h-full flex-col bg-base-100">
+			<WelcomeToast />
+			<header className="relative isolate flex h-36 shrink-0 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
 				<img
 					src={bgHome}
 					alt=""
@@ -89,7 +104,27 @@ export default function Home() {
 			)}
 
 			<div
-				className={`relative flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto px-4 pb-6 ${showsPlaceholder && !showsTopBanners ? "-mt-8" : ""}`}
+				className={`relative shrink-0 px-4 ${showsTopBanners ? "" : "-mt-8"}`}
+			>
+				<a
+					href="#incident-list"
+					className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-6 focus:z-1100 focus:rounded-full focus:bg-accent focus:px-3 focus:py-1 focus:text-xs focus:font-bold focus:text-primary"
+				>
+					Aller à la liste des incidents
+				</a>
+				<IncidentMap
+					selectedIncidentId={selectedIncidentId}
+					onSelectIncident={setSelectedIncidentId}
+					panRequest={mapPanRequest}
+					className="h-[38vh] w-full overflow-hidden rounded-2xl"
+				/>
+			</div>
+
+			<section
+				id="incident-list"
+				tabIndex={-1}
+				aria-label="Liste des incidents"
+				className="mt-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-6 focus:outline-none"
 			>
 				<IncidentList
 					incidents={incidents}
@@ -97,6 +132,8 @@ export default function Home() {
 					hasError={hasError}
 					onRetry={loadIncidents}
 					limit={INCIDENTS_LIST_LIMIT}
+					selectedIncidentId={selectedIncidentId}
+					onSelectIncident={handleSelectFromList}
 				/>
 
 				<Link
@@ -124,7 +161,7 @@ export default function Home() {
 						aria-hidden="true"
 					/>
 				</Link>
-			</div>
+			</section>
 		</div>
 	);
 }

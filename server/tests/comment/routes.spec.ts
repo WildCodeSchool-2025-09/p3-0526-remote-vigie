@@ -18,7 +18,7 @@ describe("GET /api/incidents/:id/comments", () => {
 				id: 1,
 				content: "La route est dégagée.",
 				createdAt: new Date("2026-09-20T10:00:00.000Z"),
-				author: { pseudo: "yann_30" },
+				author: { id: 7, pseudo: "yann_30" },
 				quotedComment: null,
 			},
 		];
@@ -34,6 +34,7 @@ describe("GET /api/incidents/:id/comments", () => {
 			fakeComments.map((comment) => ({
 				...comment,
 				createdAt: comment.createdAt.toISOString(),
+				author: { ...comment.author, badges: [] },
 			})),
 		);
 	});

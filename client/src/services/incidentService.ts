@@ -1,4 +1,5 @@
 import { apiFetch } from "@/services/apiClient";
+import type { Bounds } from "@/types/bounds";
 import type { Incident, IncidentCounts } from "@/types/incidentDetails";
 import type { NearbyIncident } from "@/types/incidentForm";
 import type { IncidentListItem } from "@/types/incidentList";
@@ -21,6 +22,36 @@ export async function getAllIncidents(
 		};
 	} catch {
 		return { status: "error" }; // réseau, CORS, JSON illisible
+	}
+}
+
+// Même plafond que MAX_MAP_LIMIT côté serveur (incidentActions.ts).
+export const MAP_INCIDENTS_LIMIT = 300;
+
+// Incidents in the map's visible zone (separate call from getAllIncidents).
+export async function getIncidentsInBounds(
+	bounds: Bounds,
+	limit = MAP_INCIDENTS_LIMIT,
+): Promise<GetAllIncidentsResult> {
+	try {
+		const params = new URLSearchParams({
+			north: String(bounds.north),
+			south: String(bounds.south),
+			east: String(bounds.east),
+			west: String(bounds.west),
+			limit: String(limit),
+		});
+
+		const res = await apiFetch(`/api/incidents?${params.toString()}`);
+
+		if (!res.ok) return { status: "error" };
+
+		return {
+			status: "ok",
+			incidents: (await res.json()) as IncidentListItem[],
+		};
+	} catch {
+		return { status: "error" };
 	}
 }
 
@@ -219,5 +250,49 @@ export async function createContribution(
 		};
 	} catch {
 		return { status: "error" };
+	}
+}
+type CreateDangerPayload = {
+	latitude: number;
+	longitude: number;
+};
+
+type CreateDangerResult =
+	| { status: "ok"; incident: Incident }
+	| { status: "invalid"; message: string }
+	| { status: "unauthorized" }
+	| { status: "tooManyRequests"; message: string }
+	| { status: "duplicate"; message: string }
+	| { status: "networkError" }
+	| { status: "error" };
+
+export async function createDangerIncident(
+	payload: CreateDangerPayload,
+): Promise<CreateDangerResult> {
+	try {
+		const res = await apiFetch("/api/incidents/danger", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(payload),
+		});
+
+		if (res.status === 400) {
+			const body = (await res.json()) as { message: string };
+			return { status: "invalid", message: body.message };
+		}
+		if (res.status === 401) return { status: "unauthorized" };
+		if (res.status === 429) {
+			const body = (await res.json()) as { message: string };
+			return { status: "tooManyRequests", message: body.message };
+		}
+		if (res.status === 409) {
+			const body = (await res.json()) as { message: string };
+			return { status: "duplicate", message: body.message };
+		}
+		if (!res.ok) return { status: "error" };
+
+		return { status: "ok", incident: (await res.json()) as Incident };
+	} catch {
+		return { status: "networkError" };
 	}
 }
