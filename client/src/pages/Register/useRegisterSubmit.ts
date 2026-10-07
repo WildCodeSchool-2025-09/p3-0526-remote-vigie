@@ -4,6 +4,7 @@ import { googleSignup } from "@/services/googleAuthService";
 import { register } from "@/services/userService";
 import type { RegisterPayload } from "@/services/userService";
 import type { RegisterFieldError } from "@/types/register";
+import getPseudoError from "@/utils/getPseudoError";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -114,10 +115,9 @@ export default function useRegisterSubmit({
 
 		const errors: RegisterFieldError = {};
 
-		if (pseudo === "") {
-			errors.pseudo = "Vous devez renseigner un pseudo";
-		} else if (pseudo.includes("@")) {
-			errors.pseudo = "Votre pseudo ne peut pas contenir de @";
+		const pseudoError = getPseudoError(pseudo);
+		if (pseudoError != null) {
+			errors.pseudo = pseudoError;
 		}
 
 		if (pendingToken == null) {

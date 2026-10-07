@@ -1,6 +1,7 @@
 import backgroundIncident from "@/assets/images/background-incident.jpg";
 import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNotVerifiedBanner";
 import Icon from "@/components/Icon/Icon";
+import PseudoField from "@/components/Profile/PseudoField/PseudoField";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import type { Address } from "@/types/auth";
 import { Link, useNavigate } from "react-router";
@@ -77,10 +78,7 @@ export default function Profile() {
 						Compte
 					</h2>
 					<dl>
-						<AccountField
-							label="Pseudo"
-							value={user?.pseudo ?? ""}
-						/>
+						<PseudoField pseudo={user?.pseudo ?? ""} />
 						<AccountField
 							label="E-mail"
 							value={user?.email ?? ""}

@@ -1,4 +1,5 @@
 import bgHome from "@/assets/images/background-home.jpg";
+import FormInput from "@/components/Form/FormInput/FormInput";
 import GoogleButton from "@/components/GoogleButton/GoogleButton";
 import Icon from "@/components/Icon/Icon";
 import AddressField from "@/components/Register/AddressField/AddressField";
@@ -112,21 +113,18 @@ export default function Register() {
 							>
 								Pseudonyme
 							</label>
-							<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
-								<input
-									id="register-pseudo"
-									defaultValue={google?.name.slice(0, 30)}
-									ref={pseudoRef}
-									type="text"
-									placeholder="Votre pseudo"
-									className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-									aria-describedby={
-										fieldErrors.pseudo
-											? "register-pseudo-error"
-											: undefined
-									}
-								/>
-							</section>
+							<FormInput
+								id="register-pseudo"
+								defaultValue={google?.name.slice(0, 30)}
+								ref={pseudoRef}
+								type="text"
+								placeholder="Votre pseudo"
+								aria-describedby={
+									fieldErrors.pseudo
+										? "register-pseudo-error"
+										: undefined
+								}
+							/>
 							<p className="text-xs text-primary">
 								Visible par vos voisins sur vos signalements.
 							</p>
@@ -146,22 +144,19 @@ export default function Register() {
 							>
 								E-mail
 							</label>
-							<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
-								<input
-									id="register-email"
-									defaultValue={google?.email}
-									readOnly={google != null}
-									ref={emailRef}
-									type="text"
-									placeholder="marion.c@exemple.fr"
-									className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-									aria-describedby={
-										fieldErrors.email
-											? "register-email-error"
-											: undefined
-									}
-								/>
-							</section>
+							<FormInput
+								id="register-email"
+								defaultValue={google?.email}
+								readOnly={google != null}
+								ref={emailRef}
+								type="text"
+								placeholder="marion.c@exemple.fr"
+								aria-describedby={
+									fieldErrors.email
+										? "register-email-error"
+										: undefined
+								}
+							/>
 							{fieldErrors.email && (
 								<p
 									id="register-email-error"

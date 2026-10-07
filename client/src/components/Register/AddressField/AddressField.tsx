@@ -1,3 +1,4 @@
+import FormInput from "@/components/Form/FormInput/FormInput";
 import Icon from "@/components/Icon/Icon";
 import type useAddressSearch from "@/pages/Register/useAddressSearch";
 
@@ -68,21 +69,18 @@ export default function AddressField({
 			</div>
 			{!manualMode && (
 				<div className="relative">
-					<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
-						<input
-							id="register-address"
-							value={addressQuery}
-							onChange={(e) => updateAddressQuery(e.target.value)}
-							onKeyDown={handleAddressKeyDown}
-							type="text"
-							placeholder="12 allée de l'exemple, 15800 Polminhac"
-							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-							autoComplete="off"
-							aria-describedby={
-								error ? "register-address-error" : undefined
-							}
-						/>
-					</section>
+					<FormInput
+						id="register-address"
+						value={addressQuery}
+						onChange={(e) => updateAddressQuery(e.target.value)}
+						onKeyDown={handleAddressKeyDown}
+						type="text"
+						placeholder="12 allée de l'exemple, 15800 Polminhac"
+						autoComplete="off"
+						aria-describedby={
+							error ? "register-address-error" : undefined
+						}
+					/>
 					{addressSuggestions.length > 0 && (
 						<div className="absolute inset-x-0 top-full z-20 mt-2 flex flex-col gap-1 rounded-2xl border border-primary/15 bg-base-300 p-2 shadow-lg">
 							{addressSuggestions.map((suggestion, index) => (
@@ -116,35 +114,29 @@ export default function AddressField({
 					<label htmlFor="register-city" className="sr-only">
 						Ville
 					</label>
-					<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
-						<input
-							id="register-city"
-							value={city}
-							onChange={(e) => setCity(e.target.value)}
-							type="text"
-							placeholder="Ville"
-							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-							aria-describedby={
-								error ? "register-address-error" : undefined
-							}
-						/>
-					</section>
+					<FormInput
+						id="register-city"
+						value={city}
+						onChange={(e) => setCity(e.target.value)}
+						type="text"
+						placeholder="Ville"
+						aria-describedby={
+							error ? "register-address-error" : undefined
+						}
+					/>
 					<label htmlFor="register-postal-code" className="sr-only">
 						Code postal
 					</label>
-					<section className="rounded-2xl border border-primary/15 bg-base-300 p-4">
-						<input
-							id="register-postal-code"
-							value={postalCode}
-							onChange={(e) => setPostalCode(e.target.value)}
-							type="text"
-							placeholder="Code postal"
-							className="w-full bg-transparent text-black placeholder:text-black/40 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-							aria-describedby={
-								error ? "register-address-error" : undefined
-							}
-						/>
-					</section>
+					<FormInput
+						id="register-postal-code"
+						value={postalCode}
+						onChange={(e) => setPostalCode(e.target.value)}
+						type="text"
+						placeholder="Code postal"
+						aria-describedby={
+							error ? "register-address-error" : undefined
+						}
+					/>
 				</div>
 			)}
 			{!manualMode && (

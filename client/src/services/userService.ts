@@ -1,4 +1,6 @@
 import { apiFetch } from "@/services/apiClient";
+import { normalizeUser } from "@/services/authActions";
+import type { AuthUser } from "@/types/auth";
 import type { RegisterFieldError } from "@/types/register";
 
 export type RegisterPayload = {
@@ -155,6 +157,41 @@ export async function resendVerification(
 		if (!res.ok) return { status: "error" };
 
 		return { status: "ok", message: body.message ?? "" };
+	} catch {
+		return { status: "error" };
+	}
+}
+
+type UpdatePseudoResult =
+	| { status: "ok"; user: AuthUser }
+	| { status: "invalid"; message: string }
+	| { status: "conflict"; message: string }
+	| { status: "error" };
+
+export async function updatePseudo(
+	pseudo: string,
+): Promise<UpdatePseudoResult> {
+	try {
+		const res = await apiFetch("/api/users/me/pseudo", {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ pseudo }),
+		});
+
+		if (res.status === 400 || res.status === 409) {
+			const body = (await res.json()) as { message: string };
+			return {
+				status: res.status === 400 ? "invalid" : "conflict",
+				message: body.message,
+			};
+		}
+
+		if (!res.ok) return { status: "error" };
+
+		return {
+			status: "ok",
+			user: normalizeUser((await res.json()) as AuthUser),
+		};
 	} catch {
 		return { status: "error" };
 	}
