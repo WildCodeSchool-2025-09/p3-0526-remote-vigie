@@ -8,21 +8,25 @@ const read: RequestHandler = async (req, res, next) => {
 	try {
 		const userId = Number(req.auth?.sub);
 
-		const inseeCode = await addressRepository.findOldestInseeCode(userId);
-		if (inseeCode == null) {
+		const address = await addressRepository.findOldestAddress(userId);
+		if (address == null) {
 			res.sendStatus(StatusCodes.NO_CONTENT);
 			return;
 		}
 
-		const level = await vigilanceService.getVigilanceLevel(
-			departmentFromInsee(inseeCode),
-		);
-		if (level == null) {
+		const department = departmentFromInsee(address.inseeCode);
+		const vigilance = await vigilanceService.getVigilance(department);
+		if (vigilance == null) {
 			res.sendStatus(StatusCodes.NO_CONTENT);
 			return;
 		}
 
-		res.json({ level });
+		res.json({
+			level: vigilance.level,
+			department,
+			city: address.city,
+			updatedAt: vigilance.updatedAt,
+		});
 	} catch (err) {
 		next(err);
 	}

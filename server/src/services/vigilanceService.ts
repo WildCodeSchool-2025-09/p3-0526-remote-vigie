@@ -15,6 +15,7 @@ const LEVELS: Record<number, VigilanceLevel> = {
 // Seuls les champs lus ici ; la réponse complète en contient beaucoup d'autres.
 type VigilanceMap = {
 	product?: {
+		update_time?: string;
 		periods?: {
 			echeance?: string;
 			timelaps?: {
@@ -41,9 +42,9 @@ export function levelFromMap(
 	return LEVELS[domain.max_color_id] ?? null;
 }
 
-async function getVigilanceLevel(
-	department: string,
-): Promise<VigilanceLevel | null> {
+export type Vigilance = { level: VigilanceLevel; updatedAt: string | null };
+
+async function getVigilance(department: string): Promise<Vigilance | null> {
 	try {
 		const res = await fetch(VIGILANCE_URL, {
 			headers: { apikey: process.env.METEO_API_KEY ?? "" },
@@ -53,7 +54,11 @@ async function getVigilanceLevel(
 			throw new Error(`Response status: ${res.status}`);
 		}
 
-		return levelFromMap((await res.json()) as VigilanceMap, department);
+		const map = (await res.json()) as VigilanceMap;
+		const level = levelFromMap(map, department);
+		if (level == null) return null;
+
+		return { level, updatedAt: map.product?.update_time ?? null };
 	} catch (error) {
 		console.error(
 			error instanceof Error
@@ -66,4 +71,4 @@ async function getVigilanceLevel(
 	}
 }
 
-export default { getVigilanceLevel };
+export default { getVigilance };
