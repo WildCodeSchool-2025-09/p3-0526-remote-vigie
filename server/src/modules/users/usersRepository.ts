@@ -215,6 +215,17 @@ class UsersRepository {
 		);
 		return rows[0] ?? null;
 	}
+
+	async updatePseudo(
+		userId: number,
+		pseudo: string,
+		pseudoNormalized: string,
+	) {
+		await databaseClient.query(
+			"UPDATE user SET pseudo = ?, pseudo_normalized = ? WHERE id = ?",
+			[pseudo, pseudoNormalized, userId],
+		);
+	}
 }
 
 export default new UsersRepository();

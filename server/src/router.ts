@@ -126,5 +126,6 @@ router.post(
 	checkResendVerificationRateLimit,
 	usersActions.resendVerification,
 );
+router.patch("/api/users/me/pseudo", verifyToken, usersActions.updatePseudo);
 
 export default router;

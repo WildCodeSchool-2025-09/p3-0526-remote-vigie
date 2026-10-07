@@ -12,14 +12,28 @@ function formatAddress(address: Address | undefined) {
 	return address.street_line ? `${address.street_line} · ${place}` : place;
 }
 
-function AccountField({ label, value }: { label: string; value: string }) {
+function AccountField({
+	label,
+	value,
+	verified,
+}: { label: string; value: string; verified?: boolean }) {
 	return (
 		<div className="border-b border-dashed border-primary/15 py-3">
 			<dt className="text-xs uppercase tracking-widest text-primary/75">
 				{label}
 			</dt>
-			<dd className="mt-1 wrap-break-word text-base font-bold text-primary">
+			<dd className="mt-1 flex items-center gap-2 wrap-break-word text-base font-bold text-primary">
 				{value}
+				{verified && (
+					<>
+						<Icon
+							name="checkCircle"
+							className="h-5 w-5 shrink-0 fill-success"
+							aria-hidden="true"
+						/>
+						<span className="sr-only">E-mail vérifié</span>
+					</>
+				)}
 			</dd>
 		</div>
 	);
@@ -70,6 +84,7 @@ export default function Profile() {
 						<AccountField
 							label="E-mail"
 							value={user?.email ?? ""}
+							verified={user?.emailVerified}
 						/>
 						<AccountField
 							label="Adresse principale"
