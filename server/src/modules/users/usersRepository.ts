@@ -1,5 +1,5 @@
 import databaseClient from "../../../database/client";
-import type { Result, Rows } from "../../../database/client";
+import type { Executor, Result, Rows } from "../../../database/client";
 import type { NewGoogleUser } from "../../types/oauth";
 
 class UsersRepository {
@@ -225,6 +225,65 @@ class UsersRepository {
 			"UPDATE user SET pseudo = ?, pseudo_normalized = ? WHERE id = ?",
 			[pseudo, pseudoNormalized, userId],
 		);
+	}
+
+	// Suppression de compte (US18) : la ligne est conservée pour que les
+	// signalements et commentaires restent, mais plus rien n'identifie la
+	// personne. Le pseudo et l'e-mail sont remplacés par des valeurs uniques
+	// (dérivées de l'id), ce qui libère le pseudo d'origine.
+	async anonymize(userId: number, executor: Executor = databaseClient) {
+		await executor.query(
+			`UPDATE user
+			SET pseudo = CONCAT('supprime-', id),
+				pseudo_normalized = CONCAT('supprime-', id),
+				email = CONCAT('supprime-', id, '@anonyme.invalid'),
+				email_normalized = CONCAT('supprime-', id, '@anonyme.invalid'),
+				password_hash = NULL,
+				email_verification_token_hash = NULL,
+				email_verification_expires_at = NULL,
+				anonymized_at = NOW()
+			WHERE id = ?`,
+			[userId],
+		);
+	}
+
+	// Suppression de compte (US18) : ce qui appartient à la personne disparaît.
+	// Les signalements et les commentaires ne sont volontairement pas touchés,
+	// ils restent rattachés au compte anonymisé.
+	async deletePersonalData(
+		userId: number,
+		executor: Executor = databaseClient,
+	) {
+		for (const table of [
+			"oauth_account",
+			"address",
+			"user_location",
+			"contribution",
+			"user_badge",
+		]) {
+			await executor.query(`DELETE FROM ${table} WHERE user_id = ?`, [
+				userId,
+			]);
+		}
+	}
+
+	// Suppression de compte (US18) : tout ou rien. Si l'une des deux écritures
+	// échoue, rien n'est supprimé et le compte reste intact.
+	async destroy(userId: number) {
+		const connection = await databaseClient.getConnection();
+		try {
+			await connection.beginTransaction();
+
+			await this.deletePersonalData(userId, connection);
+			await this.anonymize(userId, connection);
+
+			await connection.commit();
+		} catch (err) {
+			await connection.rollback();
+			throw err;
+		} finally {
+			connection.release();
+		}
 	}
 }
 

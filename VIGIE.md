@@ -425,6 +425,7 @@ erDiagram
         TIMESTAMP cgu_accepted_at "NOT NULL"
         TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
         TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+        TIMESTAMP anonymized_at "NULL (renseigné à la suppression du compte, US18)"
     }
     OAUTH_ACCOUNT {
         INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"

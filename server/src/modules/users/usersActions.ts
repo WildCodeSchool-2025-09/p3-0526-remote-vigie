@@ -282,6 +282,10 @@ const destroy: RequestHandler = async (req, res, next) => {
 				return;
 			}
 		}
+
+		await usersRepository.destroy(userId);
+
+		res.sendStatus(StatusCodes.NO_CONTENT);
 	} catch (err) {
 		next(err);
 	}
