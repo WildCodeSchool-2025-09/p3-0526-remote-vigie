@@ -10,7 +10,7 @@ function isDeletedUserPseudo(pseudo: string): boolean {
 			.replace(/\p{Diacritic}/gu, "")
 			.toLowerCase();
 
-	return simplify(pseudo) === simplify("Utilisateur supprimé");
+	return simplify(pseudo) === simplify("Anonyme");
 }
 
 export default function getPseudoError(pseudo: string): string | null {

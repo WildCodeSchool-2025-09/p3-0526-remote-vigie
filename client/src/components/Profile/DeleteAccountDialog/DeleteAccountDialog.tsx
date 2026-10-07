@@ -10,7 +10,6 @@ type Props = {
 
 const DELETED_ITEMS = [
 	"Vos adresses et votre position",
-	"Vos confirmations et infirmations de signalements",
 	"Vos badges et vos notifications",
 	"La liaison avec votre compte Google, le cas échéant",
 	"Votre pseudo, votre adresse e-mail et votre mot de passe : vous ne pourrez plus vous connecter",
@@ -19,6 +18,7 @@ const DELETED_ITEMS = [
 const KEPT_ITEMS = [
 	"Vos signalements",
 	"Vos commentaires",
+	"Vos confirmations et infirmations de signalements",
 	"Ils restent visibles pour vos voisins, sans qu'on puisse vous identifier.",
 ];
 

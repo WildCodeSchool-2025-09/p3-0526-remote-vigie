@@ -240,7 +240,7 @@ class UsersRepository {
 
 	// Suppression de compte (US18) : la ligne est conservée pour que les
 	// signalements et commentaires restent, mais plus rien n'identifie la
-	// personne. Le pseudo affiché devient « Utilisateur supprimé » ; les
+	// personne. Le pseudo affiché devient « Anonyme » ; les
 	// colonnes uniques reçoivent des valeurs dérivées de l'id, ce qui libère le
 	// pseudo d'origine. Ces valeurs sont impossibles à saisir à l'inscription
 	// (un pseudo ne peut pas contenir de @, un e-mail doit en contenir un),
@@ -262,8 +262,9 @@ class UsersRepository {
 	}
 
 	// Suppression de compte (US18) : ce qui appartient à la personne disparaît.
-	// Les signalements et les commentaires ne sont volontairement pas touchés,
-	// ils restent rattachés au compte anonymisé.
+	// Les signalements, les commentaires et les votes (contribution) ne sont
+	// volontairement pas touchés : ils restent rattachés au compte anonymisé,
+	// ce qui garde les compteurs et les échéances des incidents cohérents.
 	async deletePersonalData(
 		userId: number,
 		executor: Executor = databaseClient,
@@ -272,7 +273,6 @@ class UsersRepository {
 			"oauth_account",
 			"address",
 			"user_location",
-			"contribution",
 			"user_badge",
 		]) {
 			await executor.query(`DELETE FROM ${table} WHERE user_id = ?`, [

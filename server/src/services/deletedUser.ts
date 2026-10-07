@@ -1,6 +1,6 @@
 // Nom affiché à la place du pseudo d'un compte supprimé (US18). Seul
 // pseudo_normalized est unique : plusieurs comptes peuvent porter ce nom.
-export const DELETED_USER_PSEUDO = "Utilisateur supprimé";
+export const DELETED_USER_PSEUDO = "Anonyme";
 
 // Vrai si le pseudo se confond avec celui d'un compte supprimé, sans tenir
 // compte de la casse, des accents ni des espaces autour.

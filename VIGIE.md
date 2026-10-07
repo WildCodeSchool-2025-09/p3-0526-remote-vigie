@@ -701,24 +701,23 @@ saisie d'URL côté US07.
   l'identique, pour un compte créé avec Google. Le serveur choisit selon le **compte**
   (`password_hash`), jamais selon ce qu'envoie le client. Confirmation refusée : `403`
   (`invalid_confirmation`), rien n'est modifié.
-- **Supprimé définitivement** : adresses, position, liaison Google, votes (`contribution`), badges.
-- **Conservé de façon anonyme** : signalements et commentaires. La ligne `user` reste, anonymisée
-  (`anonymized_at` renseigné) : pseudo affiché « Utilisateur supprimé », e-mail et pseudo normalisé
+- **Supprimé définitivement** : adresses, position, liaison Google, badges.
+- **Conservé de façon anonyme** : signalements, commentaires et votes (`contribution`). Écart assumé
+  avec la carte Trello, qui supprimait les votes : les garder maintient les compteurs et les
+  échéances des incidents cohérents. La ligne `user` reste, anonymisée
+  (`anonymized_at` renseigné) : pseudo affiché « Anonyme », e-mail et pseudo normalisé
   remplacés par des valeurs dérivées de l'id, mot de passe et jetons de vérification effacés. Le
   pseudo d'origine redevient disponible.
 - **Tout ou rien** : suppression des données personnelles et anonymisation dans une seule
   transaction.
 - **Session** : `verifyToken` refuse (`401`) le token d'un compte supprimé, donc la session s'arrête
   immédiatement, sans attendre l'expiration du JWT (une requête par appel protégé).
-- **Pseudo réservé** : « Utilisateur supprimé » (sans tenir compte de la casse ni des accents) ne peut
+- **Pseudo réservé** : « Anonyme » (sans tenir compte de la casse ni des accents) ne peut
   être choisi ni à l'inscription ni à la modification du pseudo.
 - **Identité masquée** : pour un auteur supprimé, l'API renvoie `author.id: null` (signalements et
   commentaires), pour qu'on ne puisse pas relier ses publications entre elles. Les valeurs
   d'anonymisation (`@supprime-<id>`, `supprime-<id>`) sont impossibles à saisir à l'inscription, donc
   personne ne peut bloquer une suppression en les occupant à l'avance.
-- **Limite connue** : les votes d'un compte supprimé sont retirés du compteur, mais l'échéance déjà
-  enregistrée des incidents concernés n'est pas recalculée (effet limité, sans enjeu de sécurité ;
-  le recalcul demanderait les mêmes verrous que `contributionService`).
 
 ### Carte et lieux utiles (US04)
 

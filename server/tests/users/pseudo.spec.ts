@@ -40,11 +40,11 @@ describe("PATCH /api/users/me/pseudo", () => {
 		},
 		{
 			label: "the reserved deleted-account name",
-			body: { pseudo: "Utilisateur supprimé" },
+			body: { pseudo: "Anonyme" },
 		},
 		{
-			label: "the reserved name with another case and no accent",
-			body: { pseudo: " UTILISATEUR SUPPRIME " },
+			label: "the reserved name with another case",
+			body: { pseudo: " ANONYME " },
 		},
 		{ label: "a missing pseudo", body: {} },
 		{ label: "a non-string pseudo", body: { pseudo: 42 } },
