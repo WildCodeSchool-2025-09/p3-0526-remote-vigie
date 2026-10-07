@@ -1,3 +1,4 @@
+import argon2 from "argon2";
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 import { CURRENT_CGU_VERSION } from "../../services/cgu";
@@ -221,9 +222,75 @@ const updatePseudo: RequestHandler = async (req, res, next) => {
 	}
 };
 
+const destroy: RequestHandler = async (req, res, next) => {
+	try {
+		const userId = Number(req.auth?.sub);
+		const user = await usersRepository.read(userId);
+		if (!user) {
+			res.status(StatusCodes.UNAUTHORIZED).json({
+				error: "unauthorized",
+				message: "Session invalide.",
+			});
+			return;
+		}
+		const { password, pseudo } = req.body as {
+			password?: unknown;
+			pseudo?: unknown;
+		};
+
+		// La confirmation exigée dépend du compte, jamais de ce qu'envoie le
+		// client : sinon un token volé suffirait à contourner le mot de passe.
+		if (user.password_hash != null) {
+			if (typeof password !== "string" || password === "") {
+				res.status(StatusCodes.BAD_REQUEST).json({
+					error: "invalid_confirmation",
+					message: "Veuillez saisir votre mot de passe.",
+				});
+				return;
+			}
+
+			const isPasswordValid = await argon2.verify(
+				user.password_hash,
+				password,
+			);
+
+			// 403 et pas 401 : la session est valide, c'est la confirmation qui
+			// est refusée (un 401 déconnecterait l'utilisateur côté front).
+			if (!isPasswordValid) {
+				res.status(StatusCodes.FORBIDDEN).json({
+					error: "invalid_confirmation",
+					message: "Mot de passe incorrect.",
+				});
+				return;
+			}
+		} else {
+			if (typeof pseudo !== "string" || pseudo.trim() === "") {
+				res.status(StatusCodes.BAD_REQUEST).json({
+					error: "invalid_confirmation",
+					message: "Veuillez saisir votre pseudo.",
+				});
+				return;
+			}
+
+			// Comparaison exacte : l'utilisateur doit retaper son pseudo tel
+			// qu'il est affiché.
+			if (pseudo.trim() !== user.pseudo) {
+				res.status(StatusCodes.FORBIDDEN).json({
+					error: "invalid_confirmation",
+					message: "Le pseudo saisi ne correspond pas.",
+				});
+				return;
+			}
+		}
+	} catch (err) {
+		next(err);
+	}
+};
+
 export default {
 	add,
 	verifyEmail,
 	resendVerification,
 	updatePseudo,
+	destroy,
 };
