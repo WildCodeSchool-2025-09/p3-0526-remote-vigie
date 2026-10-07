@@ -712,6 +712,13 @@ saisie d'URL côté US07.
   immédiatement, sans attendre l'expiration du JWT (une requête par appel protégé).
 - **Pseudo réservé** : « Utilisateur supprimé » (sans tenir compte de la casse ni des accents) ne peut
   être choisi ni à l'inscription ni à la modification du pseudo.
+- **Identité masquée** : pour un auteur supprimé, l'API renvoie `author.id: null` (signalements et
+  commentaires), pour qu'on ne puisse pas relier ses publications entre elles. Les valeurs
+  d'anonymisation (`@supprime-<id>`, `supprime-<id>`) sont impossibles à saisir à l'inscription, donc
+  personne ne peut bloquer une suppression en les occupant à l'avance.
+- **Limite connue** : les votes d'un compte supprimé sont retirés du compteur, mais l'échéance déjà
+  enregistrée des incidents concernés n'est pas recalculée (effet limité, sans enjeu de sécurité ;
+  le recalcul demanderait les mêmes verrous que `contributionService`).
 
 ### Carte et lieux utiles (US04)
 

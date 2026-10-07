@@ -95,7 +95,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				login,
 				loginWithToken,
 				logout,
-				updateUser: setUser,
+				// Ignoré si la session s'est terminée entre-temps (réponse tardive)
+				updateUser: (updated) =>
+					setUser((current) => current && updated),
 			}}
 		>
 			{children}

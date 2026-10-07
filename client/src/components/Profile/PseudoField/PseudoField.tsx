@@ -125,7 +125,8 @@ export default function PseudoField({ pseudo }: PseudoFieldProps) {
 				<form
 					onSubmit={handleSubmit}
 					onKeyDown={(event) => {
-						if (event.key === "Escape") cancelEditing();
+						if (event.key === "Escape" && !isSubmitting)
+							cancelEditing();
 					}}
 					aria-busy={isSubmitting}
 					noValidate
@@ -155,6 +156,7 @@ export default function PseudoField({ pseudo }: PseudoFieldProps) {
 						<button
 							type="button"
 							onClick={cancelEditing}
+							disabled={isSubmitting}
 							className="btn btn-md grow rounded-full border-2 border-primary bg-transparent text-primary shadow-none hover:bg-primary/10"
 						>
 							Annuler

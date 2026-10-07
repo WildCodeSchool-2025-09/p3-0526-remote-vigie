@@ -67,7 +67,7 @@ const read: RequestHandler = async (req, res, next) => {
 		}
 
 		const badges =
-			userId != null
+			userId != null && incident.author.id != null
 				? await userBadgeRepository.readRecentByUser(incident.author.id)
 				: [];
 

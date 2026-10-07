@@ -34,7 +34,8 @@ type IncidentDetails = {
 	editedAt: Date | null;
 	expiresAt: Date;
 	dangerLevel: { label: string; color: string; weight: number };
-	author: { id: number; pseudo: string };
+	// id null : compte supprimé, on n'expose pas son identifiant (US18)
+	author: { id: number | null; pseudo: string };
 	types: {
 		code: string;
 		label: string;
@@ -147,7 +148,8 @@ class IncidentRepository {
 				d.label AS danger_level_label,
 				d.color AS danger_level_color,
 				d.weight AS danger_level_weight,
-				u.pseudo AS author_pseudo
+				u.pseudo AS author_pseudo,
+				u.anonymized_at AS author_anonymized_at
 			FROM incident AS i
 			INNER JOIN danger_level AS d ON d.id = i.danger_level_id
 			INNER JOIN user AS u ON u.id = i.user_id
@@ -196,7 +198,10 @@ class IncidentRepository {
 				color: row.danger_level_color,
 				weight: row.danger_level_weight,
 			},
-			author: { id: row.user_id, pseudo: row.author_pseudo },
+			author: {
+				id: row.author_anonymized_at == null ? row.user_id : null,
+				pseudo: row.author_pseudo,
+			},
 			types: typeRows.map((t) => ({
 				code: t.code,
 				label: t.label,

@@ -70,11 +70,17 @@ export default function DeleteAccountDialog({ dialogRef }: Props) {
 		}
 
 		// La saisie est conservée pour pouvoir réessayer
-		setError(
-			result.status === "invalid"
-				? result.message
-				: "Une erreur est survenue. Vérifiez votre connexion puis réessayez. Votre compte n'a pas été supprimé.",
-		);
+		if (result.status === "invalid") {
+			setError(result.message);
+		} else if (result.status === "networkError") {
+			setError(
+				"Nous n'avons pas pu confirmer la suppression : la connexion a été interrompue. Si vous êtes redirigé vers la page de connexion, votre compte a bien été supprimé ; sinon, réessayez.",
+			);
+		} else {
+			setError(
+				"Une erreur est survenue : votre compte n'a pas été supprimé. Veuillez réessayer.",
+			);
+		}
 		inputRef.current?.focus();
 	};
 

@@ -9,7 +9,8 @@ export type IncidentDangerLevel = {
 };
 
 export type IncidentAuthor = {
-	id: number;
+	// null : compte supprimé
+	id: number | null;
 	pseudo: string;
 	badges: AuthorBadge[];
 };

@@ -241,15 +241,17 @@ class UsersRepository {
 	// Suppression de compte (US18) : la ligne est conservée pour que les
 	// signalements et commentaires restent, mais plus rien n'identifie la
 	// personne. Le pseudo affiché devient « Utilisateur supprimé » ; les
-	// colonnes uniques (pseudo_normalized, e-mail) reçoivent des valeurs
-	// dérivées de l'id, ce qui libère le pseudo d'origine.
+	// colonnes uniques reçoivent des valeurs dérivées de l'id, ce qui libère le
+	// pseudo d'origine. Ces valeurs sont impossibles à saisir à l'inscription
+	// (un pseudo ne peut pas contenir de @, un e-mail doit en contenir un),
+	// donc personne ne peut les occuper à l'avance et bloquer la suppression.
 	async anonymize(userId: number, executor: Executor = databaseClient) {
 		await executor.query(
 			`UPDATE user
 			SET pseudo = ?,
-				pseudo_normalized = CONCAT('supprime-', id),
-				email = CONCAT('supprime-', id, '@anonyme.invalid'),
-				email_normalized = CONCAT('supprime-', id, '@anonyme.invalid'),
+				pseudo_normalized = CONCAT('@supprime-', id),
+				email = CONCAT('supprime-', id),
+				email_normalized = CONCAT('supprime-', id),
 				password_hash = NULL,
 				email_verification_token_hash = NULL,
 				email_verification_expires_at = NULL,

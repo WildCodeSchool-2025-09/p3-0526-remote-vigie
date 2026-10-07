@@ -200,6 +200,7 @@ export async function updatePseudo(
 type DeleteAccountResult =
 	| { status: "ok" }
 	| { status: "invalid"; message: string }
+	| { status: "networkError" }
 	| { status: "error" };
 
 // Confirmation exigée avant toute suppression : le mot de passe, ou le pseudo
@@ -227,6 +228,7 @@ export async function deleteAccount(
 
 		return { status: "ok" };
 	} catch {
-		return { status: "error" };
+		// Le serveur a pu valider la suppression avant la coupure : issue incertaine
+		return { status: "networkError" };
 	}
 }
