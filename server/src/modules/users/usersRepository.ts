@@ -227,6 +227,16 @@ class UsersRepository {
 		);
 	}
 
+	// Faux si le compte n'existe plus ou a été anonymisé (suppression, US18) :
+	// un token encore valide ne doit plus ouvrir de session.
+	async isActive(userId: number) {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT 1 FROM user WHERE id = ? AND anonymized_at IS NULL",
+			[userId],
+		);
+		return rows.length > 0;
+	}
+
 	// Suppression de compte (US18) : la ligne est conservée pour que les
 	// signalements et commentaires restent, mais plus rien n'identifie la
 	// personne. Le pseudo et l'e-mail sont remplacés par des valeurs uniques
