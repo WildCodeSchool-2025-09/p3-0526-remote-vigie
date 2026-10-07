@@ -15,5 +15,6 @@ export type AuthUser = {
 	pseudo: string;
 	email: string;
 	emailVerified: boolean;
+	hasPassword: boolean;
 	addresses: Address[];
 };

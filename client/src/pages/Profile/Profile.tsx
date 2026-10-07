@@ -1,9 +1,11 @@
 import backgroundIncident from "@/assets/images/background-incident.jpg";
 import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNotVerifiedBanner";
 import Icon from "@/components/Icon/Icon";
+import DeleteAccountDialog from "@/components/Profile/DeleteAccountDialog/DeleteAccountDialog";
 import PseudoField from "@/components/Profile/PseudoField/PseudoField";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import type { Address } from "@/types/auth";
+import { useRef } from "react";
 import { Link, useNavigate } from "react-router";
 
 function formatAddress(address: Address | undefined) {
@@ -43,6 +45,7 @@ function AccountField({
 export default function Profile() {
 	const { user, logout } = useAuth();
 	const navigate = useNavigate();
+	const deleteDialogRef = useRef<HTMLDialogElement>(null);
 	const showsEmailBanner = user != null && !user.emailVerified;
 	const primaryAddress = user?.addresses.find(
 		(address) => address.is_primary,
@@ -128,6 +131,7 @@ export default function Profile() {
 				</p>
 				<button
 					type="button"
+					onClick={() => deleteDialogRef.current?.showModal()}
 					className="btn btn-error btn-md mt-4 w-full rounded-full border-none px-5 font-bold text-(--on-error)"
 				>
 					<Icon
@@ -138,6 +142,7 @@ export default function Profile() {
 					Supprimer mon compte
 				</button>
 			</section>
+			<DeleteAccountDialog dialogRef={deleteDialogRef} />
 		</main>
 	);
 }

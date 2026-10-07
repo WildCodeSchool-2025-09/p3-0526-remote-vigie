@@ -126,6 +126,7 @@ describe("PATCH /api/users/me/pseudo", () => {
 			pseudo: "Bob",
 			email: "alice@example.com",
 			emailVerified: true,
+			hasPassword: true,
 			addresses: [],
 		});
 		// Aucun champ sensible ne doit sortir

@@ -196,3 +196,37 @@ export async function updatePseudo(
 		return { status: "error" };
 	}
 }
+
+type DeleteAccountResult =
+	| { status: "ok" }
+	| { status: "invalid"; message: string }
+	| { status: "error" };
+
+// Confirmation exigée avant toute suppression : le mot de passe, ou le pseudo
+// pour un compte sans mot de passe (inscription Google).
+export type DeleteAccountConfirmation =
+	| { password: string }
+	| { pseudo: string };
+
+export async function deleteAccount(
+	confirmation: DeleteAccountConfirmation,
+): Promise<DeleteAccountResult> {
+	try {
+		const res = await apiFetch("/api/users/me", {
+			method: "DELETE",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(confirmation),
+		});
+
+		if (res.status === 400 || res.status === 403) {
+			const body = (await res.json()) as { message: string };
+			return { status: "invalid", message: body.message };
+		}
+
+		if (!res.ok) return { status: "error" };
+
+		return { status: "ok" };
+	} catch {
+		return { status: "error" };
+	}
+}
