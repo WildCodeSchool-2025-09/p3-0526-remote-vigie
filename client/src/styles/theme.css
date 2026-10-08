@@ -359,4 +359,22 @@
 			opacity: 0;
 		}
 	}
+
+	--animate-snowfall: snowfall 3s linear infinite;
+	@keyframes snowfall {
+		0% {
+			translate: 0 -30px;
+			rotate: 0deg;
+			opacity: 0;
+		}
+		20%,
+		80% {
+			opacity: 1;
+		}
+		100% {
+			translate: 0 30px;
+			rotate: 60deg;
+			opacity: 0;
+		}
+	}
 }
