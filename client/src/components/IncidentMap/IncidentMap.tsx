@@ -13,7 +13,6 @@ import {
 	Marker,
 	Popup,
 	TileLayer,
-	ZoomControl,
 	useMap,
 	useMapEvents,
 } from "react-leaflet";
@@ -36,6 +35,11 @@ import type { IncidentListItem } from "@/types/incidentList";
 import type { UsefulPlace } from "@/types/usefulPlace";
 import { FRANCE_BOUNDS } from "@/utils/franceBounds";
 import { getDefaultMapCenter } from "@/utils/getDefaultMapCenter";
+import {
+	POPUP_AUTO_PAN_BOTTOM_RIGHT,
+	POPUP_AUTO_PAN_TOP_LEFT,
+	POPUP_MAX_WIDTH,
+} from "@/utils/popupAutoPan";
 import { useDelayedFlag } from "./useDelayedFlag";
 
 const DEFAULT_ZOOM = 6;
@@ -164,6 +168,61 @@ function MapViewportWatcher({
 	return null;
 }
 
+// Zoom de Leaflet avec, entre « + » et « − », un bouton qui ramène la carte à la
+// vue de départ (`center` / `zoom`, lus au clic).
+function MapZoomControl({
+	center,
+	zoom,
+}: {
+	center: L.LatLngExpression;
+	zoom: number;
+}) {
+	const map = useMap();
+	const startViewRef = useRef({ center, zoom });
+
+	useEffect(() => {
+		startViewRef.current = { center, zoom };
+	}, [center, zoom]);
+
+	useEffect(() => {
+		const control = L.control.zoom({
+			position: "topright",
+			zoomInTitle: "Zoom avant",
+			zoomOutTitle: "Zoom arrière",
+		});
+		control.addTo(map);
+
+		const container = control.getContainer();
+		const resetButton = L.DomUtil.create("a", "leaflet-control-zoom-reset");
+		const BulletIcon = icons.bullet;
+		resetButton.href = "#";
+		resetButton.title = "Revenir à la position de départ";
+		resetButton.setAttribute("role", "button");
+		resetButton.setAttribute(
+			"aria-label",
+			"Revenir à la position de départ",
+		);
+		resetButton.innerHTML = renderToStaticMarkup(
+			<BulletIcon
+				className="inline-block size-5 fill-current align-middle"
+				aria-hidden="true"
+			/>,
+		);
+		L.DomEvent.on(resetButton, "click", (event) => {
+			L.DomEvent.stop(event);
+			map.closePopup();
+			map.setView(startViewRef.current.center, startViewRef.current.zoom);
+		});
+		container?.insertBefore(resetButton, container.lastElementChild);
+
+		return () => {
+			control.remove();
+		};
+	}, [map]);
+
+	return null;
+}
+
 // Recentre la carte sur la demande reçue en prop (sélection depuis la liste).
 function MapPanRequestWatcher({
 	request,
@@ -225,7 +284,11 @@ function IncidentMarker({
 			}${isResolved ? " (résolu)" : ""}`}
 			eventHandlers={{ click: () => onSelect(incident, map) }}
 		>
-			<Popup>
+			<Popup
+				autoPanPaddingTopLeft={POPUP_AUTO_PAN_TOP_LEFT}
+				autoPanPaddingBottomRight={POPUP_AUTO_PAN_BOTTOM_RIGHT}
+				maxWidth={POPUP_MAX_WIDTH}
+			>
 				<p className="font-title text-sm font-bold text-primary">
 					{incident.title}
 				</p>
@@ -431,9 +494,7 @@ export default function IncidentMap({
 	);
 
 	return (
-		<div
-			className={`relative ${className} [&_.leaflet-top.leaflet-right]:mt-14`}
-		>
+		<div className={`relative ${className}`}>
 			{showMapIncidentsLoading && (
 				<output
 					aria-live="polite"
@@ -447,7 +508,7 @@ export default function IncidentMap({
 			{mapError && (
 				<div
 					role="alert"
-					className="absolute top-14 right-2 left-2 z-1000 flex items-center justify-center gap-3 rounded-2xl bg-(--bg-error) px-3 py-2 text-sm text-(--error-text)"
+					className="absolute top-14 right-14 left-2 z-1000 flex items-center justify-center gap-3 rounded-2xl bg-(--bg-error) px-3 py-2 text-sm text-(--error-text)"
 				>
 					<span>
 						Impossible de charger les signalements sur la carte.
@@ -514,7 +575,7 @@ export default function IncidentMap({
 				maxBoundsViscosity={1}
 				className="h-full w-full"
 			>
-				<ZoomControl position="topright" />
+				<MapZoomControl center={initialCenter} zoom={DEFAULT_ZOOM} />
 				<MapViewportWatcher onViewportChange={handleViewportChange} />
 				<MapPanRequestWatcher
 					request={panRequest}
