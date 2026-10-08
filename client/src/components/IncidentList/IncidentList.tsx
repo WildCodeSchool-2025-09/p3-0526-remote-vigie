@@ -44,23 +44,20 @@ const TRUNCATION_ORDER: Record<IncidentSort, string> = {
 	severity_asc: "les moins graves",
 };
 
-// Réponse tronquée : d'autres incidents existent, "Au moins" plutôt qu'un total.
 function buildCountLabel(
 	count: number,
-	isTruncated: boolean,
 	includeResolved: boolean,
 	search: string,
 ): string {
-	const prefix = isTruncated ? "Au moins" : "Il y a";
 	const noun = count > 1 ? "incidents" : "incident";
 
 	if (search !== "") {
-		const resolved = includeResolved ? " (résolus inclus)" : "";
-		return `${prefix} ${count} ${noun}${resolved} correspondant à « ${search} »`;
+		const found = count > 1 ? "trouvés" : "trouvé";
+		return `${count} ${noun} ${found}`;
 	}
 
-	const scope = includeResolved ? " (résolus inclus)" : " en cours";
-	return `${prefix} ${count} ${noun}${scope} dans cette zone`;
+	const scope = includeResolved ? "" : " en cours";
+	return `${count} ${noun}${scope}`;
 }
 
 export default function IncidentList({
@@ -92,17 +89,21 @@ export default function IncidentList({
 	const emptyTitle =
 		search !== ""
 			? `Aucun résultat pour « ${search} »`
-			: "Rien à signaler autour de vous";
+			: "Rien à signaler dans cette zone";
 	const countLabel = buildCountLabel(
 		incidents.length,
-		isTruncated,
 		includeResolved,
 		search,
 	);
 
 	// Annonce vide pendant le chargement : seul le résultat final est lu.
+	// La limite est dite ici : la phrase de troncature n'est pas dans la zone annoncée.
 	let liveMessage = "";
-	if (hasResults) liveMessage = countLabel;
+	if (hasResults) {
+		liveMessage = isTruncated
+			? `${countLabel}, liste limitée à ${limit}`
+			: countLabel;
+	}
 	if (isEmpty) liveMessage = emptyTitle;
 
 	function renderBody() {
@@ -190,7 +191,7 @@ export default function IncidentList({
 												? "."
 												: " ou cochez « Inclure les incidents résolus »."
 										}`
-									: "Aucun incident dans votre zone. Vous serez alerté dès qu'un voisin signale quelque chose près d'une de vos adresses."}
+									: "Déplacez ou dézoomez la carte pour voir d'autres incidents. Vous serez alerté dès qu'un voisin signale quelque chose près d'une de vos adresses."}
 							</p>
 						</div>
 					</div>
@@ -239,17 +240,17 @@ export default function IncidentList({
 				{liveMessage}
 			</output>
 			{/* En-tête permanent : le tri garde le focus pendant le rechargement. */}
-			<div className="flex items-start justify-between gap-3">
+			<div className="flex items-center justify-between gap-3">
 				<div className="min-w-0 flex-1">
 					{hasResults && (
-						<h2 className="font-title text-lg font-bold text-primary">
+						<h2 className="font-title text-lg leading-6 font-bold text-primary">
 							{countLabel}
 						</h2>
 					)}
 					{isLoading && (
 						<div
 							aria-hidden="true"
-							className="skeleton mt-1 h-5 w-2/3 rounded-full"
+							className="skeleton mx-auto mt-1 h-5 w-40 rounded-full"
 						/>
 					)}
 				</div>

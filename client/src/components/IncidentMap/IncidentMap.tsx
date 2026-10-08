@@ -404,10 +404,6 @@ export default function IncidentMap({
 		LOADING_MESSAGE_MIN_VISIBLE_MS,
 	);
 
-	// Vrai quand la zone ne contient aucun signalement (les lieux utiles ne comptent pas).
-	const isZoneEmpty =
-		!mapIncidentsLoading && !mapError && mapIncidents.length === 0;
-
 	// Le serveur plafonne les réponses : à la limite, des éléments sont masqués.
 	const isIncidentLimitReached =
 		!mapIncidentsLoading && !mapError && mapIncidentsTruncated;
@@ -466,14 +462,6 @@ export default function IncidentMap({
 				</div>
 			)}
 			<div className="pointer-events-none absolute right-2 bottom-6 left-2 z-1000 flex flex-col items-center gap-1">
-				{isZoneEmpty && (
-					<output
-						aria-live="polite"
-						className="rounded-full bg-base-100/90 px-3 py-1 text-xs font-bold text-primary shadow"
-					>
-						Rien à signaler autour de vous.
-					</output>
-				)}
 				{isIncidentLimitReached && (
 					<output
 						aria-live="polite"
