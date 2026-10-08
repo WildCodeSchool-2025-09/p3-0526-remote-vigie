@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 
+import commentPushService from "../../services/commentPushService";
 import badgeService from "../badge/badgeService";
 import incidentRepository from "../incident/incidentRepository";
 import commentRepository from "./commentRepository";
@@ -75,6 +76,7 @@ const add: RequestHandler = async (req, res, next) => {
 		}
 
 		let quotedCommentId: number | null = null;
+		let quotedAuthorId: number | null = null;
 
 		if (body.quotedCommentId != null) {
 			quotedCommentId = Number(body.quotedCommentId);
@@ -91,6 +93,9 @@ const add: RequestHandler = async (req, res, next) => {
 				res.sendStatus(StatusCodes.BAD_REQUEST);
 				return;
 			}
+
+			quotedAuthorId =
+				await commentRepository.findAuthorId(quotedCommentId);
 		}
 
 		const incident =
@@ -133,6 +138,18 @@ const add: RequestHandler = async (req, res, next) => {
 		res.status(StatusCodes.CREATED).json(
 			comment && withAuthorBadges(comment, badgesByAuthor),
 		);
+
+		commentPushService
+			.notify({
+				incidentId,
+				city: incident.city,
+				ownerId: incident.userId,
+				authorId: Number(req.auth.sub),
+				quotedAuthorId,
+			})
+			.catch((err) => {
+				console.error("Échec de l'envoi des push de commentaire", err);
+			});
 	} catch (err) {
 		next(err);
 	}
