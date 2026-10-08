@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import bgHome from "@/assets/images/background-home.jpg";
@@ -14,7 +14,9 @@ import { useAuth } from "@/contexts/auth/AuthContext";
 import { getAllIncidents } from "@/services/incidentService";
 import type { Bounds } from "@/types/bounds";
 import type { IncidentListItem, IncidentSort } from "@/types/incidentList";
+import { getStartView } from "@/utils/getDefaultMapCenter";
 import { useDebouncedValue } from "./useDebouncedValue";
+import { useDeviceLocation } from "./useDeviceLocation";
 
 const INCIDENTS_LIST_LIMIT = 15;
 // Même plafond que MAX_LIST_LIMIT côté serveur : une recherche, ou les résolus
@@ -23,7 +25,19 @@ const EXTENDED_LIST_LIMIT = 100;
 const SEARCH_DEBOUNCE_MS = 300;
 
 export default function Home() {
-	const { user } = useAuth();
+	const { user, loading: isAuthLoading } = useAuth();
+	const deviceLocation = useDeviceLocation();
+	// Position de l'appareil, puis adresse principale, puis Paris.
+	const startView = useMemo(
+		() =>
+			getStartView(
+				user,
+				deviceLocation.status === "found"
+					? deviceLocation.position
+					: null,
+			),
+		[user, deviceLocation],
+	);
 	const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
 	const [isTruncated, setIsTruncated] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
@@ -144,14 +158,25 @@ export default function Home() {
 				>
 					Aller à la liste des incidents
 				</a>
-				<IncidentMap
-					selectedIncidentId={selectedIncidentId}
-					onSelectIncident={setSelectedIncidentId}
-					panRequest={mapPanRequest}
-					includeResolved={includeResolved}
-					onBoundsChange={setBounds}
-					className="h-[38vh] w-full overflow-hidden rounded-2xl"
-				/>
+				{isAuthLoading ? (
+					// La carte attend l'utilisateur : son adresse décide du point de départ.
+					<div
+						aria-hidden="true"
+						className="skeleton h-[38vh] w-full rounded-2xl"
+					/>
+				) : (
+					<IncidentMap
+						selectedIncidentId={selectedIncidentId}
+						onSelectIncident={setSelectedIncidentId}
+						panRequest={mapPanRequest}
+						includeResolved={includeResolved}
+						onBoundsChange={setBounds}
+						startView={startView}
+						isStartViewFinal={deviceLocation.status !== "locating"}
+						searchActive={searchTerm.trim() !== ""}
+						className="h-[38vh] w-full overflow-hidden rounded-2xl"
+					/>
+				)}
 				{/* Au-dessus des commandes de Leaflet (z-index 1000). */}
 				<div className="pointer-events-none absolute top-2 right-6 left-6 z-1100 flex items-start justify-between gap-2">
 					<div className="pointer-events-auto min-w-0 flex-1">

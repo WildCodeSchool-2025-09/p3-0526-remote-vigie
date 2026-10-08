@@ -21,7 +21,6 @@ import "leaflet/dist/leaflet.css";
 
 import { type IconName, icons } from "@/assets/icons";
 import UsefulPlaceMarker from "@/components/UsefulPlaceMarker/UsefulPlaceMarker";
-import { useAuth } from "@/contexts/auth/AuthContext";
 import {
 	MAP_INCIDENTS_LIMIT,
 	getIncidentsInBounds,
@@ -34,7 +33,7 @@ import type { Bounds } from "@/types/bounds";
 import type { IncidentListItem } from "@/types/incidentList";
 import type { UsefulPlace } from "@/types/usefulPlace";
 import { FRANCE_BOUNDS } from "@/utils/franceBounds";
-import { getDefaultMapCenter } from "@/utils/getDefaultMapCenter";
+import type { StartView, StartViewSource } from "@/utils/getDefaultMapCenter";
 import {
 	POPUP_AUTO_PAN_BOTTOM_RIGHT,
 	POPUP_AUTO_PAN_TOP_LEFT,
@@ -42,7 +41,6 @@ import {
 } from "@/utils/popupAutoPan";
 import { useDelayedFlag } from "./useDelayedFlag";
 
-const DEFAULT_ZOOM = 6;
 const MIN_ZOOM = 5;
 const SELECTION_ZOOM = 15;
 // Sous ce zoom, les lieux utiles ne sont ni chargés ni affichés.
@@ -164,6 +162,115 @@ function MapViewportWatcher({
 	useEffect(() => {
 		onViewportChange(leafletBoundsToBounds(map.getBounds()), map.getZoom());
 	}, []);
+
+	return null;
+}
+
+const START_VIEW_MESSAGES: Record<StartViewSource, string> = {
+	device: "Carte centrée sur votre position.",
+	address: "Carte centrée sur votre adresse.",
+	default:
+		"Carte centrée sur Paris : votre position et votre adresse sont indisponibles.",
+};
+
+// Marqueur du point de départ : point bleu pulsant pour la position de l'appareil
+// (« Vous êtes ici »), pastille verte avec repère pour l'adresse. Distincts des
+// marqueurs d'incident (pastille blanche) et de lieu utile.
+function createStartViewIcon(source: StartViewSource) {
+	const AddressIcon = icons.landLocation;
+	const isDevice = source === "device";
+	const size = isDevice ? 24 : 32;
+	const html = renderToStaticMarkup(
+		isDevice ? (
+			<div className="relative flex size-6 items-center justify-center">
+				<span
+					aria-hidden="true"
+					className="animate-marker-pulse pointer-events-none absolute inset-0 rounded-full bg-blue-500"
+				/>
+				<span className="relative size-4 rounded-full border-2 border-white bg-blue-600 shadow-[0_1px_4px_rgba(0,0,0,0.4)]" />
+			</div>
+		) : (
+			<div className="flex size-8 items-center justify-center rounded-full border-2 border-white bg-primary shadow-[0_1px_4px_rgba(0,0,0,0.4)]">
+				<AddressIcon className="size-4 fill-white" aria-hidden="true" />
+			</div>
+		),
+	);
+
+	return L.divIcon({
+		html,
+		className: "",
+		iconSize: [size, size],
+		iconAnchor: [size / 2, size / 2],
+	});
+}
+
+function StartViewMarker({ startView }: { startView: StartView }) {
+	const icon = useMemo(
+		() => createStartViewIcon(startView.source),
+		[startView.source],
+	);
+	const label =
+		startView.source === "device" ? "Vous êtes ici" : "Votre adresse";
+
+	return (
+		<Marker
+			position={startView.center}
+			icon={icon}
+			title={label}
+			// Sous les marqueurs d'incident, au-dessus des lieux utiles.
+			zIndexOffset={-500}
+		>
+			<Popup
+				autoPanPaddingTopLeft={POPUP_AUTO_PAN_TOP_LEFT}
+				autoPanPaddingBottomRight={POPUP_AUTO_PAN_BOTTOM_RIGHT}
+				maxWidth={POPUP_MAX_WIDTH}
+			>
+				<p className="font-title text-sm font-bold text-primary">
+					{label}
+				</p>
+			</Popup>
+		</Marker>
+	);
+}
+
+// Recentre la carte sur le point de départ une fois la position de l'appareil
+// tranchée, sauf si l'utilisateur a déjà pris la main (déplacement de la carte,
+// recherche, carte choisie dans la liste).
+function MapStartViewWatcher({
+	startView,
+	isFinal,
+	hasUserTakenOverRef,
+	onApplied,
+}: {
+	startView: StartView;
+	isFinal: boolean;
+	hasUserTakenOverRef: { current: boolean };
+	onApplied: (message: string) => void;
+}) {
+	const map = useMap();
+
+	useEffect(() => {
+		const container = map.getContainer();
+		const markTakenOver = () => {
+			hasUserTakenOverRef.current = true;
+		};
+		const events = ["pointerdown", "wheel", "keydown"] as const;
+		for (const event of events) {
+			container.addEventListener(event, markTakenOver, { passive: true });
+		}
+		return () => {
+			for (const event of events) {
+				container.removeEventListener(event, markTakenOver);
+			}
+		};
+	}, [map, hasUserTakenOverRef]);
+
+	useEffect(() => {
+		if (!isFinal || hasUserTakenOverRef.current) return;
+
+		map.setView(startView.center, startView.zoom);
+		onApplied(START_VIEW_MESSAGES[startView.source]);
+	}, [map, startView, isFinal, hasUserTakenOverRef, onApplied]);
 
 	return null;
 }
@@ -319,6 +426,11 @@ type IncidentMapProps = {
 	includeResolved?: boolean;
 	// Appelée avec la zone visible à chaque rechargement des données de la carte.
 	onBoundsChange?: (bounds: Bounds) => void;
+	// Point de départ retenu ; `isStartViewFinal` : la position de l'appareil est tranchée.
+	startView: StartView;
+	isStartViewFinal: boolean;
+	// Une recherche saisie empêche tout recentrage automatique sur le point de départ.
+	searchActive?: boolean;
 	className?: string;
 };
 
@@ -328,9 +440,19 @@ export default function IncidentMap({
 	panRequest = null,
 	includeResolved = false,
 	onBoundsChange,
+	startView,
+	isStartViewFinal,
+	searchActive = false,
 	className = "h-[38vh] w-full",
 }: IncidentMapProps) {
-	const { user } = useAuth();
+	// Message du point de départ, lu par les lecteurs d'écran.
+	const [startMessage, setStartMessage] = useState("");
+	// Vrai dès que l'utilisateur a pris la main : plus aucun recentrage automatique.
+	const hasUserTakenOverRef = useRef(false);
+
+	useEffect(() => {
+		if (searchActive || panRequest) hasUserTakenOverRef.current = true;
+	}, [searchActive, panRequest]);
 
 	// Données propres à la carte, indépendantes de la liste (zone visible).
 	const [mapIncidents, setMapIncidents] = useState<IncidentListItem[]>([]);
@@ -454,8 +576,6 @@ export default function IncidentMap({
 		};
 	}, []);
 
-	const initialCenter = useMemo(() => getDefaultMapCenter(user), [user]);
-
 	const showMapIncidentsLoading = useDelayedFlag(
 		mapIncidentsLoading,
 		LOADING_MESSAGE_DELAY_MS,
@@ -495,6 +615,9 @@ export default function IncidentMap({
 
 	return (
 		<div className={`relative ${className}`}>
+			<output aria-live="polite" className="sr-only">
+				{startMessage}
+			</output>
 			{showMapIncidentsLoading && (
 				<output
 					aria-live="polite"
@@ -523,6 +646,15 @@ export default function IncidentMap({
 				</div>
 			)}
 			<div className="pointer-events-none absolute right-2 bottom-6 left-2 z-1000 flex flex-col items-center gap-1">
+				{!isStartViewFinal && (
+					<output
+						aria-live="polite"
+						className="rounded-full bg-base-100/90 px-3 py-1 text-center text-xs font-bold text-primary shadow"
+					>
+						Votre position sert uniquement à centrer la carte : elle
+						n'est ni enregistrée ni envoyée.
+					</output>
+				)}
 				{isIncidentLimitReached && (
 					<output
 						aria-live="polite"
@@ -567,15 +699,27 @@ export default function IncidentMap({
 				}`}
 			/>
 			<MapContainer
-				center={initialCenter}
-				zoom={DEFAULT_ZOOM}
+				center={startView.center}
+				zoom={startView.zoom}
 				zoomControl={false}
 				minZoom={MIN_ZOOM}
 				maxBounds={FRANCE_BOUNDS}
 				maxBoundsViscosity={1}
 				className="h-full w-full"
 			>
-				<MapZoomControl center={initialCenter} zoom={DEFAULT_ZOOM} />
+				<MapZoomControl
+					center={startView.center}
+					zoom={startView.zoom}
+				/>
+				<MapStartViewWatcher
+					startView={startView}
+					isFinal={isStartViewFinal}
+					hasUserTakenOverRef={hasUserTakenOverRef}
+					onApplied={setStartMessage}
+				/>
+				{isStartViewFinal && startView.source !== "default" && (
+					<StartViewMarker startView={startView} />
+				)}
 				<MapViewportWatcher onViewportChange={handleViewportChange} />
 				<MapPanRequestWatcher
 					request={panRequest}
