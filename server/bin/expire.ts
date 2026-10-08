@@ -8,6 +8,8 @@ import expiryService from "../src/services/expiryService";
 
 const expire = async () => {
 	await expiryService.run();
+	// The resolution pushes run in the background: wait for them before closing
+	await expiryService.whenIdle();
 	databaseClient.end();
 };
 

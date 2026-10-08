@@ -2,6 +2,8 @@ import backgroundIncident from "@/assets/images/background-incident.jpg";
 import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNotVerifiedBanner";
 import Icon from "@/components/Icon/Icon";
 import NotificationItem from "@/components/Notification/NotificationItem/NotificationItem";
+import PushOptInBanner from "@/components/PushOptInBanner/PushOptInBanner";
+import { usePushOptIn } from "@/components/PushOptInBanner/usePushOptIn";
 import { useNotificationCenter } from "@/contexts/Notification/useNotificationCenter";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import NotificationsSkeleton from "@/pages/Notification/NotificationsSkeleton";
@@ -73,6 +75,8 @@ function NotificationCenter() {
 	const state = getViewState(isLoading, error, notifications);
 	const { user } = useAuth();
 	const showsEmailBanner = user != null && !user.emailVerified;
+	const pushOptIn = usePushOptIn();
+	const showsTopBanner = showsEmailBanner || pushOptIn.visible;
 
 	return (
 		<main className="min-h-full bg-base-100">
@@ -90,8 +94,22 @@ function NotificationCenter() {
 
 			<EmailNotVerifiedBanner />
 
+			{pushOptIn.mode != null && (
+				<div
+					className={`relative mx-auto w-full max-w-4xl px-4 sm:px-8 ${showsEmailBanner ? "mt-3" : "-mt-8"}`}
+				>
+					<PushOptInBanner
+						mode={pushOptIn.mode}
+						accepting={pushOptIn.accepting}
+						error={pushOptIn.error}
+						onAccept={pushOptIn.accept}
+						onDismiss={pushOptIn.dismiss}
+					/>
+				</div>
+			)}
+
 			<section
-				className={`mx-auto w-full max-w-4xl px-4 pb-24 sm:px-8 sm:pb-28 ${showsEmailBanner ? "pt-12" : ""}`}
+				className={`mx-auto w-full max-w-4xl px-4 pb-24 sm:px-8 sm:pb-28 ${showsTopBanner ? "pt-12" : ""}`}
 				aria-live="polite"
 			>
 				{state.status === "loading" && <NotificationsSkeleton />}

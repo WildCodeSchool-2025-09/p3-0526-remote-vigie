@@ -19,6 +19,17 @@ type IncidentListItem = {
 	type: { code: string; label: string; icon: string; color: string } | null;
 };
 
+export type ClosedIncident = {
+	id: number;
+	userId: number;
+	city: string | null;
+	latitude: string;
+	longitude: string;
+	alertRadiusMeters: number;
+	// Computed by MySQL so it uses the same clock as expires_at
+	expiredForMinutes: number;
+};
+
 type IncidentDetails = {
 	id: number;
 	title: string;
@@ -288,16 +299,20 @@ class IncidentRepository {
 		}));
 	}
 
-	async findOwnerAndStatus(
-		id: number,
-	): Promise<{ userId: number; status: "in_progress" | "resolved" } | null> {
+	async findOwnerAndStatus(id: number): Promise<{
+		userId: number;
+		status: "in_progress" | "resolved";
+		city: string | null;
+	} | null> {
 		const [rows] = await databaseClient.query<Rows>(
-			"SELECT user_id, status FROM incident WHERE id = ?",
+			"SELECT user_id, status, city FROM incident WHERE id = ?",
 			[id],
 		);
 
 		const row = rows[0];
-		return row == null ? null : { userId: row.user_id, status: row.status };
+		return row == null
+			? null
+			: { userId: row.user_id, status: row.status, city: row.city };
 	}
 
 	async findPhotoUrl(id: number): Promise<string | null> {
@@ -429,14 +444,45 @@ class IncidentRepository {
 		);
 	}
 
-	async closeExpired(): Promise<number> {
-		const [result] = await databaseClient.query<Result>(
-			`UPDATE incident
-			SET status = 'resolved'
-			WHERE status = 'in_progress' AND expires_at <= NOW()`,
-		);
+	// Returns exactly the incidents it closed: the lock and the update cover the
+	// same set, even if another incident expires in between
+	async closeExpired(): Promise<ClosedIncident[]> {
+		const connection = await databaseClient.getConnection();
+		try {
+			await connection.beginTransaction();
 
-		return result.affectedRows;
+			const [rows] = await connection.query<Rows>(
+				`SELECT id, user_id, city, latitude, longitude, base_alert_radius_meters,
+					TIMESTAMPDIFF(MINUTE, expires_at, NOW()) AS expired_for_minutes
+				FROM incident
+				WHERE status = 'in_progress' AND expires_at <= NOW()
+				FOR UPDATE`,
+			);
+
+			if (rows.length > 0) {
+				await connection.query(
+					"UPDATE incident SET status = 'resolved' WHERE id IN (?)",
+					[rows.map((row) => row.id)],
+				);
+			}
+
+			await connection.commit();
+
+			return rows.map((row) => ({
+				id: row.id,
+				userId: row.user_id,
+				city: row.city,
+				latitude: row.latitude,
+				longitude: row.longitude,
+				alertRadiusMeters: row.base_alert_radius_meters,
+				expiredForMinutes: row.expired_for_minutes,
+			}));
+		} catch (err) {
+			await connection.rollback();
+			throw err;
+		} finally {
+			connection.release();
+		}
 	}
 }
 

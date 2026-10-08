@@ -251,6 +251,52 @@ GOOGLE_REDIRECT_URI=http://localhost:3310/api/auth/google/callback
   `GOOGLE_REDIRECT_URI`. `CLIENT_URL` doit pointer vers l'adresse publique du front :
   c'est là que le serveur renvoie l'utilisateur après Google.
 
+### Activer les notifications push
+
+Les notifications push (alerte sur l'appareil même navigateur fermé) ont besoin de 3 variables
+dans le `.env` de `server`. Sans elles, le push est simplement désactivé : le centre de
+notifications et les e-mails continuent de fonctionner.
+
+```sh
+VAPID_PUBLIC_KEY=...
+VAPID_PRIVATE_KEY=...
+VAPID_SUBJECT=mailto:vous@exemple.fr
+```
+
+- **Générer une paire de clés** (depuis `/server`) : `npx web-push generate-vapid-keys`.
+  Chacun peut générer la sienne pour son poste. `VAPID_SUBJECT` est un contact (`mailto:…`
+  ou une URL `https://…`) transmis aux services de push (Google, Mozilla, Apple) : mettre une
+  vraie adresse, Apple rejette les valeurs bidon.
+- **Au démarrage du serveur**, le journal indique `Web Push activé`, ou `Web Push désactivé`
+  avec la raison (variable manquante, clé invalide, clé publique qui ne correspond pas à la
+  clé privée).
+- **Tester en local** : le service worker n'est enregistré qu'en production, donc pas avec
+  `npm run dev`. Faire `npm run build --workspace=client` (**pas** `npm run build` à la
+  racine : il lance aussi `db:migrate`, qui efface la base), puis `npm run start`, et ouvrir
+  `http://localhost:3310`. Le navigateur autorise le push sur `localhost` (Chrome, Firefox de
+  bureau), sans HTTPS. Sur iPhone il faut le site en HTTPS **et** ajouté à l'écran d'accueil (iOS 16.4
+  minimum).
+- **Envoyer un push de test** (depuis `/server`) : `npm run push:test -- <pseudo> [incident|danger|resolved|comment|mention] [ville]`.
+  Envoie à tous les appareils enregistrés de l'utilisateur le contenu réel du cas choisi, et
+  indique le résultat par appareil. Le lien ouvre le dernier incident de la base. La
+  notification s'affiche même si Vigie est ouvert.
+- **Navigateurs acceptés** : le serveur n'enregistre une adresse d'abonnement que si elle
+  appartient à un service de push connu (Google, Mozilla, Apple, Windows), pour qu'on ne puisse
+  pas lui faire appeler une autre adresse. Un autre service serait refusé (400) : sa liste est
+  dans `server/src/modules/pushSubscription/pushSubscriptionActions.ts`.
+- **En production** : générer **une seule paire** et la conserver en lieu sûr. **Ne jamais la
+  régénérer** : un abonnement est lié à la clé publique avec laquelle il a été créé, changer
+  de clé rend tous les abonnements inutilisables (chaque utilisateur devrait se réabonner).
+  `VAPID_SUBJECT` y est l'URL `https://` du site. Les 3 variables s'ajoutent comme les
+  [variables d'environnement spécifiques](#variables-denvironnement-spécifiques), et il faut
+  prévenir le formateur. Après le déploiement, vérifier la ligne `Web Push activé` dans les
+  [logs](#logs).
+- **Désactiver l'appareil courant** : depuis « Mon profil », réglage « Alertes sur cet
+  appareil ». Se déconnecter depuis le profil retire aussi l'appareil du compte, pour que le
+  suivant sur le même navigateur ne reçoive pas ses alertes ; il faudra réactiver à la prochaine
+  connexion. Un appareil devenu injoignable est retiré automatiquement au premier envoi
+  refusé par le service de push (réponse 404 ou 410).
+
 ### Développer la partie back-end
 
 **Créer une route** dans `server/app/router.ts` :
