@@ -13,6 +13,7 @@ const typeAnimations: Record<string, string> = {
 	storm: "motion-safe:[&_.bolt]:animate-flash [&_.bolt]:origin-center [&_.bolt]:[transform-box:fill-box] motion-safe:[&_.drops]:animate-rain [&_.drops-2]:[animation-delay:0.3s] [&_.drops-3]:[animation-delay:0.6s]",
 	hail: "motion-safe:[&_.stone]:animate-fall [&_.stone-1]:[animation-duration:0.9s] [&_.stone-2]:[animation-duration:1.2s] [&_.stone-4]:[animation-duration:1.3s] [&_.stone-5]:[animation-duration:1.1s]",
 	snow: "motion-safe:[&_.flake]:animate-snowfall [&_.flake]:origin-center [&_.flake]:[transform-box:fill-box] [&_.flake-2]:[animation-duration:3.6s] [&_.flake-3]:[animation-duration:2.2s] [&_.flake-4]:[animation-duration:2.6s] [&_.flake-5]:[animation-duration:2.4s] [&_.flake-6]:[animation-duration:2.8s]",
+	flood: "overflow-hidden! motion-safe:[&_.wave-1]:animate-wave-left motion-safe:[&_.wave-2]:animate-wave-right motion-safe:[&_.bubble]:animate-bubble [&_.bubble-2]:[animation-duration:2.6s] [&_.bubble-3]:[animation-duration:2.3s]",
 	animal: "motion-safe:[&_.tail]:animate-tail-wag [&_.tail]:origin-bottom-left [&_.tail]:[transform-box:fill-box] motion-safe:[&_.eyes]:animate-blink [&_.eyes]:origin-center [&_.eyes]:[transform-box:fill-box]",
 };
 
