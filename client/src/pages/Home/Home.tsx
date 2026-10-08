@@ -14,6 +14,7 @@ import IncidentMap from "@/components/IncidentMap/IncidentMap";
 import WelcomeToast from "@/components/WelcomeToast/WelcomeToast";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { getAllIncidents } from "@/services/incidentService";
+import type { Bounds } from "@/types/bounds";
 import type { IncidentListItem, IncidentSort } from "@/types/incidentList";
 import { useDebouncedValue } from "./useDebouncedValue";
 
@@ -38,6 +39,13 @@ export default function Home() {
 		search === "" && !includeResolved
 			? INCIDENTS_LIST_LIMIT
 			: EXTENDED_LIST_LIMIT;
+	// Zone visible de la carte, inconnue tant qu'elle n'a pas signalé la sienne.
+	const [bounds, setBounds] = useState<Bounds | null>(null);
+	// Une recherche ignore la zone : la liste ne dépend alors pas de ses changements.
+	const zone = search === "" ? bounds : null;
+	const criteria = `${listLimit}|${search}|${sortBy}|${includeResolved}`;
+	// Critères de la dernière liste affichée : seule la zone change, la liste reste en place.
+	const loadedCriteriaRef = useRef<string | null>(null);
 	// Seule la réponse à la dernière requête est retenue.
 	const latestRequestRef = useRef(0);
 	// Incident sélectionné, partagé entre la carte et la liste.
@@ -61,26 +69,31 @@ export default function Home() {
 	const loadIncidents = useCallback(() => {
 		latestRequestRef.current += 1;
 		const requestId = latestRequestRef.current;
-		setIsLoading(true);
+		if (loadedCriteriaRef.current !== criteria) setIsLoading(true);
 		setHasError(false);
+
+		// Sans recherche, la liste attend la première zone de la carte.
+		if (search === "" && zone === null) return;
 
 		getAllIncidents({
 			limit: listLimit,
 			search,
 			sort: sortBy,
 			includeResolved,
+			bounds: zone,
 		}).then((result) => {
 			if (requestId !== latestRequestRef.current) return; // réponse périmée
 
 			if (result.status === "ok") {
 				setIncidents(result.incidents);
 				setIsTruncated(result.truncated);
+				loadedCriteriaRef.current = criteria;
 			} else {
 				setHasError(true);
 			}
 			setIsLoading(false);
 		});
-	}, [listLimit, search, sortBy, includeResolved]);
+	}, [listLimit, search, sortBy, includeResolved, zone, criteria]);
 
 	useEffect(() => {
 		loadIncidents();
@@ -127,6 +140,7 @@ export default function Home() {
 					onSelectIncident={setSelectedIncidentId}
 					panRequest={mapPanRequest}
 					includeResolved={includeResolved}
+					onBoundsChange={setBounds}
 					className="h-[38vh] w-full overflow-hidden rounded-2xl"
 				/>
 				{/* Au-dessus des commandes de Leaflet (z-index 1000). */}

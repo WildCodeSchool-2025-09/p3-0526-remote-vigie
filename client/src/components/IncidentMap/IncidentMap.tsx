@@ -254,6 +254,8 @@ type IncidentMapProps = {
 	panRequest?: { lat: number; lng: number } | null;
 	// Montre aussi les incidents résolus (sinon : seulement ceux en cours).
 	includeResolved?: boolean;
+	// Appelée avec la zone visible à chaque rechargement des données de la carte.
+	onBoundsChange?: (bounds: Bounds) => void;
 	className?: string;
 };
 
@@ -262,6 +264,7 @@ export default function IncidentMap({
 	onSelectIncident,
 	panRequest = null,
 	includeResolved = false,
+	onBoundsChange,
 	className = "h-[38vh] w-full",
 }: IncidentMapProps) {
 	const { user } = useAuth();
@@ -283,6 +286,8 @@ export default function IncidentMap({
 	const includeResolvedRef = useRef(includeResolved);
 	// Seule la réponse à la dernière requête de signalements est retenue.
 	const incidentsRequestRef = useRef(0);
+	// Garde `loadMapData` stable quel que soit le parent.
+	const onBoundsChangeRef = useRef(onBoundsChange);
 
 	// Voile affiché pendant le déplacement, le temps que les tuiles se chargent.
 	const [isTransitioning, setIsTransitioning] = useState(false);
@@ -350,6 +355,7 @@ export default function IncidentMap({
 	const loadMapData = useCallback(
 		(bounds: Bounds, zoom: number) => {
 			lastBoundsRef.current = bounds;
+			onBoundsChangeRef.current?.(bounds);
 			loadMapIncidents(bounds);
 			loadUsefulPlaces(bounds, zoom);
 		},
@@ -371,6 +377,10 @@ export default function IncidentMap({
 		includeResolvedRef.current = includeResolved;
 		if (lastBoundsRef.current) loadMapIncidents(lastBoundsRef.current);
 	}, [includeResolved, loadMapIncidents]);
+
+	useEffect(() => {
+		onBoundsChangeRef.current = onBoundsChange;
+	}, [onBoundsChange]);
 
 	useEffect(() => {
 		return () => {

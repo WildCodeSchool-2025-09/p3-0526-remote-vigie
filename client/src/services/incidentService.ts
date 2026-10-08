@@ -14,6 +14,8 @@ type GetAllIncidentsParams = {
 	search?: string;
 	sort?: IncidentSort;
 	includeResolved?: boolean;
+	// Zone visible de la carte ; absente : toutes les zones (cas d'une recherche).
+	bounds?: Bounds | null;
 };
 
 export async function getAllIncidents({
@@ -21,11 +23,18 @@ export async function getAllIncidents({
 	search = "",
 	sort = "date",
 	includeResolved = false,
+	bounds = null,
 }: GetAllIncidentsParams): Promise<GetAllIncidentsResult> {
 	try {
 		const params = new URLSearchParams({ limit: String(limit), sort });
 		if (search !== "") params.set("search", search);
 		if (includeResolved) params.set("includeResolved", "true");
+		if (bounds) {
+			params.set("north", String(bounds.north));
+			params.set("south", String(bounds.south));
+			params.set("east", String(bounds.east));
+			params.set("west", String(bounds.west));
+		}
 
 		const res = await apiFetch(`/api/incidents?${params.toString()}`);
 
