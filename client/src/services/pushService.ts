@@ -155,37 +155,35 @@ async function unsubscribe(): Promise<void> {
 	await subscription.unsubscribe();
 }
 
-const RELEASE_TIMEOUT_MS = 4000;
-
-// On sign-out, this device must stop receiving the account's alerts. Best
-// effort and bounded, so signing out always works: if the server cannot be
-// reached, the browser-side unsubscribe still makes the next push fail with a
-// 410, which removes the row.
-async function release(): Promise<void> {
+// On sign-out, this device must stop receiving the account's alerts. Meant to
+// run in the background once the session is cleared, hence the captured token.
+// The browser-side unsubscribe comes first: it is local and is what really stops
+// the alerts. The server call is best effort; without it, the next push fails
+// with a 410, which removes the row.
+async function release(token: string | null): Promise<void> {
 	if (!isPushSupported()) return;
 
-	const work = (async () => {
+	try {
 		const registration = await navigator.serviceWorker.getRegistration();
 		const subscription = await registration?.pushManager.getSubscription();
 		if (subscription == null) return;
 
-		try {
-			await apiFetch("/api/push-subscriptions", {
-				method: "DELETE",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ endpoint: subscription.endpoint }),
-			});
-		} catch {
-			// Offline or server down: handled by the browser-side unsubscribe
-		}
-
 		await subscription.unsubscribe().catch(() => {});
-	})().catch(() => {});
 
-	await Promise.race([
-		work,
-		new Promise<void>((resolve) => setTimeout(resolve, RELEASE_TIMEOUT_MS)),
-	]);
+		if (token == null) return;
+		// Not apiFetch: it would use the current session, already cleared (or the
+		// next user's)
+		await fetch(`${import.meta.env.VITE_API_URL}/api/push-subscriptions`, {
+			method: "DELETE",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify({ endpoint: subscription.endpoint }),
+		});
+	} catch {
+		// Offline or server down: nothing more to do
+	}
 }
 
 export default {

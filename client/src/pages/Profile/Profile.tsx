@@ -1,12 +1,9 @@
 import backgroundIncident from "@/assets/images/background-incident.jpg";
 import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNotVerifiedBanner";
 import Icon from "@/components/Icon/Icon";
-import { forgetPushPromptAnswer } from "@/components/PushOptInBanner/pushOptInStorage";
 import PushSettings from "@/components/PushSettings/PushSettings";
 import { useAuth } from "@/contexts/auth/AuthContext";
-import pushService from "@/services/pushService";
 import type { Address } from "@/types/auth";
-import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 function formatAddress(address: Address | undefined) {
@@ -32,19 +29,12 @@ function AccountField({ label, value }: { label: string; value: string }) {
 export default function Profile() {
 	const { user, logout } = useAuth();
 	const navigate = useNavigate();
-	const [signingOut, setSigningOut] = useState(false);
 	const showsEmailBanner = user != null && !user.emailVerified;
 	const primaryAddress = user?.addresses.find(
 		(address) => address.is_primary,
 	);
 
-	// The device leaves the account before the token is cleared (it is needed to
-	// tell the server)
-	const handleLogout = async () => {
-		if (signingOut) return;
-		setSigningOut(true);
-		await pushService.release();
-		if (user != null) forgetPushPromptAnswer(user.id);
+	const handleLogout = () => {
 		logout();
 		navigate("/", { replace: true });
 	};
@@ -108,10 +98,9 @@ export default function Profile() {
 				<button
 					type="button"
 					onClick={handleLogout}
-					aria-disabled={signingOut}
 					className="w-full py-4 text-center font-bold text-primary"
 				>
-					{signingOut ? "Déconnexion…" : "Se déconnecter"}
+					Se déconnecter
 				</button>
 			</div>
 		</main>
