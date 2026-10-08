@@ -55,11 +55,23 @@ const LOADING_MESSAGE_DELAY_MS = 400;
 const LOADING_MESSAGE_MIN_VISIBLE_MS = 400;
 
 // Vrai si aucune nouvelle tuile n'est à charger (même zoom, point déjà visible).
-function isTargetAlreadyInView(map: L.Map, lat: number, lng: number): boolean {
-	return (
-		map.getZoom() === SELECTION_ZOOM && map.getBounds().contains([lat, lng])
-	);
+function isTargetAlreadyInView(
+	map: L.Map,
+	lat: number,
+	lng: number,
+	zoom: number,
+): boolean {
+	return map.getZoom() === zoom && map.getBounds().contains([lat, lng]);
 }
+
+// Recentrage demandé à la carte (liste ou recherche). `zoom` : 15 par défaut ;
+// `announcement` : phrase lue par les lecteurs d'écran.
+export type MapPanRequest = {
+	lat: number;
+	lng: number;
+	zoom?: number;
+	announcement?: string;
+};
 
 function leafletBoundsToBounds(bounds: L.LatLngBounds): Bounds {
 	return {
@@ -338,29 +350,34 @@ function MapZoomControl({
 	return null;
 }
 
-// Recentre la carte sur la demande reçue en prop (sélection depuis la liste).
+// Recentre la carte sur la demande reçue en prop (carte choisie dans la liste,
+// ou résultat le plus récent d'une recherche).
 function MapPanRequestWatcher({
 	request,
 	onTransitionStart,
+	onAnnounce,
 }: {
-	request: { lat: number; lng: number } | null;
+	request: MapPanRequest | null;
 	onTransitionStart: () => void;
+	onAnnounce: (message: string) => void;
 }) {
 	const map = useMap();
 
 	useEffect(() => {
 		if (request) {
-			if (!isTargetAlreadyInView(map, request.lat, request.lng)) {
+			const zoom = request.zoom ?? SELECTION_ZOOM;
+			if (!isTargetAlreadyInView(map, request.lat, request.lng, zoom)) {
 				onTransitionStart();
 			}
 			// Une popup restée ouverte gênerait le déplacement (autoPan).
 			map.closePopup();
-			map.setView([request.lat, request.lng], SELECTION_ZOOM, {
+			map.setView([request.lat, request.lng], zoom, {
 				animate: true,
 				duration: SELECTION_TRANSITION_DURATION_SECONDS,
 			});
+			onAnnounce(request.announcement ?? "");
 		}
-	}, [request, map, onTransitionStart]);
+	}, [request, map, onTransitionStart, onAnnounce]);
 
 	return null;
 }
@@ -429,7 +446,7 @@ type IncidentMapProps = {
 	selectedIncidentId: number | null;
 	onSelectIncident: (id: number) => void;
 	// Demande de recentrage venue de la liste.
-	panRequest?: { lat: number; lng: number } | null;
+	panRequest?: MapPanRequest | null;
 	// Montre aussi les incidents résolus (sinon : seulement ceux en cours).
 	includeResolved?: boolean;
 	// Appelée avec la zone visible à chaque rechargement des données de la carte.
@@ -453,8 +470,8 @@ export default function IncidentMap({
 	searchActive = false,
 	className = "h-[38vh] w-full",
 }: IncidentMapProps) {
-	// Message du point de départ, lu par les lecteurs d'écran.
-	const [startMessage, setStartMessage] = useState("");
+	// Message de la carte (point de départ, recentrage), lu par les lecteurs d'écran.
+	const [mapAnnouncement, setMapAnnouncement] = useState("");
 	// Vrai dès que l'utilisateur a pris la main : plus aucun recentrage automatique.
 	const hasUserTakenOverRef = useRef(false);
 
@@ -609,7 +626,7 @@ export default function IncidentMap({
 			onSelectIncident(incident.id);
 			const lat = Number(incident.latitude);
 			const lng = Number(incident.longitude);
-			if (!isTargetAlreadyInView(map, lat, lng)) {
+			if (!isTargetAlreadyInView(map, lat, lng, SELECTION_ZOOM)) {
 				triggerTransitionFade();
 			}
 			// Pas de closePopup() : fermerait la popup que ce clic vient d'ouvrir.
@@ -624,7 +641,7 @@ export default function IncidentMap({
 	return (
 		<div className={`relative ${className}`}>
 			<output aria-live="polite" className="sr-only">
-				{startMessage}
+				{mapAnnouncement}
 			</output>
 			{showMapIncidentsLoading && (
 				<output
@@ -723,7 +740,7 @@ export default function IncidentMap({
 					startView={startView}
 					isFinal={isStartViewFinal}
 					hasUserTakenOverRef={hasUserTakenOverRef}
-					onApplied={setStartMessage}
+					onApplied={setMapAnnouncement}
 				/>
 				{isStartViewFinal && startView.source !== "default" && (
 					<StartViewMarker startView={startView} />
@@ -731,6 +748,7 @@ export default function IncidentMap({
 				<MapViewportWatcher onViewportChange={handleViewportChange} />
 				<MapPanRequestWatcher
 					request={panRequest}
+					onAnnounce={setMapAnnouncement}
 					onTransitionStart={triggerTransitionFade}
 				/>
 				<TileLayer

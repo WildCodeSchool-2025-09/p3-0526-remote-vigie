@@ -5,6 +5,9 @@ import type { Position } from "@/types/incidentForm";
 const LOCATION_TIMEOUT_MS = 8000;
 // Une position récente du navigateur suffit : on ne cherche qu'à centrer la carte.
 const LOCATION_MAX_AGE_MS = 60_000;
+// Le délai du navigateur ne démarre qu'après la réponse à la demande d'autorisation :
+// sans réponse de l'utilisateur, on cesse d'attendre (une position tardive reste prise en compte).
+const LOCATION_GIVE_UP_MS = 10_000;
 
 export type DeviceLocation =
 	| { status: "locating" }
@@ -43,8 +46,18 @@ export function useDeviceLocation(): DeviceLocation {
 			{ timeout: LOCATION_TIMEOUT_MS, maximumAge: LOCATION_MAX_AGE_MS },
 		);
 
+		const giveUpTimer = setTimeout(() => {
+			if (!isCurrent) return;
+			setLocation((current) =>
+				current.status === "locating"
+					? { status: "unavailable" }
+					: current,
+			);
+		}, LOCATION_GIVE_UP_MS);
+
 		return () => {
 			isCurrent = false;
+			clearTimeout(giveUpTimer);
 		};
 	}, []);
 

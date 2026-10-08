@@ -8,12 +8,15 @@ import Icon from "@/components/Icon/Icon";
 import { IncidentSearchField } from "@/components/IncidentList/IncidentFilters";
 import IncidentList from "@/components/IncidentList/IncidentList";
 import IncidentOptionsMenu from "@/components/IncidentList/IncidentOptionsMenu";
-import IncidentMap from "@/components/IncidentMap/IncidentMap";
+import IncidentMap, {
+	type MapPanRequest,
+} from "@/components/IncidentMap/IncidentMap";
 import WelcomeToast from "@/components/WelcomeToast/WelcomeToast";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { getAllIncidents } from "@/services/incidentService";
 import type { Bounds } from "@/types/bounds";
 import type { IncidentListItem, IncidentSort } from "@/types/incidentList";
+import { isInsideFranceBounds } from "@/utils/franceBounds";
 import { getStartView } from "@/utils/getDefaultMapCenter";
 import { useDebouncedValue } from "./useDebouncedValue";
 import { useDeviceLocation } from "./useDeviceLocation";
@@ -23,6 +26,8 @@ const INCIDENTS_LIST_LIMIT = 15;
 // inclus, listent tous les résultats au lieu de la page par défaut.
 const EXTENDED_LIST_LIMIT = 100;
 const SEARCH_DEBOUNCE_MS = 300;
+// Zoom du recentrage sur le résultat le plus récent d'une recherche.
+const SEARCH_RECENTER_ZOOM = 14;
 
 export default function Home() {
 	const { user, loading: isAuthLoading } = useAuth();
@@ -40,6 +45,8 @@ export default function Home() {
 	);
 	const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
 	const [isTruncated, setIsTruncated] = useState(false);
+	// Recherche à laquelle correspondent les incidents affichés.
+	const [resultsSearch, setResultsSearch] = useState("");
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
 	const [searchTerm, setSearchTerm] = useState("");
@@ -69,10 +76,9 @@ export default function Home() {
 		null,
 	);
 	// Recentrage demandé à la carte quand la sélection vient de la liste.
-	const [mapPanRequest, setMapPanRequest] = useState<{
-		lat: number;
-		lng: number;
-	} | null>(null);
+	const [mapPanRequest, setMapPanRequest] = useState<MapPanRequest | null>(
+		null,
+	);
 
 	const handleSelectFromList = useCallback((incident: IncidentListItem) => {
 		setSelectedIncidentId(incident.id);
@@ -110,6 +116,7 @@ export default function Home() {
 			if (result.status === "ok") {
 				setIncidents(result.incidents);
 				setIsTruncated(result.truncated);
+				setResultsSearch(search);
 				loadedCriteriaRef.current = criteria;
 			} else {
 				setHasError(true);
@@ -121,6 +128,56 @@ export default function Home() {
 	useEffect(() => {
 		loadIncidents();
 	}, [loadIncidents]);
+
+	// Résultat de recherche le plus récent (date de création, quel que soit le tri).
+	const latestMatch = useMemo(() => {
+		if (
+			search === "" ||
+			isLoading ||
+			hasError ||
+			resultsSearch !== search
+		) {
+			return null;
+		}
+		let latest: IncidentListItem | null = null;
+		for (const incident of incidents) {
+			if (latest === null || incident.createdAt > latest.createdAt) {
+				latest = incident;
+			}
+		}
+		return latest;
+	}, [search, isLoading, hasError, resultsSearch, incidents]);
+	// Dernier incident sur lequel la carte a été recentrée : pas de nouveau
+	// recentrage tant que ce résultat ne change pas.
+	const lastRecenteredIdRef = useRef<number | null>(null);
+
+	useEffect(() => {
+		if (search === "") {
+			lastRecenteredIdRef.current = null;
+			return;
+		}
+		if (
+			latestMatch === null ||
+			latestMatch.id === lastRecenteredIdRef.current
+		) {
+			return;
+		}
+		lastRecenteredIdRef.current = latestMatch.id;
+
+		const lat = Number(latestMatch.latitude);
+		const lng = Number(latestMatch.longitude);
+		// Hors de la zone de la carte : rien à montrer.
+		if (!isInsideFranceBounds(lat, lng)) return;
+
+		setMapPanRequest({
+			lat,
+			lng,
+			zoom: SEARCH_RECENTER_ZOOM,
+			announcement: `Carte recentrée sur ${latestMatch.title}${
+				latestMatch.city ? ` à ${latestMatch.city}` : ""
+			}.`,
+		});
+	}, [search, latestMatch]);
 
 	const showsEmailVerificationBanner = user != null && !user.emailVerified;
 
