@@ -142,5 +142,7 @@ router.post(
 	checkResendVerificationRateLimit,
 	usersActions.resendVerification,
 );
+router.patch("/api/users/me/pseudo", verifyToken, usersActions.updatePseudo);
+router.delete("/api/users/me", verifyToken, usersActions.destroy);
 
 export default router;

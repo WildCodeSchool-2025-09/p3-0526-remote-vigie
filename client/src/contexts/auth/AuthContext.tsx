@@ -19,6 +19,7 @@ type AuthContextValue = {
 	login: (identifier: string, password: string) => Promise<void>;
 	logout: () => void;
 	loginWithToken: (token: string) => Promise<void>;
+	updateUser: (user: AuthUser) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -102,7 +103,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 	return (
 		<AuthContext.Provider
-			value={{ user, loading, login, loginWithToken, logout }}
+			value={{
+				user,
+				loading,
+				login,
+				loginWithToken,
+				logout,
+				// Ignoré si la session s'est terminée entre-temps (réponse tardive)
+				updateUser: (updated) =>
+					setUser((current) => current && updated),
+			}}
 		>
 			{children}
 		</AuthContext.Provider>

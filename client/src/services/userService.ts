@@ -1,4 +1,6 @@
 import { apiFetch } from "@/services/apiClient";
+import { normalizeUser } from "@/services/authActions";
+import type { AuthUser } from "@/types/auth";
 import type { RegisterFieldError } from "@/types/register";
 
 export type RegisterPayload = {
@@ -157,5 +159,76 @@ export async function resendVerification(
 		return { status: "ok", message: body.message ?? "" };
 	} catch {
 		return { status: "error" };
+	}
+}
+
+type UpdatePseudoResult =
+	| { status: "ok"; user: AuthUser }
+	| { status: "invalid"; message: string }
+	| { status: "conflict"; message: string }
+	| { status: "error" };
+
+export async function updatePseudo(
+	pseudo: string,
+): Promise<UpdatePseudoResult> {
+	try {
+		const res = await apiFetch("/api/users/me/pseudo", {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ pseudo }),
+		});
+
+		if (res.status === 400 || res.status === 409) {
+			const body = (await res.json()) as { message: string };
+			return {
+				status: res.status === 400 ? "invalid" : "conflict",
+				message: body.message,
+			};
+		}
+
+		if (!res.ok) return { status: "error" };
+
+		return {
+			status: "ok",
+			user: normalizeUser((await res.json()) as AuthUser),
+		};
+	} catch {
+		return { status: "error" };
+	}
+}
+
+type DeleteAccountResult =
+	| { status: "ok" }
+	| { status: "invalid"; message: string }
+	| { status: "networkError" }
+	| { status: "error" };
+
+// Confirmation exigée avant toute suppression : le mot de passe, ou le pseudo
+// pour un compte sans mot de passe (inscription Google).
+export type DeleteAccountConfirmation =
+	| { password: string }
+	| { pseudo: string };
+
+export async function deleteAccount(
+	confirmation: DeleteAccountConfirmation,
+): Promise<DeleteAccountResult> {
+	try {
+		const res = await apiFetch("/api/users/me", {
+			method: "DELETE",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(confirmation),
+		});
+
+		if (res.status === 400 || res.status === 403) {
+			const body = (await res.json()) as { message: string };
+			return { status: "invalid", message: body.message };
+		}
+
+		if (!res.ok) return { status: "error" };
+
+		return { status: "ok" };
+	} catch {
+		// Le serveur a pu valider la suppression avant la coupure : issue incertaine
+		return { status: "networkError" };
 	}
 }

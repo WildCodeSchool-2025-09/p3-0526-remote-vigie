@@ -425,6 +425,7 @@ erDiagram
         TIMESTAMP cgu_accepted_at "NOT NULL"
         TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
         TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+        TIMESTAMP anonymized_at "NULL (renseigné à la suppression du compte, US18)"
     }
     OAUTH_ACCOUNT {
         INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
@@ -558,7 +559,9 @@ erDiagram
 
 > `schema.sql` étend ces règles aux autres FK : `incident.user_id`/`comment.*` en
 > `CASCADE`, `incident.danger_level_id` et les pivots `incident_incident_type` en
-> `RESTRICT`. Écart mineur relevé : le cadre MPD note `latitude` en `DECIMAL(10,6)`
+> `RESTRICT`. Ces cascades restent définies, mais **la suppression d'un compte ne les
+> déclenche pas** : la ligne `user` est anonymisée, pas effacée (voir §5, « Suppression du
+> compte »). Écart mineur relevé : le cadre MPD note `latitude` en `DECIMAL(10,6)`
 > partout, `schema.sql` utilise `DECIMAL(9,6)` pour la latitude.
 
 ### 4.4 Périmètre du modèle & revue
@@ -689,6 +692,32 @@ saisie d'URL côté US07.
   token à chaque requête protégée, il n'est plus envoyé automatiquement par le navigateur.)*
 - Comparaisons pseudo / e-mail sur formes **normalisées** ; messages d'erreur neutres
   (anti-énumération de comptes).
+
+### Suppression du compte (US18)
+
+- Accessible depuis le profil, dans une zone distincte. Une fenêtre rappelle ce qui est supprimé et
+  ce qui est conservé, et indique que l'action est **irréversible**.
+- **Confirmation obligatoire** : le mot de passe pour un compte qui en a un ; le pseudo, saisi à
+  l'identique, pour un compte créé avec Google. Le serveur choisit selon le **compte**
+  (`password_hash`), jamais selon ce qu'envoie le client. Confirmation refusée : `403`
+  (`invalid_confirmation`), rien n'est modifié.
+- **Supprimé définitivement** : adresses, position, liaison Google, badges.
+- **Conservé de façon anonyme** : signalements, commentaires et votes (`contribution`). Écart assumé
+  avec la carte Trello, qui supprimait les votes : les garder maintient les compteurs et les
+  échéances des incidents cohérents. La ligne `user` reste, anonymisée
+  (`anonymized_at` renseigné) : pseudo affiché « Anonyme », e-mail et pseudo normalisé
+  remplacés par des valeurs dérivées de l'id, mot de passe et jetons de vérification effacés. Le
+  pseudo d'origine redevient disponible.
+- **Tout ou rien** : suppression des données personnelles et anonymisation dans une seule
+  transaction.
+- **Session** : `verifyToken` refuse (`401`) le token d'un compte supprimé, donc la session s'arrête
+  immédiatement, sans attendre l'expiration du JWT (une requête par appel protégé).
+- **Pseudo réservé** : « Anonyme » (sans tenir compte de la casse ni des accents) ne peut
+  être choisi ni à l'inscription ni à la modification du pseudo.
+- **Identité masquée** : pour un auteur supprimé, l'API renvoie `author.id: null` (signalements et
+  commentaires), pour qu'on ne puisse pas relier ses publications entre elles. Les valeurs
+  d'anonymisation (`@supprime-<id>`, `supprime-<id>`) sont impossibles à saisir à l'inscription, donc
+  personne ne peut bloquer une suppression en les occupant à l'avance.
 
 ### Carte et lieux utiles (US04)
 

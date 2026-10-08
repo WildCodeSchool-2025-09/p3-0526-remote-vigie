@@ -1,9 +1,12 @@
 import backgroundIncident from "@/assets/images/background-incident.jpg";
 import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNotVerifiedBanner";
 import Icon from "@/components/Icon/Icon";
+import DeleteAccountDialog from "@/components/Profile/DeleteAccountDialog/DeleteAccountDialog";
+import PseudoField from "@/components/Profile/PseudoField/PseudoField";
 import PushSettings from "@/components/PushSettings/PushSettings";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import type { Address } from "@/types/auth";
+import { useRef } from "react";
 import { Link, useNavigate } from "react-router";
 
 function formatAddress(address: Address | undefined) {
@@ -13,14 +16,28 @@ function formatAddress(address: Address | undefined) {
 	return address.street_line ? `${address.street_line} · ${place}` : place;
 }
 
-function AccountField({ label, value }: { label: string; value: string }) {
+function AccountField({
+	label,
+	value,
+	verified,
+}: { label: string; value: string; verified?: boolean }) {
 	return (
 		<div className="border-b border-dashed border-primary/15 py-3">
 			<dt className="text-xs uppercase tracking-widest text-primary/75">
 				{label}
 			</dt>
-			<dd className="mt-1 wrap-break-word text-base font-bold text-primary">
-				{value}
+			<dd className="mt-1 flex items-center gap-2 text-base font-bold text-primary">
+				<span className="min-w-0 wrap-anywhere">{value}</span>
+				{verified && (
+					<>
+						<Icon
+							name="checkCircle"
+							className="h-5 w-5 shrink-0 fill-success"
+							aria-hidden="true"
+						/>
+						<span className="sr-only">E-mail vérifié</span>
+					</>
+				)}
 			</dd>
 		</div>
 	);
@@ -29,6 +46,7 @@ function AccountField({ label, value }: { label: string; value: string }) {
 export default function Profile() {
 	const { user, logout } = useAuth();
 	const navigate = useNavigate();
+	const deleteDialogRef = useRef<HTMLDialogElement>(null);
 	const showsEmailBanner = user != null && !user.emailVerified;
 	const primaryAddress = user?.addresses.find(
 		(address) => address.is_primary,
@@ -64,13 +82,11 @@ export default function Profile() {
 						Compte
 					</h2>
 					<dl>
-						<AccountField
-							label="Pseudo"
-							value={user?.pseudo ?? ""}
-						/>
+						<PseudoField pseudo={user?.pseudo ?? ""} />
 						<AccountField
 							label="E-mail"
 							value={user?.email ?? ""}
+							verified={user?.emailVerified}
 						/>
 						<AccountField
 							label="Adresse principale"
@@ -103,6 +119,33 @@ export default function Profile() {
 					Se déconnecter
 				</button>
 			</div>
+			<section
+				aria-labelledby="delete-account-title"
+				className="mx-4 mt-6 rounded-3xl border border-error/40 bg-(--bg-error) px-5 py-5 text-(--error-text)"
+			>
+				<h2
+					id="delete-account-title"
+					className="text-xs font-bold uppercase tracking-widest"
+				>
+					Supprimer mon compte
+				</h2>
+				<p className="mt-2 text-sm">
+					Attention, cette action est irréversible !
+				</p>
+				<button
+					type="button"
+					onClick={() => deleteDialogRef.current?.showModal()}
+					className="btn btn-error btn-md mt-4 w-full rounded-full border-none px-5 font-bold text-(--on-error)"
+				>
+					<Icon
+						name="trash"
+						className="h-5 w-5 fill-(--on-error)"
+						aria-hidden="true"
+					/>
+					Supprimer mon compte
+				</button>
+			</section>
+			<DeleteAccountDialog dialogRef={deleteDialogRef} />
 		</main>
 	);
 }

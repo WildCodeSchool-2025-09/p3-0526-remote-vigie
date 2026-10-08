@@ -11,7 +11,7 @@ import type { RecentBadge } from "../badge/userBadgeRepository";
 // Only BREAD here (Browse, Read, Edit, Add, Delete)
 
 // Adds the author's badges
-function withAuthorBadges<T extends { author: { id: number } }>(
+function withAuthorBadges<T extends { author: { id: number | null } }>(
 	comment: T,
 	badgesByAuthor: Map<number, RecentBadge[]>,
 ) {
@@ -19,7 +19,10 @@ function withAuthorBadges<T extends { author: { id: number } }>(
 		...comment,
 		author: {
 			...comment.author,
-			badges: badgesByAuthor.get(comment.author.id) ?? [],
+			badges:
+				comment.author.id == null
+					? []
+					: (badgesByAuthor.get(comment.author.id) ?? []),
 		},
 	};
 }
@@ -38,7 +41,11 @@ const browse: RequestHandler = async (req, res, next) => {
 		const badgesByAuthor =
 			req.auth != null
 				? await badgeService.readRecentBadgesByUsers(
-						comments.map((comment) => comment.author.id),
+						comments.flatMap((comment) =>
+							comment.author.id == null
+								? []
+								: [comment.author.id],
+						),
 					)
 				: new Map<number, RecentBadge[]>();
 
@@ -130,9 +137,9 @@ const add: RequestHandler = async (req, res, next) => {
 
 		const badgesByAuthor =
 			comment != null
-				? await badgeService.readRecentBadgesByUsers([
-						comment.author.id,
-					])
+				? await badgeService.readRecentBadgesByUsers(
+						comment.author.id == null ? [] : [comment.author.id],
+					)
 				: new Map<number, RecentBadge[]>();
 
 		res.status(StatusCodes.CREATED).json(

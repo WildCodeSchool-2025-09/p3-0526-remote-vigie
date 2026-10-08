@@ -20,13 +20,14 @@ const MAX_LIST_LIMIT = 100;
 // Higher ceiling when a zone is given (map).
 const MAX_MAP_LIMIT = 300;
 
-// Adds the author's badges (visitors get none)
-async function withAuthorBadges<T extends { author: { id: number } }>(
+// Adds the author's badges (visitors get none, nor does a deleted account,
+// whose author id is null)
+async function withAuthorBadges<T extends { author: { id: number | null } }>(
 	incident: T,
 	userId: number | null,
 ) {
 	const badges =
-		userId != null
+		userId != null && incident.author.id != null
 			? await userBadgeRepository.readRecentByUser(incident.author.id)
 			: [];
 

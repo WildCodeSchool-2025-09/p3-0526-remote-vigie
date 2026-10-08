@@ -68,6 +68,7 @@ const categories: { title: string; description: string; names: IconName[] }[] =
 				"rotateRight",
 				"share",
 				"shield",
+				"trash",
 			],
 		},
 	];

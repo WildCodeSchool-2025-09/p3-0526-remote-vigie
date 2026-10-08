@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
-import { isValidAddress } from "./validateRegisterInput";
+import { isValidAddress, isValidPseudo } from "./validateRegisterInput";
 
 // Mêmes règles que l'inscription classique (US05), sans e-mail ni mot de
 // passe : l'e-mail vient du jeton Google, et il n'y a pas de mot de passe.
@@ -18,12 +18,7 @@ const validateGoogleSignupInput: RequestHandler = (req, res, next) => {
 		errors.pendingToken = "Inscription Google invalide.";
 	}
 
-	if (
-		typeof body.pseudo !== "string" ||
-		body.pseudo.trim() === "" ||
-		body.pseudo.includes("@") ||
-		body.pseudo.length > 30
-	) {
+	if (!isValidPseudo(body.pseudo)) {
 		errors.pseudo = "Veuillez renseigner un pseudo valide.";
 	}
 

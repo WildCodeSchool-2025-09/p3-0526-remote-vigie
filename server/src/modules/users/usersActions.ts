@@ -1,11 +1,15 @@
+import argon2 from "argon2";
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 import { CURRENT_CGU_VERSION } from "../../services/cgu";
-import { normalizeEmail } from "../../services/normalize";
+import { normalizeEmail, normalizePseudo } from "../../services/normalize";
 import { resolveAddress } from "../../services/resolveAddress";
+import { toUserProfile } from "../../services/toUserProfile";
+import { isValidPseudo } from "../../services/validateRegisterInput";
 import verificationEmailService from "../../services/verificationEmailService";
 import { hashToken } from "../../services/verificationToken";
 import type { AddressInput, ResolvedAddress } from "../../types/address";
+import addressRepository from "../address/addressRepository";
 import usersRepository from "./usersRepository";
 
 const add: RequestHandler = async (req, res, next) => {
@@ -151,8 +155,146 @@ const resendVerification: RequestHandler = async (req, res, next) => {
 	}
 };
 
+const updatePseudo: RequestHandler = async (req, res, next) => {
+	try {
+		const userId = Number(req.auth?.sub);
+		const { pseudo } = req.body as { pseudo: unknown };
+
+		if (!isValidPseudo(pseudo)) {
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "invalid_pseudo",
+				message: "Vous devez entrer un pseudo valide.",
+			});
+			return;
+		}
+
+		const trimmed = pseudo.trim();
+		const pseudoNormalized = normalizePseudo(trimmed);
+
+		const user = await usersRepository.read(userId);
+
+		if (user == null) {
+			res.status(StatusCodes.UNAUTHORIZED).json({
+				error: "unauthorized",
+				message: "Session invalide.",
+			});
+			return;
+		}
+
+		if (user.pseudo_normalized !== pseudoNormalized) {
+			const existing =
+				await usersRepository.findByPseudoNormalized(pseudoNormalized);
+
+			if (existing != null) {
+				res.status(StatusCodes.CONFLICT).json({
+					error: "pseudo_already_used",
+					message: "Ce pseudo est déjà pris.",
+				});
+				return;
+			}
+
+			await usersRepository.updatePseudo(
+				userId,
+				trimmed,
+				pseudoNormalized,
+			);
+		}
+
+		const updated = await usersRepository.read(userId);
+		const addresses = await addressRepository.findByUserId(userId);
+
+		res.json(toUserProfile(updated, addresses));
+	} catch (err) {
+		if (
+			err &&
+			typeof err === "object" &&
+			"code" in err &&
+			err.code === "ER_DUP_ENTRY"
+		) {
+			res.status(StatusCodes.CONFLICT).json({
+				error: "pseudo_already_used",
+				message: "Ce pseudo est déjà pris.",
+			});
+			return;
+		}
+
+		next(err);
+	}
+};
+
+const destroy: RequestHandler = async (req, res, next) => {
+	try {
+		const userId = Number(req.auth?.sub);
+		const user = await usersRepository.read(userId);
+		if (!user) {
+			res.status(StatusCodes.UNAUTHORIZED).json({
+				error: "unauthorized",
+				message: "Session invalide.",
+			});
+			return;
+		}
+		const { password, pseudo } = req.body as {
+			password?: unknown;
+			pseudo?: unknown;
+		};
+
+		// La confirmation exigée dépend du compte, jamais de ce qu'envoie le
+		// client : sinon un token volé suffirait à contourner le mot de passe.
+		if (user.password_hash != null) {
+			if (typeof password !== "string" || password === "") {
+				res.status(StatusCodes.BAD_REQUEST).json({
+					error: "invalid_confirmation",
+					message: "Veuillez saisir votre mot de passe.",
+				});
+				return;
+			}
+
+			const isPasswordValid = await argon2.verify(
+				user.password_hash,
+				password,
+			);
+
+			// 403 et pas 401 : la session est valide, c'est la confirmation qui
+			// est refusée (un 401 déconnecterait l'utilisateur côté front).
+			if (!isPasswordValid) {
+				res.status(StatusCodes.FORBIDDEN).json({
+					error: "invalid_confirmation",
+					message: "Mot de passe incorrect.",
+				});
+				return;
+			}
+		} else {
+			if (typeof pseudo !== "string" || pseudo.trim() === "") {
+				res.status(StatusCodes.BAD_REQUEST).json({
+					error: "invalid_confirmation",
+					message: "Veuillez saisir votre pseudo.",
+				});
+				return;
+			}
+
+			// Comparaison exacte : l'utilisateur doit retaper son pseudo tel
+			// qu'il est affiché.
+			if (pseudo.trim() !== user.pseudo) {
+				res.status(StatusCodes.FORBIDDEN).json({
+					error: "invalid_confirmation",
+					message: "Le pseudo saisi ne correspond pas.",
+				});
+				return;
+			}
+		}
+
+		await usersRepository.destroy(userId);
+
+		res.sendStatus(StatusCodes.NO_CONTENT);
+	} catch (err) {
+		next(err);
+	}
+};
+
 export default {
 	add,
 	verifyEmail,
 	resendVerification,
+	updatePseudo,
+	destroy,
 };
