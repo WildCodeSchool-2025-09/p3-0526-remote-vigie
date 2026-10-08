@@ -120,10 +120,14 @@ const destroy: RequestHandler = async (req, res, next) => {
 	try {
 		const endpoint = req.body?.endpoint;
 
-		if (typeof endpoint !== "string" || endpoint.length === 0) {
+		if (
+			typeof endpoint !== "string" ||
+			endpoint.length === 0 ||
+			endpoint.length > MAX_ENDPOINT_LENGTH
+		) {
 			res.status(StatusCodes.BAD_REQUEST).json({
 				error: "invalid_subscription",
-				message: "Adresse d'abonnement manquante.",
+				message: "Adresse d'abonnement invalide.",
 			});
 			return;
 		}

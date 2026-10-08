@@ -113,11 +113,20 @@ async function dispatch({
 
 	const link = `${process.env.CLIENT_URL}/incident/${incidentId}`;
 
-	// Started first and not awaited yet: the push must not wait for the e-mails
-	const pushDone = pushService.sendToUsers(
-		recipients.map((recipient) => Number(recipient.user_id)),
-		newIncidentPayload({ incidentId, city, isDanger }),
-	);
+	// Started first and not awaited yet: the push must not wait for the e-mails.
+	// Handled right away: a rejection during the e-mail loop would otherwise be
+	// unhandled and could stop the process
+	const pushDone = pushService
+		.sendToUsers(
+			recipients.map((recipient) => Number(recipient.user_id)),
+			newIncidentPayload({ incidentId, city, isDanger }),
+		)
+		.catch((err) => {
+			console.error(
+				`Échec du push de l'alerte (incident ${incidentId})`,
+				err,
+			);
+		});
 
 	for (const recipient of recipients) {
 		const address =
