@@ -412,4 +412,31 @@
 			opacity: 0;
 		}
 	}
+
+	--animate-twist: twist 2.4s ease-in-out infinite;
+	@keyframes twist {
+		0%,
+		100% {
+			transform: skewX(-6deg);
+		}
+		50% {
+			transform: skewX(6deg);
+		}
+	}
+
+	--animate-debris: debris 1.2s linear infinite;
+	@keyframes debris {
+		0% {
+			translate: -40px 0;
+			opacity: 0;
+		}
+		30%,
+		70% {
+			opacity: 1;
+		}
+		100% {
+			translate: 40px 0;
+			opacity: 0;
+		}
+	}
 }
