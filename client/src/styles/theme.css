@@ -303,4 +303,44 @@
 			rotate: 8deg;
 		}
 	}
+
+	--animate-flash: flash 3s linear infinite;
+	@keyframes flash {
+		0% {
+			opacity: 0;
+			scale: 1;
+		}
+		4% {
+			opacity: 1;
+			scale: 1.1;
+		}
+		8% {
+			opacity: 0.2;
+			scale: 1;
+		}
+		12%,
+		25% {
+			opacity: 1;
+		}
+		30%,
+		100% {
+			opacity: 0;
+		}
+	}
+
+	--animate-rain: rain 0.9s linear infinite;
+	@keyframes rain {
+		0% {
+			translate: 12px -22px;
+			opacity: 0;
+		}
+		25%,
+		75% {
+			opacity: 1;
+		}
+		100% {
+			translate: -12px 22px;
+			opacity: 0;
+		}
+	}
 }
