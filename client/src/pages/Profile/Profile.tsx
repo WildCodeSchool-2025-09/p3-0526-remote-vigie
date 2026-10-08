@@ -3,6 +3,7 @@ import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNot
 import Icon from "@/components/Icon/Icon";
 import DeleteAccountDialog from "@/components/Profile/DeleteAccountDialog/DeleteAccountDialog";
 import PseudoField from "@/components/Profile/PseudoField/PseudoField";
+import PushSettings from "@/components/PushSettings/PushSettings";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import type { Address } from "@/types/auth";
 import { useRef } from "react";
@@ -93,6 +94,8 @@ export default function Profile() {
 						/>
 					</dl>
 				</section>
+
+				<PushSettings />
 
 				<nav aria-label="Profil">
 					<Link

@@ -24,6 +24,8 @@ DROP TABLE IF EXISTS `user_location`;
 
 DROP TABLE IF EXISTS `address`;
 
+DROP TABLE IF EXISTS `push_subscription`;
+
 DROP TABLE IF EXISTS `oauth_account`;
 
 DROP TABLE IF EXISTS `user`;
@@ -59,6 +61,20 @@ CREATE TABLE `oauth_account` (
     UNIQUE KEY `uq_oauth_account_provider_user` (`provider`, `provider_user_id`),
     UNIQUE KEY `uq_oauth_account_user_provider` (`user_id`, `provider`),
     CONSTRAINT `fk_oauth_account_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `push_subscription` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT UNSIGNED NOT NULL,
+    `endpoint` VARCHAR(512) NOT NULL,
+    `p256dh_key` VARCHAR(255) NOT NULL,
+    `auth_key` VARCHAR(255) NOT NULL,
+    `user_agent` VARCHAR(255) NULL DEFAULT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_push_subscription_endpoint` (`endpoint`),
+    KEY `idx_push_subscription_user` (`user_id`),
+    CONSTRAINT `fk_push_subscription_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `address` (

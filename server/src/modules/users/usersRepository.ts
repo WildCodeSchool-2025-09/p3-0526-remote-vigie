@@ -3,6 +3,21 @@ import type { Executor, Result, Rows } from "../../../database/client";
 import { DELETED_USER_PSEUDO } from "../../services/deletedUser";
 import type { NewGoogleUser } from "../../types/oauth";
 
+// Tables rattachées à user par une clé étrangère. Suppression de compte (US18) :
+// la ligne user est anonymisée, pas effacée, donc ON DELETE CASCADE ne joue
+// jamais. Toute nouvelle table liée à user doit être rangée ici dans l'une des
+// deux listes ; un test compare ces listes au schéma pour éviter l'oubli.
+export const PERSONAL_DATA_TABLES = [
+	"oauth_account",
+	"address",
+	"user_location",
+	"user_badge",
+	"push_subscription",
+];
+
+// Conservées volontairement, rattachées au compte anonymisé.
+export const KEPT_TABLES = ["incident", "comment", "contribution"];
+
 class UsersRepository {
 	async read(userId: number) {
 		const [rows] = await databaseClient.query<Rows>(
@@ -269,12 +284,7 @@ class UsersRepository {
 		userId: number,
 		executor: Executor = databaseClient,
 	) {
-		for (const table of [
-			"oauth_account",
-			"address",
-			"user_location",
-			"user_badge",
-		]) {
+		for (const table of PERSONAL_DATA_TABLES) {
 			await executor.query(`DELETE FROM ${table} WHERE user_id = ?`, [
 				userId,
 			]);

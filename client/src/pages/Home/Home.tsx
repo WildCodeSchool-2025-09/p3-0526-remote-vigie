@@ -8,6 +8,8 @@ import FlashToast from "@/components/FlashToast/FlashToast";
 import Icon from "@/components/Icon/Icon";
 import IncidentList from "@/components/IncidentList/IncidentList";
 import IncidentMap from "@/components/IncidentMap/IncidentMap";
+import PushOptInBanner from "@/components/PushOptInBanner/PushOptInBanner";
+import { usePushOptIn } from "@/components/PushOptInBanner/usePushOptIn";
 import WelcomeToast from "@/components/WelcomeToast/WelcomeToast";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { getAllIncidents } from "@/services/incidentService";
@@ -17,6 +19,7 @@ const INCIDENTS_LIST_LIMIT = 15;
 
 export default function Home() {
 	const { user } = useAuth();
+	const pushOptIn = usePushOptIn();
 	const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
@@ -65,6 +68,7 @@ export default function Home() {
 	}, [loadIncidents]);
 
 	const showsEmailVerificationBanner = user != null && !user.emailVerified;
+	const showsTopBanner = showsEmailVerificationBanner || pushOptIn.visible;
 
 	return (
 		<div className="flex h-full flex-col bg-base-100">
@@ -95,8 +99,22 @@ export default function Home() {
 				</div>
 			)}
 
+			{pushOptIn.mode != null && (
+				<div
+					className={`relative mb-4 px-4 ${showsEmailVerificationBanner ? "" : "-mt-8"}`}
+				>
+					<PushOptInBanner
+						mode={pushOptIn.mode}
+						accepting={pushOptIn.accepting}
+						error={pushOptIn.error}
+						onAccept={pushOptIn.accept}
+						onDismiss={pushOptIn.dismiss}
+					/>
+				</div>
+			)}
+
 			<div
-				className={`relative shrink-0 px-4 ${showsEmailVerificationBanner ? "" : "-mt-8"}`}
+				className={`relative shrink-0 px-4 ${showsTopBanner ? "" : "-mt-8"}`}
 			>
 				<a
 					href="#incident-list"

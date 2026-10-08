@@ -14,6 +14,14 @@ import expiryService from "./services/expiryService";
 
 expiryService.schedule();
 
+// Report the Web Push configuration at startup (US21): a missing key shows in
+// the deployment logs, not at the first alert
+import webPushClient from "./services/webPushClient";
+
+if (webPushClient.getWebPush() != null) {
+	console.info("Web Push activé");
+}
+
 // Get the port from the environment variables
 const port = process.env.APP_PORT;
 

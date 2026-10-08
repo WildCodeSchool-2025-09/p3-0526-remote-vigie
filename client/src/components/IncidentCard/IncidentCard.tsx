@@ -99,7 +99,7 @@ export default function IncidentCard({
 						type="button"
 						onClick={handleActivate}
 						aria-current={isSelected ? "true" : undefined}
-						className="line-clamp-2 cursor-pointer text-left focus:outline-none after:absolute after:inset-0"
+						className="line-clamp-2 cursor-pointer text-left focus:outline-none after:absolute after:inset-0 leading-6"
 					>
 						{incident.title}
 					</button>

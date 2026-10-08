@@ -87,6 +87,16 @@ class CommentRepository {
 		const row = rows[0];
 		return row == null ? null : row.incident_id;
 	}
+
+	async findAuthorId(id: number): Promise<number | null> {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT user_id FROM comment WHERE id = ?",
+			[id],
+		);
+
+		const row = rows[0];
+		return row == null ? null : row.user_id;
+	}
 }
 
 export default new CommentRepository();
