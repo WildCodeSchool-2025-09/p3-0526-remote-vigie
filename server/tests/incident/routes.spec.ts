@@ -309,6 +309,7 @@ describe("PUT /api/incidents/:id", () => {
 		jest.spyOn(incidentRepository, "findOwnerAndStatus").mockResolvedValue({
 			userId: 1,
 			status: "in_progress",
+			city: "Lyon",
 		});
 		jest.spyOn(incidentRepository, "update").mockResolvedValue(undefined);
 		jest.spyOn(incidentRepository, "read").mockResolvedValue(fakeIncident);
