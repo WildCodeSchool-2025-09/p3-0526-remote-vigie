@@ -156,7 +156,9 @@ describe("POST /api/incidents", () => {
 		expect(response.status).toBe(400);
 	});
 
-	it("should create an incident and respond 201 with a valid body", async () => {
+	// Mocks every dependency incidentActions.add goes through; returns the
+	// alert dispatch spy.
+	function mockIncidentCreation() {
 		// Fake incident type returned by incidentTypeRepository.readAll(),
 		// shaped like IncidentType. Its id/dangerLevelId must match the body.
 		const fakeType = {
@@ -231,9 +233,13 @@ describe("POST /api/incidents", () => {
 			[],
 		);
 		// Fire-and-forget after the response: mocked so no real e-mail is sent.
-		jest.spyOn(alertService, "dispatch").mockResolvedValue(undefined);
+		return jest
+			.spyOn(alertService, "dispatch")
+			.mockResolvedValue(undefined);
+	}
 
-		const response = await supertest(app)
+	function postValidIncident() {
+		return supertest(app)
 			.post("/api/incidents")
 			.set(authHeader())
 			.send({
@@ -242,9 +248,29 @@ describe("POST /api/incidents", () => {
 				longitude: 4.85,
 				dangerLevelId: 4,
 			});
+	}
+
+	it("should create an incident and respond 201 with a valid body", async () => {
+		mockIncidentCreation();
+
+		const response = await postValidIncident();
 
 		expect(response.status).toBe(201);
 		expect(response.body.author.badges).toStrictEqual([]);
+	});
+
+	it("should still respond 201 and dispatch the alert when reading the badges fails", async () => {
+		const dispatch = mockIncidentCreation();
+		jest.spyOn(console, "error").mockImplementation(() => {});
+		jest.spyOn(userBadgeRepository, "readRecentByUser").mockRejectedValue(
+			new Error("db down"),
+		);
+
+		const response = await postValidIncident();
+
+		expect(response.status).toBe(201);
+		expect(response.body.author.badges).toStrictEqual([]);
+		expect(dispatch).toHaveBeenCalledTimes(1);
 	});
 });
 

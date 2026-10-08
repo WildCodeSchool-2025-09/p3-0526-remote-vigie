@@ -413,10 +413,21 @@ const add: RequestHandler = async (req, res, next) => {
 			Number(req.auth.sub),
 		);
 
-		res.status(StatusCodes.CREATED).json(
+		// The incident already exists and the alert below must go out: a badges
+		// failure must not turn this into a 500.
+		const created =
 			incident &&
-				(await withAuthorBadges(incident, Number(req.auth.sub))),
-		);
+			(await withAuthorBadges(incident, Number(req.auth.sub)).catch(
+				(err) => {
+					console.error("Failed to read the author's badges", err);
+					return {
+						...incident,
+						author: { ...incident.author, badges: [] },
+					};
+				},
+			));
+
+		res.status(StatusCodes.CREATED).json(created);
 
 		if (incident) {
 			alertService
