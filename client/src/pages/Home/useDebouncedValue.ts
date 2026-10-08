@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-// Valeur qui ne suit `value` qu'après `delayMs` sans changement.
-export function useDebouncedValue<T>(value: T, delayMs: number): T {
+// Valeur qui ne suit `value` qu'après `delayMs` sans changement ; `flush` la
+// rattrape tout de suite (validation avec Entrée).
+export function useDebouncedValue<T>(
+	value: T,
+	delayMs: number,
+): [T, () => void] {
 	const [debounced, setDebounced] = useState(value);
 
 	useEffect(() => {
@@ -9,5 +13,7 @@ export function useDebouncedValue<T>(value: T, delayMs: number): T {
 		return () => clearTimeout(timer);
 	}, [value, delayMs]);
 
-	return debounced;
+	const flush = useCallback(() => setDebounced(value), [value]);
+
+	return [debounced, flush];
 }

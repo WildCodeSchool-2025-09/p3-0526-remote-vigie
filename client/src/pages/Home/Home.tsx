@@ -34,7 +34,11 @@ export default function Home() {
 	const [sortBy, setSortBy] = useState<IncidentSort>("date");
 	const [includeResolved, setIncludeResolved] = useState(false);
 	// Recherche appliquée : attend une pause de frappe, sans espaces aux extrémités.
-	const search = useDebouncedValue(searchTerm, SEARCH_DEBOUNCE_MS).trim();
+	const [debouncedSearch, applySearchNow] = useDebouncedValue(
+		searchTerm,
+		SEARCH_DEBOUNCE_MS,
+	);
+	const search = debouncedSearch.trim();
 	const listLimit =
 		search === "" && !includeResolved
 			? INCIDENTS_LIST_LIMIT
@@ -65,6 +69,13 @@ export default function Home() {
 			lng: Number(incident.longitude),
 		});
 	}, []);
+
+	// Entrée : la recherche part sans attendre, et le focus passe à la liste
+	// (le clavier mobile se referme, le clavier physique peut avancer).
+	function handleSearchSubmit() {
+		applySearchNow();
+		document.getElementById("incident-list")?.focus();
+	}
 
 	const loadIncidents = useCallback(() => {
 		latestRequestRef.current += 1;
@@ -149,6 +160,7 @@ export default function Home() {
 						<IncidentSearchField
 							value={searchTerm}
 							onChange={setSearchTerm}
+							onSubmit={handleSearchSubmit}
 						/>
 					</div>
 					<div className="pointer-events-auto shrink-0">
