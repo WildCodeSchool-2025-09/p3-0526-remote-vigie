@@ -66,12 +66,17 @@ function isTargetAlreadyInView(
 
 // Recentrage demandé à la carte (liste ou recherche). `zoom` : 15 par défaut ;
 // `announcement` : phrase lue par les lecteurs d'écran.
-export type MapPanRequest = {
-	lat: number;
-	lng: number;
-	zoom?: number;
-	announcement?: string;
-};
+// `rememberView` garde la vue d'avant pour pouvoir y revenir (type « restore »).
+export type MapPanRequest =
+	| {
+			type?: "center";
+			lat: number;
+			lng: number;
+			zoom?: number;
+			announcement?: string;
+			rememberView?: boolean;
+	  }
+	| { type: "restore"; announcement?: string };
 
 function leafletBoundsToBounds(bounds: L.LatLngBounds): Bounds {
 	return {
@@ -351,7 +356,8 @@ function MapZoomControl({
 }
 
 // Recentre la carte sur la demande reçue en prop (carte choisie dans la liste,
-// ou résultat le plus récent d'une recherche).
+// ou résultat le plus récent d'une recherche validée), ou la ramène à la vue
+// d'avant la recherche quand celle-ci ne donne rien.
 function MapPanRequestWatcher({
 	request,
 	onTransitionStart,
@@ -362,21 +368,66 @@ function MapPanRequestWatcher({
 	onAnnounce: (message: string) => void;
 }) {
 	const map = useMap();
+	// Vue d'avant la recherche : oubliée dès que l'utilisateur déplace la carte lui-même.
+	const previousViewRef = useRef<{ center: L.LatLng; zoom: number } | null>(
+		null,
+	);
 
 	useEffect(() => {
-		if (request) {
-			const zoom = request.zoom ?? SELECTION_ZOOM;
-			if (!isTargetAlreadyInView(map, request.lat, request.lng, zoom)) {
-				onTransitionStart();
+		const container = map.getContainer();
+		const forgetPreviousView = () => {
+			previousViewRef.current = null;
+		};
+		const events = ["pointerdown", "wheel", "keydown"] as const;
+		for (const event of events) {
+			container.addEventListener(event, forgetPreviousView, {
+				passive: true,
+			});
+		}
+		return () => {
+			for (const event of events) {
+				container.removeEventListener(event, forgetPreviousView);
 			}
-			// Une popup restée ouverte gênerait le déplacement (autoPan).
+		};
+	}, [map]);
+
+	useEffect(() => {
+		if (!request) return;
+
+		if (request.type === "restore") {
+			const previous = previousViewRef.current;
+			if (!previous) return;
+			previousViewRef.current = null;
+			onTransitionStart();
 			map.closePopup();
-			map.setView([request.lat, request.lng], zoom, {
+			map.setView(previous.center, previous.zoom, {
 				animate: true,
 				duration: SELECTION_TRANSITION_DURATION_SECONDS,
 			});
 			onAnnounce(request.announcement ?? "");
+			return;
 		}
+
+		const zoom = request.zoom ?? SELECTION_ZOOM;
+		if (request.rememberView) {
+			previousViewRef.current ??= {
+				center: map.getCenter(),
+				zoom: map.getZoom(),
+			};
+		} else {
+			// Un autre déplacement (carte de la liste) remplace la vue d'avant.
+			previousViewRef.current = null;
+		}
+		if (!isTargetAlreadyInView(map, request.lat, request.lng, zoom)) {
+			onTransitionStart();
+		}
+		// Une popup restée ouverte gênerait le déplacement (autoPan).
+		map.closePopup();
+		map.setView([request.lat, request.lng], zoom, {
+			animate: true,
+			duration: SELECTION_TRANSITION_DURATION_SECONDS,
+		});
+		onAnnounce(request.announcement ?? "");
 	}, [request, map, onTransitionStart, onAnnounce]);
 
 	return null;

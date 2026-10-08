@@ -92,6 +92,7 @@ export default function Home() {
 	// (le clavier mobile se referme, le clavier physique peut avancer).
 	function handleSearchSubmit() {
 		applySearchNow();
+		setSubmitCount((count) => count + 1);
 		document.getElementById("incident-list")?.focus();
 	}
 
@@ -147,22 +148,33 @@ export default function Home() {
 		}
 		return latest;
 	}, [search, isLoading, hasError, resultsSearch, incidents]);
-	// Dernier incident sur lequel la carte a été recentrée : pas de nouveau
-	// recentrage tant que ce résultat ne change pas.
-	const lastRecenteredIdRef = useRef<number | null>(null);
+	// Entrée = demande de recentrage ; `handledSubmitCountRef` : dernière demande traitée.
+	const [submitCount, setSubmitCount] = useState(0);
+	const handledSubmitCountRef = useRef(0);
 
+	// Le recentrage ne suit que la validation (Entrée), pas chaque lettre tapée :
+	// un début de mot trouve souvent un incident sans rapport avec ce qui est cherché.
 	useEffect(() => {
-		if (search === "") {
-			lastRecenteredIdRef.current = null;
-			return;
-		}
+		if (submitCount === handledSubmitCountRef.current) return;
+		// Attend les résultats de la recherche validée.
 		if (
-			latestMatch === null ||
-			latestMatch.id === lastRecenteredIdRef.current
+			search !== "" &&
+			(isLoading || hasError || resultsSearch !== search)
 		) {
 			return;
 		}
-		lastRecenteredIdRef.current = latestMatch.id;
+		handledSubmitCountRef.current = submitCount;
+		if (search === "") return;
+
+		// Rien trouvé : la carte revient à sa vue d'avant la recherche (si elle en a bougé).
+		if (latestMatch === null) {
+			setMapPanRequest({
+				type: "restore",
+				announcement:
+					"Aucun résultat : carte revenue à sa position précédente.",
+			});
+			return;
+		}
 
 		const lat = Number(latestMatch.latitude);
 		const lng = Number(latestMatch.longitude);
@@ -173,11 +185,12 @@ export default function Home() {
 			lat,
 			lng,
 			zoom: SEARCH_RECENTER_ZOOM,
+			rememberView: true,
 			announcement: `Carte recentrée sur ${latestMatch.title}${
 				latestMatch.city ? ` à ${latestMatch.city}` : ""
 			}.`,
 		});
-	}, [search, latestMatch]);
+	}, [submitCount, search, isLoading, hasError, resultsSearch, latestMatch]);
 
 	const showsEmailVerificationBanner = user != null && !user.emailVerified;
 
