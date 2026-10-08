@@ -5,11 +5,9 @@ import bgHome from "@/assets/images/background-home.jpg";
 import VigieLogo from "@/assets/images/vigie-ligne.svg?react";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner/EmailVerificationBanner";
 import Icon from "@/components/Icon/Icon";
-import {
-	IncidentSearchField,
-	IncludeResolvedCheckbox,
-} from "@/components/IncidentList/IncidentFilters";
+import { IncidentSearchField } from "@/components/IncidentList/IncidentFilters";
 import IncidentList from "@/components/IncidentList/IncidentList";
+import IncidentOptionsMenu from "@/components/IncidentList/IncidentOptionsMenu";
 import IncidentMap from "@/components/IncidentMap/IncidentMap";
 import WelcomeToast from "@/components/WelcomeToast/WelcomeToast";
 import { useAuth } from "@/contexts/auth/AuthContext";
@@ -164,9 +162,9 @@ export default function Home() {
 						/>
 					</div>
 					<div className="pointer-events-auto shrink-0">
-						<IncludeResolvedCheckbox
-							checked={includeResolved}
-							onChange={setIncludeResolved}
+						<IncidentOptionsMenu
+							includeResolved={includeResolved}
+							onIncludeResolvedChange={setIncludeResolved}
 						/>
 					</div>
 				</div>
