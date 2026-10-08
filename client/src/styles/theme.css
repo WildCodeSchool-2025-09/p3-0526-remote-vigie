@@ -252,4 +252,55 @@
 			rotate: 6deg;
 		}
 	}
+
+	--animate-flutter: flutter 0.25s linear infinite;
+	@keyframes flutter {
+		0%,
+		100% {
+			scale: 1 1;
+		}
+		50% {
+			scale: 0.75 1;
+		}
+	}
+
+	--animate-float: float 1.5s ease-in-out infinite;
+	@keyframes float {
+		0%,
+		100% {
+			translate: 0 0;
+		}
+		50% {
+			translate: 0 -3px;
+		}
+	}
+
+	--animate-blink: blink 3s linear infinite;
+	@keyframes blink {
+		0%,
+		86%,
+		90%,
+		94%,
+		100% {
+			scale: 1 1;
+		}
+		88%,
+		92% {
+			scale: 1 0.1;
+		}
+	}
+
+	--animate-tail-wag: tail-wag 2s linear infinite;
+	@keyframes tail-wag {
+		0%,
+		100% {
+			rotate: 0deg;
+		}
+		25% {
+			rotate: -10deg;
+		}
+		75% {
+			rotate: 8deg;
+		}
+	}
 }
