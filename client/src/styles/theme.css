@@ -122,4 +122,30 @@
 			opacity: 0;
 		}
 	}
+
+	--animate-flicker: flicker 1.2s ease-in-out infinite;
+	@keyframes flicker {
+		0% {
+			scale: 1 1;
+			rotate: 0deg;
+		}
+		25% {
+			scale: 0.95 1.08;
+			rotate: -3deg;
+		}
+		50% {
+			scale: 1.03 0.97;
+			rotate: 0deg;
+		}
+		75% {
+			scale: 0.97 1.05;
+			rotate: 3deg;
+		}
+		100% {
+			scale: 1 1;
+			rotate: 0deg;
+		}
+	}
+
+	--animate-flicker-inner: flicker 0.8s ease-in-out infinite reverse;
 }

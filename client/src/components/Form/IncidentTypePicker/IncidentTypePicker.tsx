@@ -3,6 +3,10 @@ import Icon from "@/components/Icon/Icon";
 import type { IncidentType } from "@/types/incidentForm";
 import { useId } from "react";
 
+const typeAnimations: Record<string, string> = {
+	fire: "motion-safe:[&_.flame-outer]:animate-flicker motion-safe:[&_.flame-inner]:animate-flicker-inner [&_g]:origin-bottom [&_g]:[transform-box:fill-box]",
+};
+
 type IncidentTypePickerProps = {
 	label: string;
 	incidentTypes: IncidentType[];
@@ -58,7 +62,7 @@ export default function IncidentTypePicker({
 							>
 								<Icon
 									name={type.icon as IconName}
-									className={`-mt-8 ${isSelected ? "h-16 w-16" : "h-14 w-14"}`}
+									className={`-mt-8 ${isSelected ? `h-16 w-16 overflow-visible ${typeAnimations[type.icon] ?? ""}` : "h-14 w-14"}`}
 								/>
 								<span className="pt-1 text-sm">
 									{type.label}
