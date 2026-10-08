@@ -194,4 +194,48 @@
 			rotate: 0deg;
 		}
 	}
+
+	--animate-headshake: headshake 2.5s ease-in-out infinite;
+	@keyframes headshake {
+		0% {
+			rotate: 0deg;
+		}
+		8% {
+			rotate: -6deg;
+		}
+		16% {
+			rotate: 6deg;
+		}
+		24% {
+			rotate: -6deg;
+		}
+		32% {
+			rotate: 6deg;
+		}
+		40%,
+		100% {
+			rotate: 0deg;
+		}
+	}
+
+	--animate-sniff: sniff 2.5s ease-in-out infinite;
+	@keyframes sniff {
+		0%,
+		55% {
+			scale: 1 1;
+		}
+		60% {
+			scale: 1.08 0.94;
+		}
+		65% {
+			scale: 1 1;
+		}
+		70% {
+			scale: 1.08 0.94;
+		}
+		75%,
+		100% {
+			scale: 1 1;
+		}
+	}
 }
