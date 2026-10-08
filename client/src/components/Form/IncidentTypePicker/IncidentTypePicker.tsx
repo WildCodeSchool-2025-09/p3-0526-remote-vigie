@@ -1,7 +1,8 @@
 import type { IconName } from "@/assets/icons";
+import ApocalypseSurprise from "@/components/Form/ApocalypseSurprise/ApocalypseSurprise";
 import Icon from "@/components/Icon/Icon";
 import type { IncidentType } from "@/types/incidentForm";
-import { useId } from "react";
+import { useId, useState } from "react";
 
 const typeAnimations: Record<string, string> = {
 	fire: "motion-safe:[&_.flame-outer]:animate-flicker motion-safe:[&_.flame-inner]:animate-flicker-inner [&_g]:origin-bottom [&_g]:[transform-box:fill-box]",
@@ -35,55 +36,68 @@ export default function IncidentTypePicker({
 	error,
 }: IncidentTypePickerProps) {
 	const errorId = useId();
+	const [isApocalypseDismissed, setIsApocalypseDismissed] = useState(false);
+
+	const isApocalypse =
+		incidentTypes.length > 0 &&
+		value.length === incidentTypes.length &&
+		!isApocalypseDismissed;
 
 	function toggleType(id: number) {
 		const next = value.includes(id)
 			? value.filter((typeId) => typeId !== id)
 			: [...value, id];
 
+		setIsApocalypseDismissed(false);
 		onChange(next);
 	}
 
 	return (
 		<fieldset aria-describedby={error ? errorId : undefined}>
 			<legend className="sr-only">{label}</legend>
-			<div className="grid grid-cols-3 gap-x-3 gap-y-6">
-				{incidentTypes.map((type) => {
-					const isSelected = value.includes(type.id);
+			{isApocalypse ? (
+				<ApocalypseSurprise
+					onDismiss={() => setIsApocalypseDismissed(true)}
+				/>
+			) : (
+				<div className="grid grid-cols-3 gap-x-3 gap-y-6">
+					{incidentTypes.map((type) => {
+						const isSelected = value.includes(type.id);
 
-					return (
-						<button
-							key={type.id}
-							type="button"
-							aria-pressed={isSelected}
-							onClick={() => toggleType(type.id)}
-						>
-							<div
-								className="relative flex aspect-square flex-col items-center justify-center gap-1 rounded-2xl border bg-base-300 p-3"
-								style={
-									isSelected
-										? {
-												borderColor: `var(--${type.icon})`,
-												backgroundColor: `var(--bg-${type.icon})`,
-											}
-										: {
-												borderColor:
-													"var(--primary-light)",
-											}
-								}
+						return (
+							<button
+								key={type.id}
+								type="button"
+								aria-pressed={isSelected}
+								onClick={() => toggleType(type.id)}
 							>
-								<Icon
-									name={type.icon as IconName}
-									className={`-mt-8 ${isSelected ? `h-16 w-16 overflow-visible ${typeAnimations[type.icon] ?? ""}` : "h-14 w-14"}`}
-								/>
-								<span className="pt-1 text-sm">
-									{type.label}
-								</span>
-							</div>
-						</button>
-					);
-				})}
-			</div>
+								<div
+									className="relative flex aspect-square flex-col items-center justify-center gap-1 rounded-2xl border bg-base-300 p-3"
+									style={
+										isSelected
+											? {
+													borderColor: `var(--${type.icon})`,
+													backgroundColor: `var(--bg-${type.icon})`,
+												}
+											: {
+													borderColor:
+														"var(--primary-light)",
+												}
+									}
+								>
+									<Icon
+										name={type.icon as IconName}
+										className={`-mt-8 ${isSelected ? `h-16 w-16 overflow-visible ${typeAnimations[type.icon] ?? ""}` : "h-14 w-14"}`}
+									/>
+									<span className="pt-1 text-sm">
+										{type.label}
+									</span>
+								</div>
+							</button>
+						);
+					})}
+				</div>
+			)}
 
 			{error && (
 				<div

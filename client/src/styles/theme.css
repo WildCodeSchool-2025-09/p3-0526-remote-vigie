@@ -439,4 +439,30 @@
 			opacity: 0;
 		}
 	}
+
+	--animate-meteor-fall: meteor-fall 2s ease-in both;
+	@keyframes meteor-fall {
+		0% {
+			translate: -140px -140px;
+			scale: 1;
+			opacity: 0;
+		}
+		15% {
+			opacity: 1;
+		}
+		85% {
+			translate: 0 0;
+			scale: 1;
+			opacity: 1;
+		}
+		100% {
+			translate: 0 0;
+			scale: 1.6;
+			opacity: 0;
+		}
+	}
+
+	--animate-impact: shiver 1.5s linear 1.7s;
+	--animate-badge-pop: pop 1s ease 3s both;
+	--animate-title-pop: pop 1s ease 2s both;
 }
