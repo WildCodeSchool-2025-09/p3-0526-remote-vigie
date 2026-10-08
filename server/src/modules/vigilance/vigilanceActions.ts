@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 import departmentFromInsee from "../../services/department";
+import departmentName from "../../services/departmentNames";
 import vigilanceService from "../../services/vigilanceService";
 import addressRepository from "../address/addressRepository";
 
@@ -24,8 +25,11 @@ const read: RequestHandler = async (req, res, next) => {
 		res.json({
 			level: vigilance.level,
 			department,
+			departmentName: departmentName(department),
 			city: address.city,
 			updatedAt: vigilance.updatedAt,
+			phenomena: vigilance.phenomena,
+			endTime: vigilance.endTime,
 		});
 	} catch (err) {
 		next(err);

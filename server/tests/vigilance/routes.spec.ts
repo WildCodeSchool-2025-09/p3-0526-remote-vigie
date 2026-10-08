@@ -61,8 +61,8 @@ describe("GET /api/weather-vigilance", () => {
 			.mockResolvedValue({
 				level: "orange",
 				updatedAt: "2026-10-06T07:30:00Z",
-				phenomena: [],
-				endTime: null,
+				phenomena: ["wind", "storms"],
+				endTime: "2026-10-06T16:00:00Z",
 			});
 
 		const response = await supertest(app)
@@ -73,8 +73,11 @@ describe("GET /api/weather-vigilance", () => {
 		expect(response.body).toStrictEqual({
 			level: "orange",
 			department: "68",
+			departmentName: "Haut-Rhin",
 			city: "Westhalten",
 			updatedAt: "2026-10-06T07:30:00Z",
+			phenomena: ["wind", "storms"],
+			endTime: "2026-10-06T16:00:00Z",
 		});
 		expect(getVigilance).toHaveBeenCalledWith("68");
 	});
