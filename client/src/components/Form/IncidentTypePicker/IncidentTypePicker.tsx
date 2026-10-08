@@ -8,6 +8,7 @@ const typeAnimations: Record<string, string> = {
 	glaze: "motion-safe:animate-shiver",
 	rockfall: "motion-safe:animate-topple origin-bottom",
 	wild: "motion-safe:animate-headshake motion-safe:[&_.snout]:animate-sniff [&_.snout]:origin-center [&_.snout]:[transform-box:fill-box]",
+	tree: "motion-safe:[&_.tier]:animate-sway [&_.tier]:origin-bottom [&_.tier]:[transform-box:fill-box] [&_.tier-2]:[animation-delay:0.15s] [&_.tier-3]:[animation-delay:0.3s]",
 };
 
 type IncidentTypePickerProps = {

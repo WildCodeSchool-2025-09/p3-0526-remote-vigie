@@ -238,4 +238,18 @@
 			scale: 1 1;
 		}
 	}
+
+	--animate-sway: sway 2s ease-in-out infinite;
+	@keyframes sway {
+		0%,
+		100% {
+			rotate: 0deg;
+		}
+		25% {
+			rotate: -6deg;
+		}
+		75% {
+			rotate: 6deg;
+		}
+	}
 }
