@@ -61,6 +61,8 @@ describe("GET /api/weather-vigilance", () => {
 			.mockResolvedValue({
 				level: "orange",
 				updatedAt: "2026-10-06T07:30:00Z",
+				phenomena: [],
+				endTime: null,
 			});
 
 		const response = await supertest(app)
