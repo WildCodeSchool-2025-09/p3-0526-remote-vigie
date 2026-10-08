@@ -150,13 +150,21 @@ function MapViewportWatcher({
 }: {
 	onViewportChange: (bounds: Bounds, zoom: number) => void;
 }) {
-	const map = useMapEvents({
-		moveend: () =>
-			onViewportChange(
-				leafletBoundsToBounds(map.getBounds()),
-				map.getZoom(),
-			),
-	});
+	const map = useMap();
+	// Objet stable : un nouvel objet à chaque rendu ferait retirer puis remettre
+	// l'écouteur, et un recentrage lancé par un autre composant au même moment
+	// passerait sans être vu (zone et incidents jamais rechargés).
+	const handlers = useMemo(
+		() => ({
+			moveend: () =>
+				onViewportChange(
+					leafletBoundsToBounds(map.getBounds()),
+					map.getZoom(),
+				),
+		}),
+		[map, onViewportChange],
+	);
+	useMapEvents(handlers);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: montage uniquement (`map` est stable, `onViewportChange` mémoïsée).
 	useEffect(() => {
