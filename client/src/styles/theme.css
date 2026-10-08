@@ -343,4 +343,20 @@
 			opacity: 0;
 		}
 	}
+
+	--animate-fall: fall 1s linear infinite;
+	@keyframes fall {
+		0% {
+			translate: 0 -40px;
+			opacity: 0;
+		}
+		20%,
+		80% {
+			opacity: 1;
+		}
+		100% {
+			translate: 0 40px;
+			opacity: 0;
+		}
+	}
 }

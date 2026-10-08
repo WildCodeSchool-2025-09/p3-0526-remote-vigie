@@ -11,7 +11,8 @@ const typeAnimations: Record<string, string> = {
 	tree: "motion-safe:[&_.tier]:animate-sway [&_.tier]:origin-bottom [&_.tier]:[transform-box:fill-box] [&_.tier-2]:[animation-delay:0.15s] [&_.tier-3]:[animation-delay:0.3s]",
 	insect: "motion-safe:animate-float motion-safe:[&_.wings]:animate-flutter [&_.wings]:origin-center [&_.wings]:[transform-box:fill-box]",
 	storm: "motion-safe:[&_.bolt]:animate-flash [&_.bolt]:origin-center [&_.bolt]:[transform-box:fill-box] motion-safe:[&_.drops]:animate-rain [&_.drops-2]:[animation-delay:0.3s] [&_.drops-3]:[animation-delay:0.6s]",
-	animal:"motion-safe:[&_.tail]:animate-tail-wag [&_.tail]:origin-bottom-left [&_.tail]:[transform-box:fill-box] motion-safe:[&_.eyes]:animate-blink [&_.eyes]:origin-center [&_.eyes]:[transform-box:fill-box]",
+	hail: "motion-safe:[&_.stone]:animate-fall [&_.stone-1]:[animation-duration:0.9s] [&_.stone-2]:[animation-duration:1.2s] [&_.stone-4]:[animation-duration:1.3s] [&_.stone-5]:[animation-duration:1.1s]",
+	animal: "motion-safe:[&_.tail]:animate-tail-wag [&_.tail]:origin-bottom-left [&_.tail]:[transform-box:fill-box] motion-safe:[&_.eyes]:animate-blink [&_.eyes]:origin-center [&_.eyes]:[transform-box:fill-box]",
 };
 
 type IncidentTypePickerProps = {
