@@ -5,6 +5,8 @@ import { useId } from "react";
 
 const typeAnimations: Record<string, string> = {
 	fire: "motion-safe:[&_.flame-outer]:animate-flicker motion-safe:[&_.flame-inner]:animate-flicker-inner [&_g]:origin-bottom [&_g]:[transform-box:fill-box]",
+	glaze: "motion-safe:animate-shiver",
+	rockfall: "motion-safe:animate-topple origin-bottom",
 };
 
 type IncidentTypePickerProps = {

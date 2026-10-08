@@ -148,4 +148,50 @@
 	}
 
 	--animate-flicker-inner: flicker 0.8s ease-in-out infinite reverse;
+
+	--animate-shiver: shiver 1.5s linear infinite;
+	@keyframes shiver {
+		0% {
+			translate: 0;
+		}
+		5% {
+			translate: -2px;
+		}
+		10% {
+			translate: 2px;
+		}
+		15% {
+			translate: -2px;
+		}
+		20% {
+			translate: 2px;
+		}
+		25% {
+			translate: -1px;
+		}
+		30%,
+		100% {
+			translate: 0;
+		}
+	}
+
+	--animate-topple: topple 2s ease-in-out infinite;
+	@keyframes topple {
+		0% {
+			rotate: 0deg;
+		}
+		15% {
+			rotate: -8deg;
+		}
+		30% {
+			rotate: 4deg;
+		}
+		40% {
+			rotate: -2deg;
+		}
+		50%,
+		100% {
+			rotate: 0deg;
+		}
+	}
 }
