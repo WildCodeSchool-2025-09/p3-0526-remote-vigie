@@ -14,6 +14,7 @@ import IncidentMap, {
 } from "@/components/IncidentMap/IncidentMap";
 import PushOptInBanner from "@/components/PushOptInBanner/PushOptInBanner";
 import { usePushOptIn } from "@/components/PushOptInBanner/usePushOptIn";
+import WeatherBanner from "@/components/WeatherBanner/WeatherBanner";
 import WelcomeToast from "@/components/WelcomeToast/WelcomeToast";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { getAllIncidents } from "@/services/incidentService";
@@ -23,6 +24,7 @@ import { isInsideFranceBounds } from "@/utils/franceBounds";
 import { getStartView } from "@/utils/getDefaultMapCenter";
 import { useDebouncedValue } from "./useDebouncedValue";
 import { useDeviceLocation } from "./useDeviceLocation";
+import useWeatherVigilance from "./useWeatherVigilance";
 
 const SEARCH_DEBOUNCE_MS = 300;
 // Zoom du recentrage sur le résultat le plus récent d'une recherche.
@@ -30,6 +32,7 @@ const SEARCH_RECENTER_ZOOM = 14;
 
 export default function Home() {
 	const { user, loading: isAuthLoading } = useAuth();
+	const weather = useWeatherVigilance();
 	const deviceLocation = useDeviceLocation();
 	// Position de l'appareil, puis adresse principale, puis Paris.
 	const startView = useMemo(
@@ -209,8 +212,10 @@ export default function Home() {
 		latestMatch,
 	]);
 
+	const showsWeatherBanner = weather.isLoading || weather.vigilance != null;
 	const showsEmailVerificationBanner = user != null && !user.emailVerified;
-	const showsTopBanner = showsEmailVerificationBanner || pushOptIn.visible;
+	const showsTopBanners =
+		showsWeatherBanner || showsEmailVerificationBanner || pushOptIn.visible;
 
 	return (
 		<div className="flex h-full flex-col bg-base-100">
@@ -235,28 +240,31 @@ export default function Home() {
 				</h1>
 			</header>
 
-			{showsEmailVerificationBanner && (
-				<div className="relative -mt-8 mb-4 px-4">
-					<EmailVerificationBanner email={user.email} />
-				</div>
-			)}
-
-			{pushOptIn.mode != null && (
-				<div
-					className={`relative mb-4 px-4 ${showsEmailVerificationBanner ? "" : "-mt-8"}`}
-				>
-					<PushOptInBanner
-						mode={pushOptIn.mode}
-						accepting={pushOptIn.accepting}
-						error={pushOptIn.error}
-						onAccept={pushOptIn.accept}
-						onDismiss={pushOptIn.dismiss}
-					/>
+			{showsTopBanners && (
+				<div className="relative -mt-8 mb-4 flex flex-col gap-3 px-4">
+					{showsEmailVerificationBanner && (
+						<EmailVerificationBanner email={user.email} />
+					)}
+					{pushOptIn.mode != null && (
+						<PushOptInBanner
+							mode={pushOptIn.mode}
+							accepting={pushOptIn.accepting}
+							error={pushOptIn.error}
+							onAccept={pushOptIn.accept}
+							onDismiss={pushOptIn.dismiss}
+						/>
+					)}
+					{showsWeatherBanner && (
+						<WeatherBanner
+							isLoading={weather.isLoading}
+							vigilance={weather.vigilance}
+						/>
+					)}
 				</div>
 			)}
 
 			<div
-				className={`relative shrink-0 px-4 ${showsTopBanner ? "" : "-mt-8"}`}
+				className={`relative shrink-0 px-4 ${showsTopBanners ? "" : "-mt-8"}`}
 			>
 				<a
 					href="#incident-list"

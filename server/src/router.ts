@@ -16,6 +16,7 @@ import photoActions from "./modules/photo/photoActions";
 import pushSubscriptionActions from "./modules/pushSubscription/pushSubscriptionActions";
 import usefulPlaceActions from "./modules/usefulPlace/usefulPlaceActions";
 import usersActions from "./modules/users/usersActions";
+import vigilanceActions from "./modules/vigilance/vigilanceActions";
 import attachUserIfPresent from "./services/attachUserIfPresent";
 import checkAddressSearchRateLimit from "./services/checkAddressSearchRateLimit";
 import checkIncidentRateLimit from "./services/checkIncidentRateLimit";
@@ -144,5 +145,7 @@ router.post(
 );
 router.patch("/api/users/me/pseudo", verifyToken, usersActions.updatePseudo);
 router.delete("/api/users/me", verifyToken, usersActions.destroy);
+
+router.get("/api/weather-vigilance", verifyToken, vigilanceActions.read);
 
 export default router;
