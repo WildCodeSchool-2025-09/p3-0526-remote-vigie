@@ -80,7 +80,25 @@ export default function Home() {
 		null,
 	);
 
+	// Vrai après une sélection : le recentrage qui suit ne doit pas recharger la
+	// liste. Levé par le premier geste de l'utilisateur sur la carte.
+	const isListFrozenRef = useRef(false);
+
+	const handleBoundsChange = useCallback((newBounds: Bounds) => {
+		if (!isListFrozenRef.current) setBounds(newBounds);
+	}, []);
+
+	const handleUserInput = useCallback(() => {
+		isListFrozenRef.current = false;
+	}, []);
+
+	const handleSelectFromMap = useCallback((id: number) => {
+		isListFrozenRef.current = true;
+		setSelectedIncidentId(id);
+	}, []);
+
 	const handleSelectFromList = useCallback((incident: IncidentListItem) => {
+		isListFrozenRef.current = true;
 		setSelectedIncidentId(incident.id);
 		setMapPanRequest({
 			lat: Number(incident.latitude),
@@ -255,10 +273,11 @@ export default function Home() {
 				) : (
 					<IncidentMap
 						selectedIncidentId={selectedIncidentId}
-						onSelectIncident={setSelectedIncidentId}
+						onSelectIncident={handleSelectFromMap}
 						panRequest={mapPanRequest}
 						includeResolved={includeResolved}
-						onBoundsChange={setBounds}
+						onBoundsChange={handleBoundsChange}
+						onUserInput={handleUserInput}
 						startView={startView}
 						isStartViewFinal={deviceLocation.status !== "locating"}
 						searchActive={searchTerm.trim() !== ""}

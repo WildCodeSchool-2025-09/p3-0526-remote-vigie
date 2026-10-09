@@ -441,6 +441,26 @@ function MapPanRequestWatcher({
 	return null;
 }
 
+// Signale le premier geste de l'utilisateur sur la carte (clic ou toucher, molette, clavier).
+function MapUserInputWatcher({ onUserInput }: { onUserInput: () => void }) {
+	const map = useMap();
+
+	useEffect(() => {
+		const container = map.getContainer();
+		const events = ["pointerdown", "wheel", "keydown"] as const;
+		for (const event of events) {
+			container.addEventListener(event, onUserInput, { passive: true });
+		}
+		return () => {
+			for (const event of events) {
+				container.removeEventListener(event, onUserInput);
+			}
+		};
+	}, [map, onUserInput]);
+
+	return null;
+}
+
 function IncidentMarker({
 	incident,
 	isSelected,
@@ -510,6 +530,8 @@ type IncidentMapProps = {
 	includeResolved?: boolean;
 	// Appelée avec la zone visible à chaque rechargement des données de la carte.
 	onBoundsChange?: (bounds: Bounds) => void;
+	// Appelée au premier geste de l'utilisateur sur la carte.
+	onUserInput?: () => void;
 	// Point de départ retenu ; `isStartViewFinal` : la position de l'appareil est tranchée.
 	startView: StartView;
 	isStartViewFinal: boolean;
@@ -524,6 +546,7 @@ export default function IncidentMap({
 	panRequest = null,
 	includeResolved = false,
 	onBoundsChange,
+	onUserInput,
 	startView,
 	isStartViewFinal,
 	searchActive = false,
@@ -805,6 +828,9 @@ export default function IncidentMap({
 					<StartViewMarker startView={startView} />
 				)}
 				<MapViewportWatcher onViewportChange={handleViewportChange} />
+				{onUserInput && (
+					<MapUserInputWatcher onUserInput={onUserInput} />
+				)}
 				<MapPanRequestWatcher
 					request={panRequest}
 					onAnnounce={setMapAnnouncement}
