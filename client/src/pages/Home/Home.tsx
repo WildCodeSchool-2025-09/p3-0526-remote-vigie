@@ -100,12 +100,6 @@ export default function Home() {
 
 			{showsTopBanners && (
 				<div className="relative -mt-8 mb-4 flex flex-col gap-3 px-4">
-					{showsWeatherBanner && (
-						<WeatherBanner
-							isLoading={weather.isLoading}
-							vigilance={weather.vigilance}
-						/>
-					)}
 					{showsEmailVerificationBanner && (
 						<EmailVerificationBanner email={user.email} />
 					)}
@@ -116,6 +110,12 @@ export default function Home() {
 							error={pushOptIn.error}
 							onAccept={pushOptIn.accept}
 							onDismiss={pushOptIn.dismiss}
+						/>
+					)}
+					{showsWeatherBanner && (
+						<WeatherBanner
+							isLoading={weather.isLoading}
+							vigilance={weather.vigilance}
 						/>
 					)}
 				</div>
