@@ -51,6 +51,9 @@ export default function Home() {
 	const [isTruncated, setIsTruncated] = useState(false);
 	// Recherche à laquelle correspondent les incidents affichés.
 	const [resultsSearch, setResultsSearch] = useState("");
+	const [pendingRecenterTerm, setPendingRecenterTerm] = useState<
+		string | null
+	>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
 	const [searchTerm, setSearchTerm] = useState("");
@@ -96,7 +99,7 @@ export default function Home() {
 	// (le clavier mobile se referme, le clavier physique peut avancer).
 	function handleSearchSubmit() {
 		applySearchNow();
-		setSubmitCount((count) => count + 1);
+		setPendingRecenterTerm(searchTerm.trim() || null);
 		document.getElementById("incident-list")?.focus();
 	}
 
@@ -125,6 +128,7 @@ export default function Home() {
 				loadedCriteriaRef.current = criteria;
 			} else {
 				setHasError(true);
+				setPendingRecenterTerm(null); // la recherche a échoué : plus rien à recentrer
 			}
 			setIsLoading(false);
 		});
@@ -152,23 +156,15 @@ export default function Home() {
 		}
 		return latest;
 	}, [search, isLoading, hasError, resultsSearch, incidents]);
-	// Entrée = demande de recentrage ; `handledSubmitCountRef` : dernière demande traitée.
-	const [submitCount, setSubmitCount] = useState(0);
-	const handledSubmitCountRef = useRef(0);
 
 	// Le recentrage ne suit que la validation (Entrée), pas chaque lettre tapée :
 	// un début de mot trouve souvent un incident sans rapport avec ce qui est cherché.
 	useEffect(() => {
-		if (submitCount === handledSubmitCountRef.current) return;
-		// Attend les résultats de la recherche validée.
-		if (
-			search !== "" &&
-			(isLoading || hasError || resultsSearch !== search)
-		) {
-			return;
-		}
-		handledSubmitCountRef.current = submitCount;
-		if (search === "") return;
+		if (pendingRecenterTerm === null) return;
+		if (isLoading || resultsSearch !== search) return;
+
+		setPendingRecenterTerm(null);
+		if (hasError || search !== pendingRecenterTerm) return;
 
 		// Rien trouvé : la carte revient à sa vue d'avant la recherche (si elle en a bougé).
 		if (latestMatch === null) {
@@ -194,7 +190,14 @@ export default function Home() {
 				latestMatch.city ? ` à ${latestMatch.city}` : ""
 			}.`,
 		});
-	}, [submitCount, search, isLoading, hasError, resultsSearch, latestMatch]);
+	}, [
+		pendingRecenterTerm,
+		search,
+		isLoading,
+		hasError,
+		resultsSearch,
+		latestMatch,
+	]);
 
 	const showsEmailVerificationBanner = user != null && !user.emailVerified;
 	const showsTopBanner = showsEmailVerificationBanner || pushOptIn.visible;
