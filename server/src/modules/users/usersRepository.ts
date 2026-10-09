@@ -1,6 +1,22 @@
 import databaseClient from "../../../database/client";
-import type { Result, Rows } from "../../../database/client";
+import type { Executor, Result, Rows } from "../../../database/client";
+import { DELETED_USER_PSEUDO } from "../../services/deletedUser";
 import type { NewGoogleUser } from "../../types/oauth";
+
+// Tables rattachées à user par une clé étrangère. Suppression de compte (US18) :
+// la ligne user est anonymisée, pas effacée, donc ON DELETE CASCADE ne joue
+// jamais. Toute nouvelle table liée à user doit être rangée ici dans l'une des
+// deux listes ; un test compare ces listes au schéma pour éviter l'oubli.
+export const PERSONAL_DATA_TABLES = [
+	"oauth_account",
+	"address",
+	"user_location",
+	"user_badge",
+	"push_subscription",
+];
+
+// Conservées volontairement, rattachées au compte anonymisé.
+export const KEPT_TABLES = ["incident", "comment", "contribution"];
 
 class UsersRepository {
 	async read(userId: number) {
@@ -214,6 +230,84 @@ class UsersRepository {
 			[normalized, normalized],
 		);
 		return rows[0] ?? null;
+	}
+
+	async updatePseudo(
+		userId: number,
+		pseudo: string,
+		pseudoNormalized: string,
+	) {
+		await databaseClient.query(
+			"UPDATE user SET pseudo = ?, pseudo_normalized = ? WHERE id = ?",
+			[pseudo, pseudoNormalized, userId],
+		);
+	}
+
+	// Faux si le compte n'existe plus ou a été anonymisé (suppression, US18) :
+	// un token encore valide ne doit plus ouvrir de session.
+	async isActive(userId: number) {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT 1 FROM user WHERE id = ? AND anonymized_at IS NULL",
+			[userId],
+		);
+		return rows.length > 0;
+	}
+
+	// Suppression de compte (US18) : la ligne est conservée pour que les
+	// signalements et commentaires restent, mais plus rien n'identifie la
+	// personne. Le pseudo affiché devient « Anonyme » ; les
+	// colonnes uniques reçoivent des valeurs dérivées de l'id, ce qui libère le
+	// pseudo d'origine. Ces valeurs sont impossibles à saisir à l'inscription
+	// (un pseudo ne peut pas contenir de @, un e-mail doit en contenir un),
+	// donc personne ne peut les occuper à l'avance et bloquer la suppression.
+	async anonymize(userId: number, executor: Executor = databaseClient) {
+		await executor.query(
+			`UPDATE user
+			SET pseudo = ?,
+				pseudo_normalized = CONCAT('@supprime-', id),
+				email = CONCAT('supprime-', id),
+				email_normalized = CONCAT('supprime-', id),
+				password_hash = NULL,
+				email_verification_token_hash = NULL,
+				email_verification_expires_at = NULL,
+				anonymized_at = NOW()
+			WHERE id = ?`,
+			[DELETED_USER_PSEUDO, userId],
+		);
+	}
+
+	// Suppression de compte (US18) : ce qui appartient à la personne disparaît.
+	// Les signalements, les commentaires et les votes (contribution) ne sont
+	// volontairement pas touchés : ils restent rattachés au compte anonymisé,
+	// ce qui garde les compteurs et les échéances des incidents cohérents.
+	async deletePersonalData(
+		userId: number,
+		executor: Executor = databaseClient,
+	) {
+		for (const table of PERSONAL_DATA_TABLES) {
+			await executor.query(`DELETE FROM ${table} WHERE user_id = ?`, [
+				userId,
+			]);
+		}
+	}
+
+	// Suppression de compte (US18) : tout ou rien. Si l'une des deux écritures
+	// échoue, rien n'est supprimé et le compte reste intact.
+	async destroy(userId: number) {
+		const connection = await databaseClient.getConnection();
+		try {
+			await connection.beginTransaction();
+
+			await this.deletePersonalData(userId, connection);
+			await this.anonymize(userId, connection);
+
+			await connection.commit();
+		} catch (err) {
+			await connection.rollback();
+			throw err;
+		} finally {
+			connection.release();
+		}
 	}
 }
 

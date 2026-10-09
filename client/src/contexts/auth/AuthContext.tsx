@@ -1,5 +1,7 @@
+import { forgetPushPromptAnswer } from "@/components/PushOptInBanner/pushOptInStorage";
 import { setAuthToken, setOnUnauthorized } from "@/services/apiClient";
 import { login as loginRequest, me as meRequest } from "@/services/authActions";
+import pushService from "@/services/pushService";
 import type { AuthUser } from "@/types/auth";
 import {
 	createContext,
@@ -17,6 +19,7 @@ type AuthContextValue = {
 	login: (identifier: string, password: string) => Promise<void>;
 	logout: () => void;
 	loginWithToken: (token: string) => Promise<void>;
+	updateUser: (user: AuthUser) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -65,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		} catch (err) {
 			// Token refusé, serveur en erreur ou réseau coupé : on ne garde pas
 			// un token qu'on n'a pas pu valider.
-			logout();
+			clearSession();
 			throw err;
 		}
 	};
@@ -75,20 +78,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		await loginWithToken(token);
 	};
 
-	const logout = useCallback(() => {
+	// Ends the session without touching the push subscription: sessions last one
+	// hour, so a 401 is routine and the device must keep receiving alerts
+	const clearSession = useCallback(() => {
 		localStorage.removeItem("vigie_token");
 		setAuthToken(null);
 		setUser(null);
 	}, []);
 
+	// Voluntary sign-out: the device also leaves the account, in the background
+	// (the token is captured before the session is cleared)
+	const logout = useCallback(() => {
+		const token = localStorage.getItem("vigie_token");
+		const userId = user?.id;
+		clearSession();
+		void pushService.release(token);
+		if (userId != null) forgetPushPromptAnswer(userId);
+	}, [user, clearSession]);
+
 	useEffect(() => {
-		setOnUnauthorized(logout);
+		setOnUnauthorized(clearSession);
 		return () => setOnUnauthorized(null);
-	}, [logout]);
+	}, [clearSession]);
 
 	return (
 		<AuthContext.Provider
-			value={{ user, loading, login, loginWithToken, logout }}
+			value={{
+				user,
+				loading,
+				login,
+				loginWithToken,
+				logout,
+				// Ignoré si la session s'est terminée entre-temps (réponse tardive)
+				updateUser: (updated) =>
+					setUser((current) => current && updated),
+			}}
 		>
 			{children}
 		</AuthContext.Provider>

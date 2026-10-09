@@ -31,17 +31,20 @@ export async function login(identifier: string, password: string) {
 	return response.json() as Promise<LoginResponse>;
 }
 
-export async function me() {
-	const response = await apiFetch("/api/auth/me");
-	if (!response.ok) return null;
-	const user = (await response.json()) as AuthUser;
+// mysql2 renvoie les DECIMAL en chaînes de caractères
+export function normalizeUser(user: AuthUser): AuthUser {
 	return {
 		...user,
 		addresses: user.addresses.map((address) => ({
 			...address,
-			// mysql2 renvoie les DECIMAL en chaînes de caractères
 			latitude: Number(address.latitude),
 			longitude: Number(address.longitude),
 		})),
 	};
+}
+
+export async function me() {
+	const response = await apiFetch("/api/auth/me");
+	if (!response.ok) return null;
+	return normalizeUser((await response.json()) as AuthUser);
 }

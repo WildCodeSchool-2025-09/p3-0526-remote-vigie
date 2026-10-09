@@ -20,6 +20,20 @@ const MAX_LIST_LIMIT = 100;
 // Higher ceiling when a zone is given (map).
 const MAX_MAP_LIMIT = 300;
 
+// Adds the author's badges (visitors get none, nor does a deleted account,
+// whose author id is null)
+async function withAuthorBadges<T extends { author: { id: number | null } }>(
+	incident: T,
+	userId: number | null,
+) {
+	const badges =
+		userId != null && incident.author.id != null
+			? await userBadgeRepository.readRecentByUser(incident.author.id)
+			: [];
+
+	return { ...incident, author: { ...incident.author, badges } };
+}
+
 const browse: RequestHandler = async (req, res, next) => {
 	try {
 		const parsed = parseBounds(req.query);
@@ -66,12 +80,7 @@ const read: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		const badges =
-			userId != null
-				? await userBadgeRepository.readRecentByUser(incident.author.id)
-				: [];
-
-		res.json({ ...incident, author: { ...incident.author, badges } });
+		res.json(await withAuthorBadges(incident, userId));
 	} catch (err) {
 		next(err);
 	}
@@ -208,7 +217,7 @@ const edit: RequestHandler = async (req, res, next) => {
 			return;
 		}
 
-		res.json(incident);
+		res.json(await withAuthorBadges(incident, userId));
 	} catch (err) {
 		next(err);
 	}
@@ -405,7 +414,21 @@ const add: RequestHandler = async (req, res, next) => {
 			Number(req.auth.sub),
 		);
 
-		res.status(StatusCodes.CREATED).json(incident);
+		// The incident already exists and the alert below must go out: a badges
+		// failure must not turn this into a 500.
+		const created =
+			incident &&
+			(await withAuthorBadges(incident, Number(req.auth.sub)).catch(
+				(err) => {
+					console.error("Failed to read the author's badges", err);
+					return {
+						...incident,
+						author: { ...incident.author, badges: [] },
+					};
+				},
+			));
+
+		res.status(StatusCodes.CREATED).json(created);
 
 		if (incident) {
 			alertService

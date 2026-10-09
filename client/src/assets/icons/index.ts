@@ -25,6 +25,7 @@ import LandLocation from "@/assets/icons/interface/land-location.svg?react";
 import Lock from "@/assets/icons/interface/lock.svg?react";
 import Marker from "@/assets/icons/interface/marker.svg?react";
 import MenuDotsVertical from "@/assets/icons/interface/menu-dots-vertical.svg?react";
+import Meteor from "@/assets/icons/interface/meteor.svg?react";
 import PaperPlane from "@/assets/icons/interface/paper-plane.svg?react";
 import Pencil from "@/assets/icons/interface/pencil.svg?react";
 import Pharmacy from "@/assets/icons/interface/pharmacy.svg?react";
@@ -35,6 +36,7 @@ import QuoteRight from "@/assets/icons/interface/quote-right.svg?react";
 import RotateRight from "@/assets/icons/interface/rotate-right.svg?react";
 import Share from "@/assets/icons/interface/share.svg?react";
 import Shield from "@/assets/icons/interface/shield.svg?react";
+import Trash from "@/assets/icons/interface/trash.svg?react";
 import Veterinary from "@/assets/icons/interface/veterinary.svg?react";
 import Alert from "@/assets/icons/nav/alert.svg?react";
 import Danger from "@/assets/icons/nav/danger.svg?react";
@@ -97,6 +99,7 @@ export const icons = {
 	lock: Lock,
 	marker: Marker,
 	menuDotsVertical: MenuDotsVertical,
+	meteor: Meteor,
 	paperPlane: PaperPlane,
 	pencil: Pencil,
 	pharmacy: Pharmacy,
@@ -107,6 +110,7 @@ export const icons = {
 	rotateRight: RotateRight,
 	share: Share,
 	shield: Shield,
+	trash: Trash,
 	veterinary: Veterinary,
 } as const;
 

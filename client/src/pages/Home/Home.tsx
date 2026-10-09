@@ -4,9 +4,12 @@ import { Link } from "react-router";
 import bgHome from "@/assets/images/background-home.jpg";
 import VigieLogo from "@/assets/images/vigie-ligne.svg?react";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner/EmailVerificationBanner";
+import FlashToast from "@/components/FlashToast/FlashToast";
 import Icon from "@/components/Icon/Icon";
 import IncidentList from "@/components/IncidentList/IncidentList";
 import IncidentMap from "@/components/IncidentMap/IncidentMap";
+import PushOptInBanner from "@/components/PushOptInBanner/PushOptInBanner";
+import { usePushOptIn } from "@/components/PushOptInBanner/usePushOptIn";
 import WeatherBanner from "@/components/WeatherBanner/WeatherBanner";
 import WelcomeToast from "@/components/WelcomeToast/WelcomeToast";
 import { useAuth } from "@/contexts/auth/AuthContext";
@@ -19,6 +22,7 @@ const INCIDENTS_LIST_LIMIT = 15;
 export default function Home() {
 	const { user } = useAuth();
 	const weather = useWeatherVigilance();
+	const pushOptIn = usePushOptIn();
 	const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
@@ -68,11 +72,16 @@ export default function Home() {
 
 	const showsWeatherBanner = weather.isLoading || weather.vigilance != null;
 	const showsEmailVerificationBanner = user != null && !user.emailVerified;
-	const showsTopBanners = showsWeatherBanner || showsEmailVerificationBanner;
+	const showsTopBanners =
+		showsWeatherBanner || showsEmailVerificationBanner || pushOptIn.visible;
 
 	return (
 		<div className="flex h-full flex-col bg-base-100">
 			<WelcomeToast />
+			<FlashToast
+				stateKey="accountDeleted"
+				message="Votre compte a bien été supprimé."
+			/>
 			<header className="relative isolate flex h-36 shrink-0 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
 				<img
 					src={bgHome}
@@ -99,6 +108,15 @@ export default function Home() {
 					)}
 					{showsEmailVerificationBanner && (
 						<EmailVerificationBanner email={user.email} />
+					)}
+					{pushOptIn.mode != null && (
+						<PushOptInBanner
+							mode={pushOptIn.mode}
+							accepting={pushOptIn.accepting}
+							error={pushOptIn.error}
+							onAccept={pushOptIn.accept}
+							onDismiss={pushOptIn.dismiss}
+						/>
 					)}
 				</div>
 			)}
