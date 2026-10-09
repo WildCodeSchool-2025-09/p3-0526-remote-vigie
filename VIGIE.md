@@ -425,6 +425,7 @@ erDiagram
         TIMESTAMP cgu_accepted_at "NOT NULL"
         TIMESTAMP created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
         TIMESTAMP updated_at "NULL, ON UPDATE CURRENT_TIMESTAMP"
+        TIMESTAMP anonymized_at "NULL (renseigné à la suppression du compte, US18)"
     }
     OAUTH_ACCOUNT {
         INT_UNSIGNED id PK "NOT NULL, AUTO_INCREMENT"
@@ -558,7 +559,9 @@ erDiagram
 
 > `schema.sql` étend ces règles aux autres FK : `incident.user_id`/`comment.*` en
 > `CASCADE`, `incident.danger_level_id` et les pivots `incident_incident_type` en
-> `RESTRICT`. Écart mineur relevé : le cadre MPD note `latitude` en `DECIMAL(10,6)`
+> `RESTRICT`. Ces cascades restent définies, mais **la suppression d'un compte ne les
+> déclenche pas** : la ligne `user` est anonymisée, pas effacée (voir §5, « Suppression du
+> compte »). Écart mineur relevé : le cadre MPD note `latitude` en `DECIMAL(10,6)`
 > partout, `schema.sql` utilise `DECIMAL(9,6)` pour la latitude.
 
 ### 4.4 Périmètre du modèle & revue
@@ -689,6 +692,32 @@ saisie d'URL côté US07.
   token à chaque requête protégée, il n'est plus envoyé automatiquement par le navigateur.)*
 - Comparaisons pseudo / e-mail sur formes **normalisées** ; messages d'erreur neutres
   (anti-énumération de comptes).
+
+### Suppression du compte (US18)
+
+- Accessible depuis le profil, dans une zone distincte. Une fenêtre rappelle ce qui est supprimé et
+  ce qui est conservé, et indique que l'action est **irréversible**.
+- **Confirmation obligatoire** : le mot de passe pour un compte qui en a un ; le pseudo, saisi à
+  l'identique, pour un compte créé avec Google. Le serveur choisit selon le **compte**
+  (`password_hash`), jamais selon ce qu'envoie le client. Confirmation refusée : `403`
+  (`invalid_confirmation`), rien n'est modifié.
+- **Supprimé définitivement** : adresses, position, liaison Google, badges.
+- **Conservé de façon anonyme** : signalements, commentaires et votes (`contribution`). Écart assumé
+  avec la carte Trello, qui supprimait les votes : les garder maintient les compteurs et les
+  échéances des incidents cohérents. La ligne `user` reste, anonymisée
+  (`anonymized_at` renseigné) : pseudo affiché « Anonyme », e-mail et pseudo normalisé
+  remplacés par des valeurs dérivées de l'id, mot de passe et jetons de vérification effacés. Le
+  pseudo d'origine redevient disponible.
+- **Tout ou rien** : suppression des données personnelles et anonymisation dans une seule
+  transaction.
+- **Session** : `verifyToken` refuse (`401`) le token d'un compte supprimé, donc la session s'arrête
+  immédiatement, sans attendre l'expiration du JWT (une requête par appel protégé).
+- **Pseudo réservé** : « Anonyme » (sans tenir compte de la casse ni des accents) ne peut
+  être choisi ni à l'inscription ni à la modification du pseudo.
+- **Identité masquée** : pour un auteur supprimé, l'API renvoie `author.id: null` (signalements et
+  commentaires), pour qu'on ne puisse pas relier ses publications entre elles. Les valeurs
+  d'anonymisation (`@supprime-<id>`, `supprime-<id>`) sont impossibles à saisir à l'inscription, donc
+  personne ne peut bloquer une suppression en les occupant à l'avance.
 
 ### Carte et lieux utiles (US04)
 
@@ -873,7 +902,178 @@ POST /api/incident-types
 POST /api/incidents/emergency      (US17 — SOS)
 ```
 
-## 10. Ressources
+## 10. Animations des icônes de type (US01)
+
+Dans le formulaire de signalement, l'icône d'un type **sélectionné** s'anime en boucle
+(la flamme vacille, la neige tombe…). Tout est en CSS : aucune bibliothèque, aucun
+JavaScript d'animation.
+
+### 10.1 Où se trouve quoi
+
+| Fichier | Rôle |
+|---|---|
+| `client/src/styles/theme.css` | les animations : un réglage `--animate-…` + son scénario `@keyframes` |
+| `client/src/components/Form/IncidentTypePicker/IncidentTypePicker.tsx` | la table `typeAnimations` : quelle classe pour quel `type.icon` |
+| `client/src/assets/icons/types/*.svg` | certains SVG ont reçu des groupes `<g class="…">` pour animer une partie seulement (§10.5) |
+
+La classe n'est ajoutée que si `isSelected` est vrai, avec `overflow-visible` pour que
+l'icône puisse sortir de son cadre en bougeant.
+
+### 10.2 Comment s'écrit une animation
+
+Une animation, ce sont **deux morceaux** :
+
+```css
+--animate-flicker: flicker 1.2s ease-in-out infinite;   /* le réglage  */
+@keyframes flicker {                                      /* le scénario */
+	0%   { scale: 1 1;       rotate: 0deg; }
+	25%  { scale: 0.95 1.08; rotate: -3deg; }
+	/* … */
+	100% { scale: 1 1;       rotate: 0deg; }
+}
+```
+
+- **Le scénario (`@keyframes`)** décrit l'élément à certains moments, en pourcentage de la
+  durée. Le navigateur calcule les étapes intermédiaires.
+- **Le réglage** dit quel scénario jouer et comment : `nom durée rythme [délai] [infinite] [both]`.
+  Quand il y a deux temps, **le premier est la durée, le second le délai**
+  (`pop 1s ease 2s both` = dure 1 s, démarre après 2 s).
+- **Les noms sont inventés** : `flicker` n'existe nulle part ailleurs. Le nom du `@keyframes`
+  et celui écrit dans le réglage doivent être identiques. Le nom après `--animate-` devient
+  la classe Tailwind (`--animate-flicker` → `animate-flicker`) ; on garde le même nom
+  partout par convention.
+- **Un scénario peut servir plusieurs fois** avec des réglages différents :
+  `--animate-flicker-inner: flicker 0.8s ease-in-out infinite reverse;` (plus rapide, à l'envers),
+  `--animate-impact: shiver 1.5s linear 1.7s;` (le tremblement du verglas, une fois, avec délai).
+- **Rythme** : `linear` (vitesse constante), `ease-in` (accélère), `ease-out` (ralentit),
+  `ease-in-out` (doux aux deux bouts).
+- **`theme.css` n'a pas besoin d'être importé** dans le composant : il est chargé une fois
+  pour toute l'app (`App.tsx` → `index.css` → `theme.css`), et le CSS est global.
+- Propriétés utilisées : `rotate`, `scale: X Y`, `translate: X Y`, `opacity`. Pour l'inclinaison,
+  il n'existe pas de propriété séparée : `transform: skewX(…)` (tornade).
+
+### 10.3 Pourquoi une table et pas `animate-${type.icon}`
+
+Tailwind ne génère que les classes **écrites en entier** dans le code : il lit le texte des
+fichiers, il n'exécute pas le JavaScript. Une classe construite (`` `animate-${x}` ``) n'est
+jamais générée. D'où la table `typeAnimations`, où chaque classe est écrite en toutes lettres.
+
+### 10.4 Animer l'intérieur d'un SVG
+
+`<Icon>` ne reçoit qu'un `className`, celui du `<svg>`. Pour atteindre une partie, on donne une
+`class` à un groupe dans le fichier SVG (`vite-plugin-svgr` la conserve), puis on la vise avec
+une **variante arbitraire** :
+
+```
+motion-safe:[&_.flame-inner]:animate-flicker-inner
+```
+
+`&` = l'élément lui-même (le `<svg>`), `_` = un espace (« à l'intérieur de »), `.flame-inner` =
+la classe visée. Tailwind génère `.cette-classe .flame-inner { animation: … }`.
+
+**Les pièges rencontrés :**
+
+- **Le point de pivot dans un SVG.** Par défaut, une partie de SVG tourne ou grandit autour du
+  coin haut-gauche **du dessin entier**. Il faut `[transform-box:fill-box]` (référence = la
+  boîte de la forme elle-même) + un `origin-…` (`origin-bottom`, `origin-center`…). Inutile
+  quand c'est le `<svg>` entier qui bouge (verglas, éboulement) : lui a une vraie boîte.
+- **Ce qui dépasse est coupé.** Un SVG masque ce qui sort de son `viewBox` : une flamme étirée
+  perdait sa pointe. D'où `overflow-visible` sur les icônes sélectionnées. Exception :
+  l'inondation, qui doit au contraire couper (`overflow-hidden!`, le `!` rend la classe prioritaire).
+- **`translate` à l'intérieur d'un SVG se mesure en unités du dessin**, pas en pixels d'écran :
+  un dessin de 512 unités affiché sur 64 px → 8 unités par pixel.
+- **`motion-safe:`** : l'animation ne se joue que si l'utilisateur n'a pas demandé de réduire
+  les animations. Sous Windows, si *Paramètres → Accessibilité → Effets visuels → Effets
+  d'animation* est désactivé, **aucune animation ne s'affiche** : penser à le vérifier avant de
+  chercher un bug. `motion-reduce:` fait l'inverse (ex. : cacher le météore, §10.7).
+- **Délai ou durée par partie** (`[&_.tier-2]:[animation-delay:0.15s]`) : la ligne `animation`
+  remet délai et durée à zéro. Ça fonctionne parce que Tailwind écrit ces règles **après**
+  celle de l'animation (vérifié dans le CSS généré). Si un jour toutes les parties bougent en
+  même temps, c'est cet ordre qui a changé.
+- **Formater un SVG** : VS Code ne le fait pas seul. Basculer le langage du fichier en HTML puis
+  Shift+Alt+F, ou installer l'extension XML de Red Hat.
+
+### 10.5 Découper un SVG
+
+Un `<path>` peut contenir **plusieurs formes** : chacune commence par un `M` (« move to »).
+Les 9 gouttes de la tempête, par exemple, étaient une seule forme. Pour les animer séparément :
+
+
+- **Couper au niveau des `M` majuscules** : un `M` majuscule est une coordonnée absolue, la
+   forme est autonome ; on la copie dans son propre `<path>` (même `fill`). Un `m` minuscule
+   au milieu du tracé est relatif à la forme précédente : il faut d'abord convertir en absolu.
+- **Regrouper** les morceaux d'une même partie (forme + son ombre) dans un `<g class="…">`.
+- **Réordonner change la superposition** : dans un SVG, ce qui est écrit en dernier est
+  dessiné par-dessus. Réordonner n'est sûr que si les formes ne se chevauchent pas.
+- **Vérifier visuellement** : un rendu de l'image au repos, puis avec une partie déplacée
+  (Chrome en ligne de commande : `chrome --headless --screenshot=x.png fichier.svg`).
+
+Modifications faites, icône par icône :
+
+| Icône | Modification du SVG | Animation |
+|---|---|---|
+| `fire` | 3 paths rouges → `flame-outer`, 2 jaunes → `flame-inner` | `flicker` et `flicker-inner` (même scénario, plus rapide et inversé) |
+| `glaze` | aucune | `shiver` : frisson puis pause |
+| `rockfall` | aucune | `topple` : penche, oscille, se stabilise (pivot en bas) |
+| `wild` | les 4 derniers paths (nez + narines) → `snout` | `headshake` + `sniff`, même durée, le groin renifle pendant la pause de la tête |
+| `tree` | paths réordonnés (tronc d'abord), chaque étage (forme + moitié foncée) → `tier tier-1..3` | `sway`, décalé par étage (`animation-delay`) |
+| `insect` | les 2 paths des ailes → `wings` | `flutter` (ailes rétrécies en largeur depuis le centre : pas besoin de séparer gauche et droite) + `float` |
+| `animal` | `class="eyes"` directement sur le path des yeux ; **la queue faisait partie du contour du corps** : contours recalculés en coordonnées absolues, corps et ombre coupés à la base de la queue, nouveau groupe `tail` dessiné derrière le corps et prolongé un peu à l'intérieur pour cacher la couture | `tail-wag` + double `blink` |
+| `storm` | `bolt` sur l'éclair ; les 9 gouttes (une seule forme) → 3 rangées `drops drops-1..3` | `flash` (éclair caché entre deux éclats) + `rain` en cascade |
+| `hail` | 5 grêlons répartis dans 2 paths → `stone stone-1..5` (celui du centre = un morceau clair + un foncé) | `fall`, une **durée** différente par grêlon pour ne jamais se resynchroniser |
+| `snow` | les 2 gros flocons (une forme) et les 4 boules (cercle + ombre séparée) → `flake flake-1..6` | `snowfall` avec rotation de 60° : un flocon à 6 branches est identique à lui-même, la boucle est invisible |
+| `flood` | chaque couche dupliquée à ±64 unités (« tapis roulant ») ; le fond foncé reçoit la classe de la couche claire car son bord haut a la même forme ; `bubble bubble-1..3` | `wave-left` / `wave-right` d'une longueur de vague (16 unités), en sens opposés + `bubble` |
+| `tornado` | entonnoir, rayures et ombres → `funnel` ; les 4 traits → `debris debris-1..4` | `twist` (`skewX`, pointe fixe au sol) + `debris` décalés |
+
+**Couleurs corrigées au passage** : les gouttes de `storm` et les rayures de `tornado` étaient
+noires, alors que le SVG prévoyait du bleu / du marron sur le groupe : un `fill="#000000"` sur
+chaque path écrasait la couleur du groupe. Remplacé par la couleur prévue.
+
+### 10.6 Astuces de scénario
+
+- **Boucle sans saut** : 0 % et 100 % identiques.
+- **Pause** : tout le mouvement au début, puis une étape immobile regroupée
+  (`30%, 100% { translate: 0; }`). Inversé pour le clignement (yeux ouverts jusqu'à 86 %).
+- **Maintien** : deux étapes de même valeur (`10%, 35% { rotate: -8deg; }`).
+- **Synchroniser deux animations** : même durée, mouvements placés à des moments différents
+  (le sanglier secoue la tête de 0 à 40 %, renifle de 55 à 75 %).
+- **Balancier fluide** : écrire `0% = -6°, 50% = +6°, 100% = -6°`, pas `0 → -6 → 0 → +6 → 0` ;
+  avec `ease-in-out`, la seconde forme freine au passage par le centre et paraît saccadée.
+  Pour un balancement continu, `linear` est souvent plus fluide.
+- **Boucle invisible par symétrie** : déplacer d'exactement une période du motif (une vague,
+  60° pour un flocon).
+
+### 10.7 Bonus : la surprise « Apocalypse »
+
+Quand **tous** les types sont sélectionnés, la grille est remplacée par
+`components/Form/ApocalypseSurprise` : un météore tombe en diagonale et explose, le bloc tremble,
+puis le titre et enfin le badge Apocalypse (`/badges-png/07-apocalypse.png`) apparaissent
+(chute 2 s, tremblement à 1,7 s, titre à 2 s, badge à 3 s). Un clic
+ramène la grille **sans rien décocher**.
+
+- **État `isApocalypseDismissed`** dans `IncidentTypePicker` : la condition « tous cochés » reste
+  vraie après le clic, il faut donc retenir que la surprise a été écartée. Remis à `false` dans
+  `toggleType`, pour qu'elle se rejoue si l'on décoche puis recoche.
+- **Icône `interface/meteor.svg`** dessinée pour l'occasion, sur le modèle du badge (le badge est
+  un PNG : impossible d'en extraire le météore).
+- **`both` (`animation-fill-mode`)** : pendant le délai, l'élément applique déjà l'étape 0 %
+  (le badge reste caché à `scale: 0`) ; après la fin, il garde l'étape 100 % (le météore reste
+  effacé). Sans `both`, le badge serait visible avant son « pop ».
+- **Superposition** : parent `relative` de taille fixe, météore et badge en `absolute inset-0`.
+- **Accessibilité** : c'est un `<button>` (pas de `<h2>` à l'intérieur, interdit en HTML, d'où
+  un `<span>` stylé) ; images en `aria-hidden` ; `motion-reduce:hidden` sur le météore pour
+  qu'il ne reste pas affiché par-dessus le badge quand les animations sont désactivées.
+
+### 10.8 Lexique des noms d'animation
+
+`flicker` vaciller · `shiver` frissonner · `topple` basculer · `headshake` secouer la tête ·
+`sniff` renifler · `sway` se balancer · `flutter` battre des ailes · `float` flotter ·
+`blink` cligner · `tail-wag` remuer la queue · `flash` éclair · `rain` pluie · `fall` chute ·
+`snowfall` chute de neige · `wave-left` / `wave-right` vague · `bubble` bulle · `twist` se tordre ·
+`debris` débris · `meteor-fall` chute du météore · `impact` / `badge-pop` / `title-pop` (réglages
+de `shiver` et `pop`).
+
+## 11. Ressources
 
 | Ressource | Lien |
 |-----------|------|

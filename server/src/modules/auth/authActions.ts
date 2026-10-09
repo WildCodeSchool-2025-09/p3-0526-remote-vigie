@@ -2,6 +2,7 @@ import argon2, { type HashOptions } from "argon2";
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 import { signAuthToken } from "../../services/jwt";
+import { toUserProfile } from "../../services/toUserProfile";
 import addressRepository from "../address/addressRepository";
 import badgeService from "../badge/badgeService";
 import usersRepository from "../users/usersRepository";
@@ -95,13 +96,7 @@ const me: RequestHandler = async (req, res, next) => {
 
 		const addresses = await addressRepository.findByUserId(userId);
 
-		res.json({
-			id: user.id,
-			pseudo: user.pseudo,
-			email: user.email,
-			emailVerified: user.email_verified_at != null,
-			addresses,
-		});
+		res.json(toUserProfile(user, addresses));
 	} catch (err) {
 		next(err);
 	}

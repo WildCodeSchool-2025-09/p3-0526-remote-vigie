@@ -1,7 +1,8 @@
 import type { AuthorBadge } from "@/types/badge";
 
 export type CommentAuthor = {
-	id: number;
+	// null : compte supprimé
+	id: number | null;
 	pseudo: string;
 	badges: AuthorBadge[];
 };

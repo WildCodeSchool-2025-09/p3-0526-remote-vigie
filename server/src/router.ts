@@ -13,6 +13,7 @@ import incidentActions from "./modules/incident/incidentActions";
 import incidentTypeActions from "./modules/incidentType/incidentTypeActions";
 import notificationsActions from "./modules/notifications/notificationsActions";
 import photoActions from "./modules/photo/photoActions";
+import pushSubscriptionActions from "./modules/pushSubscription/pushSubscriptionActions";
 import usefulPlaceActions from "./modules/usefulPlace/usefulPlaceActions";
 import usersActions from "./modules/users/usersActions";
 import attachUserIfPresent from "./services/attachUserIfPresent";
@@ -106,6 +107,21 @@ router.put(
 	notificationsActions.markSeen,
 );
 
+router.get(
+	"/api/push-subscriptions/public-key",
+	pushSubscriptionActions.readPublicKey,
+);
+router.post(
+	"/api/push-subscriptions",
+	verifyToken,
+	pushSubscriptionActions.add,
+);
+router.delete(
+	"/api/push-subscriptions",
+	verifyToken,
+	pushSubscriptionActions.destroy,
+);
+
 router.get("/api/addresses/reverse", verifyToken, addressActions.reverse);
 router.get(
 	"/api/addresses/search",
@@ -126,5 +142,7 @@ router.post(
 	checkResendVerificationRateLimit,
 	usersActions.resendVerification,
 );
+router.patch("/api/users/me/pseudo", verifyToken, usersActions.updatePseudo);
+router.delete("/api/users/me", verifyToken, usersActions.destroy);
 
 export default router;

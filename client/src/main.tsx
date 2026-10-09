@@ -172,3 +172,12 @@ createRoot(rootElement).render(
 		<RouterProvider router={router} />
 	</AuthProvider>,
 );
+
+// Service worker: production only, a stale one could serve old files in dev
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+	window.addEventListener("load", () => {
+		navigator.serviceWorker.register("/sw.js").catch((err) => {
+			console.error("Enregistrement du service worker impossible", err);
+		});
+	});
+}

@@ -8,13 +8,15 @@ type CommentRow = {
 	id: number;
 	content: string;
 	createdAt: Date;
-	author: { id: number; pseudo: string };
+	// id null : compte supprimé, on n'expose pas son identifiant (US18)
+	author: { id: number | null; pseudo: string };
 	quotedComment: { author: { pseudo: string }; content: string } | null;
 };
 
 const SELECT_COMMENT = `
 	SELECT
 		c.id, c.user_id, c.content, c.created_at, u.pseudo AS author_pseudo,
+		u.anonymized_at AS author_anonymized_at,
 		qc.content AS quoted_content, qu.pseudo AS quoted_author_pseudo
 	FROM comment AS c
 	INNER JOIN user AS u ON u.id = c.user_id
@@ -27,7 +29,10 @@ function mapRow(row: Rows[number]): CommentRow {
 		id: row.id,
 		content: row.content,
 		createdAt: row.created_at,
-		author: { id: row.user_id, pseudo: row.author_pseudo },
+		author: {
+			id: row.author_anonymized_at == null ? row.user_id : null,
+			pseudo: row.author_pseudo,
+		},
 		quotedComment:
 			row.quoted_content == null
 				? null
@@ -81,6 +86,16 @@ class CommentRepository {
 
 		const row = rows[0];
 		return row == null ? null : row.incident_id;
+	}
+
+	async findAuthorId(id: number): Promise<number | null> {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT user_id FROM comment WHERE id = ?",
+			[id],
+		);
+
+		const row = rows[0];
+		return row == null ? null : row.user_id;
 	}
 }
 

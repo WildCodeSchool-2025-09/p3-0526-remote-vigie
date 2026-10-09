@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import bgHome from "@/assets/images/background-home.jpg";
 import VigieLogo from "@/assets/images/vigie-ligne.svg?react";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner/EmailVerificationBanner";
+import FlashToast from "@/components/FlashToast/FlashToast";
 import Icon from "@/components/Icon/Icon";
 import { IncidentSearchField } from "@/components/IncidentList/IncidentFilters";
 import IncidentList from "@/components/IncidentList/IncidentList";
@@ -11,6 +12,8 @@ import IncidentOptionsMenu from "@/components/IncidentList/IncidentOptionsMenu";
 import IncidentMap, {
 	type MapPanRequest,
 } from "@/components/IncidentMap/IncidentMap";
+import PushOptInBanner from "@/components/PushOptInBanner/PushOptInBanner";
+import { usePushOptIn } from "@/components/PushOptInBanner/usePushOptIn";
 import WelcomeToast from "@/components/WelcomeToast/WelcomeToast";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { getAllIncidents } from "@/services/incidentService";
@@ -43,6 +46,7 @@ export default function Home() {
 			),
 		[user, deviceLocation],
 	);
+	const pushOptIn = usePushOptIn();
 	const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
 	const [isTruncated, setIsTruncated] = useState(false);
 	// Recherche à laquelle correspondent les incidents affichés.
@@ -193,10 +197,15 @@ export default function Home() {
 	}, [submitCount, search, isLoading, hasError, resultsSearch, latestMatch]);
 
 	const showsEmailVerificationBanner = user != null && !user.emailVerified;
+	const showsTopBanner = showsEmailVerificationBanner || pushOptIn.visible;
 
 	return (
 		<div className="flex h-full flex-col bg-base-100">
 			<WelcomeToast />
+			<FlashToast
+				stateKey="accountDeleted"
+				message="Votre compte a bien été supprimé."
+			/>
 			<header className="relative isolate flex h-36 shrink-0 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
 				<img
 					src={bgHome}
@@ -219,8 +228,22 @@ export default function Home() {
 				</div>
 			)}
 
+			{pushOptIn.mode != null && (
+				<div
+					className={`relative mb-4 px-4 ${showsEmailVerificationBanner ? "" : "-mt-8"}`}
+				>
+					<PushOptInBanner
+						mode={pushOptIn.mode}
+						accepting={pushOptIn.accepting}
+						error={pushOptIn.error}
+						onAccept={pushOptIn.accept}
+						onDismiss={pushOptIn.dismiss}
+					/>
+				</div>
+			)}
+
 			<div
-				className={`relative shrink-0 px-4 ${showsEmailVerificationBanner ? "" : "-mt-8"}`}
+				className={`relative shrink-0 px-4 ${showsTopBanner ? "" : "-mt-8"}`}
 			>
 				<a
 					href="#incident-list"

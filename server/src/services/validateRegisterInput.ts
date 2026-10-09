@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
+import { isDeletedUserPseudo } from "./deletedUser";
 
 export function isValidAddress(address: unknown): boolean {
 	if (typeof address !== "object" || address === null) {
@@ -68,6 +69,17 @@ export function isValidAddress(address: unknown): boolean {
 	return true;
 }
 
+export function isValidPseudo(pseudo: unknown): pseudo is string {
+	return (
+		typeof pseudo === "string" &&
+		pseudo.trim() !== "" &&
+		!pseudo.includes("@") &&
+		pseudo.length <= 30 &&
+		// Réservé : ce nom s'affiche pour les comptes supprimés
+		!isDeletedUserPseudo(pseudo)
+	);
+}
+
 const validateRegisterInput: RequestHandler = (req, res, next) => {
 	const body = req.body as {
 		pseudo: unknown;
@@ -79,12 +91,7 @@ const validateRegisterInput: RequestHandler = (req, res, next) => {
 
 	const errors: Record<string, string> = {};
 
-	if (
-		typeof body.pseudo !== "string" ||
-		body.pseudo.trim() === "" ||
-		body.pseudo.includes("@") ||
-		body.pseudo.length > 30
-	) {
+	if (!isValidPseudo(body.pseudo)) {
 		errors.pseudo = "Veuillez renseigner un pseudo valide.";
 	}
 

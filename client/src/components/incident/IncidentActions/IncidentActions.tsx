@@ -12,7 +12,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 
 type Props = Pick<Incident, "types" | "city" | "latitude" | "longitude"> & {
 	incidentId: number;
-	authorId: number;
+	authorId: number | null;
 	status: IncidentStatus;
 	expiresAt: string;
 	myContribution: "confirm" | "deny" | null;
