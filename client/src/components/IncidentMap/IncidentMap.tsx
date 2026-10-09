@@ -273,6 +273,7 @@ function MapStartViewWatcher({
 	onApplied: (message: string) => void;
 }) {
 	const map = useMap();
+	const hasAppliedRef = useRef(false);
 
 	useEffect(() => {
 		const container = map.getContainer();
@@ -291,7 +292,9 @@ function MapStartViewWatcher({
 	}, [map, hasUserTakenOverRef]);
 
 	useEffect(() => {
-		if (!isFinal || hasUserTakenOverRef.current) return;
+		if (!isFinal || hasAppliedRef.current || hasUserTakenOverRef.current)
+			return;
+		hasAppliedRef.current = true;
 
 		map.setView(startView.center, startView.zoom);
 		onApplied(START_VIEW_MESSAGES[startView.source]);
