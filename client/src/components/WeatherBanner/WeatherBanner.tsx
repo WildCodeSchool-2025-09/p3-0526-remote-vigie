@@ -1,6 +1,10 @@
 import Icon from "@/components/Icon/Icon";
 import type { VigilanceLevel, WeatherVigilance } from "@/types/vigilance";
-import { formatTime } from "@/utils/formatDate";
+import {
+	formatEndTime,
+	formatParisTime,
+	formatPhenomena,
+} from "@/utils/vigilanceText";
 
 // Rayures : couleurs vives de la maquette (décoratif). Texte : jetons AA du thème.
 const LEVEL_STYLES: Record<
@@ -8,6 +12,7 @@ const LEVEL_STYLES: Record<
 	{
 		label: string;
 		advice: string;
+		shortAdvice: string;
 		stripe: string;
 		text: string;
 		icon: string;
@@ -16,6 +21,7 @@ const LEVEL_STYLES: Record<
 	yellow: {
 		label: "Vigilance jaune",
 		advice: "Soyez attentif : des phénomènes habituels dans la région mais occasionnellement dangereux sont prévus.",
+		shortAdvice: "Soyez attentif.",
 		stripe: "#e0a81f",
 		text: "text-(--level-3)",
 		icon: "fill-(--level-3)",
@@ -23,6 +29,7 @@ const LEVEL_STYLES: Record<
 	orange: {
 		label: "Vigilance orange",
 		advice: "Soyez très vigilant : des phénomènes dangereux sont prévus.",
+		shortAdvice: "Soyez très vigilant.",
 		stripe: "#e8600f",
 		text: "text-(--level-4)",
 		icon: "fill-(--level-4)",
@@ -30,6 +37,7 @@ const LEVEL_STYLES: Record<
 	red: {
 		label: "Vigilance rouge",
 		advice: "Vigilance absolue : des phénomènes dangereux d'intensité exceptionnelle sont prévus.",
+		shortAdvice: "Vigilance absolue.",
 		stripe: "#c1392b",
 		text: "text-(--level-5)",
 		icon: "fill-(--level-5)",
@@ -63,10 +71,22 @@ export default function WeatherBanner({
 	if (vigilance == null) return null;
 
 	const style = LEVEL_STYLES[vigilance.level];
+	const place = vigilance.departmentName
+		? `${vigilance.departmentName} (${vigilance.department})`
+		: `Département ${vigilance.department}`;
+
+	// "Vent violent et orages jusqu'à demain 6 h." ; null s'il n'y a aucun phénomène.
+	const phenomenaText = formatPhenomena(vigilance.phenomena);
+	const endText = vigilance.endTime ? formatEndTime(vigilance.endTime) : null;
+	const forecast = phenomenaText
+		? `${[phenomenaText, endText].filter(Boolean).join(" ")}.`
+		: null;
+
 	const source = [
 		"Météo-France",
-		vigilance.updatedAt && `relevé à ${formatTime(vigilance.updatedAt)}`,
-		`d'après votre adresse (${vigilance.city})`,
+		vigilance.updatedAt &&
+			`relevé à ${formatParisTime(vigilance.updatedAt)}`,
+		`d'après votre adresse (${vigilance.city}, ${vigilance.department})`,
 	]
 		.filter(Boolean)
 		.join(" · ");
@@ -93,11 +113,13 @@ export default function WeatherBanner({
 						>
 							{style.label}
 						</strong>{" "}
-						<span className="font-bold">
-							Département {vigilance.department}
-						</span>
+						<span className="font-bold">{place}</span>
 					</p>
-					<p className="mt-1">{style.advice}</p>
+					<p className="mt-1">
+						{forecast
+							? `${forecast} ${style.shortAdvice}`
+							: style.advice}
+					</p>
 					<p className="mt-1 text-xs text-black/60">{source}</p>
 				</div>
 			</div>
