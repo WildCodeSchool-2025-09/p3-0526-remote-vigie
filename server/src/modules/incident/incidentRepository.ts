@@ -109,6 +109,8 @@ class IncidentRepository {
 		const whereParams: unknown[] = [];
 
 		if (!filters.includeResolved) {
+			// Masque les incidents échus que la tâche de clôture n'a pas encore traités ;
+			// avec includeResolved, ils peuvent apparaître en cours jusqu'à son prochain passage.
 			conditions.push(
 				"i.status = 'in_progress' AND i.expires_at > NOW()",
 			);
