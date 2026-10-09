@@ -114,7 +114,7 @@ export default function IncidentOptionsMenu({
 				aria-expanded={isOpen}
 				aria-controls={isOpen ? panelId : undefined}
 				onClick={() => setIsOpen((open) => !open)}
-				className="btn relative h-11 min-h-11 w-9 min-w-0 rounded-2xl border-0 bg-white px-0 text-primary shadow"
+				className="btn relative h-11 min-h-11 w-9 min-w-0 rounded-2xl border-0 bg-(--white) px-0 text-primary shadow"
 			>
 				<span className="sr-only">
 					Options d'affichage
@@ -128,7 +128,7 @@ export default function IncidentOptionsMenu({
 				{includeResolved && (
 					<span
 						aria-hidden="true"
-						className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-primary ring-2 ring-white"
+						className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-primary ring-2 ring-(--white)"
 					/>
 				)}
 			</button>
@@ -138,7 +138,7 @@ export default function IncidentOptionsMenu({
 					id={panelId}
 					// Focalisable : un clic dans le panneau y garde le focus.
 					tabIndex={-1}
-					className={`absolute top-full right-0 mt-2 w-56 rounded-2xl bg-white p-2 shadow-lg transition-opacity duration-150 focus:outline-none motion-reduce:transition-none ${
+					className={`absolute top-full right-0 mt-2 w-56 rounded-2xl bg-(--white) p-2 shadow-lg transition-opacity duration-150 focus:outline-none motion-reduce:transition-none ${
 						isFading ? "opacity-0" : "opacity-100"
 					}`}
 				>

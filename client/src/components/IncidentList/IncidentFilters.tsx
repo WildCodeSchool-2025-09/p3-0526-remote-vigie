@@ -41,7 +41,7 @@ export function IncidentSearchField({
 					maxLength={SEARCH_MAX_LENGTH}
 					autoComplete="off"
 					placeholder="Titre, description, commune…"
-					className="h-11 w-full rounded-2xl border-0 bg-white pr-3 pl-10 text-sm text-black text-ellipsis shadow placeholder:text-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+					className="h-11 w-full rounded-2xl border-0 bg-(--white) pr-3 pl-10 text-sm text-black text-ellipsis shadow placeholder:text-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 				/>
 			</form>
 		</search>

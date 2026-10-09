@@ -87,8 +87,8 @@ function leafletBoundsToBounds(bounds: L.LatLngBounds): Bounds {
 	};
 }
 
-// Gris neutre des incidents résolus : 5,3:1 sur blanc, sans rapport avec la couleur d'un type.
-const RESOLVED_MARKER_COLOR = "#6b6b6b";
+// Gris neutre des incidents résolus (token de theme.css), sans rapport avec la couleur d'un type.
+const RESOLVED_MARKER_COLOR = "var(--marker-resolved)";
 
 // Icône du marqueur : pastille blanche cerclée de la couleur du type. Quand
 // `isSelected`, elle grossit et un anneau pulse autour. Un incident résolu est
@@ -116,7 +116,9 @@ function createIncidentDivIcon(
 	const frameClass = isSelected
 		? "border-[3px] shadow-[0_0_0_3px_color-mix(in_srgb,var(--marker-color)_35%,transparent)]"
 		: "border-2 shadow-[0_1px_4px_rgba(0,0,0,0.3)]";
-	const resolvedClass = isResolved ? "border-dashed bg-gray-200" : "bg-white";
+	const resolvedClass = isResolved
+		? "border-dashed bg-(--bg-marker-resolved)"
+		: "bg-(--white)";
 
 	// La couleur du type n'est connue qu'à l'exécution : passée en variable CSS.
 	const html = renderToStaticMarkup(
@@ -141,10 +143,10 @@ function createIncidentDivIcon(
 			{isResolved && (
 				<span
 					aria-hidden="true"
-					className="absolute -right-1 -bottom-1 flex size-[16px] items-center justify-center rounded-full border border-white bg-(--marker-color)"
+					className="absolute -right-1 -bottom-1 flex size-[16px] items-center justify-center rounded-full border border-(--white) bg-(--marker-color)"
 				>
 					<CheckIcon
-						className="size-[10px] fill-white"
+						className="size-[10px] fill-(--white)"
 						aria-hidden="true"
 					/>
 				</span>
@@ -210,13 +212,16 @@ function createStartViewIcon(source: StartViewSource) {
 			<div className="relative flex size-6 items-center justify-center">
 				<span
 					aria-hidden="true"
-					className="animate-marker-pulse pointer-events-none absolute inset-0 rounded-full bg-blue-500"
+					className="animate-marker-pulse pointer-events-none absolute inset-0 rounded-full bg-(--marker-position-halo)"
 				/>
-				<span className="relative size-4 rounded-full border-2 border-white bg-blue-600 shadow-[0_1px_4px_rgba(0,0,0,0.4)]" />
+				<span className="relative size-4 rounded-full border-2 border-(--white) bg-(--marker-position) shadow-[0_1px_4px_rgba(0,0,0,0.4)]" />
 			</div>
 		) : (
-			<div className="flex size-8 items-center justify-center rounded-full border-2 border-white bg-primary shadow-[0_1px_4px_rgba(0,0,0,0.4)]">
-				<AddressIcon className="size-4 fill-white" aria-hidden="true" />
+			<div className="flex size-8 items-center justify-center rounded-full border-2 border-(--white) bg-primary shadow-[0_1px_4px_rgba(0,0,0,0.4)]">
+				<AddressIcon
+					className="size-4 fill-(--white)"
+					aria-hidden="true"
+				/>
 			</div>
 		),
 	);
