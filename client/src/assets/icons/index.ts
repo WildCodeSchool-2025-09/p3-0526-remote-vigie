@@ -34,6 +34,7 @@ import PlusSmall from "@/assets/icons/interface/plus-small.svg?react";
 import PoliceStation from "@/assets/icons/interface/police-station.svg?react";
 import QuoteRight from "@/assets/icons/interface/quote-right.svg?react";
 import RotateRight from "@/assets/icons/interface/rotate-right.svg?react";
+import Search from "@/assets/icons/interface/search.svg?react";
 import Share from "@/assets/icons/interface/share.svg?react";
 import Shield from "@/assets/icons/interface/shield.svg?react";
 import Trash from "@/assets/icons/interface/trash.svg?react";
@@ -108,6 +109,7 @@ export const icons = {
 	policeStation: PoliceStation,
 	quoteRight: QuoteRight,
 	rotateRight: RotateRight,
+	search: Search,
 	share: Share,
 	shield: Shield,
 	trash: Trash,

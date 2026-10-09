@@ -1,5 +1,9 @@
 import databaseClient from "../../../database/client";
 import type { Bounds } from "../../services/parseBounds";
+import type {
+	IncidentSort,
+	ListFilters,
+} from "../../services/parseListFilters";
 import contributionRepository from "../contribution/contributionRepository";
 
 import type { Executor, Result, Rows } from "../../../database/client";
@@ -58,6 +62,11 @@ type IncidentDetails = {
 	myContribution: "confirm" | "deny" | null;
 };
 
+type IncidentListPage = {
+	incidents: IncidentListItem[];
+	truncated: boolean;
+};
+
 type NearbyIncident = {
 	id: number;
 	typeIds: number[];
@@ -68,18 +77,70 @@ type NearbyIncident = {
 	createdAt: Date;
 };
 
+const DEFAULT_LIST_FILTERS: ListFilters = {
+	includeResolved: false,
+	sort: "date",
+	search: null,
+};
+
+// Never built from user input: `sort` is whitelisted by parseListFilters.
+const SORT_CLAUSES: Record<IncidentSort, string> = {
+	date: "i.created_at DESC, i.id DESC",
+	date_asc: "i.created_at ASC, i.id ASC",
+	severity: "d.weight DESC, i.created_at DESC, i.id DESC",
+	severity_asc: "d.weight ASC, i.created_at DESC, i.id DESC",
+};
+
+// `\`, `%` and `_` are escape or wildcard characters in a LIKE pattern.
+function toLikePattern(search: string): string {
+	return `%${search.replace(/[\\%_]/g, "\\$&")}%`;
+}
+
 class IncidentRepository {
 	// With `bounds`, only incidents located inside that rectangle.
+	// Without `includeResolved`, only ongoing and not yet expired incidents.
+	// With `search`, only incidents whose title, description, city or a type label matches.
 	async readAllForList(
 		limit: number,
 		bounds: Bounds | null = null,
-	): Promise<IncidentListItem[]> {
-		const whereClause = bounds
-			? "WHERE i.latitude BETWEEN ? AND ? AND i.longitude BETWEEN ? AND ?"
-			: "";
-		const whereParams = bounds
-			? [bounds.south, bounds.north, bounds.west, bounds.east]
-			: [];
+		filters: ListFilters = DEFAULT_LIST_FILTERS,
+	): Promise<IncidentListPage> {
+		const conditions: string[] = [];
+		const whereParams: unknown[] = [];
+
+		if (!filters.includeResolved) {
+			// Masque les incidents échus que la tâche de clôture n'a pas encore traités ;
+			// avec includeResolved, ils peuvent apparaître en cours jusqu'à son prochain passage.
+			conditions.push(
+				"i.status = 'in_progress' AND i.expires_at > NOW()",
+			);
+		}
+		if (bounds) {
+			conditions.push(
+				"i.latitude BETWEEN ? AND ? AND i.longitude BETWEEN ? AND ?",
+			);
+			whereParams.push(
+				bounds.south,
+				bounds.north,
+				bounds.west,
+				bounds.east,
+			);
+		}
+		if (filters.search) {
+			conditions.push(
+				`(i.title LIKE ? OR i.description LIKE ? OR i.city LIKE ?
+					OR EXISTS (
+						SELECT 1 FROM incident_incident_type AS siit
+						INNER JOIN incident_type AS st ON st.id = siit.incident_type_id
+						WHERE siit.incident_id = i.id AND st.label LIKE ?
+					))`,
+			);
+			const pattern = toLikePattern(filters.search);
+			whereParams.push(pattern, pattern, pattern, pattern);
+		}
+
+		const whereClause =
+			conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
 		const [incidentRows] = await databaseClient.query<Rows>(
 			`SELECT
@@ -91,16 +152,20 @@ class IncidentRepository {
 			FROM incident AS i
 			INNER JOIN danger_level AS d ON d.id = i.danger_level_id
 			${whereClause}
-			ORDER BY i.created_at DESC, i.id DESC
+			ORDER BY ${SORT_CLAUSES[filters.sort]}
 			LIMIT ?`,
-			[...whereParams, limit],
+			[...whereParams, limit + 1],
 		);
 
-		if (incidentRows.length === 0) {
-			return [];
+		// The extra row only tells that more incidents exist: it is not returned.
+		const truncated = incidentRows.length > limit;
+		const pageRows = incidentRows.slice(0, limit);
+
+		if (pageRows.length === 0) {
+			return { incidents: [], truncated: false };
 		}
 
-		const ids = incidentRows.map((row) => row.id as number);
+		const ids = pageRows.map((row) => row.id as number);
 
 		const [typeRows] = await databaseClient.query<Rows>(
 			`SELECT
@@ -129,7 +194,7 @@ class IncidentRepository {
 			}
 		}
 
-		return incidentRows.map((row) => ({
+		const incidents = pageRows.map((row) => ({
 			id: row.id,
 			title: row.title,
 			city: row.city,
@@ -145,6 +210,8 @@ class IncidentRepository {
 			},
 			type: principalTypeByIncident.get(row.id) ?? null,
 		}));
+
+		return { incidents, truncated };
 	}
 
 	async read(

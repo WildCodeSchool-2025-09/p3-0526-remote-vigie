@@ -2,23 +2,48 @@ import { apiFetch } from "@/services/apiClient";
 import type { Bounds } from "@/types/bounds";
 import type { Incident, IncidentCounts } from "@/types/incidentDetails";
 import type { NearbyIncident } from "@/types/incidentForm";
-import type { IncidentListItem } from "@/types/incidentList";
+import type { IncidentListResponse, IncidentSort } from "@/types/incidentList";
 
 type GetAllIncidentsResult =
-	| { status: "ok"; incidents: IncidentListItem[] }
+	| ({ status: "ok" } & IncidentListResponse)
 	| { status: "error" };
 
-export async function getAllIncidents(
-	limit = 15,
-): Promise<GetAllIncidentsResult> {
+type GetAllIncidentsParams = {
+	limit?: number;
+	// Texte déjà nettoyé (sans espaces aux extrémités) ; vide : pas de recherche.
+	search?: string;
+	sort?: IncidentSort;
+	includeResolved?: boolean;
+	// Zone visible de la carte ; absente : toutes les zones (cas d'une recherche).
+	bounds?: Bounds | null;
+};
+
+export async function getAllIncidents({
+	limit,
+	search = "",
+	sort = "date",
+	includeResolved = false,
+	bounds = null,
+}: GetAllIncidentsParams): Promise<GetAllIncidentsResult> {
 	try {
-		const res = await apiFetch(`/api/incidents?limit=${limit}`);
+		const params = new URLSearchParams({ sort });
+		if (limit !== undefined) params.set("limit", String(limit));
+		if (search !== "") params.set("search", search);
+		if (includeResolved) params.set("includeResolved", "true");
+		if (bounds) {
+			params.set("north", String(bounds.north));
+			params.set("south", String(bounds.south));
+			params.set("east", String(bounds.east));
+			params.set("west", String(bounds.west));
+		}
+
+		const res = await apiFetch(`/api/incidents?${params.toString()}`);
 
 		if (!res.ok) return { status: "error" };
 
 		return {
 			status: "ok",
-			incidents: (await res.json()) as IncidentListItem[],
+			...((await res.json()) as IncidentListResponse),
 		};
 	} catch {
 		return { status: "error" }; // réseau, CORS, JSON illisible
@@ -31,6 +56,7 @@ export const MAP_INCIDENTS_LIMIT = 300;
 // Incidents in the map's visible zone (separate call from getAllIncidents).
 export async function getIncidentsInBounds(
 	bounds: Bounds,
+	includeResolved = false,
 	limit = MAP_INCIDENTS_LIMIT,
 ): Promise<GetAllIncidentsResult> {
 	try {
@@ -41,6 +67,7 @@ export async function getIncidentsInBounds(
 			west: String(bounds.west),
 			limit: String(limit),
 		});
+		if (includeResolved) params.set("includeResolved", "true");
 
 		const res = await apiFetch(`/api/incidents?${params.toString()}`);
 
@@ -48,7 +75,7 @@ export async function getIncidentsInBounds(
 
 		return {
 			status: "ok",
-			incidents: (await res.json()) as IncidentListItem[],
+			...((await res.json()) as IncidentListResponse),
 		};
 	} catch {
 		return { status: "error" };

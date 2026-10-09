@@ -25,3 +25,13 @@ export type IncidentListItem = {
 	dangerLevel: IncidentListDangerLevel;
 	type: IncidentListType | null;
 };
+
+// Body of GET /api/incidents; `truncated` is true when more incidents exist than returned.
+export type IncidentListResponse = {
+	incidents: IncidentListItem[];
+	truncated: boolean;
+};
+
+// Sort criteria accepted by GET /api/incidents (`sort`).
+// `date` et `severity` : les plus récents / les plus graves d'abord.
+export type IncidentSort = "date" | "date_asc" | "severity" | "severity_asc";

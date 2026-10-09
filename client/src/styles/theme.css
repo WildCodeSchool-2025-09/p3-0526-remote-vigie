@@ -13,6 +13,7 @@
 	--accent-dark: color-mix(in srgb, var(--accent) 50%, black);
 
 	--grey: #c9c9c9; /* grey neutral */
+	--white: #ffffff; /* blanc des surfaces et des contours (champs, marqueurs, zoom) */
 
 	--info: #25a5e0;
 	--success: var(--secondary);
@@ -76,6 +77,12 @@
 	--place-hospital: #0b6b6b;
 	--place-pharmacy: #1e7a34;
 	--place-veterinary: #7a3e9d;
+
+	/* map markers (contraste AA sur fond blanc) */
+	--marker-resolved: #6b6b6b; /* incident résolu : 5,3:1 */
+	--bg-marker-resolved: #e5e7eb; /* fond du marqueur résolu */
+	--marker-position: #2563eb; /* point « Vous êtes ici » : 5,2:1 */
+	--marker-position-halo: #3b82f6; /* halo pulsant autour du point */
 
 	/* spacings */
 	--spacer-small: 1rem;
@@ -466,4 +473,66 @@
 	--animate-impact: shiver 1.5s linear 1.7s;
 	--animate-badge-pop: pop 1s ease 3s both;
 	--animate-title-pop: pop 1s ease 2s both;
+}
+
+/* Zoom de Leaflet : même forme que la recherche et le menu d'options (blanc, arrondi, ombre). */
+.leaflet-container .leaflet-control-zoom.leaflet-bar {
+	margin-top: 3.75rem;
+	margin-right: 0.5rem;
+	overflow: hidden;
+	border: 0;
+	border-radius: 0.75rem;
+	box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a {
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 0;
+	background-color: var(--white);
+	color: var(--primary);
+	font-size: 1.25rem;
+	font-weight: 700;
+	line-height: 2.25rem;
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a:hover {
+	background-color: var(--color-base-200);
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a.leaflet-disabled {
+	background-color: var(--white);
+	color: color-mix(in srgb, var(--primary) 35%, var(--white));
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: -4px;
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a + a {
+	border-top: 1px solid color-mix(in srgb, var(--primary) 12%, var(--white));
+}
+
+/* Croix de fermeture des popups : zone tactile de 44 px (24 px par défaut). */
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button {
+	width: 2.75rem;
+	height: 2.75rem;
+	color: var(--primary);
+	font-size: 1.75rem;
+	line-height: 2.75rem;
+}
+
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button:hover {
+	color: var(--primary-dark);
+}
+
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: -4px;
+}
+
+/* Le texte de la popup laisse la place de la croix. */
+.leaflet-container .leaflet-popup-content {
+	margin-right: 2.5rem;
 }

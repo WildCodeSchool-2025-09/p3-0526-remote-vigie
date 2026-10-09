@@ -5,6 +5,11 @@ import { Marker, Popup } from "react-leaflet";
 
 import { type IconName, icons } from "@/assets/icons";
 import type { UsefulPlace, UsefulPlaceCategory } from "@/types/usefulPlace";
+import {
+	POPUP_AUTO_PAN_BOTTOM_RIGHT,
+	POPUP_AUTO_PAN_TOP_LEFT,
+	POPUP_MAX_WIDTH,
+} from "@/utils/popupAutoPan";
 
 // Classes écrites en entier : Tailwind ne génère que les noms qu'il lit dans le code.
 const CATEGORY_STYLES: Record<
@@ -88,7 +93,11 @@ function UsefulPlaceMarker({ place }: { place: UsefulPlace }) {
 			// Sous les marqueurs d'incident.
 			zIndexOffset={-1000}
 		>
-			<Popup>
+			<Popup
+				autoPanPaddingTopLeft={POPUP_AUTO_PAN_TOP_LEFT}
+				autoPanPaddingBottomRight={POPUP_AUTO_PAN_BOTTOM_RIGHT}
+				maxWidth={POPUP_MAX_WIDTH}
+			>
 				<p className={`text-xs font-bold ${textClass}`}>{label}</p>
 				<p className="font-title text-sm font-bold text-primary">
 					{place.name}
