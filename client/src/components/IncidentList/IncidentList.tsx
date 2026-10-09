@@ -11,7 +11,6 @@ type IncidentListProps = {
 	hasError: boolean;
 	onRetry: () => void;
 	isTruncated: boolean;
-	limit: number;
 	// Recherche appliquée à la liste affichée (vide : aucune).
 	search: string;
 	includeResolved: boolean;
@@ -66,7 +65,6 @@ export default function IncidentList({
 	hasError,
 	onRetry,
 	isTruncated,
-	limit,
 	search,
 	includeResolved,
 	sortBy,
@@ -101,7 +99,7 @@ export default function IncidentList({
 	let liveMessage = "";
 	if (hasResults) {
 		liveMessage = isTruncated
-			? `${countLabel}, liste limitée à ${limit}`
+			? `${countLabel}, liste limitée à ${incidents.length}`
 			: countLabel;
 	}
 	if (isEmpty) liveMessage = emptyTitle;
@@ -224,8 +222,8 @@ export default function IncidentList({
 
 				{isTruncated && (
 					<p className="text-center text-xs text-primary/50">
-						Seuls les {limit} incidents {TRUNCATION_ORDER[sortBy]}{" "}
-						sont affichés
+						Seuls les {incidents.length} incidents{" "}
+						{TRUNCATION_ORDER[sortBy]} sont affichés
 						{search !== "" ? " : précisez votre recherche." : "."}
 					</p>
 				)}

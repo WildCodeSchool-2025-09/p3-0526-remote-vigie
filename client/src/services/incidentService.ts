@@ -9,7 +9,7 @@ type GetAllIncidentsResult =
 	| { status: "error" };
 
 type GetAllIncidentsParams = {
-	limit: number;
+	limit?: number;
 	// Texte déjà nettoyé (sans espaces aux extrémités) ; vide : pas de recherche.
 	search?: string;
 	sort?: IncidentSort;
@@ -26,7 +26,8 @@ export async function getAllIncidents({
 	bounds = null,
 }: GetAllIncidentsParams): Promise<GetAllIncidentsResult> {
 	try {
-		const params = new URLSearchParams({ limit: String(limit), sort });
+		const params = new URLSearchParams({ sort });
+		if (limit !== undefined) params.set("limit", String(limit));
 		if (search !== "") params.set("search", search);
 		if (includeResolved) params.set("includeResolved", "true");
 		if (bounds) {

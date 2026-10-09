@@ -24,10 +24,6 @@ import { getStartView } from "@/utils/getDefaultMapCenter";
 import { useDebouncedValue } from "./useDebouncedValue";
 import { useDeviceLocation } from "./useDeviceLocation";
 
-const INCIDENTS_LIST_LIMIT = 15;
-// Même plafond que MAX_LIST_LIMIT côté serveur : une recherche, ou les résolus
-// inclus, listent tous les résultats au lieu de la page par défaut.
-const EXTENDED_LIST_LIMIT = 100;
 const SEARCH_DEBOUNCE_MS = 300;
 // Zoom du recentrage sur le résultat le plus récent d'une recherche.
 const SEARCH_RECENTER_ZOOM = 14;
@@ -65,15 +61,12 @@ export default function Home() {
 		SEARCH_DEBOUNCE_MS,
 	);
 	const search = debouncedSearch.trim();
-	const listLimit =
-		search === "" && !includeResolved
-			? INCIDENTS_LIST_LIMIT
-			: EXTENDED_LIST_LIMIT;
+
 	// Zone visible de la carte, inconnue tant qu'elle n'a pas signalé la sienne.
 	const [bounds, setBounds] = useState<Bounds | null>(null);
 	// Une recherche ignore la zone : la liste ne dépend alors pas de ses changements.
 	const zone = search === "" ? bounds : null;
-	const criteria = `${listLimit}|${search}|${sortBy}|${includeResolved}`;
+	const criteria = `${search}|${sortBy}|${includeResolved}`;
 	// Critères de la dernière liste affichée : seule la zone change, la liste reste en place.
 	const loadedCriteriaRef = useRef<string | null>(null);
 	// Seule la réponse à la dernière requête est retenue.
@@ -113,7 +106,6 @@ export default function Home() {
 		if (search === "" && zone === null) return;
 
 		getAllIncidents({
-			limit: listLimit,
 			search,
 			sort: sortBy,
 			includeResolved,
@@ -132,7 +124,7 @@ export default function Home() {
 			}
 			setIsLoading(false);
 		});
-	}, [listLimit, search, sortBy, includeResolved, zone, criteria]);
+	}, [search, sortBy, includeResolved, zone, criteria]);
 
 	useEffect(() => {
 		loadIncidents();
@@ -303,7 +295,6 @@ export default function Home() {
 					hasError={hasError}
 					onRetry={loadIncidents}
 					isTruncated={isTruncated}
-					limit={listLimit}
 					search={search}
 					includeResolved={includeResolved}
 					sortBy={sortBy}
