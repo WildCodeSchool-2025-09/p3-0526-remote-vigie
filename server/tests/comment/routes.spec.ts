@@ -1,0 +1,54 @@
+import supertest from "supertest";
+
+import app from "../../src/app";
+
+// Import the repository whose SQL calls we mock: routes.spec.ts tests the
+// HTTP layer (route → action → status/JSON), not the SQL itself.
+import commentRepository from "../../src/modules/comment/commentRepository";
+import { authHeader } from "../helpers/authHeader";
+
+afterEach(() => {
+	jest.restoreAllMocks();
+});
+
+describe("GET /api/incidents/:id/comments", () => {
+	it("should fetch comments successfully", async () => {
+		const fakeComments = [
+			{
+				id: 1,
+				content: "La route est dégagée.",
+				createdAt: new Date("2026-09-20T10:00:00.000Z"),
+				author: { id: 7, pseudo: "yann_30" },
+				quotedComment: null,
+			},
+		];
+
+		jest.spyOn(commentRepository, "readByIncident").mockResolvedValue(
+			fakeComments,
+		);
+
+		const response = await supertest(app).get("/api/incidents/1/comments");
+
+		expect(response.status).toBe(200);
+		expect(response.body).toStrictEqual(
+			fakeComments.map((comment) => ({
+				...comment,
+				createdAt: comment.createdAt.toISOString(),
+				author: { ...comment.author, badges: [] },
+			})),
+		);
+	});
+});
+
+describe("POST /api/incidents/:id/comments", () => {
+	// Un token de test valide passe verifyToken : un contenu vide (ou composé
+	// d'espaces) est ensuite rejeté avant tout accès base.
+	it("should reject an empty comment with 400", async () => {
+		const response = await supertest(app)
+			.post("/api/incidents/1/comments")
+			.set(authHeader())
+			.send({ content: "   " });
+
+		expect(response.status).toBe(400);
+	});
+});

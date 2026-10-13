@@ -1,0 +1,42 @@
+import AbstractSeeder from "./AbstractSeeder";
+import UserSeeder, { SEED_ADMIN_COUNT, getAdminPosition } from "./UserSeeder";
+
+class UserLocationSeeder extends AbstractSeeder {
+	constructor() {
+		// Call the constructor of the parent class (AbstractSeeder) with appropriate options
+		super({
+			table: "user_location",
+			truncate: true,
+			dependencies: [UserSeeder],
+		});
+	}
+
+	// The run method - Populate the 'user_location' table with fake data
+
+	run() {
+		for (let i = 1; i <= SEED_ADMIN_COUNT; i += 1) {
+			const admin = {
+				user_id: this.getRef(`admin_${i}`).insertId,
+				is_enabled: 1,
+				...getAdminPosition(i),
+			};
+			this.insert(admin);
+		}
+
+		// Generate and insert fake data into the 'user_location' table
+		for (let i = 0; i < 10; i += 1) {
+			// Generate fake location data matching the `user_location` table columns
+			const fakeLocation = {
+				user_id: this.getRef(`user_${i}`).insertId,
+				is_enabled: i % 4 !== 0 ? 1 : 0,
+				latitude: 47.954352 + i * 0.001,
+				longitude: 7.260492 + i * 0.001,
+			};
+
+			// Insert the fakeLocation data into the 'user_location' table
+			this.insert(fakeLocation);
+		}
+	}
+}
+
+export default UserLocationSeeder;

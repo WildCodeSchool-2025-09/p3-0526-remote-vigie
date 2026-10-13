@@ -1,0 +1,50 @@
+import AbstractSeeder from "./AbstractSeeder";
+import UserSeeder, { SEED_ADMIN_COUNT, getAdminPosition } from "./UserSeeder";
+
+class AddressSeeder extends AbstractSeeder {
+	constructor() {
+		// Call the constructor of the parent class (AbstractSeeder) with appropriate options
+		super({ table: "address", truncate: true, dependencies: [UserSeeder] });
+	}
+
+	// The run method - Populate the 'address' table with fake data
+
+	run() {
+		for (let i = 1; i <= SEED_ADMIN_COUNT; i += 1) {
+			const admin = {
+				user_id: this.getRef(`admin_${i}`).insertId,
+				label: "Domicile",
+				street_line: "Adresse de test",
+				postal_code: "68250",
+				city: "Westhalten",
+				insee_code: "68364",
+				...getAdminPosition(i),
+				is_approximate: 0,
+				is_primary: 1,
+			};
+			this.insert(admin);
+		}
+
+		// Generate and insert fake data into the 'address' table
+		for (let i = 0; i < 10; i += 1) {
+			// Generate fake address data matching the `address` table columns
+			const fakeAddress = {
+				user_id: this.getRef(`user_${i}`).insertId,
+				label: i === 0 ? "Domicile" : "Adresse principale",
+				street_line: `${this.faker.location.streetAddress()}, ${this.faker.location.street()}`,
+				postal_code: "68250",
+				city: "Westhalten",
+				insee_code: "68364",
+				latitude: 47.954352 + i * 0.001,
+				longitude: 7.260492 + i * 0.001,
+				is_approximate: 0,
+				is_primary: 1,
+			};
+
+			// Insert the fakeAddress data into the 'address' table
+			this.insert(fakeAddress);
+		}
+	}
+}
+
+export default AddressSeeder;

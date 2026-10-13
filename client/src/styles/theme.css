@@ -1,0 +1,538 @@
+/* Palette primitive : source unique de vérité (utilitaires Tailwind + var() CSS) */
+@theme static {
+	--primary: #0b4619; /* primary color (deep green) */
+	--primary-light: color-mix(in srgb, var(--primary) 10%, white);
+	--primary-dark: color-mix(in srgb, var(--primary) 50%, black);
+
+	--secondary: #116530; /* secondary color (green) */
+	--secondary-light: color-mix(in srgb, var(--secondary) 10%, white);
+	--secondary-dark: color-mix(in srgb, var(--secondary) 50%, black);
+
+	--accent: #ffcc1d; /* accent color (gold yellow) */
+	--accent-light: color-mix(in srgb, var(--accent) 10%, white);
+	--accent-dark: color-mix(in srgb, var(--accent) 50%, black);
+
+	--grey: #c9c9c9; /* grey neutral */
+	--white: #ffffff; /* blanc des surfaces et des contours (champs, marqueurs, zoom) */
+
+	--info: #25a5e0;
+	--success: var(--secondary);
+	--warning: var(--accent);
+	--error: #c1392b;
+	--error-text: #a32e22; /* texte sur --bg-error, AA (5.21:1 ; --error seul : 3.98:1) */
+	--on-error: #ffffff; /* texte sur --error plein (boutons), AA (5.4:1) */
+
+	--bg-dark: #e8e8cc; /* background in the behind */
+	--bg-default: #f6f5e9; /* background of frames */
+	--bg-light: #fcfbf1; /* background in the front */
+
+	--bg-info: color-mix(in srgb, var(--info) 20%, white);
+	--bg-success: color-mix(in srgb, var(--success) 20%, white);
+	--bg-warning: color-mix(in srgb, var(--warning) 20%, white);
+	--bg-error: color-mix(in srgb, var(--error) 20%, white);
+
+	/* types colors */
+	--fire: #d8323e;
+	--bg-fire: #f4e9df;
+	--insect: #946d00; /* corrigé AA (était #d19a00, 2.42:1 → 4.52:1) */
+	--bg-insect: #f4f0db;
+	--flood: #1b7ab2; /* corrigé AA (était #1f8fd0, 3.43:1 → 4.50:1) */
+	--bg-flood: #e9efe7;
+	--hail: #3a75c2; /* corrigé AA (était #6e9ad4, 2.79:1 → 4.51:1) */
+	--bg-hail: #eef0e8;
+	--glaze: #267f89; /* corrigé AA (était #2e9aa6, 3.21:1 → 4.51:1) */
+	--bg-glaze: #eaf0e5;
+	--snow: #3579ac; /* corrigé AA (était #93bede, 1.90:1 → 4.51:1) */
+	--bg-snow: #f0f2e8;
+	--storm: #4f6e7c;
+	--bg-storm: #dfe2da;
+	--wild: #6e4a2e;
+	--bg-wild: #e3ddcf;
+	--tornado: #b25d1c; /* corrigé AA (était #c2661f, 3.88:1 → 4.51:1) */
+	--bg-tornado: #efe1cd;
+	--rockfall: #574a5e;
+	--bg-rockfall: #e0ddd6;
+	--animal: #5e4a63;
+	--bg-animal: #e1ddd6;
+	--tree: #2d8436; /* corrigé AA (était #2f8a38, 4.20:1 → 4.50:1) */
+	--bg-tree: #dae6d0;
+	--danger: #c1392b;
+	--bg-danger: #fdf1ef;
+
+	/* danger levels (1 → 5) */
+	--level-1: #36853b; /* faible — corrigé AA (était #3a8f3f, 3.97:1 → 4.50:1) */
+	--bg-level-1: #f8ffef;
+	--level-2: #687e20; /* modéré — corrigé AA (était #9bbb2f, 2.17:1 → 4.51:1) */
+	--bg-level-2: #feffed;
+	--level-3: #926d14; /* important — corrigé AA (était #e0a81f, 2.04:1 → 4.52:1) */
+	--bg-level-3: #fffadd;
+	--level-4: #b94d0c; /* élevé — corrigé AA (était #e8600f, 3.05:1 → 4.52:1) */
+	--bg-level-4: #f9f0e9;
+	--level-5: #c1392b; /* critique */
+	--bg-level-5: #fdf1ef;
+
+	/* useful places (contraste AA sur fond blanc) */
+	--place-fire-station: #b3261e;
+	--place-police: #1f4fa3;
+	--place-hospital: #0b6b6b;
+	--place-pharmacy: #1e7a34;
+	--place-veterinary: #7a3e9d;
+
+	/* map markers (contraste AA sur fond blanc) */
+	--marker-resolved: #6b6b6b; /* incident résolu : 5,3:1 */
+	--bg-marker-resolved: #e5e7eb; /* fond du marqueur résolu */
+	--marker-position: #2563eb; /* point « Vous êtes ici » : 5,2:1 */
+	--marker-position-halo: #3b82f6; /* halo pulsant autour du point */
+
+	/* spacings */
+	--spacer-small: 1rem;
+	--spacer-medium: 2rem;
+	--spacer-large: 3rem;
+	--navigation-height: 5rem;
+
+	/* fonts family */
+	--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+	--font-title: "Playfair Display", ui-serif, Georgia, serif;
+
+	--animate-pop: pop 0.5s ease;
+	@keyframes pop {
+		0% {
+			scale: 0;
+		}
+		75% {
+			scale: 1.05;
+		}
+		100% {
+			scale: 1;
+		}
+	}
+
+	--animate-slide: slide 0.5s ease;
+	@keyframes slide {
+		0% {
+			opacity: 0;
+			translate: -50%;
+		}
+		100% {
+			opacity: 1;
+			translate: 0;
+		}
+	}
+
+	--animate-marker-pulse: marker-pulse 1.6s ease-out infinite;
+	@keyframes marker-pulse {
+		0% {
+			scale: 1;
+			opacity: 0.55;
+		}
+		100% {
+			scale: 2.4;
+			opacity: 0;
+		}
+	}
+
+	--animate-flicker: flicker 1.2s ease-in-out infinite;
+	@keyframes flicker {
+		0% {
+			scale: 1 1;
+			rotate: 0deg;
+		}
+		25% {
+			scale: 0.95 1.08;
+			rotate: -3deg;
+		}
+		50% {
+			scale: 1.03 0.97;
+			rotate: 0deg;
+		}
+		75% {
+			scale: 0.97 1.05;
+			rotate: 3deg;
+		}
+		100% {
+			scale: 1 1;
+			rotate: 0deg;
+		}
+	}
+
+	--animate-flicker-inner: flicker 0.8s ease-in-out infinite reverse;
+
+	--animate-shiver: shiver 1.5s linear infinite;
+	@keyframes shiver {
+		0% {
+			translate: 0;
+		}
+		5% {
+			translate: -2px;
+		}
+		10% {
+			translate: 2px;
+		}
+		15% {
+			translate: -2px;
+		}
+		20% {
+			translate: 2px;
+		}
+		25% {
+			translate: -1px;
+		}
+		30%,
+		100% {
+			translate: 0;
+		}
+	}
+
+	--animate-topple: topple 2s ease-in-out infinite;
+	@keyframes topple {
+		0% {
+			rotate: 0deg;
+		}
+		15% {
+			rotate: -8deg;
+		}
+		30% {
+			rotate: 4deg;
+		}
+		40% {
+			rotate: -2deg;
+		}
+		50%,
+		100% {
+			rotate: 0deg;
+		}
+	}
+
+	--animate-headshake: headshake 2.5s ease-in-out infinite;
+	@keyframes headshake {
+		0% {
+			rotate: 0deg;
+		}
+		8% {
+			rotate: -6deg;
+		}
+		16% {
+			rotate: 6deg;
+		}
+		24% {
+			rotate: -6deg;
+		}
+		32% {
+			rotate: 6deg;
+		}
+		40%,
+		100% {
+			rotate: 0deg;
+		}
+	}
+
+	--animate-sniff: sniff 2.5s ease-in-out infinite;
+	@keyframes sniff {
+		0%,
+		55% {
+			scale: 1 1;
+		}
+		60% {
+			scale: 1.08 0.94;
+		}
+		65% {
+			scale: 1 1;
+		}
+		70% {
+			scale: 1.08 0.94;
+		}
+		75%,
+		100% {
+			scale: 1 1;
+		}
+	}
+
+	--animate-sway: sway 2s ease-in-out infinite;
+	@keyframes sway {
+		0%,
+		100% {
+			rotate: 0deg;
+		}
+		25% {
+			rotate: -6deg;
+		}
+		75% {
+			rotate: 6deg;
+		}
+	}
+
+	--animate-flutter: flutter 0.25s linear infinite;
+	@keyframes flutter {
+		0%,
+		100% {
+			scale: 1 1;
+		}
+		50% {
+			scale: 0.75 1;
+		}
+	}
+
+	--animate-float: float 1.5s ease-in-out infinite;
+	@keyframes float {
+		0%,
+		100% {
+			translate: 0 0;
+		}
+		50% {
+			translate: 0 -3px;
+		}
+	}
+
+	--animate-blink: blink 3s linear infinite;
+	@keyframes blink {
+		0%,
+		86%,
+		90%,
+		94%,
+		100% {
+			scale: 1 1;
+		}
+		88%,
+		92% {
+			scale: 1 0.1;
+		}
+	}
+
+	--animate-tail-wag: tail-wag 2s linear infinite;
+	@keyframes tail-wag {
+		0%,
+		100% {
+			rotate: 0deg;
+		}
+		25% {
+			rotate: -10deg;
+		}
+		75% {
+			rotate: 8deg;
+		}
+	}
+
+	--animate-flash: flash 3s linear infinite;
+	@keyframes flash {
+		0% {
+			opacity: 0;
+			scale: 1;
+		}
+		4% {
+			opacity: 1;
+			scale: 1.1;
+		}
+		8% {
+			opacity: 0.2;
+			scale: 1;
+		}
+		12%,
+		25% {
+			opacity: 1;
+		}
+		30%,
+		100% {
+			opacity: 0;
+		}
+	}
+
+	--animate-rain: rain 0.9s linear infinite;
+	@keyframes rain {
+		0% {
+			translate: 12px -22px;
+			opacity: 0;
+		}
+		25%,
+		75% {
+			opacity: 1;
+		}
+		100% {
+			translate: -12px 22px;
+			opacity: 0;
+		}
+	}
+
+	--animate-fall: fall 1s linear infinite;
+	@keyframes fall {
+		0% {
+			translate: 0 -40px;
+			opacity: 0;
+		}
+		20%,
+		80% {
+			opacity: 1;
+		}
+		100% {
+			translate: 0 40px;
+			opacity: 0;
+		}
+	}
+
+	--animate-snowfall: snowfall 3s linear infinite;
+	@keyframes snowfall {
+		0% {
+			translate: 0 -30px;
+			rotate: 0deg;
+			opacity: 0;
+		}
+		20%,
+		80% {
+			opacity: 1;
+		}
+		100% {
+			translate: 0 30px;
+			rotate: 60deg;
+			opacity: 0;
+		}
+	}
+
+	--animate-wave-left: wave-left 3s linear infinite;
+	@keyframes wave-left {
+		0% {
+			translate: 0 0;
+		}
+		100% {
+			translate: -16px 0;
+		}
+	}
+
+	--animate-wave-right: wave-right 4s linear infinite;
+	@keyframes wave-right {
+		0% {
+			translate: 0 0;
+		}
+		100% {
+			translate: 16px 0;
+		}
+	}
+
+	--animate-bubble: bubble 2s ease-out infinite;
+	@keyframes bubble {
+		0% {
+			translate: 0 3px;
+			opacity: 0;
+		}
+		30% {
+			opacity: 1;
+		}
+		100% {
+			translate: 0 -5px;
+			opacity: 0;
+		}
+	}
+
+	--animate-twist: twist 2.4s ease-in-out infinite;
+	@keyframes twist {
+		0%,
+		100% {
+			transform: skewX(-6deg);
+		}
+		50% {
+			transform: skewX(6deg);
+		}
+	}
+
+	--animate-debris: debris 1.2s linear infinite;
+	@keyframes debris {
+		0% {
+			translate: -40px 0;
+			opacity: 0;
+		}
+		30%,
+		70% {
+			opacity: 1;
+		}
+		100% {
+			translate: 40px 0;
+			opacity: 0;
+		}
+	}
+
+	--animate-meteor-fall: meteor-fall 2s ease-in both;
+	@keyframes meteor-fall {
+		0% {
+			translate: -140px -140px;
+			scale: 1;
+			opacity: 0;
+		}
+		15% {
+			opacity: 1;
+		}
+		85% {
+			translate: 0 0;
+			scale: 1;
+			opacity: 1;
+		}
+		100% {
+			translate: 0 0;
+			scale: 1.6;
+			opacity: 0;
+		}
+	}
+
+	--animate-impact: shiver 1.5s linear 1.7s;
+	--animate-badge-pop: pop 1s ease 3s both;
+	--animate-title-pop: pop 1s ease 2s both;
+}
+
+/* Zoom de Leaflet : même forme que la recherche et le menu d'options (blanc, arrondi, ombre). */
+.leaflet-container .leaflet-control-zoom.leaflet-bar {
+	margin-top: 3.75rem;
+	margin-right: 0.5rem;
+	overflow: hidden;
+	border: 0;
+	border-radius: 0.75rem;
+	box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a {
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 0;
+	background-color: var(--white);
+	color: var(--primary);
+	font-size: 1.25rem;
+	font-weight: 700;
+	line-height: 2.25rem;
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a:hover {
+	background-color: var(--color-base-200);
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a.leaflet-disabled {
+	background-color: var(--white);
+	color: color-mix(in srgb, var(--primary) 35%, var(--white));
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: -4px;
+}
+
+.leaflet-container .leaflet-control-zoom.leaflet-bar a + a {
+	border-top: 1px solid color-mix(in srgb, var(--primary) 12%, var(--white));
+}
+
+/* Croix de fermeture des popups : zone tactile de 44 px (24 px par défaut). */
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button {
+	width: 2.75rem;
+	height: 2.75rem;
+	color: var(--primary);
+	font-size: 1.75rem;
+	line-height: 2.75rem;
+}
+
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button:hover {
+	color: var(--primary-dark);
+}
+
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: -4px;
+}
+
+/* Le texte de la popup laisse la place de la croix. */
+.leaflet-container .leaflet-popup-content {
+	margin-right: 2.5rem;
+}

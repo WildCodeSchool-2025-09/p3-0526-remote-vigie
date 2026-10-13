@@ -30,3 +30,6 @@ jobs:
 
       - name: Compile with tsc
         run: npm i && (cd client && npx tsc --noEmit) && (cd server && npx tsc --noEmit)
+
+      - name: Run unit tests
+        run: npm run test:unit --workspace=server

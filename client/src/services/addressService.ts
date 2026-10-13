@@ -1,0 +1,71 @@
+import { apiFetch } from "@/services/apiClient";
+import type { LocationAddress } from "@/types/incidentForm";
+
+type ReverseGeocodeResult =
+	| { status: "ok"; locationAddress: LocationAddress }
+	| { status: "error" };
+
+export async function reverseGeocode(
+	lat: number,
+	lng: number,
+	signal?: AbortSignal,
+): Promise<ReverseGeocodeResult> {
+	try {
+		const params = new URLSearchParams();
+		params.set("lat", String(lat));
+		params.set("lng", String(lng));
+		const res = await apiFetch(
+			`/api/addresses/reverse?${params.toString()}`,
+			{ signal },
+		);
+		if (!res.ok) return { status: "error" };
+
+		return {
+			status: "ok",
+			locationAddress: await res.json(),
+		};
+	} catch {
+		return { status: "error" };
+	}
+}
+
+export type AddressSuggestion = {
+	name: string;
+	city: string;
+	postalCode: string;
+	inseeCode: string;
+	latitude: number;
+	longitude: number;
+	type: string;
+	streetLine: string;
+};
+
+type SearchAddressResult =
+	| { status: "ok"; suggestions: AddressSuggestion[] }
+	| { status: "error" }
+	| { status: "unavailable" };
+
+export async function searchAddress(
+	query: string,
+	signal?: AbortSignal,
+): Promise<SearchAddressResult> {
+	try {
+		const params = new URLSearchParams();
+		params.set("q", query);
+		const res = await apiFetch(
+			`/api/addresses/search?${params.toString()}`,
+			{ signal },
+		);
+
+		if (res.status === 503) return { status: "unavailable" };
+
+		if (!res.ok) return { status: "error" };
+
+		return {
+			status: "ok",
+			suggestions: await res.json(),
+		};
+	} catch {
+		return { status: "error" };
+	}
+}

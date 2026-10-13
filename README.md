@@ -50,6 +50,9 @@ Il est pré-configuré avec un ensemble d'outils pour aider les étudiants à pr
     - [Commandes de Base](#commandes-de-base)
     - [Structure des Dossiers](#structure-des-dossiers)
     - [Mettre en place la base de données](#mettre-en-place-la-base-de-données)
+    - [Remplir les lieux utiles de la carte](#remplir-les-lieux-utiles-de-la-carte)
+    - [Simuler une progression de badges](#simuler-une-progression-de-badges)
+    - [Activer la connexion Google](#activer-la-connexion-google)
     - [Développer la partie back-end](#développer-la-partie-back-end)
     - [REST](#rest)
     - [Autres Bonnes Pratiques](#autres-bonnes-pratiques)
@@ -78,6 +81,7 @@ Il est pré-configuré avec un ensemble d'outils pour aider les étudiants à pr
 |------------------------|-----------------------------------------------------------------------------|
 | `npm install`          | Installe les dépendances pour le client et le serveur                       |
 | `npm run db:migrate`   | Met à jour la base de données à partir d'un schéma défini                   |
+| `npm run sync:places --workspace=server` | Remplit les lieux utiles de la carte depuis OpenStreetMap (voir [Remplir les lieux utiles](#remplir-les-lieux-utiles-de-la-carte)) |
 | `npm run dev`          | Démarre les deux serveurs (client et serveur) dans un seul terminal         |
 | `npm run check`        | Exécute les outils de validation (linting et formatage)                     |
 | `npm run test`         | Exécute les tests unitaires et d'intégration                                |
@@ -167,6 +171,131 @@ INSERT INTO item (title, user_id) VALUES
 ```sh
 npm run db:migrate
 ```
+
+### Remplir les lieux utiles de la carte
+
+La carte affiche des lieux utiles (pompiers, vétérinaires, hôpitaux, pharmacies, police)
+stockés dans la table `useful_place`. Ni `db:migrate` ni `db:seed` ne la remplissent : elle
+se remplit **à la main** depuis OpenStreetMap (API Overpass), avec le script `sync:places`.
+
+À faire une première fois, puis à chaque `npm run db:migrate` (la migration vide la base,
+`useful_place` comprise) :
+
+```sh
+# toutes les catégories
+npm run sync:places --workspace=server
+
+# seulement certaines catégories
+npm run sync:places --workspace=server -- fire_station veterinary
+```
+
+Catégories : `fire_station`, `veterinary`, `hospital`, `pharmacy`, `police`.
+
+- Le serveur de la base doit tourner et le `.env` de `server` être rempli. Une connexion à
+  Internet est nécessaire.
+- L'API Overpass est publique et parfois indisponible ou surchargée : le script réessaie une
+  fois par catégorie, et une catégorie en échec n'empêche pas les suivantes. En fin de
+  script, il liste les catégories en échec et affiche la commande pour les relancer seules.
+- Le script peut être relancé sans risque : les lieux sont mis à jour, pas dupliqués, et
+  ceux qui ont disparu d'OpenStreetMap sont retirés (sauf si plus de la moitié d'une
+  catégorie serait supprimée : le script refuse alors la suppression).
+- Vérifier le résultat :
+
+  ```sql
+  SELECT category, COUNT(*) FROM useful_place GROUP BY category;
+  ```
+
+### Simuler une progression de badges
+
+Pour voir la page « Mes badges » sans passer des heures à créer des signalements, le script
+`simulate:badges` ajoute de l'activité fictive à un utilisateur existant (développement
+uniquement : le script refuse de tourner en production).
+
+```sh
+# depuis /server : ajoute l'activité fictive (relançable, repart du même état)
+npm run simulate:badges -- <pseudo>
+
+# retire l'activité fictive, les badges et tous les votes de l'utilisateur
+npm run simulate:badges -- <pseudo> reset
+```
+
+- L'activité fictive est repérable : signalements et commentaires portent le contenu
+  `badge-test`.
+- Les badges atteints ne sont attribués qu'à la **connexion** : après le script, il faut se
+  reconnecter. Le script affiche la progression de chaque badge.
+- `reset` supprime **tous** les votes de l'utilisateur, y compris les vrais, et ses badges.
+
+### Activer la connexion Google
+
+Le bouton « Continuer avec Google » (pages de connexion et d'inscription) a besoin de
+3 variables dans le `.env` de `server`. Sans elles, le bouton redirige vers Google, qui
+refuse la connexion.
+
+```sh
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REDIRECT_URI=http://localhost:3310/api/auth/google/callback
+```
+
+- **Les valeurs** : elles viennent du projet « Vigie » de la console Google Cloud. Les
+  demander à Julien en **message privé**. Le secret ne doit jamais être commité ni posté
+  dans un canal de groupe.
+- **Compte de test** : tant que l'application est en mode test chez Google, seuls les
+  comptes ajoutés comme *utilisateurs test* peuvent se connecter. Toute l'équipe y est
+  ajoutée ; pour un nouveau compte, demander à Julien.
+- **Base de données** : la connexion Google utilise la table `oauth_account`. Après avoir
+  récupéré la branche, relancer `npm run db:migrate` puis `npm run db:seed`.
+- **En production** : l'adresse de retour devient
+  `https://<domaine>/api/auth/google/callback`. Elle doit être ajoutée aux *URI de
+  redirection autorisés* du client OAuth dans la console Google, et reportée dans
+  `GOOGLE_REDIRECT_URI`. `CLIENT_URL` doit pointer vers l'adresse publique du front :
+  c'est là que le serveur renvoie l'utilisateur après Google.
+
+### Activer les notifications push
+
+Les notifications push (alerte sur l'appareil même navigateur fermé) ont besoin de 3 variables
+dans le `.env` de `server`. Sans elles, le push est simplement désactivé : le centre de
+notifications et les e-mails continuent de fonctionner.
+
+```sh
+VAPID_PUBLIC_KEY=...
+VAPID_PRIVATE_KEY=...
+VAPID_SUBJECT=mailto:vous@exemple.fr
+```
+
+- **Générer une paire de clés** (depuis `/server`) : `npx web-push generate-vapid-keys`.
+  Chacun peut générer la sienne pour son poste. `VAPID_SUBJECT` est un contact (`mailto:…`
+  ou une URL `https://…`) transmis aux services de push (Google, Mozilla, Apple) : mettre une
+  vraie adresse, Apple rejette les valeurs bidon.
+- **Au démarrage du serveur**, le journal indique `Web Push activé`, ou `Web Push désactivé`
+  avec la raison (variable manquante, clé invalide, clé publique qui ne correspond pas à la
+  clé privée).
+- **Tester en local** : le service worker n'est enregistré qu'en production, donc pas avec
+  `npm run dev`. Faire `npm run build --workspace=client` (**pas** `npm run build` à la
+  racine : il lance aussi `db:migrate`, qui efface la base), puis `npm run start`, et ouvrir
+  `http://localhost:3310`. Le navigateur autorise le push sur `localhost` (Chrome, Firefox de
+  bureau), sans HTTPS. Sur iPhone il faut le site en HTTPS **et** ajouté à l'écran d'accueil (iOS 16.4
+  minimum).
+- **Envoyer un push de test** (depuis `/server`) : `npm run push:test -- <pseudo> [incident|danger|resolved|comment|mention] [ville]`.
+  Envoie à tous les appareils enregistrés de l'utilisateur le contenu réel du cas choisi, et
+  indique le résultat par appareil. Le lien ouvre le dernier incident de la base. La
+  notification s'affiche même si Vigie est ouvert.
+- **Navigateurs acceptés** : le serveur n'enregistre une adresse d'abonnement que si elle
+  appartient à un service de push connu (Google, Mozilla, Apple, Windows), pour qu'on ne puisse
+  pas lui faire appeler une autre adresse. Un autre service serait refusé (400) : sa liste est
+  dans `server/src/modules/pushSubscription/pushSubscriptionActions.ts`.
+- **En production** : générer **une seule paire** et la conserver en lieu sûr. **Ne jamais la
+  régénérer** : un abonnement est lié à la clé publique avec laquelle il a été créé, changer
+  de clé rend tous les abonnements inutilisables (chaque utilisateur devrait se réabonner).
+  `VAPID_SUBJECT` y est l'URL `https://` du site. Les 3 variables s'ajoutent comme les
+  [variables d'environnement spécifiques](#variables-denvironnement-spécifiques), et il faut
+  prévenir le formateur. Après le déploiement, vérifier la ligne `Web Push activé` dans les
+  [logs](#logs).
+- **Désactiver l'appareil courant** : depuis « Mon profil », réglage « Alertes sur cet
+  appareil ». Se déconnecter depuis le profil retire aussi l'appareil du compte, pour que le
+  suivant sur le même navigateur ne reçoive pas ses alertes ; il faudra réactiver à la prochaine
+  connexion. Un appareil devenu injoignable est retiré automatiquement au premier envoi
+  refusé par le service de push (réponse 404 ou 410).
 
 ### Développer la partie back-end
 

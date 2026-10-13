@@ -1,0 +1,121 @@
+import type { IconName } from "@/assets/icons";
+import ApocalypseSurprise from "@/components/Form/ApocalypseSurprise/ApocalypseSurprise";
+import Icon from "@/components/Icon/Icon";
+import type { IncidentType } from "@/types/incidentForm";
+import { useId, useState } from "react";
+
+const typeAnimations: Record<string, string> = {
+	fire: "motion-safe:[&_.flame-outer]:animate-flicker motion-safe:[&_.flame-inner]:animate-flicker-inner [&_g]:origin-bottom [&_g]:[transform-box:fill-box]",
+	glaze: "motion-safe:animate-shiver",
+	rockfall: "motion-safe:animate-topple origin-bottom",
+	wild: "motion-safe:animate-headshake motion-safe:[&_.snout]:animate-sniff [&_.snout]:origin-center [&_.snout]:[transform-box:fill-box]",
+	tree: "motion-safe:[&_.tier]:animate-sway [&_.tier]:origin-bottom [&_.tier]:[transform-box:fill-box] [&_.tier-2]:[animation-delay:0.15s] [&_.tier-3]:[animation-delay:0.3s]",
+	insect: "motion-safe:animate-float motion-safe:[&_.wings]:animate-flutter [&_.wings]:origin-center [&_.wings]:[transform-box:fill-box]",
+	storm: "motion-safe:[&_.bolt]:animate-flash [&_.bolt]:origin-center [&_.bolt]:[transform-box:fill-box] motion-safe:[&_.drops]:animate-rain [&_.drops-2]:[animation-delay:0.3s] [&_.drops-3]:[animation-delay:0.6s]",
+	hail: "motion-safe:[&_.stone]:animate-fall [&_.stone-1]:[animation-duration:0.9s] [&_.stone-2]:[animation-duration:1.2s] [&_.stone-4]:[animation-duration:1.3s] [&_.stone-5]:[animation-duration:1.1s]",
+	snow: "motion-safe:[&_.flake]:animate-snowfall [&_.flake]:origin-center [&_.flake]:[transform-box:fill-box] [&_.flake-2]:[animation-duration:3.6s] [&_.flake-3]:[animation-duration:2.2s] [&_.flake-4]:[animation-duration:2.6s] [&_.flake-5]:[animation-duration:2.4s] [&_.flake-6]:[animation-duration:2.8s]",
+	flood: "overflow-hidden! motion-safe:[&_.wave-1]:animate-wave-left motion-safe:[&_.wave-2]:animate-wave-right motion-safe:[&_.bubble]:animate-bubble [&_.bubble-2]:[animation-duration:2.6s] [&_.bubble-3]:[animation-duration:2.3s]",
+	tornado:
+		"motion-safe:[&_.funnel]:animate-twist [&_.funnel]:origin-bottom [&_.funnel]:[transform-box:fill-box] motion-safe:[&_.debris]:animate-debris [&_.debris-2]:[animation-delay:0.3s] [&_.debris-3]:[animation-delay:0.6s] [&_.debris-4]:[animation-delay:0.9s]",
+	animal: "motion-safe:[&_.tail]:animate-tail-wag [&_.tail]:origin-bottom-left [&_.tail]:[transform-box:fill-box] motion-safe:[&_.eyes]:animate-blink [&_.eyes]:origin-center [&_.eyes]:[transform-box:fill-box]",
+};
+
+type IncidentTypePickerProps = {
+	label: string;
+	incidentTypes: IncidentType[];
+	value: number[];
+	onChange: (ids: number[]) => void;
+	error?: string | null;
+};
+
+export default function IncidentTypePicker({
+	label,
+	incidentTypes,
+	value,
+	onChange,
+	error,
+}: IncidentTypePickerProps) {
+	const errorId = useId();
+	const [isApocalypseDismissed, setIsApocalypseDismissed] = useState(false);
+
+	const isApocalypse =
+		incidentTypes.length > 0 &&
+		value.length === incidentTypes.length &&
+		!isApocalypseDismissed;
+
+	function toggleType(id: number) {
+		const next = value.includes(id)
+			? value.filter((typeId) => typeId !== id)
+			: [...value, id];
+
+		setIsApocalypseDismissed(false);
+		onChange(next);
+	}
+
+	return (
+		<fieldset aria-describedby={error ? errorId : undefined}>
+			<legend className="sr-only">{label}</legend>
+			{isApocalypse ? (
+				<ApocalypseSurprise
+					onDismiss={() => setIsApocalypseDismissed(true)}
+				/>
+			) : (
+				<div className="grid grid-cols-3 gap-x-3 gap-y-6">
+					{incidentTypes.map((type) => {
+						const isSelected = value.includes(type.id);
+
+						return (
+							<button
+								key={type.id}
+								type="button"
+								aria-pressed={isSelected}
+								onClick={() => toggleType(type.id)}
+							>
+								<div
+									className="relative flex aspect-square flex-col items-center justify-center gap-1 rounded-2xl border bg-base-300 p-3"
+									style={
+										isSelected
+											? {
+													borderColor: `var(--${type.icon})`,
+													backgroundColor: `var(--bg-${type.icon})`,
+												}
+											: {
+													borderColor:
+														"var(--primary-light)",
+												}
+									}
+								>
+									<Icon
+										name={type.icon as IconName}
+										className={`-mt-8 ${isSelected ? `h-16 w-16 overflow-visible ${typeAnimations[type.icon] ?? ""}` : "h-14 w-14"}`}
+									/>
+									<span className="pt-1 text-sm">
+										{type.label}
+									</span>
+								</div>
+							</button>
+						);
+					})}
+				</div>
+			)}
+
+			{error && (
+				<div
+					role="alert"
+					className="mt-4 flex w-full items-start gap-3 rounded-2xl bg-(--bg-error) px-5 py-3"
+				>
+					<span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-error">
+						<Icon
+							name="exclamation"
+							className="h-3.5 w-3.5 fill-white"
+							aria-hidden="true"
+						/>
+					</span>
+					<p id={errorId} className="text-sm text-error">
+						{error}
+					</p>
+				</div>
+			)}
+		</fieldset>
+	);
+}

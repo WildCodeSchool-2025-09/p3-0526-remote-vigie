@@ -1,0 +1,66 @@
+import IncidentTypePicker from "@/components/Form/IncidentTypePicker/IncidentTypePicker";
+import SafetyInstructions, {
+	type SafetyInstructionsItem,
+} from "@/components/SafetyInstructions/SafetyInstructions";
+import type { IncidentType } from "@/types/incidentForm";
+
+type IncidentTypeStepProps = {
+	incidentTypes: IncidentType[];
+	selectedTypes: number[];
+	onSelectedTypesChange: (ids: number[]) => void;
+	typesError: string | null;
+	onRetry: () => void;
+	selectedTypesInstructions: SafetyInstructionsItem[];
+	selectionError: string | null;
+};
+
+export default function IncidentTypeStep({
+	incidentTypes,
+	selectedTypes,
+	onSelectedTypesChange,
+	typesError,
+	onRetry,
+	selectedTypesInstructions,
+	selectionError,
+}: IncidentTypeStepProps) {
+	return (
+		<section className="rounded-2xl bg-base-200 p-4">
+			<div className="flex items-center gap-2 pb-8">
+				<span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-content">
+					1
+				</span>
+				<h2 className="font-title text-lg font-bold text-primary">
+					Que voulez-vous signaler ?
+				</h2>
+			</div>
+			{typesError && (
+				<div className="text-center">
+					<p role="alert" className="m-2 ">
+						{typesError}
+					</p>
+					<button
+						type="button"
+						className="btn btn-accent btn-md w-full grow rounded-full border-none px-5 font-bold"
+						onClick={onRetry}
+					>
+						Réessayer
+					</button>
+				</div>
+			)}
+			{!typesError && (
+				<>
+					<IncidentTypePicker
+						label="Que voulez-vous signaler ?"
+						incidentTypes={incidentTypes}
+						value={selectedTypes}
+						onChange={onSelectedTypesChange}
+						error={selectionError}
+					/>
+					<SafetyInstructions
+						incidentTypes={selectedTypesInstructions}
+					/>
+				</>
+			)}
+		</section>
+	);
+}

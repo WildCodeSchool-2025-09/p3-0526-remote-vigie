@@ -1,0 +1,233 @@
+import backgroundIncident from "@/assets/images/background-incident.jpg";
+import EmailNotVerifiedBanner from "@/components/EmailNotVerifiedBanner/EmailNotVerifiedBanner";
+import Icon from "@/components/Icon/Icon";
+import NotificationItem from "@/components/Notification/NotificationItem/NotificationItem";
+import PushOptInBanner from "@/components/PushOptInBanner/PushOptInBanner";
+import { usePushOptIn } from "@/components/PushOptInBanner/usePushOptIn";
+import { useNotificationCenter } from "@/contexts/Notification/useNotificationCenter";
+import { useAuth } from "@/contexts/auth/AuthContext";
+import NotificationsSkeleton from "@/pages/Notification/NotificationsSkeleton";
+import type { Notification } from "@/types/notification";
+import { useNavigate } from "react-router";
+
+function getDateGroupLabel(date: string) {
+	const value = new Date(date);
+	if (Number.isNaN(value.getTime())) return "Plus tôt";
+
+	const startOfDay = (d: Date) =>
+		new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+	const diffDays = Math.round(
+		(startOfDay(new Date()) - startOfDay(value)) / 86_400_000,
+	);
+
+	if (diffDays === 0) return "Aujourd'hui";
+	if (diffDays === 1) return "Hier";
+	return value.toLocaleDateString("fr-FR", {
+		day: "numeric",
+		month: "long",
+		year:
+			value.getFullYear() !== new Date().getFullYear()
+				? "numeric"
+				: undefined,
+	});
+}
+
+function groupByDate(notifications: Notification[]) {
+	const groups = new Map<string, Notification[]>();
+	for (const notification of notifications) {
+		const label = getDateGroupLabel(notification.created_at);
+		const group = groups.get(label) ?? [];
+		group.push(notification);
+		groups.set(label, group);
+	}
+	return [...groups.entries()];
+}
+
+type ViewState =
+	| { status: "loading" }
+	| { status: "error" }
+	| { status: "empty" }
+	| { status: "list"; notifications: Notification[] };
+
+function getViewState(
+	isLoading: boolean,
+	error: string | null,
+	notifications: Notification[],
+): ViewState {
+	if (isLoading) return { status: "loading" };
+	if (error) return { status: "error" };
+	if (notifications.length === 0) return { status: "empty" };
+	return { status: "list", notifications };
+}
+
+function NotificationCenter() {
+	const navigate = useNavigate();
+	const {
+		notifications,
+		page,
+		hasMore,
+		isLoading,
+		error,
+		loadNotifications,
+		markAllAsRead,
+		markOneAsRead,
+	} = useNotificationCenter();
+	const state = getViewState(isLoading, error, notifications);
+	const { user } = useAuth();
+	const showsEmailBanner = user != null && !user.emailVerified;
+	const pushOptIn = usePushOptIn();
+	const showsTopBanner = showsEmailBanner || pushOptIn.visible;
+
+	return (
+		<main className="min-h-full bg-base-100">
+			<header className="relative isolate flex h-36 flex-col justify-end overflow-hidden bg-primary px-4 pt-4 pb-16">
+				<img
+					src={backgroundIncident}
+					alt=""
+					aria-hidden="true"
+					className="absolute inset-0 -z-10 h-full w-full object-cover opacity-60 mix-blend-multiply"
+				/>
+				<h1 className="font-title text-2xl font-bold text-accent">
+					Notifications
+				</h1>
+			</header>
+
+			<EmailNotVerifiedBanner />
+
+			{pushOptIn.mode != null && (
+				<div
+					className={`relative mx-auto w-full max-w-4xl px-4 sm:px-8 ${showsEmailBanner ? "mt-3" : "-mt-8"}`}
+				>
+					<PushOptInBanner
+						mode={pushOptIn.mode}
+						accepting={pushOptIn.accepting}
+						error={pushOptIn.error}
+						onAccept={pushOptIn.accept}
+						onDismiss={pushOptIn.dismiss}
+					/>
+				</div>
+			)}
+
+			<section
+				className={`mx-auto w-full max-w-4xl px-4 pb-24 sm:px-8 sm:pb-28 ${showsTopBanner ? "pt-12" : ""}`}
+				aria-live="polite"
+			>
+				{state.status === "loading" && <NotificationsSkeleton />}
+
+				{state.status === "error" && (
+					<div className="relative -mt-8 flex flex-col gap-4 rounded-3xl bg-(--bg-error) p-4">
+						<div className="flex items-start gap-3">
+							<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-error">
+								<Icon
+									name="exclamation"
+									className="h-3.5 w-3.5 fill-white"
+									aria-hidden="true"
+								/>
+							</span>
+							<div>
+								<h2 className="font-title text-lg font-bold text-error">
+									Impossible d'afficher vos notifications
+								</h2>
+								<p className="mx-auto mt-3 max-w-lg text-secondary/70">
+									La connexion au serveur a échoué. Réessayez
+									dans un instant.
+								</p>
+								<button
+									className="btn btn-md grow rounded-full mt-3 w-60 border-none bg-error px-5 font-bold text-white"
+									type="button"
+									onClick={() => void loadNotifications()}
+								>
+									Réessayer
+								</button>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{state.status === "empty" && (
+					<div className="relative -mt-8 flex flex-col items-center gap-4 rounded-3xl bg-base-300 p-4 text-center">
+						<span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--bg-success)">
+							<Icon
+								name="notification"
+								className="h-8 w-8 fill-success"
+								aria-hidden="true"
+							/>
+						</span>
+						<div>
+							<h2 className="font-title text-lg font-bold text-primary">
+								Aucune notification
+							</h2>
+							<p className="mt-1 text-sm text-black">
+								Vous retrouverez ici les incidents signalés près
+								de vos adresses, les réponses à vos signalements
+								et vos badges.
+							</p>
+						</div>
+						<button
+							type="button"
+							onClick={() => navigate("/")}
+							className="btn btn-accent btn-md w-full rounded-full border-none px-5 font-bold mt-3"
+						>
+							Aller à l'accueil
+						</button>
+					</div>
+				)}
+
+				{state.status === "list" && (
+					<>
+						<div className="-mt-8 relative mb-6 flex items-center justify-between gap-3 rounded-2xl bg-warning p-4 shadow-sm">
+							<div className="flex items-center gap-2">
+								<span className="font-title text-lg font-bold text-primary">
+									{
+										state.notifications.filter(
+											(item) => item.is_read === false,
+										).length
+									}{" "}
+									non lues sur {state.notifications.length}
+								</span>
+							</div>
+							<button
+								className="shrink-0 text-xs font-bold text-secondary underline underline-offset-2"
+								type="button"
+								onClick={() => void markAllAsRead()}
+							>
+								Tout marquer comme lu
+							</button>
+						</div>
+
+						{groupByDate(state.notifications).map(
+							([dateLabel, items]) => (
+								<div key={dateLabel} className="mb-5">
+									<h2 className="mb-2 text-xs font-bold tracking-wide text-secondary/50 uppercase">
+										{dateLabel}
+									</h2>
+									<div className="grid content-start gap-3">
+										{items.map((notification) => (
+											<NotificationItem
+												key={`${notification.type}-${notification.source_id}`}
+												notification={notification}
+												onRead={markOneAsRead}
+											/>
+										))}
+									</div>
+								</div>
+							),
+						)}
+
+						{hasMore && (
+							<button
+								className="btn btn-outline mt-5 w-full"
+								type="button"
+								onClick={() => void loadNotifications(page + 1)}
+							>
+								Charger plus
+							</button>
+						)}
+					</>
+				)}
+			</section>
+		</main>
+	);
+}
+
+export default NotificationCenter;

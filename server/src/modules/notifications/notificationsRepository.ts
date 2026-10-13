@@ -1,0 +1,288 @@
+import databaseClient from "../../../database/client";
+import type { Rows } from "../../../database/client";
+
+class NotificationsRepository {
+	async browseSinceLastSeen(
+		userId: number,
+		lastSeenAt: Date | null,
+		limit = 20,
+		offset = 0,
+	) {
+		const [rows] = await databaseClient.query<Rows>(
+			`(
+         SELECT
+           'incident' AS type,
+           incident.id AS source_id,
+           incident.created_at,
+           incident.id AS incident_id,
+           incident.title AS incident_title,
+           incident.city,
+           incident.status,
+           (
+            SELECT incident_type.code
+            FROM incident_incident_type
+            JOIN incident_type ON incident_type.id = incident_incident_type.incident_type_id
+            JOIN danger_level ON danger_level.id = incident_type.danger_level_id
+            WHERE incident_incident_type.incident_id = incident.id
+            ORDER BY danger_level.weight DESC, incident_type.code ASC
+            LIMIT 1
+           ) AS incident_type,
+           NULL AS badge_code,
+           NULL AS badge_label,
+           NULL AS badge_icon
+         FROM incident
+         WHERE incident.user_id != ?
+           AND incident.status = 'in_progress'
+           AND incident.expires_at > NOW()
+           AND (? IS NULL OR incident.created_at > ?)
+           AND EXISTS (
+             SELECT 1
+             FROM address
+             WHERE address.user_id = ?
+               AND ST_Distance_Sphere(
+                 POINT(address.longitude, address.latitude),
+                 POINT(incident.longitude, incident.latitude)
+               ) <= incident.base_alert_radius_meters
+           )
+       )
+       UNION ALL
+       (
+         SELECT
+           'comment' AS type,
+           comment.id AS source_id,
+           comment.created_at,
+           incident.id AS incident_id,
+           incident.title AS incident_title,
+           incident.city,
+           incident.status,
+           NULL AS incident_type,
+           NULL AS badge_code,
+           NULL AS badge_label,
+           NULL AS badge_icon
+         FROM comment
+         JOIN incident ON incident.id = comment.incident_id
+         WHERE incident.user_id = ?
+           AND comment.user_id != ?
+           AND (? IS NULL OR comment.created_at > ?)
+       )
+       UNION ALL
+       (
+         SELECT
+           'incident_resolved' AS type,
+           incident.id AS source_id,
+           incident.updated_at AS created_at,
+           incident.id AS incident_id,
+           incident.title AS incident_title,
+           incident.city,
+           incident.status,
+           (
+            SELECT incident_type.code
+            FROM incident_incident_type
+            JOIN incident_type ON incident_type.id = incident_incident_type.incident_type_id
+            JOIN danger_level ON danger_level.id = incident_type.danger_level_id
+            WHERE incident_incident_type.incident_id = incident.id
+            ORDER BY danger_level.weight DESC, incident_type.code ASC
+            LIMIT 1
+           ) AS incident_type,
+           NULL AS badge_code,
+           NULL AS badge_label,
+           NULL AS badge_icon
+         FROM incident
+         WHERE incident.user_id = ?
+           AND incident.status = 'resolved'
+           AND (? IS NULL OR incident.updated_at > ?)
+       )
+       UNION ALL
+       (
+         SELECT
+           'incident_resolved' AS type,
+           incident.id AS source_id,
+           incident.updated_at AS created_at,
+           incident.id AS incident_id,
+           incident.title AS incident_title,
+           incident.city,
+           incident.status,
+           (
+            SELECT incident_type.code
+            FROM incident_incident_type
+            JOIN incident_type ON incident_type.id = incident_incident_type.incident_type_id
+            JOIN danger_level ON danger_level.id = incident_type.danger_level_id
+            WHERE incident_incident_type.incident_id = incident.id
+            ORDER BY danger_level.weight DESC, incident_type.code ASC
+            LIMIT 1
+           ) AS incident_type,
+           NULL AS badge_code,
+           NULL AS badge_label,
+           NULL AS badge_icon
+         FROM incident
+         WHERE incident.user_id != ?
+           AND incident.status = 'resolved'
+           AND (? IS NULL OR incident.updated_at > ?)
+           AND EXISTS (
+             SELECT 1
+             FROM address
+             WHERE address.user_id = ?
+               AND ST_Distance_Sphere(
+                 POINT(address.longitude, address.latitude),
+                 POINT(incident.longitude, incident.latitude)
+               ) <= incident.base_alert_radius_meters
+           )
+       )
+       UNION ALL
+       (
+         SELECT
+           'mention' AS type,
+           c.id AS source_id,
+           c.created_at,
+           incident.id AS incident_id,
+           incident.title AS incident_title,
+           incident.city,
+           incident.status,
+           NULL AS incident_type,
+           NULL AS badge_code,
+           NULL AS badge_label,
+           NULL AS badge_icon
+         FROM comment AS c
+         JOIN comment AS quoted ON quoted.id = c.quoted_comment_id
+         JOIN incident ON incident.id = c.incident_id
+         WHERE quoted.user_id = ?
+           AND c.user_id != ?
+           AND incident.user_id != quoted.user_id
+           AND (? IS NULL OR c.created_at > ?)
+       )
+       UNION ALL
+       (
+         SELECT
+           'badge' AS type,
+           badge.id AS source_id,
+           user_badge.earned_at AS created_at,
+           NULL AS incident_id,
+           NULL AS incident_title,
+           NULL AS city,
+           NULL AS status,
+           NULL AS incident_type,
+           badge.code AS badge_code,
+           badge.label AS badge_label,
+           badge.icon AS badge_icon
+         FROM user_badge
+         JOIN badge ON badge.id = user_badge.badge_id
+         WHERE user_badge.user_id = ?
+           AND (? IS NULL OR user_badge.earned_at > ?)
+       )
+       ORDER BY created_at DESC
+       LIMIT ? OFFSET ?`,
+			[
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				userId,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				userId,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				limit,
+				offset,
+			],
+		);
+
+		return rows;
+	}
+
+	async countSinceLastSeen(userId: number, lastSeenAt: Date | null) {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT COUNT(*) AS count FROM (
+         SELECT incident.id
+         FROM incident
+         WHERE incident.user_id != ?
+           AND incident.status = 'in_progress'
+           AND incident.expires_at > NOW()
+           AND (? IS NULL OR incident.created_at > ?)
+           AND EXISTS (
+             SELECT 1
+             FROM address
+             WHERE address.user_id = ?
+               AND ST_Distance_Sphere(
+                 POINT(address.longitude, address.latitude),
+                 POINT(incident.longitude, incident.latitude)
+               ) <= incident.base_alert_radius_meters
+           )
+         UNION ALL
+         SELECT comment.id FROM comment
+         JOIN incident ON incident.id = comment.incident_id
+         WHERE incident.user_id = ? AND comment.user_id != ?
+           AND (? IS NULL OR comment.created_at > ?)
+         UNION ALL
+         SELECT incident.id FROM incident
+         WHERE incident.user_id = ? AND incident.status = 'resolved'
+           AND (? IS NULL OR incident.updated_at > ?)
+         UNION ALL
+         SELECT incident.id FROM incident
+         WHERE incident.user_id != ? AND incident.status = 'resolved'
+           AND (? IS NULL OR incident.updated_at > ?)
+           AND EXISTS (
+             SELECT 1
+             FROM address
+             WHERE address.user_id = ?
+               AND ST_Distance_Sphere(
+                 POINT(address.longitude, address.latitude),
+                 POINT(incident.longitude, incident.latitude)
+               ) <= incident.base_alert_radius_meters
+           )
+         UNION ALL
+         SELECT c.id FROM comment AS c
+         JOIN comment AS quoted ON quoted.id = c.quoted_comment_id
+         JOIN incident ON incident.id = c.incident_id
+         WHERE quoted.user_id = ?
+           AND c.user_id != ?
+           AND incident.user_id != quoted.user_id
+           AND (? IS NULL OR c.created_at > ?)
+         UNION ALL
+         SELECT user_badge.badge_id FROM user_badge
+         WHERE user_badge.user_id = ?
+           AND (? IS NULL OR user_badge.earned_at > ?)
+       ) AS events`,
+			[
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				userId,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				userId,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+				userId,
+				lastSeenAt,
+				lastSeenAt,
+			],
+		);
+
+		return (rows as { count: number }[])[0].count;
+	}
+}
+
+export default new NotificationsRepository();

@@ -1,0 +1,561 @@
+import databaseClient from "../../../database/client";
+import type { Bounds } from "../../services/parseBounds";
+import type {
+	IncidentSort,
+	ListFilters,
+} from "../../services/parseListFilters";
+import contributionRepository from "../contribution/contributionRepository";
+
+import type { Executor, Result, Rows } from "../../../database/client";
+
+// Only CRUD here (Create, Read, Update, Delete)
+
+type IncidentListItem = {
+	id: number;
+	title: string;
+	city: string | null;
+	latitude: string;
+	longitude: string;
+	status: "in_progress" | "resolved";
+	createdAt: Date;
+	expiresAt: Date;
+	dangerLevel: { label: string; color: string; weight: number };
+	type: { code: string; label: string; icon: string; color: string } | null;
+};
+
+export type ClosedIncident = {
+	id: number;
+	userId: number;
+	city: string | null;
+	latitude: string;
+	longitude: string;
+	alertRadiusMeters: number;
+	// Computed by MySQL so it uses the same clock as expires_at
+	expiredForMinutes: number;
+};
+
+type IncidentDetails = {
+	id: number;
+	title: string;
+	description: string | null;
+	photoUrl: string | null;
+	latitude: string;
+	longitude: string;
+	city: string | null;
+	postalCode: string | null;
+	inseeCode: string | null;
+	status: "in_progress" | "resolved";
+	createdAt: Date;
+	editedAt: Date | null;
+	expiresAt: Date;
+	dangerLevel: { label: string; color: string; weight: number };
+	// id null : compte supprimé, on n'expose pas son identifiant (US18)
+	author: { id: number | null; pseudo: string };
+	types: {
+		code: string;
+		label: string;
+		icon: string;
+		color: string;
+		safetyInstructions: string | null;
+	}[];
+	counts: { confirm: number; deny: number };
+	myContribution: "confirm" | "deny" | null;
+};
+
+type IncidentListPage = {
+	incidents: IncidentListItem[];
+	truncated: boolean;
+};
+
+type NearbyIncident = {
+	id: number;
+	typeIds: number[];
+	latitude: string;
+	longitude: string;
+	baseAlertRadiusMeters: number;
+	city: string | null;
+	createdAt: Date;
+};
+
+const DEFAULT_LIST_FILTERS: ListFilters = {
+	includeResolved: false,
+	sort: "date",
+	search: null,
+};
+
+// Never built from user input: `sort` is whitelisted by parseListFilters.
+const SORT_CLAUSES: Record<IncidentSort, string> = {
+	date: "i.created_at DESC, i.id DESC",
+	date_asc: "i.created_at ASC, i.id ASC",
+	severity: "d.weight DESC, i.created_at DESC, i.id DESC",
+	severity_asc: "d.weight ASC, i.created_at DESC, i.id DESC",
+};
+
+// `\`, `%` and `_` are escape or wildcard characters in a LIKE pattern.
+function toLikePattern(search: string): string {
+	return `%${search.replace(/[\\%_]/g, "\\$&")}%`;
+}
+
+class IncidentRepository {
+	// With `bounds`, only incidents located inside that rectangle.
+	// Without `includeResolved`, only ongoing and not yet expired incidents.
+	// With `search`, only incidents whose title, description, city or a type label matches.
+	async readAllForList(
+		limit: number,
+		bounds: Bounds | null = null,
+		filters: ListFilters = DEFAULT_LIST_FILTERS,
+	): Promise<IncidentListPage> {
+		const conditions: string[] = [];
+		const whereParams: unknown[] = [];
+
+		if (!filters.includeResolved) {
+			// Masque les incidents échus que la tâche de clôture n'a pas encore traités ;
+			// avec includeResolved, ils peuvent apparaître en cours jusqu'à son prochain passage.
+			conditions.push(
+				"i.status = 'in_progress' AND i.expires_at > NOW()",
+			);
+		}
+		if (bounds) {
+			conditions.push(
+				"i.latitude BETWEEN ? AND ? AND i.longitude BETWEEN ? AND ?",
+			);
+			whereParams.push(
+				bounds.south,
+				bounds.north,
+				bounds.west,
+				bounds.east,
+			);
+		}
+		if (filters.search) {
+			conditions.push(
+				`(i.title LIKE ? OR i.description LIKE ? OR i.city LIKE ?
+					OR EXISTS (
+						SELECT 1 FROM incident_incident_type AS siit
+						INNER JOIN incident_type AS st ON st.id = siit.incident_type_id
+						WHERE siit.incident_id = i.id AND st.label LIKE ?
+					))`,
+			);
+			const pattern = toLikePattern(filters.search);
+			whereParams.push(pattern, pattern, pattern, pattern);
+		}
+
+		const whereClause =
+			conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+		const [incidentRows] = await databaseClient.query<Rows>(
+			`SELECT
+				i.id, i.title, i.city, i.latitude, i.longitude, i.status,
+				i.created_at, i.expires_at,
+				d.label  AS danger_level_label,
+				d.color  AS danger_level_color,
+				d.weight AS danger_level_weight
+			FROM incident AS i
+			INNER JOIN danger_level AS d ON d.id = i.danger_level_id
+			${whereClause}
+			ORDER BY ${SORT_CLAUSES[filters.sort]}
+			LIMIT ?`,
+			[...whereParams, limit + 1],
+		);
+
+		// The extra row only tells that more incidents exist: it is not returned.
+		const truncated = incidentRows.length > limit;
+		const pageRows = incidentRows.slice(0, limit);
+
+		if (pageRows.length === 0) {
+			return { incidents: [], truncated: false };
+		}
+
+		const ids = pageRows.map((row) => row.id as number);
+
+		const [typeRows] = await databaseClient.query<Rows>(
+			`SELECT
+				iit.incident_id,
+				t.code, t.label, t.icon, t.color
+			FROM incident_incident_type AS iit
+			INNER JOIN incident_type AS t   ON t.id   = iit.incident_type_id
+			INNER JOIN danger_level  AS tdl ON tdl.id = t.danger_level_id
+			WHERE iit.incident_id IN (?)
+			ORDER BY iit.incident_id, tdl.weight DESC, t.id ASC`,
+			[ids],
+		);
+
+		const principalTypeByIncident = new Map<
+			number,
+			{ code: string; label: string; icon: string; color: string }
+		>();
+		for (const row of typeRows) {
+			if (!principalTypeByIncident.has(row.incident_id)) {
+				principalTypeByIncident.set(row.incident_id, {
+					code: row.code,
+					label: row.label,
+					icon: row.icon,
+					color: row.color,
+				});
+			}
+		}
+
+		const incidents = pageRows.map((row) => ({
+			id: row.id,
+			title: row.title,
+			city: row.city,
+			latitude: row.latitude,
+			longitude: row.longitude,
+			status: row.status,
+			createdAt: row.created_at,
+			expiresAt: row.expires_at,
+			dangerLevel: {
+				label: row.danger_level_label,
+				color: row.danger_level_color,
+				weight: row.danger_level_weight,
+			},
+			type: principalTypeByIncident.get(row.id) ?? null,
+		}));
+
+		return { incidents, truncated };
+	}
+
+	async read(
+		id: number,
+		userId: number | null,
+	): Promise<IncidentDetails | null> {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT
+				i.id, i.user_id, i.title, i.description, i.photo_url,
+				i.latitude, i.longitude, i.city, i.postal_code, i.insee_code,
+				i.status, i.created_at, i.edited_at, i.expires_at,
+				d.label AS danger_level_label,
+				d.color AS danger_level_color,
+				d.weight AS danger_level_weight,
+				u.pseudo AS author_pseudo,
+				u.anonymized_at AS author_anonymized_at
+			FROM incident AS i
+			INNER JOIN danger_level AS d ON d.id = i.danger_level_id
+			INNER JOIN user AS u ON u.id = i.user_id
+			WHERE i.id = ?`,
+			[id],
+		);
+
+		const row = rows[0];
+
+		if (row == null) {
+			return null;
+		}
+
+		const [typeRows] = await databaseClient.query<Rows>(
+			`SELECT t.code, t.label, t.icon, t.color, t.safety_instructions
+			FROM incident_incident_type AS iit
+			INNER JOIN incident_type AS t ON t.id = iit.incident_type_id
+			INNER JOIN danger_level AS tdl ON tdl.id = t.danger_level_id
+			WHERE iit.incident_id = ?
+			ORDER BY tdl.weight DESC, t.id ASC`,
+			[id],
+		);
+
+		const counts = await contributionRepository.countByIncident(id);
+		const myContribution =
+			userId == null
+				? null
+				: await contributionRepository.findByUser(id, userId);
+
+		return {
+			id: row.id,
+			title: row.title,
+			description: row.description,
+			photoUrl: row.photo_url,
+			latitude: row.latitude,
+			longitude: row.longitude,
+			city: row.city,
+			postalCode: row.postal_code,
+			inseeCode: row.insee_code,
+			status: row.status,
+			createdAt: row.created_at,
+			editedAt: row.edited_at,
+			expiresAt: row.expires_at,
+			dangerLevel: {
+				label: row.danger_level_label,
+				color: row.danger_level_color,
+				weight: row.danger_level_weight,
+			},
+			author: {
+				id: row.author_anonymized_at == null ? row.user_id : null,
+				pseudo: row.author_pseudo,
+			},
+			types: typeRows.map((t) => ({
+				code: t.code,
+				label: t.label,
+				icon: t.icon,
+				color: t.color,
+				safetyInstructions: t.safety_instructions,
+			})),
+			counts,
+			myContribution,
+		};
+	}
+
+	async readNearbyOngoingByTypes(
+		typeIds: number[],
+	): Promise<NearbyIncident[]> {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT DISTINCT
+			i.id, i.latitude, i.longitude, i.base_alert_radius_meters,
+			i.city, i.created_at
+			FROM incident AS i
+			INNER JOIN incident_incident_type AS iit ON iit.incident_id = i.id
+			WHERE i.status = 'in_progress'
+			AND iit.incident_type_id IN (?)`,
+			[typeIds],
+		);
+
+		if (rows.length === 0) return [];
+
+		const [typeRows] = await databaseClient.query<Rows>(
+			`SELECT incident_id, incident_type_id
+			FROM incident_incident_type
+			WHERE incident_id IN (?)`,
+			[rows.map((row) => row.id)],
+		);
+
+		const typesByIncident = new Map<number, number[]>();
+		for (const row of typeRows) {
+			const ids = typesByIncident.get(row.incident_id) ?? [];
+			ids.push(row.incident_type_id);
+			typesByIncident.set(row.incident_id, ids);
+		}
+
+		return rows.map((r) => ({
+			id: r.id,
+			typeIds: typesByIncident.get(r.id) ?? [],
+			latitude: r.latitude,
+			longitude: r.longitude,
+			baseAlertRadiusMeters: r.base_alert_radius_meters,
+			city: r.city,
+			createdAt: r.created_at,
+		}));
+	}
+
+	async readRecentByUser(userId: number): Promise<NearbyIncident[]> {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT DISTINCT
+			i.id, i.latitude, i.longitude, i.base_alert_radius_meters,
+			i.city, i.created_at
+			FROM incident AS i
+			WHERE i.user_id = ?
+			AND i.created_at >= NOW() - INTERVAL 10 SECOND`,
+			[userId],
+		);
+
+		if (rows.length === 0) return [];
+
+		const [typeRows] = await databaseClient.query<Rows>(
+			`SELECT incident_id, incident_type_id
+			FROM incident_incident_type
+			WHERE incident_id IN (?)`,
+			[rows.map((row) => row.id)],
+		);
+
+		const typesByIncident = new Map<number, number[]>();
+		for (const row of typeRows) {
+			const ids = typesByIncident.get(row.incident_id) ?? [];
+			ids.push(row.incident_type_id);
+			typesByIncident.set(row.incident_id, ids);
+		}
+
+		return rows.map((r) => ({
+			id: r.id,
+			typeIds: typesByIncident.get(r.id) ?? [],
+			latitude: r.latitude,
+			longitude: r.longitude,
+			baseAlertRadiusMeters: r.base_alert_radius_meters,
+			city: r.city,
+			createdAt: r.created_at,
+		}));
+	}
+
+	async findOwnerAndStatus(id: number): Promise<{
+		userId: number;
+		status: "in_progress" | "resolved";
+		city: string | null;
+	} | null> {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT user_id, status, city FROM incident WHERE id = ?",
+			[id],
+		);
+
+		const row = rows[0];
+		return row == null
+			? null
+			: { userId: row.user_id, status: row.status, city: row.city };
+	}
+
+	async findPhotoUrl(id: number): Promise<string | null> {
+		const [rows] = await databaseClient.query<Rows>(
+			"SELECT photo_url FROM incident WHERE id = ?",
+			[id],
+		);
+
+		return rows[0]?.photo_url ?? null;
+	}
+
+	async update(
+		id: number,
+		data: {
+			title: string;
+			description: string | null;
+			// undefined : on garde la photo actuelle ; null : on la retire.
+			photoUrl?: string | null;
+		},
+	): Promise<void> {
+		const photoSet = data.photoUrl === undefined ? "" : ", photo_url = ?";
+		const photoParams = data.photoUrl === undefined ? [] : [data.photoUrl];
+
+		await databaseClient.query(
+			`UPDATE incident
+			SET title = ?, description = ?${photoSet}, edited_at = NOW()
+			WHERE id = ?`,
+			[data.title, data.description, ...photoParams, id],
+		);
+	}
+
+	async countRecentByUser(userId: number): Promise<number> {
+		const [rows] = await databaseClient.query<Rows>(
+			`SELECT COUNT(*) AS total
+		FROM incident
+		WHERE user_id = ?
+		AND created_at >= NOW() - INTERVAL 1 HOUR`,
+			[userId],
+		);
+
+		return Number(rows[0].total);
+	}
+
+	async create(data: {
+		userId: number;
+		dangerLevelId: number;
+		title: string;
+		description: string | null;
+		photoUrl: string | null;
+		latitude: number;
+		longitude: number;
+		lifespanHours: number;
+		alertRadiusMeters: number;
+		city: string | null;
+		postalCode: string | null;
+		inseeCode: string | null;
+		typeIds: number[];
+	}): Promise<number> {
+		const connection = await databaseClient.getConnection();
+		try {
+			await connection.beginTransaction();
+
+			const [result] = await connection.query<Result>(
+				`INSERT INTO incident
+			(user_id, danger_level_id, title, description, photo_url,
+			latitude, longitude, base_lifespan_hours, base_alert_radius_meters,
+			city, postal_code, insee_code, expires_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW() + INTERVAL ? HOUR)`,
+				[
+					data.userId,
+					data.dangerLevelId,
+					data.title,
+					data.description,
+					data.photoUrl,
+					data.latitude,
+					data.longitude,
+					data.lifespanHours,
+					data.alertRadiusMeters,
+					data.city,
+					data.postalCode,
+					data.inseeCode,
+					data.lifespanHours,
+				],
+			);
+
+			const incidentId = result.insertId;
+
+			const values = data.typeIds.map((typeId) => [incidentId, typeId]);
+			await connection.query(
+				"INSERT INTO incident_incident_type (incident_id, incident_type_id) VALUES ?",
+				[values],
+			);
+
+			await connection.commit();
+
+			return incidentId;
+		} catch (err) {
+			await connection.rollback();
+			throw err;
+		} finally {
+			connection.release();
+		}
+	}
+
+	async lockBaseLifespan(
+		id: number,
+		executor: Executor,
+	): Promise<{ baseLifespanHours: number; createdAt: Date }> {
+		const [rows] = await executor.query<Rows>(
+			"SELECT base_lifespan_hours, created_at FROM incident WHERE id = ? FOR UPDATE",
+			[id],
+		);
+
+		const row = rows[0];
+		return {
+			baseLifespanHours: row.base_lifespan_hours,
+			createdAt: row.created_at,
+		};
+	}
+
+	async updateExpiry(
+		id: number,
+		expiresAt: Date,
+		executor: Executor = databaseClient,
+	): Promise<void> {
+		await executor.query(
+			"UPDATE incident SET expires_at = ? WHERE id = ?",
+			[expiresAt, id],
+		);
+	}
+
+	// Returns exactly the incidents it closed: the lock and the update cover the
+	// same set, even if another incident expires in between
+	async closeExpired(): Promise<ClosedIncident[]> {
+		const connection = await databaseClient.getConnection();
+		try {
+			await connection.beginTransaction();
+
+			const [rows] = await connection.query<Rows>(
+				`SELECT id, user_id, city, latitude, longitude, base_alert_radius_meters,
+					TIMESTAMPDIFF(MINUTE, expires_at, NOW()) AS expired_for_minutes
+				FROM incident
+				WHERE status = 'in_progress' AND expires_at <= NOW()
+				FOR UPDATE`,
+			);
+
+			if (rows.length > 0) {
+				await connection.query(
+					"UPDATE incident SET status = 'resolved' WHERE id IN (?)",
+					[rows.map((row) => row.id)],
+				);
+			}
+
+			await connection.commit();
+
+			return rows.map((row) => ({
+				id: row.id,
+				userId: row.user_id,
+				city: row.city,
+				latitude: row.latitude,
+				longitude: row.longitude,
+				alertRadiusMeters: row.base_alert_radius_meters,
+				expiredForMinutes: row.expired_for_minutes,
+			}));
+		} catch (err) {
+			await connection.rollback();
+			throw err;
+		} finally {
+			connection.release();
+		}
+	}
+}
+
+export default new IncidentRepository();
