@@ -89,6 +89,10 @@ export default function DangerModal({ dialogRef }: Props) {
 			setSubmitError(result.message);
 			return;
 		}
+		if (result.status === "emailNotVerified") {
+			setSubmitError(`${result.message} ${EMERGENCY_HINT}`);
+			return;
+		}
 		if (result.status === "networkError") {
 			setSubmitError(
 				`Impossible de confirmer que l'alerte Vigie a été envoyée. ${EMERGENCY_HINT}`,

@@ -290,6 +290,7 @@ type CreateDangerResult =
 	| { status: "unauthorized" }
 	| { status: "tooManyRequests"; message: string }
 	| { status: "duplicate"; message: string }
+	| { status: "emailNotVerified"; message: string }
 	| { status: "networkError" }
 	| { status: "error" };
 
@@ -308,6 +309,10 @@ export async function createDangerIncident(
 			return { status: "invalid", message: body.message };
 		}
 		if (res.status === 401) return { status: "unauthorized" };
+		if (res.status === 403) {
+			const body = (await res.json()) as { message: string };
+			return { status: "emailNotVerified", message: body.message };
+		}
 		if (res.status === 429) {
 			const body = (await res.json()) as { message: string };
 			return { status: "tooManyRequests", message: body.message };
