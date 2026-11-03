@@ -62,6 +62,7 @@ router.post(
 router.post(
 	"/api/incidents/danger",
 	verifyToken,
+	requireVerifiedEmail,
 	checkIncidentRateLimit,
 	dangerActions.add,
 );
