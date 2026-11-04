@@ -43,7 +43,12 @@ export default function useDuplicateDetection(
 	}, [selectedTypes, position]);
 
 	const duplicateType =
-		incidentTypes.find((type) => selectedTypes.includes(type.id)) ?? null;
+		incidentTypes.find(
+			(type) =>
+				selectedTypes.includes(type.id) &&
+				(duplicateCandidate?.typeIds.includes(type.id) ?? false),
+		) ?? null;
+
 	const duplicateDistance =
 		position && duplicateCandidate
 			? distanceInMeters(

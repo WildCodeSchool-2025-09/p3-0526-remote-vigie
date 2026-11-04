@@ -20,6 +20,7 @@ export type Position = {
 
 export type NearbyIncident = {
 	id: number;
+	typeIds: number[];
 	latitude: string;
 	longitude: string;
 	baseAlertRadiusMeters: number;
