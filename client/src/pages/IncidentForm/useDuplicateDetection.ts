@@ -12,14 +12,15 @@ export default function useDuplicateDetection(
 	position: Position | null,
 	incidentTypes: IncidentType[],
 ) {
+	const [dismissedId, setDismissedId] = useState<number | null>(null);
 	const [duplicateCandidate, setDuplicateCandidate] =
 		useState<NearbyIncident | null>(null);
 
 	useEffect(() => {
-		setDuplicateCandidate(null);
-
-		if (selectedTypes.length === 0 || !position) return;
-
+		if (selectedTypes.length === 0 || !position) {
+			setDuplicateCandidate(null);
+			return;
+		}
 		let active = true;
 
 		const timeoutId = setTimeout(async () => {
@@ -32,7 +33,10 @@ export default function useDuplicateDetection(
 			if (!active) return;
 
 			if (result.status === "ok") {
-				setDuplicateCandidate(result.nearbyIncident);
+				const found = result.nearbyIncident;
+				setDuplicateCandidate(
+					found && found.id !== dismissedId ? found : null,
+				);
 			}
 		}, 300);
 
@@ -40,7 +44,7 @@ export default function useDuplicateDetection(
 			active = false;
 			clearTimeout(timeoutId);
 		};
-	}, [selectedTypes, position]);
+	}, [selectedTypes, position, dismissedId]);
 
 	const duplicateType =
 		incidentTypes.find(
@@ -63,6 +67,9 @@ export default function useDuplicateDetection(
 		duplicateCandidate,
 		duplicateType,
 		duplicateDistance,
-		onIgnoreDuplicate: () => setDuplicateCandidate(null),
+		onIgnoreDuplicate: () => {
+			setDismissedId(duplicateCandidate?.id ?? null);
+			setDuplicateCandidate(null);
+		},
 	};
 }
